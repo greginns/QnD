@@ -1,11 +1,9 @@
 const root = process.cwd();
-const fs = require('fs').promises;
 const urlParse = require('url').parse;
 const qParse = require('querystring').parse;
-const StringDecoder = require('string_decoder').StringDecoder;
 
-const {ResponseMessage} = require(root + '/lib/messages.js');
-const {SystemError, JSONError, Error413} = require(root + '/lib/errors.js');
+const {ResponseMessage} = require(root + '/server/utils/messages.js');
+const {SystemError, JSONError, Error413} = require(root + '/server/utils/errors.js');
 
 function cookieParse(req) {
   var list = {}, rc = req.headers.cookie;

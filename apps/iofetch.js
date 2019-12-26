@@ -10,11 +10,17 @@ var io = {
   
   _login: function(orig) {
     return new Promise(function(resolve, reject) {
-      if (!App || !App.helpers || !App.helpers.modalLogin || !App.helpers.modalLogin.popup) {
+      var fn;
+
+      try {
+        fn = App.helpers.modalLogin.popup
+      }
+      catch(err) {
         reject({status: 400, data: {errors: {message: ''}}});
+        return;
       }
 
-      App.helpers.modalLogin.popup({cb: function() {
+      fn({cb: function() {
       // only comes back if/when a good login
         io.fetch(orig)  // this is the original request getting re-fired
         .then(function(res) {

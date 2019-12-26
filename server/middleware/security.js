@@ -1,27 +1,21 @@
 const root = process.cwd();
-const {ResponseMessage} = require(root + '/lib/messages.js');
-const {SystemError} = require(root + '/lib/errors.js');
-const {Router} = require(root + '/lib/router.js');
+const {ResponseMessage} = require(root + '/server/utils/messages.js');
+const {SystemError} = require(root + '/server/utils/errors.js');
+const {Router} = require(root + '/server/utils/router.js');
 const config = require(root + '/config.json').server;
 
 module.exports = {
   check: async function(req, res) {
-    // logged in status
-    /*
-      api - credentials in request:  apiuser, tenant, password 
-      tenant - tenant_session cookie
-      admin - admin_session cookie
-    */
-
+    // logged in status *** Need some way to decide if a user or an api calling.  Maybe getOptions specifies auth method
     var options = Router.getOptions(req);
     var path = req.parsedURL.pathname.split('/');    
-    var sys = path[1], tenant, user, tokenOK;
-    var auth = Router.getInfo('/' + sys + '/auth');   // get /admin/auth, /tenant/auth, /api/auth route
-    var csrf = Router.getInfo('/' + sys + '/csrf');   // get /admin/csrf, /tenant/csrf, /api/csrf route
+    var sys = '/login', tenant, user, tokenOK;
+    var auth = Router.getInfo(sys + '/auth');
+    var csrf = Router.getInfo(sys + '/csrf');
 
     if (options === false) return;  // 404, let router catch it.
     if (options.bypassUser) return;
-    if (path.length < 2) throw new ResponseMessage({status: 500, err: new SystemError('No System Specified')});
+    //if (path.length < 2) throw new ResponseMessage({status: 500, err: new SystemError('No System Specified')});
     if (!auth) throw new ResponseMessage({status: 500, err: new SystemError('No sys/auth Route Specified')});
     if (!csrf) throw new ResponseMessage({status: 500, err: new SystemError('No sys/csrf Route Specified')});
 
@@ -58,8 +52,8 @@ module.exports = {
   
   checkWS: async function(req) {
     var path = req.parsedURL.pathname.split('/');  
-    var sys = path[1];
-    var auth = Router.getInfo('/' + sys + '/auth');   // get /admin/auth, /tenant/auth, /api/auth route
+    var sys = '/login';
+    var auth = Router.getInfo(sys + '/auth');
 
     if (req.headers.origin.indexOf(config.domain) == -1) {
       return [null, null];

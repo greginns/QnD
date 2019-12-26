@@ -1,7 +1,8 @@
 const root = process.cwd();
-const Fields = require(root + '/lib/model/modelFields');
-const modelBuild = require(root + '/lib/model/modelBuild.js');
-const modelRun = require(root + '/lib/model/modelRun.js');
+const Fields = require(root + '/server/model/modelFields');
+const modelBuild = require(root + '/server/model/modelBuild.js');
+const modelRun = require(root + '/server/model/modelRun.js');
+const {login_User} = require(root + '/apps/login/models/models.js')(false);
 
 var setNewDate = function() {
   return new Date();
@@ -35,7 +36,7 @@ module.exports = function(buildOrRun) {
   var Model = (!buildOrRun) ? modelRun : modelBuild;
   
   var models = {
-    Department: class Department extends Model {
+    timeclock_Department: class timeclock_Department extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -52,7 +53,7 @@ module.exports = function(buildOrRun) {
           
           constraints: {
             pk: ['code'],
-            fk: [{name: 'mgr', columns: ['mgr'], table: models.Employee, tableColumns: ['code'], onDelete: 'NO ACTION'}],
+            fk: [{name: 'mgr', columns: ['mgr'], table: models.timeclock_Employee, tableColumns: ['code'], onDelete: 'NO ACTION'}],
           },
           
           hidden: ['password'],
@@ -64,7 +65,7 @@ module.exports = function(buildOrRun) {
       }
     },
 
-    Employee: class Employee extends Model {
+    timeclock_Employee: class timeclock_Employee extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -90,7 +91,7 @@ module.exports = function(buildOrRun) {
           
           constraints: {
             pk: ['code'],
-            fk: [{name: 'dept', columns: ['dept'], table: models.Department, tableColumns: ['code'], onDelete: 'NO ACTION'}],
+            fk: [{name: 'dept', columns: ['dept'], table: models.timeclock_Department, tableColumns: ['code'], onDelete: 'NO ACTION'}],
           },
           
           hidden: ['password'],
@@ -102,7 +103,7 @@ module.exports = function(buildOrRun) {
       }
     },      
     
-    Workcode: class Workcode extends Model {
+    timeclock_Workcode: class timeclock_Workcode extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -119,7 +120,7 @@ module.exports = function(buildOrRun) {
           
           constraints: {
             pk: ['code'],
-            fk: [{name: 'dept', columns: ['dept'], table: models.Department, tableColumns: ['code'], onDelete: 'NO ACTION'}],
+            fk: [{name: 'dept', columns: ['dept'], table: models.timeclock_Department, tableColumns: ['code'], onDelete: 'NO ACTION'}],
           },
           
           orderBy: ['desc'],
@@ -129,7 +130,7 @@ module.exports = function(buildOrRun) {
       }
     },
         
-    Empwork: class Empwork extends Model {
+    timeclock_Empwork: class timeclock_Empwork extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -145,8 +146,8 @@ module.exports = function(buildOrRun) {
           
           constraints: {
             pk: ['id'],
-            fk: [{name: 'employee', columns: ['employee'], table: models.Employee, tableColumns: ['code'], onDelete: 'NO ACTION'},
-                 {name: 'workcode', columns: ['workcode'], table: models.Workcode, tableColumns: ['code'], onDelete: 'NO ACTION'}],
+            fk: [{name: 'employee', columns: ['employee'], table: models.timeclock_Employee, tableColumns: ['code'], onDelete: 'NO ACTION'},
+                 {name: 'workcode', columns: ['workcode'], table: models.timeclock_Workcode, tableColumns: ['code'], onDelete: 'NO ACTION'}],
           },
           
           orderBy: ['employee', 'workcode'],
@@ -156,7 +157,7 @@ module.exports = function(buildOrRun) {
       }
     },
 
-    Work: class Work extends Model {
+    timeclock_Work: class timeclock_Work extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -178,8 +179,8 @@ module.exports = function(buildOrRun) {
           constraints: {
             pk: ['id'],
             fk: [
-              {name: 'employee', columns: ['employee'], table: models.Employee, tableColumns: ['code'], onDelete: 'NO ACTION'},
-              {name: 'workcode', columns: ['workcode'], table: models.Workcode, tableColumns: ['code'], onDelete: 'NO ACTION'}
+              {name: 'employee', columns: ['employee'], table: models.timeclock_Employee, tableColumns: ['code'], onDelete: 'NO ACTION'},
+              {name: 'workcode', columns: ['workcode'], table: models.timeclock_Workcode, tableColumns: ['code'], onDelete: 'NO ACTION'}
             ],
           },
           
@@ -190,7 +191,7 @@ module.exports = function(buildOrRun) {
       }
     },
     
-    Payroll: class Payroll extends Model {
+    timeclock_Payroll: class timeclock_Payroll extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -207,63 +208,10 @@ module.exports = function(buildOrRun) {
           
           constraints: {
             pk: ['id'],
-            fk: [{name: 'user', columns: ['user'], table: models.User, tableColumns: ['code'], onDelete: 'NO ACTION'}],
+            fk: [{name: 'user', columns: ['user'], table: login_User, tableColumns: ['code'], onDelete: 'NO ACTION'}],
           },
           
           orderBy: ['-sdate'],
-          
-          dbschema: 'tenant',
-        }
-      }
-    },
-    
-    User: class User extends Model {
-      constructor(obj, opts) {
-        super(obj, opts);
-      }
-      
-      static definition() {
-        return {
-          schema: {
-            code: new Fields.Char({notNull: true, maxLength: 10, verbose: 'User Code'}),
-            name: new Fields.Char({notNull: true, maxLength: 30, verbose: 'User Name'}),
-            email: new Fields.Char({notNull: true, maxLength: 50, isEmail: true, verbose: 'Email Address'}),
-            password: new Fields.Password({notNull: true, minLength: 8, maxLength: 128, verbose: 'Password'}),
-            active: new Fields.Boolean({default: true, verbose: 'Active'}),     
-          },
-          
-          constraints: {
-            pk: ['code'],
-          },
-          
-          hidden: ['password'],
-          
-          orderBy: ['name'],
-          
-          dbschema: 'tenant',
-        }
-      }
-    },
-
-    CSRF: class CSRF extends Model {
-      constructor(obj, opts) {
-        super(obj, opts);
-      }
-      
-      static definition() {
-        return {
-          schema: {
-            token: new Fields.Char({notNull: true, maxLength: 128, verbose: 'CSRF Token'}),
-            user: new Fields.Char({null: true, maxLength: 10, verbose: 'User Code'}),
-            issued: new Fields.DateTime({notNull: true, maxLength: 30, onBeforeInsert: setNewDate, verbose: 'Issued On'}),
-          },
-          
-          constraints: {
-            pk: ['token'],
-            fk: [{name: 'user', columns: ['user'], table: models.User, tableColumns: ['code'], onDelete: 'NO ACTION'}],
-          },
-          
-          orderBy: ['issued'],
           
           dbschema: 'tenant',
         }

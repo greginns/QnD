@@ -1,23 +1,24 @@
 const root = process.cwd();
 const fs = require('fs').promises;
 
-const {Error302, JSONError} = require(root + '/lib/errors.js');
-const {ResponseMessage} = require(root + '/lib/messages.js');
+const {JSONError} = require(root + '/server/utils/errors.js');
+const {ResponseMessage} = require(root + '/server/utils/messages.js');
 const services = require(root + '/apps/admin/server/services.js');
-const {Router, RouterMessage} = require(root + '/lib/router.js');
+const {Router, RouterMessage} = require(root + '/server/utils/router.js');
+const app = '/admin';
 
 // Admin
 Router.add(new RouterMessage({
   method: 'info',
-  path: '/admin/auth', 
+  path: app + '/auth', 
   fn: async function(req, res) {
-    return await services.auth.getUser(req);
+    return await services.auth.verifySession(req);
   },
 }));
 
 Router.add(new RouterMessage({
   method: 'info',
-  path: '/admin/csrf', 
+  path: app + '/csrf', 
   fn: async function(req, res) {
     return await services.auth.verifyCSRF(req);
   },
@@ -25,7 +26,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/admin/login', 
+  path: app + '/login', 
   fn: async function(req, res) {
     var rm = new ResponseMessage();
     var tm = await services.auth.login(req.body);
@@ -38,7 +39,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: '/admin/logout', 
+  path: app + '/logout', 
   fn: async function(req, res) {
     var tm = await services.auth.logout(req);
   
@@ -50,7 +51,7 @@ Router.add(new RouterMessage({
 // generic admin query
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/admin/query', 
+  path: app + '/query', 
   fn: async function(req, res) {
     var rm;
 
@@ -73,7 +74,7 @@ Router.add(new RouterMessage({
 // tenant
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/admin/tenant', 
+  path: app + '/tenant', 
   fn: async function(req, res) {
     var tm = await services.tenant.get();
   
@@ -84,7 +85,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/admin/tenant/:code', 
+  path: app + '/tenant/:code', 
   fn: async function(req, res) {
     var tm = await services.tenant.get({rec: {code: req.params.code}});
   
@@ -95,7 +96,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/admin/tenant', 
+  path: app + '/tenant', 
   fn: async function(req, res) {
     var tm = await services.tenant.insert({rec: req.body.tenant});
 
@@ -106,7 +107,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/admin/tenant/:code', 
+  path: app + '/tenant/:code', 
   fn: async function(req, res) {
     var tm = await services.tenant.update({code: req.params.code, rec: req.body.tenant});
 
@@ -117,7 +118,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: '/admin/tenant/:code', 
+  path: app + '/tenant/:code', 
   fn: async function(req, res) {
     var tm = await services.tenant.delete({code: req.params.code});
 
@@ -129,7 +130,7 @@ Router.add(new RouterMessage({
 // user
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/admin/user', 
+  path: app + '/user', 
   fn: async function(req, res) {
     var tm = await services.user.get();
   
@@ -140,7 +141,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/admin/user/:code', 
+  path: app + '/user/:code', 
   fn: async function(req, res) {
     var tm = await services.user.get({rec: {code: req.params.code}});
   
@@ -151,7 +152,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/admin/user', 
+  path: app + '/user', 
   fn: async function(req, res) {
     var tm = await services.user.insert({rec: req.body.user});
 
@@ -162,7 +163,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/admin/user/:code', 
+  path: app + '/user/:code', 
   fn: async function(req, res) {
     var tm = await services.user.update({code: req.params.code, rec: req.body.user});
 
@@ -173,7 +174,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: '/admin/user/:code', 
+  path: app + '/user/:code', 
   fn: async function(req, res) {
     var tm = await services.user.delete({code: req.params.code});
 
@@ -185,7 +186,7 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/admin/user/:code', 
+  path: app + '/user/:code', 
   fn: async function(req, res) {
     var tm = await services.user.update({code: req.params.code, rec: req.body.user});
 
@@ -197,7 +198,7 @@ Router.add(new RouterMessage({
 // Migrations
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/admin/migrate', 
+  path: app + '/migrate', 
   fn: async function(req, res) {
     var tm = await services.migrate.run({code: req.body.code});
 

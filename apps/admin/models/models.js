@@ -1,7 +1,7 @@
 const root = process.cwd();
-const Fields = require(root + '/lib/model/modelFields');
-const modelBuild = require(root + '/lib/model/modelBuild.js');
-const modelRun = require(root + '/lib/model/modelRun.js');
+const Fields = require(root + '/server/model/modelFields');
+const modelBuild = require(root + '/server/model/modelBuild.js');
+const modelRun = require(root + '/server/model/modelRun.js');
 
 var setNewDate = function() {
   return new Date();
@@ -11,7 +11,7 @@ module.exports = function(buildOrRun) {
   var Model = (!buildOrRun) ? modelRun : modelBuild;
   
   var models = {
-    Tenant: class Tenant extends Model {
+    admin_Tenant: class admin_Tenant extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -44,7 +44,7 @@ module.exports = function(buildOrRun) {
       }
     },
 
-    User: class User extends Model {
+    admin_User: class admin_User extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -72,7 +72,7 @@ module.exports = function(buildOrRun) {
       }
     },
 
-    CSRF: class CSRF extends Model {
+    admin_CSRF: class admin_CSRF extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -97,7 +97,7 @@ module.exports = function(buildOrRun) {
       }
     },
 
-    Session: class Session extends Model {
+    admin_Session: class admin_Session extends Model {
       constructor(obj, opts) {
         super(obj, opts);
       }
@@ -129,10 +129,3 @@ module.exports = function(buildOrRun) {
   
   return models;
 };
-
-/*
-module.exports.Tenant = Tenant;
-module.exports.User = User;
-module.exports.CSRF = CSRF;
-module.exports.Session = Session;
-*/

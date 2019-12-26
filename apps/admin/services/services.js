@@ -11,13 +11,21 @@ const uuidv1 = require('uuid/v1');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-const sqlUtil = require(root + '/lib/sqlUtil.js');
-const {Tenant, User, Session, CSRF} = require(root + '/models/adminModels.js')(false);
-const modelsBuild = {tenant: require(root + '/models/tenantModels.js')(true)};
-const tenantUser = require(root + '/models/tenantModels.js')(false).User;
-const {SystemError, UserError, NunjucksError, InvalidUserError, JSONError} = require(root + '/lib/errors.js');
-const {TravelMessage} = require(root + '/lib/messages.js');
+const sqlUtil = require(root + '/server/utils/sqlUtil.js');
+const {admin_Tenant, admin_User, admin_Session, admin_CSRF} = require(root + '/apps/admin/models/models.js')(false);
+const tenantUser = require(root + '/apps/login/models/models.js')(false).login_User;
+const {SystemError, UserError, NunjucksError, InvalidUserError, JSONError} = require(root + '/server/utils/errors.js');
+const {TravelMessage} = require(root + '/server/utils/messages.js');
+const config = require(root + '/config.json');
 const pgschema = 'public';
+const modelsBuild = {}, appNames = [];
+
+config.apps.forEach(function(app) {
+  if (app != 'admin') {
+    modelsBuild[app] = require(root + `/apps/${app}/models/models.js`)(true);
+    appNames.push(app);
+  }
+})
 
 var readMigFile = async function(file) {
   var data = false
@@ -114,15 +122,15 @@ module.exports = {
   },
   
   auth: {
-    getUser: async function(req) {
+    verifySession: async function(req) {
       var tm, user = null;
       var sessID = req.cookies.admin_session || '';
 
       if (sessID) {
-        tm = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
+        tm = await admin_Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
 
         if (tm.isGood()) {
-          tm = await User.selectOne({pgschema, cols: '*', pks: tm.data.user});
+          tm = await admin_User.selectOne({pgschema, cols: '*', pks: tm.data.user});
           if (tm.isGood()) user = tm.data;
         }
       }
@@ -138,7 +146,7 @@ module.exports = {
 
       if (!token) return false;
 
-      tm = await CSRF.selectOne({pgschema, pks: token})
+      tm = await admin_CSRF.selectOne({pgschema, pks: token})
 
       if (tm.isBad()) return false;
 
@@ -152,7 +160,7 @@ module.exports = {
       var match, tm, tobj, rec, bpwd;
 
       // user valid?
-      tm = await User.selectOne({pgschema, cols: 'password', pks: body.username});
+      tm = await admin_User.selectOne({pgschema, cols: 'password', pks: body.username});
       if (tm.isBad()) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
 
       // password valid?
@@ -160,7 +168,7 @@ module.exports = {
       if (!match) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
       
       // create session record
-      rec = new Session({id: uuidv1(), tenant: 'public', user: body.username});
+      rec = new admin_Session({id: uuidv1(), tenant: 'public', user: body.username});
       tm = await rec.insertOne({pgschema});
 
       if (tm.isBad()) return tm;
@@ -176,7 +184,7 @@ module.exports = {
       var tobj, tm;
       
       if (id) {
-        tobj = new Session({id});
+        tobj = new admin_Session({id});
         tm = await tobj.deleteOne({pgschema});
       }
       
@@ -202,17 +210,16 @@ module.exports = {
   tenant: {
     get: async function({rec = {}} = {}) {
       // get one or more tenants
-      return await Tenant.select({pgschema, rec});
+      return await admin_Tenant.select({pgschema, rec});
     },
     
     insert: async function({rec = {}} = {}) {
       var tm1, tm2, tobj, sql, sqlFK, jsonModels = {}, errs = [], verrs = [];
-      var modelNames = Object.keys(modelsBuild.tenant);
-      var migrationFile = root + `/models/migrations/tenant/${rec.code}.json`;
       var tm = new TravelMessage();
+      var fks = [];
 
       // insert tenant row
-      tobj = new Tenant(rec);
+      tobj = new admin_Tenant(rec);
       tm1 = await tobj.insertOne({pgschema});
       
       if (tm1.isBad()) return tm1; // insert failure, most likely schema validation failure
@@ -224,11 +231,13 @@ module.exports = {
       if (tm2.isBad()) return tm2; // create schema error
       
       // verify tables
-      for (model of modelNames) {
-        verrs = modelsBuild.tenant[model].verify();
-        
-        if (verrs.length > 0) {
-          errs.push({model, verrs: verrs.join(',')});
+      for (var app of appNames) {
+        for (var model of Object.keys(modelsBuild[app])) {
+          verrs = modelsBuild[app][model].verify();
+          
+          if (verrs.length > 0) {
+            errs.push({model, verrs: verrs.join(',')});
+          }
         }
       }
       
@@ -239,29 +248,35 @@ module.exports = {
       }
       
       // create tables if no errors
-      for (model of modelNames) {
-        [verrs, sql, sqlFK] = modelsBuild.tenant[model].create(rec.code);
-        
-        if (verrs.length > 0) {
-          errs.push({model, verrs: verrs.join(',')});
-          continue;
-        }
-         
-        res = await sqlUtil.execQuery(sql);
-        
-        if (!res.err && sqlFK) {
-          res = await sqlUtil.execQuery(sqlFK);
-        }
+      for (var app of appNames) {
+        let migrationFile = root + `/apps/${app}/models/migrations/${rec.code}.json`;
 
-        if (!res.err) {
-          jsonModels[model] = modelsBuild.tenant[model].toJSON();
+        for (var model of Object.keys(modelsBuild[app])) {
+          [verrs, sql, sqlFK] = modelsBuild[app][model].create(rec.code);
+          
+          if (verrs.length > 0) {
+            errs.push({model, verrs: verrs.join(',')});
+            continue;
+          }
+          
+          res = await sqlUtil.execQuery(sql);
+          
+          if (!res.err) {
+            if (sqlFK) fks.push(sqlFK);
 
-          await writeMigFile(migrationFile, jsonModels);
-        }
-        else {
-          errs.push({model, verrs: res.err.message});
+            jsonModels[model] = modelsBuild[app][model].toJSON();
+
+            await writeMigFile(migrationFile, jsonModels);
+          }
+          else {
+            errs.push({model, verrs: res.err.message});
+          }
         }
       };  
+
+      fks.forEach(function(fk) {
+        res = await sqlUtil.execQuery(fk);
+      })
       
       if (errs.length > 0) {
         tm.data = {errors: {'_verify': errs}};
@@ -295,7 +310,6 @@ module.exports = {
       // delete Tenant
       // drop schema and tables
       var tm1, tm2, tobj, sql;
-      var migrationFile = root + `/models/migrations/tenant/${code}.json`;
       var tm = new TravelMessage();
       
       if (!code) return new TravelMessage({err: new UserError('No Tenant Code Supplied')});
@@ -303,16 +317,18 @@ module.exports = {
       // drop schema
       sql = `DROP SCHEMA IF EXISTS "${code}" CASCADE`;
       tm2 = await sqlUtil.execQuery(sql);
-console.log(sql)      
-console.log(tm2)      
+
       if (tm2.isBad()) return tm2;  // drop schema error
       
-      tobj = new Tenant({code});
+      tobj = new admin_Tenant({code});
       tm1 = await tobj.deleteOne({pgschema});
             
       if (tm1.isBad()) return tm1;  // delete failure
 
-      deleteMigFile(migrationFile);
+      for (var app of appNames) {
+        let migrationFile = root + `/apps/${app}/models/migrations/${code}.json`;
+        deleteMigFile(migrationFile);
+      }
       
       return tm;
     },
@@ -321,12 +337,12 @@ console.log(tm2)
   user: {
     get: async function({rec = {}} = {}) {
       // get one or more users
-      return await User.select({pgschema, rec});
+      return await admin_User.select({pgschema, rec});
     },
     
     insert: async function({rec = {}} = {}) {
       // Insert Record
-      var tobj = new User(rec);
+      var tobj = new admin_User(rec);
     
       return await tobj.insertOne({pgschema});
     },
@@ -336,7 +352,7 @@ console.log(tm2)
       if (!code) return new TravelMessage({err: new UserError('No User Code Supplied')});
           
       rec.code = code;
-      var tobj = new User(rec);
+      var tobj = new admin_User(rec);
         
       return await tobj.updateOne({pgschema});
     },
@@ -344,7 +360,7 @@ console.log(tm2)
     delete: async function({code = ''} = {}) {
       if (!code) return new TravelMessage({err: new UserError('No User Code Supplied')});
       
-      var tobj = new User({code});
+      var tobj = new admin_User({code});
       return await tobj.deleteOne({pgschema});
     },  
   },
@@ -354,7 +370,7 @@ console.log(tm2)
       // run migrations for this tenant
       var model, sql, sqlFK, res, tableName;
       var jsonModels, errs = [], verrs = [];
-      var migrationFile = root + `/models/migrations/tenant/${code}.json`;
+      var appNames = Object.keys(modelsBuild);
             
       if (!code) return new TravelMessage({err: new UserError('No Tenant Code Supplied')});
       
@@ -366,53 +382,60 @@ console.log(tm2)
       if (!jsonModels) return new TravelMessage({err: new SystemError('Missing JSON file')});
       
       // go through current models and add, alter
-      for (model of Object.keys(modelsBuild.tenant)) {
-        if (! (model in jsonModels)) {
-          [verrs, sql, sqlFK] = modelsBuild.tenant[model].create(pgschema);
-        }
-        else {
-          [verrs, sql] =  modelsBuild.tenant[model].alter(code, jsonModels[model]);
-          sqlFK = '';
-        }
-        
-        if (verrs.length > 0) {
-          errs.push({model, verrs: verrs.join(',')});
-          continue;
-        }
-         
-        res = await sqlUtil.execQuery(sql);
-        
-        if (!res.err && sqlFK) {
-          res = await sqlUtil.execQuery(sqlFK);
-        }
+      for (var app of appNames) {
+        let migrationFile = root + `/apps/${app}/models/migrations/${rec.code}.json`;
 
-        if (!res.err) {
-          jsonModels[model] = modelsBuild.tenant[model].toJSON();
-
-          await writeMigFile(migrationFile, jsonModels);
-        }
-        else {
-          errs.push({model, verrs: res.err.message});
-        }
-
-      };  
-      
-      // go through old models, drop any not current
-      for (model of Object.keys(jsonModels)) {
-        if (! (model in modelsBuild.tenant)) {
-          // can't use Model.drop as model doesn't exist anymore!     
-          tableName = `"${code}"."${model}"`
-          sql = `DROP TABLE IF EXISTS ${tableName}`;    
-        
+        for (var model of Object.keys(modelsBuild[app])) {
+          if (! (model in jsonModels)) {
+            [verrs, sql, sqlFK] = modelsBuild[app][model].create(pgschema);
+          }
+          else {
+            [verrs, sql] =  modelsBuild[app][model].alter(code, jsonModels[model]);
+            sqlFK = '';
+          }
+          
+          if (verrs.length > 0) {
+            errs.push({model, verrs: verrs.join(',')});
+            continue;
+          }
+          
           res = await sqlUtil.execQuery(sql);
           
+          if (!res.err && sqlFK) {
+            res = await sqlUtil.execQuery(sqlFK);
+          }
+
           if (!res.err) {
-            delete jsonModels[model];
-            
+            jsonModels[model] = modelsBuild[app][model].toJSON();
+
             await writeMigFile(migrationFile, jsonModels);
           }
           else {
             errs.push({model, verrs: res.err.message});
+          }
+        }
+      };  
+      
+      // go through old models, drop any not current
+      for (app of appNames) {
+        var migrationFile = root + `/apps/${app}/models/migrations/${rec.code}.json`;
+
+        for (model of Object.keys(modelsBuild[app])) {
+          if (! (model in modelsBuild[app])) {
+            // can't use Model.drop as model doesn't exist anymore!     
+            tableName = `"${code}"."${model}"`
+            sql = `DROP TABLE IF EXISTS ${tableName}`;    
+          
+            res = await sqlUtil.execQuery(sql);
+            
+            if (!res.err) {
+              delete jsonModels[model];
+              
+              await writeMigFile(migrationFile, jsonModels);
+            }
+            else {
+              errs.push({model, verrs: res.err.message});
+            }
           }
         }
       }

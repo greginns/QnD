@@ -1,3 +1,6 @@
+/*
+	Redo pubsub without this.system, perhaps app/table
+*/
 var ga;
 var App = {};
 
@@ -56,19 +59,19 @@ App.startup.init = function() {
   App.router = new Router(App.module);
 
   return new Promise(function(resolve, reject) {
-  	Object.keys(App.mvcs).forEach(function(id) {
- 		  mvcs.push(func(id));
-  	});
+		Object.keys(App.mvcs).forEach(function(id) {
+			mvcs.push(func(id));
+		});
 
-  	Promise.all(mvcs)
-  	.then(function(res) {
-  	  App.router.add('404', function(){console.log('page not found')});
-  	  resolve();
-  	})
-  	.catch(function(err) {
-  	  reject(err);
-  	  console.log(err)
-  	});
+		Promise.all(mvcs)
+		.then(function(res) {
+			App.router.add('404', function(){console.log('page not found')});
+			resolve();
+		})
+		.catch(function(err) {
+			reject(err);
+			console.log(err)
+		});
 
   })
 };
@@ -91,7 +94,7 @@ App.startup.addToRouter = function(path, page, inView, outView, title) {
 	var outFunc = function(params) {
 		// call 'out' function
 		if (outView) {
-		  return outView(params);
+			return outView(params);
 		}
 
 		return true;

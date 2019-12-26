@@ -3,73 +3,43 @@ const http = require('http');
 const server = http.createServer();
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTracking: false});
-const fs = require('fs').promises;
-const config = require(root + '/config.json').server;
+const uuidv1 = require('uuid/v1');
+//const fs = require('fs').promises;
+const config = require(root + '/config.json');
 
 const mw = {}
-mw.request = require(root + '/middleware/request.js');
-mw.security = require(root + '/middleware/security.js');
-mw.reply = require(root + '/middleware/reply.js');
+mw.request = require(root + '/server/middleware/request.js');
+mw.security = require(root + '/server/middleware/security.js');
+mw.reply = require(root + '/server/middleware/reply.js');
 
-const {Error404} = require(root + '/lib/errors.js');
-const {TravelMessage, ResponseMessage} = require(root + '/lib/messages.js');
-const {Router, RouterMessage} = require(root + '/lib/router.js');
-const {Wouter} = require(root + '/lib/wouter.js');
-const sqlUtil = require(root + '/lib/sqlUtil.js');
+const {Router} = require(root + '/server/utils/router.js');
+const {Wouter} = require(root + '/server/utils/wouter.js');
+const sqlUtil = require(root + '/server/utils/sqlUtil.js');
 const WSclients = new Map();
-const uuidv1 = require('uuid/v1');
 
-require(root + '/apps/admin/server/routes.js');  // processes routes.
-require(root + '/apps/tenant/server/routes.js');  // processes routes.
+require(root + '/server/routes/routes.js');  // processes routes.
+
+config.apps.forEach(function(app) {
+  require(root + `/apps/${app}/routes/routes.js`);  // processes routes.
+})
 
 process
-.on('unhandledRejection', (reason, p) => {
+.on('unhandledRejection', (reason, rej) => {
   console.error(reason);
-  console.error('There was an uncaught rejection', p);
+  console.error('There was an uncaught rejection', rej);
+
   sqlUtil.shutdown();
   process.exit(1) //mandatory (as per the Node docs)
 })
 .on('uncaughtException', (err) => {
   console.error('There was an uncaught error', err);
+
   sqlUtil.shutdown();
   process.exit(1) //mandatory (as per the Node docs)
 });
 
-Router.add(new RouterMessage({
-  method: 'get',
-  path: '404', 
-  fn: async function(req, res) {
-    var rm = new ResponseMessage(), tm = new TravelMessage({data: '', status: 404, err: new Error404()});
-
-    rm.convertFromTravel(tm)
-    
-    return tm;
-  }, 
-  options: {needLogin: false}
-}));
-
-Router.add(new RouterMessage({
-  method: 'get',
-  path: '/favicon.ico', 
-  fn: async function(req, res) {
-    var rm = new ResponseMessage(), tm = new TravelMessage();
-
-    try {
-      tm.data = await fs.readFile(root + '/favicon.ico');  
-      tm.type = 'icon';
-    }
-    catch(err) {
-      tm.err = new Error404();
-    }
-    
-    rm.convertFromTravel(tm)
-    return rm;
-  }, 
-  options: {needLogin: false, bypassUser: true}
-}));
-
-
-server.on('request', async function(req, res) {
+server
+.on('request', async function(req, res) {
   var rm;
 
   try {
@@ -81,14 +51,13 @@ server.on('request', async function(req, res) {
     rm = await Router.go(req, res)
   }
   catch(erm) {
-console.log(erm)    
+    console.log(erm);
     rm = erm;
   }
 
   mw.reply(res, rm);
-});
- 
-server.on('upgrade', async function(req, socket, head) {
+})
+.on('upgrade', async function(req, socket, head) {
   var tenant, user;
 
   await mw.request.processWS(req);
@@ -142,8 +111,8 @@ setInterval(function() {
 }, 30000);
 
 
-server.listen(config.port);
-console.log('GO! on ' + config.port);
+server.listen(config.server.port);
+console.log('GO! on ' + config.server.port);
 
 /*
 if(this.limitCounter >= Socket.limit) {
