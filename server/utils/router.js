@@ -1,5 +1,5 @@
 const root = process.cwd();
-const {ResponseMessage} = require(root + '/lib/messages.js');
+const {ResponseMessage} = require(root + '/server/utils/messages.js');
 
 var routePaths = []
 
@@ -128,6 +128,7 @@ class RouterMessage {
       needCSRF: true,
       bypassUser: false,
       allowAnon: false,
+      authApp: 'login',
       redirect: '',
     }
     

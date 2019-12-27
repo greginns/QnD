@@ -1,11 +1,11 @@
 App.mvcObjs.admin_manage_tenants = {
   model: {
-    tenant: {},
+    admin_tenant: {},
     tenantOrig: {},
     tenantPK: '',
     
     defaults: {
-      tenant: {
+      admin_tenant: {
         code: '',
         coname: '',
         first: '',
@@ -16,12 +16,12 @@ App.mvcObjs.admin_manage_tenants = {
         zipcode: '',
         phone: '',
         email: '',
-        active: {{tenant.active.default}},
+        active: {{admin_tenant.active.default}},
       },
     },
     
     errors: {
-      tenant: {},
+      admin_tenant: {},
       message: '',
       _verify: [],
     }
@@ -31,7 +31,7 @@ App.mvcObjs.admin_manage_tenants = {
     created: function() {
       var self = this;
       
-      App.subs.data.subscribe('/admin/tenant', function(data) {
+      App.subs.data.subscribe('/admin/admin_tenant', function(data) {
         self.$set('tenants', data);
       })
 
@@ -59,10 +59,10 @@ App.mvcObjs.admin_manage_tenants = {
   controllers: {
     save: async function(ev) {
       var self = this;
-      var tenant = this.$get('tenant');
+      var tenant = this.$get('admin_tenant');
       var tenantPK = this.$get('tenantPK');
       var orig, diffs;
-      var url = '/admin/tenant';
+      var url = '/admin/admin_tenant';
 
       this.clearErrors();
             
@@ -95,7 +95,7 @@ App.mvcObjs.admin_manage_tenants = {
       
       App.modals.spinner.show();
 
-      ((tenantPK) ? io.put({tenant: diffs}, url + '/' + tenantPK) : io.post({tenant}, url))
+      ((tenantPK) ? io.put({admin_tenant: diffs}, url + '/' + tenantPK) : io.post({admin_tenant: tenant}, url))
       .then(function(res) {
         if (res.status == 200) {
           self.$set('toastMessage', 'Tenant ' + (tenantPK) ? 'Created' : 'Updated');
@@ -124,7 +124,7 @@ App.mvcObjs.admin_manage_tenants = {
       this.clearErrors();
       App.modals.spinner.show();
       
-      io.delete({}, '/admin/tenant/' + tenantPK)
+      io.delete({}, '/admin/admin_tenant/' + tenantPK)
       .then(function(res) {
         if (res.status == 200) {
           self.$set('toastMessage', 'Tenant Deleted');
@@ -182,7 +182,7 @@ App.mvcObjs.admin_manage_tenants = {
     },
     
     canClear: async function() {
-      var tenant = this.$get('tenant');
+      var tenant = this.$get('admin_tenant');
       var orig = this.$get('tenantOrig');
       var diffs = App.utils.object.diff(orig, tenant);
       var ret;
@@ -202,7 +202,7 @@ App.mvcObjs.admin_manage_tenants = {
     
     getTenantFromList: function(pk) {
       var self = this;
-      var tenants = this.$get('tenants');
+      var tenants = this.$get('tenants') || [];
       var tenret = {};
 
       if (pk) {      
@@ -219,19 +219,19 @@ App.mvcObjs.admin_manage_tenants = {
     setTenant: function(pk) {
       this.clearErrors();
       
-      this.$set('tenant', this.getTenantFromList(pk));
+      this.$set('admin_tenant', this.getTenantFromList(pk));
       this.$set('tenantOrig', this.$get('tenant'));
     },
     
     setDefaults: function() {
-      var dflts = this.$get('defaults.tenant');
+      var dflts = this.$get('defaults.admin_tenant');
       
       for (var k in dflts) {
-        this.$set('tenant.'+k, dflts[k]);
+        this.$set('admin_tenant.'+k, dflts[k]);
       }
       
       this.$set('tenantPK', '');
-      this.$set('tenantOrig', this.$get('tenant'));
+      this.$set('tenantOrig', this.$get('admin_tenant'));
     },
     
     displayErrors: function(res) {

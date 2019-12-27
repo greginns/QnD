@@ -1,9 +1,11 @@
 const root = process.cwd();
-const {exec, shutdown} = require(root + '/lib/db.js');
+const {exec, shutdown} = require(root + '/server/utils/db.js');
+const config = require(root + '/config.json');
 const models = {}
 
-models['admin'] = require(root + '/models/adminModels.js')(false);
-models['tenant'] = require(root + '/models/tenantModels.js')(false);
+config.apps.forEach(function(app) {
+  models[app] = require(root + `/apps/${app}/models/models.js`)(false);
+})
 
 module.exports = {
   jsonQueryExecify: async function({query={}, group='', pgschema = '', values=[]} = {}) {

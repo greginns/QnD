@@ -93,7 +93,7 @@
         io.post({username, password}, '/admin/login')
         .then(function(res) {
           if (res.status == 200) {
-            location = '/admin/manage';
+            location = res.data;
           }
           else {
             $('#errMsg').text(res.data.errors.message);

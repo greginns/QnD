@@ -9,7 +9,6 @@ const fs = require('fs').promises;
 const nunjucks = require('nunjucks');
 const uuidv1 = require('uuid/v1');
 const bcrypt = require('bcrypt');
-const saltRounds = 10;
 
 const sqlUtil = require(root + '/server/utils/sqlUtil.js');
 const {admin_Tenant, admin_User, admin_Session, admin_CSRF} = require(root + '/apps/admin/models/models.js')(false);
@@ -79,7 +78,7 @@ module.exports = {
       var tm = new TravelMessage();
       
       try {
-        nj = nunjucks.configure([root + '/apps/admin/public', root + '/apps', root + '/macros'], { autoescape: true });
+        nj = nunjucks.configure([root + '/apps/admin/views', root + '/apps', root + '/macros'], { autoescape: true });
         tm.data = nj.render('admin.html', ctx);
         tm.type = 'html';
       }  
@@ -99,24 +98,24 @@ module.exports = {
       ctx.CSRFToken = uuidv1();
       
       // create CSRF record
-      rec = new CSRF({token: ctx.CSRFToken, user: req.user.code});
+      rec = new admin_CSRF({token: ctx.CSRFToken, user: req.user.code});
       tm = await rec.insertOne({pgschema});
 
-      ctx.tenant = Tenant.getColumnDefns();
-      ctx.user = User.getColumnDefns();
+      ctx.admin_tenant = admin_Tenant.getColumnDefns();
+      ctx.admin_user = admin_User.getColumnDefns();
       ctx.dateFormat = 'MM/DD/YYYY';
       ctx.timeFormat = 'hh:mm A';
       ctx.TID = pgschema;
       
       try {
-        nj = nunjucks.configure([root + '/apps/admin/public', root + '/apps', root + '/macros', root + '/mvc-addons', root + '/lib/utils'], { autoescape: true });
+        nj = nunjucks.configure([root + '/apps/admin/views', root + '/apps', root + '/client/macros', root + '/client/mvc', root + '/client/utils', root + '/server/utils'], { autoescape: true });
         tm.data = nj.render('admin-manage.html', ctx);
         tm.type = 'html';
       }  
       catch(err) {
         tm.err = new NunjucksError(err);
       }
-      
+
       return tm;
     },
   },
@@ -157,7 +156,8 @@ module.exports = {
       // credentials good?
       // create Session record 
       // setup cookies
-      var match, tm, tobj, rec, bpwd;
+      var match, tm, rec;
+      var url = config.logins.login || '';
 
       // user valid?
       tm = await admin_User.selectOne({pgschema, cols: 'password', pks: body.username});
@@ -174,7 +174,7 @@ module.exports = {
       if (tm.isBad()) return tm;
      
       // Reply with blank data not user record, include session as cookie
-      return new TravelMessage({data: '', type: 'text', status: 200, cookies: [{name: 'admin_session', value: tm.data.id, 'Max-Age': 60*60*24, HttpOnly: true}]});
+      return new TravelMessage({data: url, type: 'text', status: 200, cookies: [{name: 'admin_session', value: tm.data.id, 'Max-Age': 60*60*24, HttpOnly: true}]});
     },
     
     logout: async function(req) {
@@ -274,9 +274,9 @@ module.exports = {
         }
       };  
 
-      fks.forEach(function(fk) {
+      for (var fk of fks) {
         res = await sqlUtil.execQuery(fk);
-      })
+      }
       
       if (errs.length > 0) {
         tm.data = {errors: {'_verify': errs}};

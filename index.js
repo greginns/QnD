@@ -4,7 +4,6 @@ const server = http.createServer();
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTracking: false});
 const uuidv1 = require('uuid/v1');
-//const fs = require('fs').promises;
 const config = require(root + '/config.json');
 
 const mw = {}
@@ -55,7 +54,7 @@ server
     rm = erm;
   }
 
-  mw.reply(res, rm);
+  mw.reply.reply(res, rm);
 })
 .on('upgrade', async function(req, socket, head) {
   var tenant, user;

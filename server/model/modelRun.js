@@ -6,11 +6,11 @@ const root = process.cwd();
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const ModelBase = require('./modelBase.js')
-const {exec} = require(root + '/lib/db.js');
-const verify = require(root + '/lib/verify.js');
-const {TravelMessage} = require(root + '/lib/messages.js');
-const {RowNotInsertedError, RowNotUpdatedError, SQLSelectError, SQLDeleteError, SQLSchemaError, UserError} = require(root + '/lib/errors.js');
-const {modelPubsub} = require(root + '/lib/pubsub.js');
+const {exec} = require(root + '/server/utils/db.js');
+const verify = require(root + '/server/utils/verify.js');
+const {TravelMessage} = require(root + '/server/utils/messages.js');
+const {RowNotInsertedError, RowNotUpdatedError, SQLSelectError, SQLDeleteError, SQLSchemaError, UserError} = require(root + '/server/utils/errors.js');
+const {modelPubsub} = require(root + '/server/utils/pubsub.js');
 
 var validationFailed = function(tcon, errs) {
   var terrs = {};

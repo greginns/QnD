@@ -1,5 +1,5 @@
 const root = process.cwd();
-const {modelPubsub} = require(root + '/lib/pubsub.js');
+const {modelPubsub} = require(root + '/server/utils/pubsub.js');
 
 class Wouter {
   constructor() {

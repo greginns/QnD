@@ -3,9 +3,10 @@ const fs = require('fs').promises;
 
 const {JSONError} = require(root + '/server/utils/errors.js');
 const {ResponseMessage} = require(root + '/server/utils/messages.js');
-const services = require(root + '/apps/admin/server/services.js');
+const services = require(root + '/apps/admin/services/services.js');
 const {Router, RouterMessage} = require(root + '/server/utils/router.js');
 const app = '/admin';
+const authApp = 'admin';
 
 // Admin
 Router.add(new RouterMessage({
@@ -34,7 +35,7 @@ Router.add(new RouterMessage({
     rm.convertFromTravel(tm);
     return rm;
   },
-  options: {needLogin: false, needCSRF: false}
+  options: {needLogin: false, needCSRF: false, authApp}
 }));
 
 Router.add(new RouterMessage({
@@ -45,7 +46,7 @@ Router.add(new RouterMessage({
   
     return tm.toResponse();
   },
-  options: {needLogin: false, needCSRF: false}
+  options: {needLogin: false, needCSRF: false, authApp}
 }));
 
 // generic admin query
@@ -68,131 +69,131 @@ Router.add(new RouterMessage({
   
     return rm;
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 // tenant
 Router.add(new RouterMessage({
   method: 'get',
-  path: app + '/tenant', 
+  path: app + '/admin_tenant', 
   fn: async function(req, res) {
     var tm = await services.tenant.get();
   
-    return rm.toResponse();
+    return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: app + '/tenant/:code', 
+  path: app + '/admin_tenant/:code', 
   fn: async function(req, res) {
     var tm = await services.tenant.get({rec: {code: req.params.code}});
   
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: app + '/tenant', 
+  path: app + '/admin_tenant', 
   fn: async function(req, res) {
-    var tm = await services.tenant.insert({rec: req.body.tenant});
+    var tm = await services.tenant.insert({rec: req.body.admin_tenant});
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: app + '/tenant/:code', 
+  path: app + '/admin_tenant/:code', 
   fn: async function(req, res) {
-    var tm = await services.tenant.update({code: req.params.code, rec: req.body.tenant});
+    var tm = await services.tenant.update({code: req.params.code, rec: req.body.admin_tenant});
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: app + '/tenant/:code', 
+  path: app + '/admin_tenant/:code', 
   fn: async function(req, res) {
     var tm = await services.tenant.delete({code: req.params.code});
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 // user
 Router.add(new RouterMessage({
   method: 'get',
-  path: app + '/user', 
+  path: app + '/admin_user', 
   fn: async function(req, res) {
     var tm = await services.user.get();
   
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: app + '/user/:code', 
+  path: app + '/admin_user/:code', 
   fn: async function(req, res) {
     var tm = await services.user.get({rec: {code: req.params.code}});
   
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: app + '/user', 
+  path: app + '/admin_user', 
   fn: async function(req, res) {
-    var tm = await services.user.insert({rec: req.body.user});
+    var tm = await services.user.insert({rec: req.body.admin_user});
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: app + '/user/:code', 
+  path: app + '/admin_user/:code', 
   fn: async function(req, res) {
-    var tm = await services.user.update({code: req.params.code, rec: req.body.user});
+    var tm = await services.user.update({code: req.params.code, rec: req.body.admin_user});
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: app + '/user/:code', 
+  path: app + '/admin_user/:code', 
   fn: async function(req, res) {
     var tm = await services.user.delete({code: req.params.code});
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: app + '/user/:code', 
+  path: app + '/admin_user/:code', 
   fn: async function(req, res) {
-    var tm = await services.user.update({code: req.params.code, rec: req.body.user});
+    var tm = await services.user.update({code: req.params.code, rec: req.body.admin_user});
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 // Migrations
@@ -204,7 +205,7 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: ''}
+  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
 // Pages
@@ -216,7 +217,7 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false, needCSRF: false}
+  options: {needLogin: false, needCSRF: false, authApp}
 }));
 
 // manage page
@@ -226,9 +227,9 @@ Router.add(new RouterMessage({
   fn: async function(req, res) {
     var tm = await services.output.manage(req);
 
-    tm.toResponse();
+    return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: false, redirect: '/admin'}
+  options: {needLogin: true, needCSRF: false, redirect: '/admin', authApp}
 }));
 
 // misc

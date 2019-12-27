@@ -1,15 +1,14 @@
 const root = process.cwd();
 const fs = require('fs').promises;
-const models = require(root + '/models')(true);
-const sqlUtil = require(root + '/lib/sqlUtil.js');
-
+const models = require(root + '/apps/admin/models/models.js')(false);
+const sqlUtil = require(root + '/server/utils/sqlUtil.js');
 const pgschema = 'public';
 //const pgschema = 'neoc';
 
 if (pgschema == 'public') {
-  var migrationFile = root + '/models/migrations/admin/admin.json';
+  var migrationFile = root + '/apps/admin/models/migrations/admin.json';
   var schema = 'admin';
-  var modelNames = Object.keys(models.admin);
+  //var modelNames = Object.keys(models.admin);
 }
 else {
   var migrationFile = root + '/models/migrations/tenant/' + pgschema + '.json';  
@@ -168,10 +167,10 @@ var buildJSON = async function() {
 }
 
 var initUser = async function() {
-  var rec = {code: 'greg', name: 'Greg Miller', email: 'greg@reservation-net.com', password: 'herbie99', active: true}
+  var rec = {code: 'greg', name: 'Greg Miller', email: 'greg@reservation-net.com', password: 'herbie', active: true}
   //var rec = {code: 'monica', name: 'Monica Eurich', email: 'monicae@neoc.com', password: 'adriana9', active: true};
-  var user = new User(rec);
-  var tm = await models.tenant.User.insertOne({pgschema, rec});
+  var user = new models.admin_User(rec);
+  var tm = await user.insertOne({pgschema, rec});
   console.log(tm)
 }
 

@@ -1,6 +1,6 @@
 const root = process.cwd();
 const {TravelMessage} = require(root + '/server/utils/messages.js');
-const {RouterMessage} = require(root + '/server/utils/router.js');
+const {Router, RouterMessage} = require(root + '/server/utils/router.js');
 const {Error404} = require(root + '/server/utils/errors.js');
 
 Router.add(new RouterMessage({

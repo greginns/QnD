@@ -103,7 +103,7 @@
         io.post({tenant, username, password}, '/login/login')
         .then(function(res) {
           if (res.status == 200) {
-            location = 'www.google.com';  // *** Where to go?
+            location = res.data;
           }
           else {
             $('#errMsg').text(res.data.errors.message);

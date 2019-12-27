@@ -2,7 +2,7 @@
   App.startup.init()
 	.then(function(res) {
 	  App.wsdc = new App.classes.WSDataComm('admin');
-	  App.wsdc.setTables(['tenant','user']);
+	  App.wsdc.setTables(['admin_tenant','admin_user']);
 	  App.wsdc.start();
 
 	  App.router.start('tenants');

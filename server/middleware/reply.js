@@ -17,7 +17,7 @@ const reply = function(res, rm) {
 
 				Object.keys(cookie).forEach(function(key) {
 					cookieValue += `;${key}`;
-					(!(key in unary)) cookieValue  += `=${cookie[key]}`;
+					if (!(key in unary)) cookieValue  += `=${cookie[key]}`;
 				});
 
 				cookies.push(cookieValue);

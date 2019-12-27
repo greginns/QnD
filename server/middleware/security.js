@@ -6,18 +6,20 @@ const config = require(root + '/config.json').server;
 
 module.exports = {
   check: async function(req, res) {
-    // logged in status *** Need some way to decide if a user or an api calling.  Maybe getOptions specifies auth method
+    // logged in status
+    var tenant, user, tokenOK, app, auth, csrf;
     var options = Router.getOptions(req);
-    var path = req.parsedURL.pathname.split('/');    
-    var sys = '/login', tenant, user, tokenOK;
-    var auth = Router.getInfo(sys + '/auth');
-    var csrf = Router.getInfo(sys + '/csrf');
 
     if (options === false) return;  // 404, let router catch it.
-    if (options.bypassUser) return;
-    //if (path.length < 2) throw new ResponseMessage({status: 500, err: new SystemError('No System Specified')});
-    if (!auth) throw new ResponseMessage({status: 500, err: new SystemError('No sys/auth Route Specified')});
-    if (!csrf) throw new ResponseMessage({status: 500, err: new SystemError('No sys/csrf Route Specified')});
+    if (options.bypassUser) return;    
+
+    app = options.authApp;
+    auth = Router.getInfo('/' + app + '/auth');
+    csrf = Router.getInfo('/' + app + '/csrf');
+
+    if (!app) throw new ResponseMessage({status: 500, err: new SystemError('No Auth App Specified')});
+    if (!auth) throw new ResponseMessage({status: 500, err: new SystemError('No app/auth Route Specified')});
+    if (!csrf) throw new ResponseMessage({status: 500, err: new SystemError('No app/csrf Route Specified')});
 
     [tenant, user] = await auth.fn(req, res);
 
@@ -52,8 +54,8 @@ module.exports = {
   
   checkWS: async function(req) {
     var path = req.parsedURL.pathname.split('/');  
-    var sys = '/login';
-    var auth = Router.getInfo(sys + '/auth');
+    var app = path[1];
+    var auth = Router.getInfo('/' + app + '/auth');
 
     if (req.headers.origin.indexOf(config.domain) == -1) {
       return [null, null];

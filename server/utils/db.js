@@ -1,7 +1,7 @@
 const root = process.cwd();
 const {Pool} = require('pg');
-const {SQLError} = require(root + '/lib/errors.js');
-const {TravelMessage} = require(root + '/lib/messages.js');
+const {SQLError} = require(root + '/server/utils/errors.js');
+const {TravelMessage} = require(root + '/server/utils/messages.js');
 const config = require(root + '/config.json').db;
 const pool = new Pool(config);
 

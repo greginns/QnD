@@ -8,6 +8,7 @@ const {admin_Session, admin_Tenant} = require(root + '/apps/admin/models/models.
 const {NunjucksError, InvalidUserError} = require(root + '/server/utils/errors.js');
 const {TravelMessage} = require(root + '/server/utils/messages.js');
 const pgschema = 'public';
+const config = require(root + '/config.json');
 
 module.exports = {
   output: {
@@ -72,6 +73,7 @@ module.exports = {
       // create Session record 
       // setup cookies
       var match, tm, rec;
+      var url = config.logins.login || '';
 
       // tenant valid?
       tm = await admin_Tenant.selectOne({pgschema, cols: '', pks: body.tenant});
@@ -92,7 +94,7 @@ module.exports = {
       if (tm.isBad()) return tm;
      
       // Reply with blank data not user record, include session as cookie
-      return new TravelMessage({data: '', type: 'text', status: 200, cookies: [{name: 'tenant_session', value: tm.data.id, path: '/', 'Max-Age': 60*60*24}]});  //, HttpOnly: true
+      return new TravelMessage({data: url, type: 'text', status: 200, cookies: [{name: 'tenant_session', value: tm.data.id, path: '/', 'Max-Age': 60*60*24, HttpOnly: true}]});  //, HttpOnly: true
     },
     
     logout: async function(req) {

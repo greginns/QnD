@@ -25,9 +25,9 @@
       {% include "./admin-manage-tenants.html" %}
       {% include "./admin-manage-users.html" %}
       {% include "./admin-manage-migrate.html" %}
-      {% include "../../../mvc-addons/mvc-boot-cal.html" %}
-      {% include "../../../mvc-addons/mvc-boot-time.html" %}
-      {% include "../../../mvc-addons/mvc-modals.html" %}
+      {% include "../../../client/mvc/mvc-boot-cal.html" %}
+      {% include "../../../client/mvc/mvc-boot-time.html" %}
+      {% include "../../../client//mvc/mvc-modals.html" %}
     </div>
   </div>
   
@@ -36,7 +36,7 @@
 
 {% block init %}
 <script type="text/javascript">
-  {% include "../../../lib/utils/object.js" %}
+  {% include "../../../client/utils/object.js" %}
   {% include "./admin-manage.js" %}
 </script>
 {% endblock %}
