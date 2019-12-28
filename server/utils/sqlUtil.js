@@ -8,15 +8,15 @@ config.apps.forEach(function(app) {
 })
 
 module.exports = {
-  jsonQueryExecify: async function({query={}, group='', pgschema = '', values=[]} = {}) {
-    var text = module.exports.jsonToQuery(query, group, pgschema);
+  jsonQueryExecify: async function({query={}, app='', pgschema = '', values=[]} = {}) {
+    var text = module.exports.jsonToQuery(query, app, pgschema);
     var tm = await module.exports.execQuery({text, values});
 
     tm.data = module.exports.objectify(tm.data);
     return tm;
   },
 
-  jsonToQuery: function(query, group, pgschema) {
+  jsonToQuery: function(query, app, pgschema) {
     // [S]ingle quote for [S]trings, [D]ouble quote for things(in the [D]atabase)
     var sql = '';
     var colList = [];
@@ -27,7 +27,7 @@ module.exports = {
     var doJoin = function(tblA, tblB, jon) {
       if (!jon) {
         var jona = [];
-        var fks = models[group][tblA].getConstraints().fk;
+        var fks = models[app][tblA].getConstraints().fk;
         
         jon = `INNER JOIN "${pgschema}"."${tblB}" AS "${tblB}" ON `;
         
@@ -56,7 +56,7 @@ module.exports = {
 
           let tbl = Object.keys(tblDef)[0];
           let cols = Object.values(tblDef)[0];
-          var schema = models[group][tbl].getSchema();
+          var schema = models[app][tbl].getSchema();
 
           cols.forEach(function(col) {
             if (schema[col].constructor.name == 'Derived') {
@@ -85,13 +85,13 @@ module.exports = {
         return `ORDER BY ${obs.join(', ')}`;
       }
       else {
-         return models[group][mainTable].makeOrderBy();
+         return models[app][mainTable].makeOrderBy();
       }
     }
 
     var swallow = function(tblA, tblADefn, isMainTable, joinName) {
       if (! ('columns' in tblADefn)) tblADefn.columns = ['*'];
-      var cols = models[group][tblA].getColumnList({cols: tblADefn.columns || ['*'], isMainTable, joinName})
+      var cols = models[app][tblA].getColumnList({cols: tblADefn.columns || ['*'], isMainTable, joinName})
 
       if (cols.length > 0) colList = colList.concat(cols);  
       
@@ -110,7 +110,7 @@ module.exports = {
     sql += `SELECT ${colList.join(',')}\n`;
     sql += `FROM "${pgschema}"."${mainTable}" AS "${mainTable}"\n`;
     sql += joins.join('\n');
-    sql += (query[mainTable].where) ? '\n' + query[mainTable].where : '';    
+    sql += (query[mainTable].where) ? '\nWHERE ' + query[mainTable].where : '';    
     sql += '\n' + doOrderby(query[mainTable].orderBy || []);
 
     return sql;      
@@ -157,8 +157,8 @@ module.exports = {
     return `DROP SCHEMA IF EXISTS ${pgschema} CASCADE`;
   },
   
-  createTable: function(group, pgschema, table) {
-    return models[group][table]['build'](pgschema);
+  createTable: function(app, pgschema, table) {
+    return models[app][table]['build'](pgschema);
   },
   
   dropTable: function(schema, table) {

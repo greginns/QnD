@@ -1,58 +1,15 @@
 const root = process.cwd();
 const {JSONError} = require(root + '/lib/errors.js');
 const {ResponseMessage} = require(root + '/lib/messages.js');
-const services = require(root + '/apps/tenant/server/services.js');
+const services = require(root + '/apps/timeclock/server/services.js');
 const {Router, RouterMessage} = require(root + '/lib/router.js');
-
-// Admin
-Router.add(new RouterMessage({
-  method: 'info',
-  path: '/tenant/auth', 
-  fn: async function(req, res) {
-    return await services.auth.getUser(req);
-  },
-}));
-
-Router.add(new RouterMessage({
-  method: 'info',
-  path: '/tenant/csrf', 
-  fn: async function(req, res) {
-    return await services.auth.verifyCSRF(req);
-  },
-}));
-
-Router.add(new RouterMessage({
-  method: 'post',
-  path: '/tenant/login', 
-  fn: async function(req, res) {
-    var rm = new ResponseMessage();
-    var tm = await services.auth.login(req.body);
-  
-    rm.convertFromTravel(tm);
-    return rm;
-  },
-  options: {needLogin: false, needCSRF: false}
-}));
-
-Router.add(new RouterMessage({
-  method: 'delete',
-  path: '/tenant/logout', 
-  fn: async function(req, res) {
-    var rm = new ResponseMessage();
-    var tm = await services.auth.logout(req);
-  
-    rm.convertFromTravel(tm);
-    return rm;
-  },
-  options: {needLogin: false, needCSRF: false}
-}));
 
 // generic tenant query
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/query', 
+  path: '/timeclock/query', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
+
     var tm;
     var query = {
       Work: {
@@ -74,56 +31,38 @@ Router.add(new RouterMessage({
       //var query = JSON.parse(req.parsedURL.query.query);
 
       tm = await services.query(query);
-      rm.convertFromTravel(tm);
+  
     }
     catch(err) {
       rm.err = new JSONError(err);
     }
 
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 // Pages
-// login
-Router.add(new RouterMessage({
-  method: 'get',
-  path: ['/tenant'], 
-  fn: async function(req, res) {
-    var rm = new ResponseMessage();
-    var tm = await services.output.main(req);
-
-    rm.convertFromTravel(tm);
-    return rm;
-  }, 
-  options: {needLogin: false, needCSRF: false, allowAnon: true}
-}));
-
 // manage page
 Router.add(new RouterMessage({
   method: 'get',
-  path: ['/tenant/manage/:etc', '/tenant/manage'], 
+  path: ['/timeclock/manage/:etc', '/timeclock/manage'], 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.output.manage(req);
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: false, redirect: '/tenant'}
+  options: {needLogin: true, needCSRF: false, redirect: '/timeclock'}
 }));
 
 // empclock page
 Router.add(new RouterMessage({
   method: 'get',
-  path: ['/tenant/empclock/:etc', '/tenant/empclock'], 
+  path: ['/timeclock/empclock/:etc', '/timeclock/empclock'], 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.output.empclock(req);
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: false, needCSRF: false, allowAnon: true}
 }));
@@ -131,13 +70,11 @@ Router.add(new RouterMessage({
 // tips page
 Router.add(new RouterMessage({
   method: 'get',
-  path: ['/tenant/tips/:etc', '/tenant/tips'], 
+  path: ['/timeclock/tips/:etc', '/timeclock/tips'], 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.output.tips(req);
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: false, needCSRF: false, allowAnon: true}
 }));
@@ -146,65 +83,55 @@ Router.add(new RouterMessage({
 // department
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/department', 
+  path: '/timeclock/department', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.department.get({pgschema: req.TID});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/department/:code', 
+  path: '/timeclock/department/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.department.get({pgschema: req.TID, rec: {code: req.params.code}});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/department', 
+  path: '/timeclock/department', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.department.insert({pgschema: req.TID, rec: req.body.department});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/tenant/department/:code', 
+  path: '/timeclock/department/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.department.update({pgschema: req.TID, code: req.params.code, rec: req.body.department});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: '/tenant/department/:code', 
+  path: '/timeclock/department/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.department.delete({pgschema: req.TID, code: req.params.code});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
@@ -212,65 +139,55 @@ Router.add(new RouterMessage({
 // Employee
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/employee', 
+  path: '/timeclock/employee', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.employee.get({pgschema: req.TID});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/employee/:code', 
+  path: '/timeclock/employee/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.employee.get({pgschema: req.TID, rec: {code: req.params.code}});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/employee', 
+  path: '/timeclock/employee', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.employee.insert({pgschema: req.TID, rec: req.body.employee});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/tenant/employee/:code', 
+  path: '/timeclock/employee/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.employee.update({pgschema: req.TID, code: req.params.code, rec: req.body.employee});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: '/tenant/employee/:code', 
+  path: '/timeclock/employee/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.employee.delete({pgschema: req.TID, code: req.params.code});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
@@ -278,65 +195,55 @@ Router.add(new RouterMessage({
 // workcode
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/workcode', 
+  path: '/timeclock/workcode', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.workcode.get({pgschema: req.TID});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/workcode/:code', 
+  path: '/timeclock/workcode/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.workcode.get({pgschema: req.TID, rec: {code: req.params.code}});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/workcode', 
+  path: '/timeclock/workcode', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.workcode.insert({pgschema: req.TID, rec: req.body.workcode});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/tenant/workcode/:code', 
+  path: '/timeclock/workcode/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.workcode.update({pgschema: req.TID, code: req.params.code, rec: req.body.workcode});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: '/tenant/workcode/:code', 
+  path: '/timeclock/workcode/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.workcode.delete({pgschema: req.TID, code: req.params.code});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
@@ -344,65 +251,55 @@ Router.add(new RouterMessage({
 // empwork
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/empwork/:employee', 
+  path: '/timeclock/empwork/:employee', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empwork.get({pgschema: req.TID, rec: {employee: req.params.employee}});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/empwork/:employee/:workcode', 
+  path: '/timeclock/empwork/:employee/:workcode', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empwork.get({pgschema: req.TID, rec: {employee: req.params.employee, workcode: req.params.workcode}});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/empwork', 
+  path: '/timeclock/empwork', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empwork.insert({pgschema: req.TID, rec: req.body.empwork});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/tenant/empwork/:id', 
+  path: '/timeclock/empwork/:id', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empwork.update({pgschema: req.TID, id: req.params.id, rec: req.body.empwork});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: '/tenant/empwork/:id', 
+  path: '/timeclock/empwork/:id', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empwork.delete({pgschema: req.TID, id: req.params.id});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
@@ -410,52 +307,44 @@ Router.add(new RouterMessage({
 // work
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/work/:employee', 
+  path: '/timeclock/work/:employee', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.work.get({pgschema: req.TID, rec: {employee: req.params.employee}});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/work', 
+  path: '/timeclock/work', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.work.insert({pgschema: req.TID, rec: req.body.work});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/tenant/work/:id', 
+  path: '/timeclock/work/:id', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.work.update({pgschema: req.TID, id: req.params.id, rec: req.body.work});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: '/tenant/work/:id', 
+  path: '/timeclock/work/:id', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.work.delete({pgschema: req.TID, id: req.params.id});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
@@ -463,52 +352,44 @@ Router.add(new RouterMessage({
 // user
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/user', 
+  path: '/timeclock/user', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.user.get({pgschema: req.TID});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/user', 
+  path: '/timeclock/user', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.user.insert({pgschema: req.TID, rec: req.body.workcode});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/tenant/user/:code', 
+  path: '/timeclock/user/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.user.update({pgschema: req.TID, code: req.params.code, rec: req.body.user});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'delete',
-  path: '/tenant/user/:code', 
+  path: '/timeclock/user/:code', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.user.delete({pgschema: req.TID, code: req.params.code});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));
@@ -516,65 +397,55 @@ Router.add(new RouterMessage({
 // Empclock
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/empclock/login', 
+  path: '/timeclock/empclock/login', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empclock.login(req.body);
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: false, needCSRF: false, allowAnon: true}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/empclock/empwork/:emp', 
+  path: '/timeclock/empclock/empwork/:emp', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empclock.empwork({pgschema: req.TID, emp: req.params.emp});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: true, allowAnon: true}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/empclock/work/:emp', 
+  path: '/timeclock/empclock/work/:emp', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empclock.work({pgschema: req.TID, emp: req.params.emp});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: true, allowAnon: true}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/empclock/clockin', 
+  path: '/timeclock/empclock/clockin', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empclock.clockin({pgschema: req.TID, employee: req.body.employee, workcode: req.body.workcode, payrate: req.body.payrate});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: true, allowAnon: true}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/empclock/clockout/:emp/:id', 
+  path: '/timeclock/empclock/clockout/:emp/:id', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.empclock.clockout({pgschema: req.TID, emp: req.params.emp, id: req.params.id});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: true, allowAnon: true}
 }));
@@ -582,52 +453,44 @@ Router.add(new RouterMessage({
 // Tips
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/tips/login', 
+  path: '/timeclock/tips/login', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.tips.login(req.body);
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: false, needCSRF: false, allowAnon: true}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/tips/:dept/:date', 
+  path: '/timeclock/tips/:dept/:date', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.tips.get({pgschema: req.TID, dept: req.params.dept, date: req.params.date});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: false, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/tips/:emp', 
+  path: '/timeclock/tips/:emp', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.tips.insert({pgschema: req.TID, emp: req.params.emp, dt: req.body.date, work: req.body.work, tip: req.body.tip});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: false, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'put',
-  path: '/tenant/tips/:id', 
+  path: '/timeclock/tips/:id', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.tips.update({pgschema: req.TID, id: req.params.id, tip: req.body.tip});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: false, needCSRF: false}
 }));
@@ -635,49 +498,42 @@ Router.add(new RouterMessage({
 // payroll
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/payroll/params', 
+  path: '/timeclock/payroll/params', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.payroll.getParams({pgschema: req.TID});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/payroll/pastPeriods', 
+  path: '/timeclock/payroll/pastPeriods', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.payroll.getPastPeriods({pgschema: req.TID});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/payroll/run', 
+  path: '/timeclock/payroll/run', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.payroll.run({pgschema: req.TID});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'post',
-  path: '/tenant/payroll/confirm', 
+  path: '/timeclock/payroll/confirm', 
   fn: async function(req, res) {
     var rec = {}
-    var rm = new ResponseMessage();
     var tm;
     
     rec.user = req.user.code;
@@ -686,8 +542,7 @@ Router.add(new RouterMessage({
     
     tm = await services.payroll.confirm({pgschema: req.TID, rec});
   
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
@@ -695,91 +550,77 @@ Router.add(new RouterMessage({
 // reports
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/reports/params', 
+  path: '/timeclock/reports/params', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.payroll.getParams({pgschema: req.TID});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/reports/depts', 
+  path: '/timeclock/reports/depts', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.reports.depts({pgschema: req.TID, active: req.query.active});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/reports/emps', 
+  path: '/timeclock/reports/emps', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.reports.emps({pgschema: req.TID, active: req.query.active});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/reports/works', 
+  path: '/timeclock/reports/works', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.reports.works({pgschema: req.TID, active: req.query.active});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/reports/pay', 
+  path: '/timeclock/reports/pay', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.reports.pay({pgschema: req.TID, active: req.query.active});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/reports/users', 
+  path: '/timeclock/reports/users', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.reports.users({pgschema: req.TID, active: req.query.active});
 
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   },
   options: {needLogin: true, needCSRF: false}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
-  path: '/tenant/dymo', 
+  path: '/timeclock/dymo', 
   fn: async function(req, res) {
-    var rm = new ResponseMessage();
     var tm = await services.dymo.getConfig({pgschema: req.TID});
-  
-    rm.convertFromTravel(tm);
-    return rm;
+
+    return tm.toResponse();
   }, 
   options: {needLogin: true, needCSRF: true, redirect: ''}
 }));

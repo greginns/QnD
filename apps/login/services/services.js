@@ -111,5 +111,4 @@ module.exports = {
       return new TravelMessage({data: '/tenant', type: 'text', status: 200, cookies: [{name: 'tenant_session', value: ''}]});
     },
   },
-
 }
