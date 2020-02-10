@@ -25,6 +25,37 @@ Object.assign(Employee, {
     return (Object.keys(pkRec).length != pkCols.length) ? false : pkRec;
   }
 
+  static getSchema() {
+    return this.definition().schema || {};
+  }
+  
+  static getConstraints() {
+    return this.definition().constraints || {};
+  }
+
+  static getOrderBy() {
+    return this.definition().orderBy || [];
+  }
+  
+  static getDBschema() {
+    return this.definition().dbschema || '';
+  }
+  
+  static getColumnDefns() {
+    // return back defn of table columns, plus 'column' (name), and id (for html id)
+    var defns = {};
+    var tn = this.getTableName({pgschema: null, naked: true}).toLowerCase();
+    var schema = this.getSchema();
+    
+    for (var col in schema) {
+      defns[col] = schema[col].defn; 
+      defns[col].column = col;
+      defns[col].id = `${tn}_${col}`;
+    }
+    
+    return defns;
+  }
+  
   static getColumnList({cols = '*', isMainTable=false, joinName=false, showHidden = false, includeDerived = true} = {}) {
     // list of fully qualified, quoted, column names, ie "Department"."code"
     // Main Table name is "code" vs joinName/Derived "Department.code"
@@ -94,53 +125,6 @@ Object.assign(Employee, {
     return (naked) ? this.name : (pgschema) ? `"${pgschema}"."${this.name}"` : `"${this.name}"`;
   }
   
-  static getSchema() {
-    // get col defns
-    return this.definition().schema || {};
-  }
-  
-  static getColumnDefns() {
-    // return back defn of table columns, plus 'column' (name), and id (for html id)
-    var defns = {};
-    var tn = this.getTableName({pgschema: null, naked: true}).toLowerCase();
-    var schema = this.getSchema();
-    
-    for (var col in schema) {
-      defns[col] = schema[col].defn; 
-      defns[col].column = col;
-      defns[col].id = `${tn}_${col}`;
-    }
-    
-    return defns;
-  }
-  
-  static getConstraints() {
-    return this.definition().constraints || {};
-  }
-
-  static getOrderBy() {
-    return this.definition().orderBy || [];
-  }
-  
-  static getDBschema() {
-    return this.definition().dbschema || '';
-  }
-  
-  static testSchemaValue(pgschema) {
-    // compare the home schema in defn vs what was provided
-    // check to make sure not using incorrect schema
-    var dbSchema = this.getDBschema();
-    
-    if (dbSchema == 'all') return false;
-    
-    if (!pgschema) return `No pgschema for ${this.name}`;
-    if (!dbSchema) return `Invalid dbschema in ${this.name}`;
-    if (dbSchema == 'public' && pgschema != 'public') return `Mismatched pgschema in ${this.name} [${dbSchema} vs ${pgschema}]`;
-    if (dbSchema == 'tenant' && pgschema == 'public') return `Mismatched pgschema in ${this.name} [${dbSchema} vs ${pgschema}]`;
-    
-    return false;
-  }
-  
   static makePrimaryKey(pks) {
     // object of pk values
     var pkCols = this.getConstraints().pk;
@@ -156,7 +140,7 @@ Object.assign(Employee, {
   }
   
   static makeFkeyName(tbl, fkey) {
-    // used in reating table constraints
+    // used in creating table constraints
     return `${tbl}_${fkey}_fkey`; 
   }
   
@@ -223,6 +207,21 @@ Object.assign(Employee, {
     });
 
     return [where, values];
+  }
+  
+  static testPGSchema(pgschema) {
+    // compare the home schema in defn vs what was provided
+    // check to make sure not using incorrect schema
+    var dbSchema = this.getDBschema();
+    
+    if (dbSchema == 'all') return false;
+    
+    if (!pgschema) return `No pgschema for ${this.name}`;
+    if (!dbSchema) return `Invalid dbschema in ${this.name}`;
+    if (dbSchema == 'public' && pgschema != 'public') return `Mismatched pgschema in ${this.name} [${dbSchema} vs ${pgschema}]`;
+    if (dbSchema == 'tenant' && pgschema == 'public') return `Mismatched pgschema in ${this.name} [${dbSchema} vs ${pgschema}]`;
+    
+    return false;
   }
 
   static construct(rows) {

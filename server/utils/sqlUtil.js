@@ -4,7 +4,7 @@ const config = require(root + '/config.json');
 const models = {}
 
 config.apps.forEach(function(app) {
-  models[app] = require(root + `/apps/${app}/models/models.js`)(false);
+  models[app] = require(root + `/apps/${app}/models/models.js`);
 })
 
 module.exports = {

@@ -14,21 +14,19 @@ class Router {
 
   static add(msg) {
     msg.path.forEach(function(p) {
-      routePaths.push({mpath: msg.method + this._stripSlashes(p), msg});
+      routePaths.push({mpath: msg.method + this.app + this._stripSlashes(p), msg});
     }, this)  
   }
 
   static async go(req, res) {
     var path = req.method + this._stripSlashes(req.parsedURL.pathname);
-    var entry, params;
+    var [entry, params] = this._getEntry(path);
 
-    [entry, params] = this._getEntry(path);
-
-    if (!entry) {  
-      var entry, params; // weird error if entry and params == false  "TypeError: Cannot set property 'false' of undefined"
+    //if (!entry) {  
+      //var entry, params; // weird error if entry and params == false  "TypeError: Cannot set property 'false' of undefined"
       // no match, use 404 page if exists
-      [entry, params] = this._getEntry(path);
-    }
+      //var [entry, params] = this._getEntry(path);
+    //}
 
     if (!entry) {
       return new ResponseMessage({data: '', status: 404, ct: 'text/plain', err: new Error('No 404 page found')});
@@ -41,18 +39,14 @@ class Router {
 
   static getOptions(req) {
     var path = req.method + this._stripSlashes(req.parsedURL.pathname);
-    var entry, params;
-    
-    [entry, params] = this._getEntry(path);
+    var [entry, params] = this._getEntry(path);
     
     return (!entry) ? false : entry.options;
   }
   
   static getInfo(path) {
     path = 'INFO' + this._stripSlashes(path);
-    var entry, params;
-    
-    [entry, params] = this._getEntry(path);
+    var [entry, params] = this._getEntry(path);
 
     return entry;
   }
@@ -109,10 +103,13 @@ console.log(path)
 }
 
 class RouterMessage {
-  constructor({method='post', path='', fn='', options={}} = {}) {
+  constructor({method='post', app='', path='', fn='', options={}} = {}) {
+    path = path || '';
+
     if (!Array.isArray(path)) path = [path];
     
     this.method = method.toUpperCase();
+    this.app = app;
     this.path = path;
     this.fn = fn;
     this.options = options;
@@ -142,28 +139,32 @@ class RouterMessage {
       console.log(`Invalid Method ${this.method}`);
     }
 
-    if (!this.path[0]) {
-      console.log(`No Path specified for ${this.method}`);
-    }
+    //if (!this.path[0]) {
+    //  console.log(`No Path specified for ${this.method}`);
+    //}
     
+    if (!this.app) {
+      console.log(`No App specified for ${this.method} ${this.path}`);
+    }
+
     if (!this.fn) {
-      console.log(`No Function specified for ${this.method} ${this.path}`)
+      console.log(`No Function specified for ${this.method} ${this.app} ${this.path}`);
     }
     
     if (this.options.needLogin && (this.options.needLogin !== true && this.options.needLogin !== false)) {
-      console.log(`Invalid needLogin Option for ${this.method} ${this.path}`);
+      console.log(`Invalid needLogin Option for ${this.method} ${this.app} ${this.path}`);
     }
     
     if (this.options.needCSRF && (this.options.needCSRF !== true && this.options.needCSRF !== false)) {
-      console.log(`Invalid needCSRF Option for ${this.method} ${this.path}`);
+      console.log(`Invalid needCSRF Option for ${this.method} ${this.app} ${this.path}`);
     }
     
     if (this.options.bypassUser && (this.options.bypassUser !== true && this.options.bypassUser !== false)) {
-      console.log(`Invalid bypassUser option for ${this.method} ${this.path}`);
+      console.log(`Invalid bypassUser option for ${this.method} ${this.app} ${this.path}`);
     }
 
     if (this.options.allowAnon && (this.options.allowAnon !== true && this.options.allowAnon !== false)) {
-      console.log(`Invalid allowAnon Option for ${this.method} ${this.path}`);
+      console.log(`Invalid allowAnon Option for ${this.method} ${this.app} ${this.path}`);
     }
 
   }

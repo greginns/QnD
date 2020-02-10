@@ -27,7 +27,7 @@ class Model extends ModelBase {
     //    if no keys, build complete row of defaults
     //    if keys, build row based on keys
     // anything other than an object is an empty record
-    // overrRideColumns comes from construct so that derived columns are kept
+    // overrRideColumns comes from construct() so that derived columns are kept
     super();
 
     var self = this;
@@ -81,7 +81,7 @@ class Model extends ModelBase {
     var cols, params, values;
     
     // make sure a valid pgschema
-    scerr = tcon.testSchemaValue(pgschema);
+    scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
     
     // preInsert
@@ -119,7 +119,7 @@ class Model extends ModelBase {
     var tm, errs, scerr, schema, table, set, where, values, text;
     
     // make sure a valid pgschema
-    scerr = tcon.testSchemaValue(pgschema);
+    scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
     
     // preUpdate
@@ -136,7 +136,7 @@ class Model extends ModelBase {
     
     text = `UPDATE ${table} SET ${set.join(',')} WHERE ${where.join(',')} RETURNING *;`;
     tm = await tcon.sql({text, values});    
-console.log(text, values)
+
     if (!tm.err) {
       if (tm.data.length == 0) {
         tm.err = new RowNotUpdatedError();
@@ -159,7 +159,7 @@ console.log(text, values)
     var cols, params, values, set, where;
     
     // make sure a valid pgschema
-    scerr = tcon.testSchemaValue(pgschema);
+    scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});    
         
     table = tcon.getTableName({pgschema});
@@ -192,7 +192,7 @@ console.log(text, values)
     var where, values;
     const tcon = this.constructor;
     
-    scerr = tcon.testSchemaValue(pgschema);
+    scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
 
     rec = this.extractPrimaryKey();
@@ -226,7 +226,7 @@ console.log(text, values)
     var colNames, table, text;
     var where, values;
 
-    scerr = tcon.testSchemaValue(pgschema);
+    scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
 
     rec = tcon.makePrimaryKey(pks);
@@ -259,7 +259,7 @@ console.log(text, values)
     var colNames, table, text;
     var where, values, orderBy;
 
-    scerr = tcon.testSchemaValue(pgschema);
+    scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
 
     colNames = tcon.getColumnList({cols, isMainTable: true, showHidden});
@@ -289,7 +289,7 @@ console.log(text, values)
     table = tcon.getTableName({pgschema});
     
     // make sure a valid pgschema
-    scerr = tcon.testSchemaValue(pgschema);
+    scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
     
     for (row of rows) {
@@ -341,7 +341,7 @@ console.log(text, values)
     table = tcon.getTableName({pgschema});
     
     // make sure a valid pgschema
-    scerr = tcon.testSchemaValue(pgschema);
+    scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
     
     for (row of rows) {
@@ -391,7 +391,7 @@ console.log(text, values)
 
     if (Object.keys(obj).length == 0) return new TravelMessage({err: new UserError('No fields valued')});    
     
-    scerr = tcon.testSchemaValue(pgschema);
+    scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});    
     
     // Do the deleting

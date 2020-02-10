@@ -3,8 +3,8 @@ const nunjucks = require('nunjucks');
 const uuidv1 = require('uuid/v1');
 const bcrypt = require('bcrypt');
 
-const {login_User, login_CSRF} = require(root + '/apps/login/models/models.js')(false);
-const {admin_Session, admin_Tenant} = require(root + '/apps/admin/models/models.js')(false);
+const {User, CSRF} = require(root + '/apps/login/models.js');
+const {Session, Tenant} = require(root + '/apps/admin/models.js');
 const {NunjucksError, InvalidUserError} = require(root + '/server/utils/errors.js');
 const {TravelMessage} = require(root + '/server/utils/messages.js');
 const pgschema = 'public';
@@ -36,15 +36,15 @@ module.exports = {
       var sessID = req.cookies.tenant_session || '';
 
       if (sessID) {
-        sess = await admin_Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
+        sess = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
 
         if (!sess.err) {
-          tm = await admin_Tenant.selectOne({pgschema, cols: '*', pks: sess.data.tenant});
+          tm = await Tenant.selectOne({pgschema, cols: '*', pks: sess.data.tenant});
 
           if (tm.isGood()) {
             tenant = tm.data;
 
-            tm = await login_User.selectOne({pgschema: tenant.code, cols: '*', pks: sess.data.user});
+            tm = await User.selectOne({pgschema: tenant.code, cols: '*', pks: sess.data.user});
             if (tm.isGood()) user = tm.data;
           }
         }
@@ -62,7 +62,7 @@ module.exports = {
 
       if (!token) return false;
 
-      tm = await login_CSRF.selectOne({pgschema: TID, pks: token});
+      tm = await CSRF.selectOne({pgschema: TID, pks: token});
       if (tm.err) return false;
 
       return tm.data.user == user.code;    
@@ -76,11 +76,11 @@ module.exports = {
       var url = config.logins.login || '';
 
       // tenant valid?
-      tm = await admin_Tenant.selectOne({pgschema, cols: '', pks: body.tenant});
+      tm = await Tenant.selectOne({pgschema, cols: '', pks: body.tenant});
       if (tm.err) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
 
       // user valid?
-      tm = await login_User.selectOne({pgschema: body.tenant, cols: 'password', pks: body.username});
+      tm = await User.selectOne({pgschema: body.tenant, cols: 'password', pks: body.username});
       if (tm.err) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
 
       // password valid?
@@ -88,7 +88,7 @@ module.exports = {
       if (!match) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
       
       // create session record
-      rec = new admin_Session({id: uuidv1(), tenant: body.tenant, user: body.username});
+      rec = new Session({id: uuidv1(), tenant: body.tenant, user: body.username});
       tm = await rec.insertOne({pgschema});
 
       if (tm.isBad()) return tm;
@@ -104,7 +104,7 @@ module.exports = {
       var tobj;
       
       if (id) {
-        tobj = new admin_Session({id});
+        tobj = new Session({id});
         await tobj.deleteOne({pgschema});
       }
       

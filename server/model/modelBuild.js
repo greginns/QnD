@@ -1,7 +1,6 @@
 /*
   Test that adding a not null also adds a default
 */
-const ModelBase = require('./modelBase.js')
 
 const quotedList = function(list) {
   return list.map(function(el) {
@@ -9,7 +8,7 @@ const quotedList = function(list) {
   });
 }
     
-var compareTwoArrays = function(npk, opk) {
+const compareTwoArrays = function(npk, opk) {
   // make sure number and order are same 
   if (opk.length != npk.length) return false;
   
@@ -20,7 +19,7 @@ var compareTwoArrays = function(npk, opk) {
   return true;      
 };
 
-var compareFKs = function(nfk, ofk) {
+const compareFKs = function(nfk, ofk) {
   // compares two fks with same name
   // {name: 'user', columns: ['user'], table: models.User, tableColumns: ['id'], onDelete: 'NO ACTION'}
   if (!compareTwoArrays(ofk.columns, nfk.columns)) return false;
@@ -31,18 +30,18 @@ var compareFKs = function(nfk, ofk) {
   return true;      
 };
 
-class ModelBuild extends ModelBase {
-  constructor() {
-    super()
+class ModelBuild {
+  constructor(model) {
+    this.model = model;
   }
 
-  static create(pgschema) {
+  create(pgschema) {
     var self = this;
-    var tableName = this.getTableName({pgschema});
-    var tableNameRaw = this.getTableName({naked: true});
-    var colNames = this.getColumnNames({showHidden: true, includeDerived: false});
-    var schema = this.getSchema();
-    var constraints = this.getConstraints();
+    var tableName = this.model.getTableName({pgschema});
+    var tableNameRaw = this.model.getTableName({naked: true});
+    var colNames = this.model.getColumnNames({showHidden: true, includeDerived: false});
+    var schema = this.model.getSchema();
+    var constraints = this.model.getConstraints();
     var build = '', buildFK = '';
     var errs = this.verify();
     var fks;
@@ -74,7 +73,7 @@ class ModelBuild extends ModelBase {
 
       if ('fk' in constraints && constraints.fk.length > 0) {
         constraints.fk.forEach(function(val) {
-          fkeyName = self.makeFkeyName(`${pgschema}.${tableNameRaw.toLowerCase()}`, val.name);
+          fkeyName = self.model.makeFkeyName(`${pgschema}.${tableNameRaw.toLowerCase()}`, val.name);
               
           fks.push(` ADD CONSTRAINT "${fkeyName}" FOREIGN KEY(${quotedList(val.columns).join(',')}) REFERENCES ${val.table.getTableName({pgschema})} (${quotedList(val.tableColumns).join(',')}) ON DELETE ${val.onDelete}`);
         })  
@@ -101,12 +100,12 @@ class ModelBuild extends ModelBase {
     return [errs, build, buildFK];
   }
   
-  static alter(pgschema, old) {
+  alter(pgschema, old) {
     var self = this;
-    var tableName = this.getTableName({naked: true});
-    var colNames = this.getColumnNames({showHidden: true, includeDerived: false});
-    var schema = this.getSchema();
-    var constraints = this.getConstraints();
+    var tableName = this.model.getTableName({naked: true});
+    var colNames = this.model.getColumnNames({showHidden: true, includeDerived: false});
+    var schema = this.model.getSchema();
+    var constraints = this.model.getConstraints();
     var oldColNames = Object.keys(old.schema);
     var alter = '', alters = [], fkeyName;
     var errs = this.verify();
@@ -202,7 +201,7 @@ class ModelBuild extends ModelBase {
           })
           
           if (addCon) {
-            fkeyName = self.makeFkeyName(tableName, nval.name);
+            fkeyName = self.model.makeFkeyName(tableName, nval.name);
           
             alters.push(`\nADD CONSTRAINT "${fkeyName}" FOREIGN KEY(${quotedList(nval.columns).join(',')}) REFERENCES ${nval.table.getTableName({pgschema})} (${quotedList(nval.tableColumns).join(',')}) ON DELETE ${nval.onDelete}`);
           }
@@ -224,7 +223,7 @@ class ModelBuild extends ModelBase {
           })
         
           if (dropCon) {
-            fkeyName = self.makeFkeyName(tableName, oval.name);
+            fkeyName = self.model.makeFkeyName(tableName, oval.name);
             
             alters.push(`\nDROP CONSTRAINT IF EXISTS "${fkeyName}"`);
           }
@@ -237,7 +236,7 @@ class ModelBuild extends ModelBase {
           (old.constraints.fk || []).forEach(function(oval) {
             // same name and exact same signature
             if (nval.name == oval.name && !compareFKs(nval, oval)) {
-              fkeyName = self.makeFkeyName(tableName, nval.name);
+              fkeyName = self.model.makeFkeyName(tableName, nval.name);
 
               alters.push(`\nDROP CONSTRAINT IF EXISTS "${fkeyName}"`);
               alters.push(`\nADD CONSTRAINT "${fkeyName}" FOREIGN KEY(${quotedList(nval.columns).join(',')}) REFERENCES ${nval.table.getTableName({pgschema})} (${quotedList(nval.tableColumns).join(',')}) ON DELETE ${nval.onDelete}`);
@@ -265,12 +264,12 @@ class ModelBuild extends ModelBase {
     return [errs, alter];
   }
   
-  static verify() {
-    var tableName = this.getTableName();
-    var colNames = this.getColumnNames({showHidden: true, includeDerived: false});
-    var schema = this.getSchema();
-    var constraints = this.getConstraints();
-    var orderBy = this.getOrderBy();
+  verify() {
+    var tableName = this.model.getTableName();
+    var colNames = this.model.getColumnNames({showHidden: true, includeDerived: false});
+    var schema = this.model.getSchema();
+    var constraints = this.model.getConstraints();
+    var orderBy = this.model.getOrderBy();
     var errs = [], valArray, fkeyNames;
     
     // test col defs
@@ -367,7 +366,6 @@ class ModelBuild extends ModelBase {
           }          
           
           break;
-        
       }
     });
     
@@ -383,9 +381,9 @@ class ModelBuild extends ModelBase {
     return errs;
   }
 
-  static drop(pgschema, pswd) {
+  drop(pgschema, pswd) {
     // only for a table dropping itself
-    var tableName = this.getTableName({pgschema});
+    var tableName = this.model.getTableName({pgschema});
     var dt = new Date();
     var pwd = dt.getFullYear() + '-' + dt.getMonth() + '-' + dt.getDate();
     
@@ -394,8 +392,8 @@ class ModelBuild extends ModelBase {
     return `DROP TABLE IF EXISTS ${tableName} CASCADE`;    
   }
   
-  static toJSON() {
-    var defn = this.definition();
+  toJSON() {
+    var defn = this.model.definition();
     var defk;
     var json = {};
     
@@ -419,6 +417,7 @@ class ModelBuild extends ModelBase {
         var fk = [];
 
         defk.fk.forEach(function(f) {
+          
           f.table = f.table.name;  
           fk.push(f);
         })

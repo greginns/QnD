@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const moment = require('moment');
 
 const {jsonToQuery, execQuery, objectify, jsonQueryExecify} = require(root + '/lib/sqlUtil.js');
-const {timeclock_User, timeclock_CSRF, timeclock_Department, timeclock_Employee, timeclock_Workcode, timeclock_Empwork, timeclock_Work, timeclock_Payroll} = require(root + '/apps/timeclock/models/models.js')(false);
+const {User, CSRF, Department, Employee, Workcode, Empwork, Work, Payroll} = require(root + '/apps/timeclock/models/models.js');
 const {JSONError, UserError, NunjucksError, InvalidUserError} = require(root + '/server/utils/errors.js');
 const {TravelMessage} = require(root + '/server/utils/messages.js');
 const login = require(root + '/apps/login/services.js').auth.login;
@@ -19,7 +19,7 @@ const makeCSRF = async function(tenant, user) {
   var CSRFToken = uuidv1();
       
   // create CSRF record
-  var rec = new timeclock_CSRF({token: CSRFToken, user: user});
+  var rec = new CSRF({token: CSRFToken, user: user});
   await rec.insertOne({pgschema: tenant});
 
   return CSRFToken;
@@ -30,7 +30,7 @@ const getPayrollPeriodStart = async function(tenant) {
   var config = await getAppConfig(tenant);
   var days = config.payroll.periodDays;
   var latest, start;
-  var tm = await timeclock_Payroll.select({pgschema: tenant, rec: {}}); // get all periods, take first (= most current)
+  var tm = await Payroll.select({pgschema: tenant, rec: {}}); // get all periods, take first (= most current)
   
   if (tm.isGood() && tm.data.length > 0) {
     latest = tm.data[0].sdate;
@@ -60,10 +60,10 @@ module.exports = {
       var config = await getAppConfig(req.TID);
 
       ctx.CSRFToken = await makeCSRF(req.TID, req.user.code);
-      ctx.department = timeclock_Department.getColumnDefns();
-      ctx.employee = timeclock_Employee.getColumnDefns();
-      ctx.workcode = timeclock_Workcode.getColumnDefns();
-      ctx.user = timeclock_User.getColumnDefns();
+      ctx.department = Department.getColumnDefns();
+      ctx.employee = Employee.getColumnDefns();
+      ctx.workcode = Workcode.getColumnDefns();
+      ctx.user = User.getColumnDefns();
       ctx.dateFormat = dateFormat;
       ctx.timeFormat = timeFormat;
       ctx.TID = req.TID;
@@ -87,7 +87,7 @@ module.exports = {
       var nj;
       var tm = new TravelMessage();
 
-      ctx.workcode = timeclock_Workcode.getColumnDefns();
+      ctx.workcode = Workcode.getColumnDefns();
       ctx.dateFormat = dateFormat;
       ctx.timeFormat = timeFormat;
       ctx.TID = req.TID;
@@ -147,12 +147,12 @@ module.exports = {
   department: {
     get: async function({pgschema = '', rec = {}} = {}) {
       // get one or more departments
-      return await timeclock_Department.select({pgschema, rec});
+      return await Department.select({pgschema, rec});
     },
     
     insert: async function({pgschema = '', rec = {}} = {}) {
       // Insert Record
-      var tobj = new timeclock_Department(rec);
+      var tobj = new Department(rec);
 
       return await tobj.insertOne({pgschema});
     },
@@ -162,7 +162,7 @@ module.exports = {
       if (!code) return new TravelMessage({err: new UserError('No Department Code Supplied')});
           
       rec.code = code;
-      var tobj = new timeclock_Department(rec);
+      var tobj = new Department(rec);
         
       return await tobj.updateOne({pgschema});
     },
@@ -170,7 +170,7 @@ module.exports = {
     delete: async function({pgschema = '', code = ''} = {}) {
       if (!code) return new TravelMessage({err: new UserError('No Department Code Supplied')});
       
-      var tobj = new timeclock_Department({code});
+      var tobj = new Department({code});
       return await tobj.deleteOne({pgschema});
     },  
   },
@@ -178,12 +178,12 @@ module.exports = {
   employee: {
     get: async function({pgschema = '', rec = {}} = {}) {
       // get one or more employees
-      return await timeclock_Employee.select({pgschema, rec});
+      return await Employee.select({pgschema, rec});
     },
 
     insert: async function({pgschema = '', rec = {}} = {}) {
       // Insert Record
-      var tobj = new timeclock_Employee(rec);
+      var tobj = new Employee(rec);
     
       return await tobj.insertOne({pgschema});
     },
@@ -193,7 +193,7 @@ module.exports = {
       if (!code) return new TravelMessage({err: new UserError('No Employee Code Supplied')});
           
       rec.code = code;
-      var tobj = new timeclock_Employee(rec);
+      var tobj = new Employee(rec);
 
       return await tobj.updateOne({pgschema});
     },
@@ -201,7 +201,7 @@ module.exports = {
     delete: async function({pgschema = '', code = ''} = {}) {
       if (!code) return new TravelMessage({err: new UserError('No Employee Code Supplied')});
       
-      var tobj = new timeclock_Employee({code});
+      var tobj = new Employee({code});
       return await tobj.deleteOne({pgschema});
     },  
   },
@@ -209,12 +209,12 @@ module.exports = {
   workcode: {
     get: async function({pgschema = '', rec = {}} = {}) {
       // get one or more workcodes
-      return await timeclock_Workcode.select({pgschema, rec});
+      return await Workcode.select({pgschema, rec});
     },
     
     insert: async function({pgschema = '', rec = {}} = {}) {
       // Insert Record
-      var tobj = new timeclock_Workcode(rec);
+      var tobj = new Workcode(rec);
     
       return await tobj.insertOne({pgschema});
     },
@@ -224,7 +224,7 @@ module.exports = {
       if (!code) return new TravelMessage({err: new UserError('No workcode Code Supplied')});
           
       rec.code = code;
-      var tobj = new timeclock_Workcode(rec);
+      var tobj = new Workcode(rec);
 
       return await tobj.updateOne({pgschema});
     },
@@ -232,7 +232,7 @@ module.exports = {
     delete: async function({pgschema = '', code = ''} = {}) {
       if (!code) return new TravelMessage({err: new UserError('No workcode Code Supplied')});
       
-      var tobj = new timeclock_Workcode({code});
+      var tobj = new Workcode({code});
       return await tobj.deleteOne({pgschema});
     },  
   },
@@ -240,12 +240,12 @@ module.exports = {
   user: {
     get: async function({pgschema = '', rec = {}} = {}) {
       // get one or more users
-      return await timeclock_User.select({pgschema, rec});
+      return await User.select({pgschema, rec});
     },
     
     insert: async function({pgschema = '', rec = {}} = {}) {
       // Insert Record
-      var tobj = new timeclock_User(rec);
+      var tobj = new User(rec);
     
       return await tobj.insertOne({pgschema});
     },
@@ -255,7 +255,7 @@ module.exports = {
       if (!code) return new TravelMessage({err: new UserError('No User Code Supplied')});
           
       rec.code = code;
-      var tobj = new timeclock_User(rec);
+      var tobj = new User(rec);
         
       return await tobj.updateOne({pgschema});
     },
@@ -263,7 +263,7 @@ module.exports = {
     delete: async function({pgschema = '', code = ''} = {}) {
       if (!code) return new TravelMessage({err: new UserError('No User Code Supplied')});
       
-      var tobj = new timeclock_User({code});
+      var tobj = new User({code});
       return await tobj.deleteOne({pgschema});
     },  
   },
@@ -271,14 +271,14 @@ module.exports = {
   empwork: {
     get: async function({pgschema = '', rec = {}} = {}) {
       // get all work codes for an employee
-      return await timeclock_Empwork.select({pgschema, rec});
+      return await Empwork.select({pgschema, rec});
     },
     
     insert: async function({pgschema = '', rec = {}} = {}) {
       // Insert Record
       if (!rec.payrate) rec.payrate = '0';
 
-      var tobj = new timeclock_Empwork(rec);
+      var tobj = new Empwork(rec);
 
       return await tobj.insertOne({pgschema});
     },
@@ -289,7 +289,7 @@ module.exports = {
       if (!rec.payrate) rec.payrate = '0';
 
       rec.id = id;
-      var tobj = new timeclock_Empwork(rec);
+      var tobj = new Empwork(rec);
         
       return await tobj.updateOne({pgschema});
     },
@@ -297,7 +297,7 @@ module.exports = {
     delete: async function({pgschema = '', id = ''} = {}) {
       if (!id) return new TravelMessage({err: new UserError('No Empwork ID Supplied')});
       
-      var tobj = new timeclock_Empwork({id});
+      var tobj = new Empwork({id});
       return await tobj.deleteOne({pgschema});
     },  
   },
@@ -305,12 +305,12 @@ module.exports = {
   work: {
     get: async function({pgschema = '', rec = {}} = {}) {
       // get all work for an employee
-      return await timeclock_Work.select({pgschema, rec});
+      return await Work.select({pgschema, rec});
     },
     
     insert: async function({pgschema = '', rec = {}} = {}) {
       // Insert Record
-      var tobj = new timeclock_Work(rec);
+      var tobj = new Work(rec);
 
       return await tobj.insertOne({pgschema});
     },
@@ -320,7 +320,7 @@ module.exports = {
       if (!id) return new TravelMessage({err: new UserError('No Work ID Supplied')});
           
       rec.id = id;
-      var tobj = new timeclock_Work(rec);
+      var tobj = new Work(rec);
         
       return await tobj.updateOne({pgschema});
     },
@@ -328,7 +328,7 @@ module.exports = {
     delete: async function({pgschema = '', id = ''} = {}) {
       if (!id) return new TravelMessage({err: new UserError('No Work ID Supplied')});
       
-      var tobj = new timeclock_Work({id});
+      var tobj = new Work({id});
       return await tobj.deleteOne({pgschema});
     },  
   },  
@@ -339,7 +339,7 @@ module.exports = {
       var CSRFToken;
 
       // employee valid?
-      emp = await timeclock_Employee.selectOne({pgschema: body.tenant, cols: ['first', 'last', 'password'], pks: body.username});
+      emp = await Employee.selectOne({pgschema: body.tenant, cols: ['first', 'last', 'password'], pks: body.username});
       if (emp.isBad()) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError('Employee')});
 
       // password valid?
@@ -361,13 +361,13 @@ module.exports = {
     empwork: async function({pgschema='', emp=''} = {}) {
       // get work codes + desc for an employee
       var query = {
-        timeclock_Empwork: {
+        Empwork: {
           columns: ['id', 'workcode', 'payrate'],
           innerJoin: [
-            {timeclock_Workcode: {columns: ['desc', 'method']}}
+            {Workcode: {columns: ['desc', 'method']}}
           ],
-          orderBy: [{timeclock_Workcode: ['desc']}],
-          where: '"timeclock_Empwork"."employee"=$1'
+          orderBy: [{Workcode: ['desc']}],
+          where: '"Empwork"."employee"=$1'
         }
       };
       
@@ -377,12 +377,12 @@ module.exports = {
     work: async function({pgschema='', emp=''} = {}) {
       // get past work entries since date X.
       var query = {
-        timeclock_Work: {
+        Work: {
           columns: ['*'],
           innerJoin: [
-            {timeclock_Workcode: {columns: ['desc']}}
+            {Workcode: {columns: ['desc']}}
           ],
-          where: '"timeclock_Work"."employee"=$1 AND "timeclock_Work"."sdate" >= $2'
+          where: '"Work"."employee"=$1 AND "Work"."sdate" >= $2'
         }
       };
 
@@ -393,7 +393,7 @@ module.exports = {
     clockin: async function({pgschema='', employee='', workcode='', payrate='0'} = {}) {
       var sdate = new Date();
       var stime = new Date();
-      var rec = new timeclock_Work({employee, workcode, payrate, sdate, stime: stime.toLocaleTimeString()});
+      var rec = new Work({employee, workcode, payrate, sdate, stime: stime.toLocaleTimeString()});
       
       return await rec.insertOne({pgschema});      
     },   
@@ -405,7 +405,7 @@ module.exports = {
       var tm, tobj, rec;
       
       // get Work record, make sure employee matches
-      tm = await timeclock_Work.selectOne({pgschema, cols: '*', pks: id});
+      tm = await Work.selectOne({pgschema, cols: '*', pks: id});
       if (tm.isBad() || tm.data.employee != emp) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
       
       // calc hours
@@ -415,7 +415,7 @@ module.exports = {
 
       // update work record      
       rec = {id, edate, etime: etime.toLocaleTimeString(), hours};
-      tobj = new timeclock_Work(rec);
+      tobj = new Work(rec);
         
       return await tobj.updateOne({pgschema});
     },       
@@ -438,7 +438,7 @@ module.exports = {
     getPastPeriods: async function({pgschema} = {}) {
       var config = await getAppConfig(pgschema);
       var days = parseInt(config.payroll.periodDays, 10);
-      var tm = await timeclock_Payroll.select({pgschema});
+      var tm = await Payroll.select({pgschema});
       var sdate, edate;
 
       if (tm.isGood()) {
@@ -471,7 +471,7 @@ module.exports = {
       }
       
       // get payrates & reorganize by {emp: {code: rate}}
-      tm = await timeclock_Empwork.select({pgschema});
+      tm = await Empwork.select({pgschema});
       if (tm.isBad()) return tm;
       
       tm.data.forEach(function(rec) {
@@ -481,19 +481,19 @@ module.exports = {
       
       // get work data
       var query = {
-        timeclock_Work: {
+        Work: {
           columns: ['*'],
           innerJoin: [
-            {timeclock_Employee: {
+            {Employee: {
               columns: ['last', 'first'],
               innerJoin: [
-                {timeclock_Department: {columns: ['code','name']}},
+                {Department: {columns: ['code','name']}},
               ]
             }},
-            {timeclock_Workcode: {columns: ['desc', 'method']}}
+            {Workcode: {columns: ['desc', 'method']}}
           ],
-          where: '"timeclock_Work"."sdate" >= $1 AND "timeclock_Work"."sdate" <= $2',
-          orderBy: [{timeclock_Work: ['employee', 'sdate', 'stime', 'etime']}]
+          where: '"Work"."sdate" >= $1 AND "Work"."sdate" <= $2',
+          orderBy: [{Work: ['employee', 'sdate', 'stime', 'etime']}]
         }
       };
 
@@ -670,7 +670,7 @@ module.exports = {
     },
     
     confirm: async function({pgschema, rec={}} = {}) {
-      var pay = new timeclock_Payroll(rec);
+      var pay = new Payroll(rec);
       var tm = await pay.insertOne({pgschema})
       
       return tm;
@@ -696,22 +696,22 @@ module.exports = {
 
     get: async function({pgschema='', dept='', date = ''} = {}) {
       var query = {
-        timeclock_Work: {
+        Work: {
           columns: ['id','tip'],
           innerJoin: [
-            {timeclock_Employee: {
+            {Employee: {
               columns: ['code'],
               innerJoin: [
-                {timeclock_Department: {
+                {Department: {
                   columns: ['code']
                 }}
               ]
             }},
-            {timeclock_Workcode: {
+            {Workcode: {
               columns: ['code']
             }}
           ],
-          where: '"timeclock_Workcode"."method" = \'T\' AND "timeclock_Department"."code" = $1 AND "timeclock_Work"."sdate" = $2'
+          where: '"Workcode"."method" = \'T\' AND "Department"."code" = $1 AND "Work"."sdate" = $2'
         }
       }
 
@@ -725,7 +725,7 @@ module.exports = {
       var stime = tm;
       var etime = tm;
       var hours = 0;
-      var rec = new timeclock_Work({employee: emp, workcode: work, sdate, stime, edate, etime, hours, tip});
+      var rec = new Work({employee: emp, workcode: work, sdate, stime, edate, etime, hours, tip});
 
       return rec.insertOne({pgschema});
     },
@@ -734,7 +734,7 @@ module.exports = {
       if (!id) return new TravelMessage({err: new UserError('No ID Supplied')});
           
       rec = {id, tip};
-      var tobj = new timeclock_Work(rec);
+      var tobj = new Work(rec);
         
       return await tobj.updateOne({pgschema});      
     }
@@ -755,7 +755,7 @@ module.exports = {
     
     depts: async function({pgschema='', active='A'} = {}) {
       var rec = (active == 'A') ? {} : {active: (active == 'Y') ? true : false};
-      var depts = await timeclock_Department.select({pgschema, rec});
+      var depts = await Department.select({pgschema, rec});
       var tm = new TravelMessage();
       
       if (depts.isBad()) return depts;
@@ -775,7 +775,7 @@ module.exports = {
   
     emps: async function({pgschema='', active='A'} = {}) {
       var rec = (active == 'A') ? {} : {active: (active == 'Y') ? true : false};
-      var emps = await timeclock_Employee.select({pgschema, rec});
+      var emps = await Employee.select({pgschema, rec});
       var tm = new TravelMessage();
       
       if (emps.isBad()) return emps;
@@ -795,7 +795,7 @@ module.exports = {
     
     works: async function({pgschema='', active='A'} = {}) {
       var rec = (active == 'A') ? {} : {active: (active == 'Y') ? true : false};
-      var works = await timeclock_Workcode.select({pgschema, rec});
+      var works = await Workcode.select({pgschema, rec});
       var tm = new TravelMessage();
       
       if (works.isBad()) return works;
@@ -814,23 +814,23 @@ module.exports = {
     },
     
     pay: async function({pgschema={}, active='A'} = {}) {
-      var where = (active == 'A') ? '' : {active: (active == 'Y') ? '"timeclock_Employee"."active" = true' : '"timeclock_Employee"."active" = false'};
+      var where = (active == 'A') ? '' : {active: (active == 'Y') ? '"Employee"."active" = true' : '"Employee"."active" = false'};
       
       // get pay data
       var query = {
-        timeclock_Empwork: {
+        Empwork: {
           columns: ['payrate'],
           innerJoin: [
-            {timeclock_Employee: {
+            {Employee: {
               columns: ['name'],
               innerJoin: [
-                {timeclock_Department: {columns: ['name']}},
+                {Department: {columns: ['name']}},
               ]
             }},
-            {timeclock_Workcode: {columns: ['desc']}}
+            {Workcode: {columns: ['desc']}}
           ],
           where: (where) ? where : '',
-          orderBy: [{timeclock_Department: ['name']}, {timeclock_Employee: ['name']}, {timeclock_Workcode: ['desc']}]
+          orderBy: [{Department: ['name']}, {Employee: ['name']}, {Workcode: ['desc']}]
         }
       };
       
@@ -858,7 +858,7 @@ module.exports = {
     
     users: async function({pgschema={}, active='A'} = {}) {
       var rec = (active == 'A') ? {} : {active: (active == 'Y') ? true : false};
-      var users = await timeclock_User.select({pgschema, rec});
+      var users = await User.select({pgschema, rec});
       var tm = new TravelMessage();
       
       if (users.isBad()) return users;

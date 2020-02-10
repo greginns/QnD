@@ -10,35 +10,22 @@ const uuidv1 = require('uuid/v1');
 const bcrypt = require('bcrypt');
 
 const sqlUtil = require(root + '/server/utils/sqlUtil.js');
-const {admin_Tenant, admin_User, admin_Session, admin_CSRF} = require(root + '/apps/admin/models/models.js')(false);
-const tenantUser = require(root + '/apps/login/models/models.js')(false).login_User;
-const {SystemError, UserError, NunjucksError, InvalidUserError, JSONError} = require(root + '/server/utils/errors.js');
+const migration = require(root + '/server/utils/migration.js');
+const {UserError, NunjucksError, InvalidUserError, JSONError} = require(root + '/server/utils/errors.js');
 const {TravelMessage} = require(root + '/server/utils/messages.js');
+const {Tenant, User, Session, CSRF} = require(root + '/apps/admin/models.js');
+const tenantUser = require(root + '/apps/login/models/models.js').User;
 const config = require(root + '/config.json');
 const pgschema = 'public';
-const modelsBuild = {}, appNames = [];
+const appNames = [];
 
 config.apps.forEach(function(app) {
   if (app != 'admin') {
-    modelsBuild[app] = require(root + `/apps/${app}/models/models.js`)(true);
     appNames.push(app);
   }
 })
 
-var readMigFile = async function(file) {
-  var data = false
-  
-  try {
-    data = JSON.parse(await fs.readFile(file));
-  }
-  catch(err) {
-    console.log(err);
-  }
-  
-  return data;
-}
-
-var writeMigFile = async function(file, json) {
+const writeMigFile = async function(file, json) {
   var data = false
   
   try {
@@ -53,7 +40,7 @@ var writeMigFile = async function(file, json) {
   return data;
 }
 
-var deleteMigFile = async function(file) {
+const deleteMigFile = async function(file) {
   var rc = false
   
   try {
@@ -67,101 +54,6 @@ var deleteMigFile = async function(file) {
   
   return rc;
 }
-
-const migration = function(code) {
-  var model, sql, sqlFK, fks = [], res, tableName;
-  var jsonModels, errs = [], verrs = [];
-        
-  // verify tables
-  for (var app of appNames) {
-    for (var model of Object.keys(modelsBuild[app])) {
-      verrs = modelsBuild[app][model].verify();
-      
-      if (verrs.length > 0) {
-        errs.push({model, verrs: verrs.join(',')});
-      }
-    }
-  }
-
-  if (errs.length > 0) {
-    tm.data = {errors: {'_verify': errs}};
-    tm.status = 400;
-    return tm;
-  }
-
-  // go through current models and add, alter
-  for (var app of appNames) {
-    let migrationFile = root + `/apps/${app}/models/migrations/${code}.json`;
-    
-    jsonModels = await readMigFile(migrationFile);
-    if (!jsonModels) return new TravelMessage({err: new SystemError('Missing JSON file')});
-
-    for (var model of Object.keys(modelsBuild[app])) {
-      if (! (model in jsonModels)) {
-        [verrs, sql, sqlFK] = modelsBuild[app][model].create(code);
-      }
-      else {
-        [verrs, sql] =  modelsBuild[app][model].alter(code, jsonModels[model]);
-        sqlFK = '';
-      }
-      
-      if (verrs.length > 0) {
-        errs.push({model, verrs: verrs.join(',')});
-        continue;
-      }
-      
-      res = await sqlUtil.execQuery(sql);
-
-      if (!res.err) {
-        if (sqlFK) fks.push(sqlFK);
-
-        jsonModels[model] = modelsBuild[app][model].toJSON();
-
-        await writeMigFile(migrationFile, jsonModels);
-      }
-      else {
-        errs.push({model, verrs: res.err.message});
-      }
-    }
-
-    for (var fk of fks) {
-      res = await sqlUtil.execQuery(fk);
-    }
-  };  
-  
-  // go through old models, drop any not current
-  for (app of appNames) {
-    var migrationFile = root + `/apps/${app}/models/migrations/${code}.json`;
-
-    for (model of Object.keys(modelsBuild[app])) {
-      if (! (model in modelsBuild[app])) {
-        // can't use Model.drop as model doesn't exist anymore!     
-        tableName = `"${code}"."${model}"`
-        sql = `DROP TABLE IF EXISTS ${tableName}`;    
-      
-        res = await sqlUtil.execQuery(sql);
-        
-        if (!res.err) {
-          delete jsonModels[model];
-          
-          await writeMigFile(migrationFile, jsonModels);
-        }
-        else {
-          errs.push({model, verrs: res.err.message});
-        }
-      }
-    }
-  }
-  
-  tm = new TravelMessage();
-  
-  if (errs.length > 0) {
-    tm.data = {errors: {'_verify': errs}};
-    tm.status = 400;
-  }
-
-  return tm;
-};
 
 module.exports = {
   output: {
@@ -192,11 +84,11 @@ module.exports = {
       ctx.CSRFToken = uuidv1();
       
       // create CSRF record
-      rec = new admin_CSRF({token: ctx.CSRFToken, user: req.user.code});
+      rec = new CSRF({token: ctx.CSRFToken, user: req.user.code});
       tm = await rec.insertOne({pgschema});
 
-      ctx.admin_tenant = admin_Tenant.getColumnDefns();
-      ctx.admin_user = admin_User.getColumnDefns();
+      ctx.Tenant = Tenant.getColumnDefns();
+      ctx.User = User.getColumnDefns();
       ctx.dateFormat = 'MM/DD/YYYY';
       ctx.timeFormat = 'hh:mm A';
       ctx.TID = pgschema;
@@ -220,10 +112,10 @@ module.exports = {
       var sessID = req.cookies.admin_session || '';
 
       if (sessID) {
-        tm = await admin_Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
+        tm = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
 
         if (tm.isGood()) {
-          tm = await admin_User.selectOne({pgschema, cols: '*', pks: tm.data.user});
+          tm = await User.selectOne({pgschema, cols: '*', pks: tm.data.user});
           if (tm.isGood()) user = tm.data;
         }
       }
@@ -239,7 +131,7 @@ module.exports = {
 
       if (!token) return false;
 
-      tm = await admin_CSRF.selectOne({pgschema, pks: token})
+      tm = await CSRF.selectOne({pgschema, pks: token})
 
       if (tm.isBad()) return false;
 
@@ -254,7 +146,7 @@ module.exports = {
       var url = config.logins.login || '';
 
       // user valid?
-      tm = await admin_User.selectOne({pgschema, cols: 'password', pks: body.username});
+      tm = await User.selectOne({pgschema, cols: 'password', pks: body.username});
       if (tm.isBad()) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
 
       // password valid?
@@ -262,7 +154,7 @@ module.exports = {
       if (!match) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
       
       // create session record
-      rec = new admin_Session({id: uuidv1(), tenant: 'public', user: body.username});
+      rec = new Session({id: uuidv1(), tenant: 'public', user: body.username});
       tm = await rec.insertOne({pgschema});
 
       if (tm.isBad()) return tm;
@@ -278,7 +170,7 @@ module.exports = {
       var tobj, tm;
       
       if (id) {
-        tobj = new admin_Session({id});
+        tobj = new Session({id});
         tm = await tobj.deleteOne({pgschema});
       }
       
@@ -304,7 +196,7 @@ module.exports = {
   tenant: {
     get: async function({rec = {}} = {}) {
       // get one or more tenants
-      return await admin_Tenant.select({pgschema, rec});
+      return await Tenant.select({pgschema, rec});
     },
     
     insert: async function({rec = {}} = {}) {
@@ -313,7 +205,7 @@ module.exports = {
       var fks = [];
 
       // insert tenant row
-      tobj = new admin_Tenant(rec);
+      tobj = new Tenant(rec);
       tm1 = await tobj.insertOne({pgschema});
       
       if (tm1.isBad()) return tm1; // insert failure, most likely schema validation failure
@@ -330,7 +222,7 @@ module.exports = {
         await writeMigFile(migrationFile, {});
       }
 
-      tm3 = migration(rec.code);
+      tm3 = await migration(rec.code);
 
       if (tm3.status == 200) {
         // create admin user 
@@ -370,7 +262,7 @@ module.exports = {
 
       if (tm2.isBad()) return tm2;  // drop schema error
       
-      tobj = new admin_Tenant({code});
+      tobj = new Tenant({code});
       tm1 = await tobj.deleteOne({pgschema});
             
       if (tm1.isBad()) return tm1;  // delete failure
@@ -388,12 +280,12 @@ module.exports = {
   user: {
     get: async function({rec = {}} = {}) {
       // get one or more users
-      return await admin_User.select({pgschema, rec});
+      return await User.select({pgschema, rec});
     },
     
     insert: async function({rec = {}} = {}) {
       // Insert Record
-      var tobj = new admin_User(rec);
+      var tobj = new User(rec);
     
       return await tobj.insertOne({pgschema});
     },
@@ -403,7 +295,7 @@ module.exports = {
       if (!code) return new TravelMessage({err: new UserError('No User Code Supplied')});
           
       rec.code = code;
-      var tobj = new admin_User(rec);
+      var tobj = new User(rec);
         
       return await tobj.updateOne({pgschema});
     },
@@ -411,7 +303,7 @@ module.exports = {
     delete: async function({code = ''} = {}) {
       if (!code) return new TravelMessage({err: new UserError('No User Code Supplied')});
       
-      var tobj = new admin_User({code});
+      var tobj = new User({code});
       return await tobj.deleteOne({pgschema});
     },  
   },
@@ -421,10 +313,10 @@ module.exports = {
       // run migrations for this tenant
       if (!code) return new TravelMessage({err: new UserError('No Tenant Code Supplied')});
       
-      tm = await admin_Tenant.selectOne({pgschema, cols: '*', showHidden: true, pks: code});
+      tm = await Tenant.selectOne({pgschema, cols: '*', showHidden: true, pks: code});
       if (tm.isBad()) return tm;
 
-      return migration(code);
+      return await migration(code);
     }    
   },
   
