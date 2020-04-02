@@ -4,52 +4,55 @@ const fs = require('fs').promises;
 const sqlUtil = require(root + '/server/utils/sqlUtil.js');
 const {SystemError} = require(root + '/server/utils/errors.js');
 const {TravelMessage} = require(root + '/server/utils/messages.js');
+const modelBuild = require(root + '/server/model/modelBuild.js');
 const config = require(root + '/config.json');
 
-const readMigFile = async function(file) {
-  var data = false
-  
-  try {
-    data = JSON.parse(await fs.readFile(file));
-  }
-  catch(err) {
-    console.log(err);
-  }
-  
-  return data;
-}
-
-const writeMigFile = async function(file, json) {
-  var data = false
-  
-  try {
-    await fs.writeFile(file, JSON.stringify(json));
+const migFile = {
+  read: async function(file) {
+    var data = {};
     
-    data = true;
-  }
-  catch(err) {
-    console.log(err)
-  }
-  
-  return data;
-}
-
-const deleteMigFile = async function(file) {
-  var rc = false
-  
-  try {
-    await fs.unlink(file);
+    try {
+      data = JSON.parse(await fs.readFile(file));
+    }
+    catch(err) {
+      console.log(err);
+    }
     
-    rc = true;    
+    return data;
+  },
+
+  write: async function(file, json) {
+    var data = false
+    
+    try {
+      await fs.writeFile(file, JSON.stringify(json));
+      
+      data = true;
+    }
+    catch(err) {
+      console.log(err)
+    }
+    
+    return data;
+  },
+
+  delete: async function(file) {
+    var rc = false
+    
+    try {
+      await fs.unlink(file);
+      
+      rc = true;    
+    }
+    catch(err) {
+      console.log(err);
+    }
+    
+    return rc;
   }
-  catch(err) {
-    console.log(err);
-  }
-  
-  return rc;
 }
 
-const migration = async function(tenant, migApp) {
+const migration = async function({tenant = 'public', migApp = null} = {}) {
   var model, sql, sqlFK, fks = [], res, tableName;
   var jsonModels, errs = [], verrs = [];
   var modelsList = {}, appNames = [];
@@ -78,8 +81,8 @@ const migration = async function(tenant, migApp) {
   // verify tables
   for (var app of appNames) {
     for (var model of Object.keys(modelsList[app])) {
-      let mb = new modelBuild(model);
-      verrs = mb.verify(tenant);
+      let mb = new modelBuild(modelsList[app][model]);
+      verrs = mb.verify();
       
       if (verrs.length > 0) {
         errs.push({model, verrs: verrs.join(',')});
@@ -97,11 +100,11 @@ const migration = async function(tenant, migApp) {
   for (var app of appNames) {
     let migrationFile = root + `/apps/${app}/migrations/${tenant}.json`;
     
-    jsonModels = await readMigFile(migrationFile);
+    jsonModels = await migFile.read(migrationFile);
     if (!jsonModels) return new TravelMessage({err: new SystemError('Missing JSON file')});
 
     for (var model of Object.keys(modelsList[app])) {
-      let mb = new modelBuild(model);
+      let mb = new modelBuild(modelsList[app][model]);
 
       if (! (model in jsonModels)) {
         var [verrs, sql, sqlFK] = mb.create(tenant);
@@ -119,11 +122,13 @@ const migration = async function(tenant, migApp) {
       res = await sqlUtil.execQuery(sql);
 
       if (!res.err) {
+        // save fk sql for after all tables are created
         if (sqlFK) fks.push(sqlFK);
 
+        // save updated json
         jsonModels[model] = mb.toJSON();
 
-        await writeMigFile(migrationFile, jsonModels);
+        await migFile.write(migrationFile, jsonModels);
       }
       else {
         errs.push({model, verrs: res.err.message});
@@ -138,19 +143,22 @@ const migration = async function(tenant, migApp) {
   // go through old models, drop any not current
   for (app of appNames) {
     var migrationFile = root + `/apps/${app}/migrations/${tenant}.json`;
+    var jsonModels = await migFile.read(migrationFile);
+    var modelNames = Object.keys(modelsList[app]);
+    var jsonNames = Object.keys(jsonModels);
 
-    for (model of Object.keys(modelsList[app])) {
-      if (! (model in modelsList[app])) {
+    for (model of jsonNames) {
+      if (modelNames.indexOf(model) == -1) {
         // can't use Model.drop as model doesn't exist anymore!     
-        tableName = `"${tenant}"."${model}"`
-        sql = `DROP TABLE IF EXISTS ${tableName}`;    
+        tableName = `"${tenant}"."${app}_${model}"`
+        sql = `DROP TABLE IF EXISTS ${tableName} CASCADE`;    
       
         res = await sqlUtil.execQuery(sql);
         
         if (!res.err) {
           delete jsonModels[model];
           
-          await writeMigFile(migrationFile, jsonModels);
+          await migFile.write(migrationFile, jsonModels);
         }
         else {
           errs.push({model, verrs: res.err.message});

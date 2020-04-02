@@ -1,0 +1,40 @@
+{% extends "../../base.html" %}
+
+{% block title %}
+  Payroll
+{% endblock %}
+
+{% block css %}
+<style>
+</style>
+{% endblock %}
+
+{% block script %}
+  <!--script type="text/javascript" src="https://static.roam3hosting.com/js/node/dymo.js"></!--script-->
+
+  <script type="text/javascript">
+  </script>
+{% endblock %}
+
+{% block body %}
+  <div class="container-fluid">
+    <div id='qndPages'>
+      {% include "./bindings.html" %}
+      {% include "./filters.html" %}
+      {% include "./interfaces.html" %}
+    </div>
+  </div>
+
+  {% include "../../../client/mvc-addons/modals.html" %}
+  {% include "../../../client/mvc-addons/mdate.html" %}
+  {% include "../../../client/mvc-addons/mtime.html" %}
+  {% include "../../../client/mvc-addons/multisel.html" %}
+  {% include "../../../client/mvc-addons/singlesel.html" %}
+
+{% endblock %}
+
+{% block init %}
+<script type="text/javascript">
+  {% include "./test.js" %}
+</script>
+{% endblock %}

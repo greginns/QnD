@@ -7,7 +7,7 @@ const config = require(root + '/config.json').server;
 module.exports = {
   check: async function(req, res) {
     // logged in status
-    var tenant, user, tokenOK, app, auth, csrf;
+    var app, auth, csrf;
     var options = Router.getOptions(req);
 
     if (options === false) return;  // 404, let router catch it.
@@ -21,7 +21,7 @@ module.exports = {
     if (!auth) throw new ResponseMessage({status: 500, err: new SystemError('No app/auth Route Specified')});
     if (!csrf) throw new ResponseMessage({status: 500, err: new SystemError('No app/csrf Route Specified')});
 
-    [tenant, user] = await auth.fn(req, res);
+    let [tenant, user] = await auth.fn(req, res);
 
     if (!user) {
       if (options.needLogin) {
@@ -46,7 +46,7 @@ module.exports = {
       }
 
       if (options.needCSRF) {
-        tokenOK = await csrf.fn(req, res);
+        let tokenOK = await csrf.fn(req, res);
         if (!tokenOK) throw new ResponseMessage({status: 401});
       }
     }

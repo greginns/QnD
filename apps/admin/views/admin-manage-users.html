@@ -29,13 +29,13 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6 col-sm-3'>
-                {{ fields.Char(type='text', id=admin_user.code.id, maxlength=admin_user.code.maxLength, mvc_value='admin_user.code', mvc_disabled='this.$get("userPK")', label=admin_user.code.verbose) }}
+                {{ fields.Char(type='text', id=user.code.id, maxlength=user.code.maxLength, mvc_value='user.code', mvc_disabled='this.$get("userPK")', label=user.code.verbose) }}
               </div>
               
               <div class='col-sm-1'></div>
               
               <div class='col-12 col-sm-4'>
-                {{ fields.Boolean(id=admin_user.active.id, mvc_checked='admin_user.active', label=admin_user.active.verbose) }}
+                {{ fields.Boolean(id=user.active.id, mvc_checked='user.active', label=user.active.verbose) }}
               </div>
             </div>          
           </div>
@@ -43,17 +43,17 @@
           <div class='card-body'>
             <div class='row form-group'>
               <div class='col-sm-6'>
-                {{ fields.Char(type='text', id=admin_user.name.id, maxlength=admin_user.name.maxLength, mvc_value='admin_user.name', label=admin_user.name.verbose) }}
+                {{ fields.Char(type='text', id=user.name.id, maxlength=user.name.maxLength, mvc_value='user.name', label=user.name.verbose) }}
               </div>
             </div>
             
             <div class='row'>
               <div class='col-12 col-sm-6'>
-                {{ fields.Char(type='text', id=admin_user.email.id, maxlength=admin_user.email.maxLength, mvc_value='admin_user.email', label=admin_user.email.verbose) }}
+                {{ fields.Char(type='text', id=user.email.id, maxlength=user.email.maxLength, mvc_value='user.email', label=user.email.verbose) }}
               </div>
               
               <div class='col-12 col-sm-6'>
-                {{ fields.Password(type='password', id=admin_user.password.id, maxlength=admin_user.password.maxLength, mvc_value='admin_user.password', label=admin_user.password.verbose) }}
+                {{ fields.Password(type='password', id=user.password.id, maxlength=user.password.maxLength, mvc_value='user.password', label=user.password.verbose) }}
               </div>          
             </div>
           </div>

@@ -16,11 +16,13 @@ const {Wouter} = require(root + '/server/utils/wouter.js');
 const sqlUtil = require(root + '/server/utils/sqlUtil.js');
 const WSclients = new Map();
 
-require(root + '/server/routes/routes.js');  // processes routes.
+require(root + '/server/routes/routes.js');  // process system routes.
 
-config.apps.forEach(function(app) {
-  require(root + `/apps/${app}/routes/routes.js`);  // processes routes.
-})
+//config.apps.forEach(function(app) {
+//  require(root + `/apps/${app}/routes.js`);  // process app routes.
+//})
+require(root + `/apps/admin/routes.js`);  // process app routes.
+require(root + `/apps/test/routes.js`);  // process app routes.
 
 process
 .on('unhandledRejection', (reason, rej) => {
@@ -46,7 +48,7 @@ server
     await mw.request.process(req, res);
     await mw.security.check(req, res);
 
-    // Routes - communicate via params and resp message
+    // Routes - communicate via params and response message
     rm = await Router.go(req, res)
   }
   catch(erm) {
@@ -57,10 +59,9 @@ server
   mw.reply.reply(res, rm);
 })
 .on('upgrade', async function(req, socket, head) {
-  var tenant, user;
-
   await mw.request.processWS(req);
-  [tenant, user] = await mw.security.checkWS(req);
+
+  var [tenant, user] = await mw.security.checkWS(req);
 
   if (!user) {
     socket.destroy();
@@ -129,25 +130,6 @@ if(this.limitCounter >= Socket.limit) {
 For example, if you’re using WS library for Node for creating websockets on server, you can use the maxPayload option to specify the maximum payload size in bytes. 
 */
 
-/*
-var sqlExec = async function(sqlList) {
-  for (const sql of sqlList) {
-    console.log(sql.substr(0,30))
-    
-    try {
-      var res = await db.exec(sql);
-      console.log(res)
-    }
-    catch (error) {
-      console.log(error)
-    }
-  }
-  
-  console.log('pre-end')
-  db.shutdown();
-  console.log('end')
-}
-*/
 /* VERIFY
   // USAGE
   Object.keys(models['tenant']).forEach(function(model) {

@@ -1,6 +1,7 @@
 const root = process.cwd();
 const Fields = require(root + '/server/model/modelFields');
 const Model = require(root + '/server/model/modelRun.js');
+const app = 'login';
 
 var setNewDate = function() {
   return new Date();
@@ -30,6 +31,7 @@ const User =  class extends Model {
       orderBy: ['name'],
       
       dbschema: 'tenant',
+      app
     }
   }
 };
@@ -55,6 +57,7 @@ const CSRF = class extends Model {
       orderBy: ['issued'],
       
       dbschema: 'tenant',
+      app
     }
   }
 };

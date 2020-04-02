@@ -36,6 +36,7 @@ const Tenant = class extends Model {
       orderBy: ['coname'],
       
       dbschema: 'public',
+      app
     }
   }
 };
@@ -64,6 +65,7 @@ const User = class extends Model {
       orderBy: ['name'],
       
       dbschema: 'public',
+      app
     }
   }
 };
@@ -89,6 +91,7 @@ const CSRF = class extends Model {
       orderBy: ['issued'],
       
       dbschema: 'public',
+      app
     }
   }
 };
@@ -118,6 +121,7 @@ const Session = class extends Model {
       orderBy: ['issued'],
       
       dbschema: 'all',
+      app
     }
   }
 };

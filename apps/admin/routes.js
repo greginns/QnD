@@ -58,11 +58,9 @@ Router.add(new RouterMessage({
   app,
   path: '/login', 
   fn: async function(req) {
-    var rm = new ResponseMessage();
     var tm = await services.auth.login(req.body);
   
-    rm.convertFromTravel(tm);
-    return rm;
+    return tm.toResponse();
   },
   options: {needLogin: false, needCSRF: false, authApp}
 }));
@@ -109,7 +107,7 @@ Router.add(new RouterMessage({
   app,
   path: '/tenant', 
   fn: async function(req) {
-    var tm = await services.tenant.insert({rec: req.body.admin_tenant});
+    var tm = await services.tenant.insert({rec: req.body.tenant});
 
     return tm.toResponse();
   }, 
@@ -121,7 +119,7 @@ Router.add(new RouterMessage({
   app,
   path: '/tenant/:code', 
   fn: async function(req) {
-    var tm = await services.tenant.update({code: req.params.code, rec: req.body.admin_tenant});
+    var tm = await services.tenant.update({code: req.params.code, rec: req.body.tenant});
 
     return tm.toResponse();
   }, 
@@ -131,7 +129,7 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app,
-  path: '/:code', 
+  path: '/tenant/:code', 
   fn: async function(req) {
     var tm = await services.tenant.delete({code: req.params.code});
 
@@ -170,7 +168,7 @@ Router.add(new RouterMessage({
   app,
   path: '/user', 
   fn: async function(req) {
-    var tm = await services.user.insert({rec: req.body.admin_user});
+    var tm = await services.user.insert({rec: req.body.user});
 
     return tm.toResponse();
   }, 
@@ -182,7 +180,7 @@ Router.add(new RouterMessage({
   app,
   path: '/user/:code', 
   fn: async function(req) {
-    var tm = await services.user.update({code: req.params.code, rec: req.body.admin_user});
+    var tm = await services.user.update({code: req.params.code, rec: req.body.user});
 
     return tm.toResponse();
   }, 
@@ -214,7 +212,7 @@ Router.add(new RouterMessage({
   options: {needLogin: true, needCSRF: true, redirect: '', authApp}
 }));
 
-// misc
+// misc for testing
 Router.add(new RouterMessage({
   method: 'post',
   app,

@@ -9,15 +9,14 @@ const ModelBase = require('./modelBase.js')
 const {exec} = require(root + '/server/utils/db.js');
 const verify = require(root + '/server/utils/verify.js');
 const {TravelMessage} = require(root + '/server/utils/messages.js');
-const {RowNotInsertedError, RowNotUpdatedError, SQLSelectError, SQLDeleteError, SQLSchemaError, UserError} = require(root + '/server/utils/errors.js');
+const {DataValidationError, RowNotInsertedError, RowNotUpdatedError, SQLSelectError, SQLDeleteError, SQLSchemaError, UserError} = require(root + '/server/utils/errors.js');
 const {modelPubsub} = require(root + '/server/utils/pubsub.js');
 
 var validationFailed = function(tcon, errs) {
-  var terrs = {};
-  
-  terrs[tcon.name.toLowerCase()] = errs;
-  
-  return new TravelMessage({data: {errors: terrs}, status: 400});
+  var errors = {}, name = tcon.name.toLowerCase();
+  errors[name] = errs;
+
+  return new TravelMessage({data: {errors}, err: new DataValidationError()});
 }
 
 class Model extends ModelBase {
@@ -39,7 +38,9 @@ class Model extends ModelBase {
       if (Object.keys(obj).length > 0) {
         // data passed in, create record based on it
         Object.keys(obj).forEach(function(col) {
-          if (cols.indexOf(col) != -1 || overRideColumns) self[col] = obj[col];
+          if (cols.indexOf(col) != -1 || overRideColumns) {
+            self[col] = (obj[col]) ? obj[col] : ('default' in schema[col].defn) ? schema[col].defn.default : obj[col];
+          }
         })
       }
       else {
@@ -74,11 +75,18 @@ class Model extends ModelBase {
   }    
   
 /* Instance actions */  
+  verifyOneFull({schema = {}, oneOnly = false} = {}) {    
+    return verify.testFullRecord(schema, this, oneOnly);
+  }
+
+  verifyOnePartial({schema = {}, oneOnly = false} = {}) {
+    return verify.testPartialRecord(schema, this, oneOnly);
+  }
+
   async insertOne({pgschema = ''} = {}) {
     // insert model object
     const tcon = this.constructor;
     var tm, errs, scerr, schema, table, text;
-    var cols, params, values;
     
     // make sure a valid pgschema
     scerr = tcon.testPGSchema(pgschema);
@@ -89,12 +97,13 @@ class Model extends ModelBase {
 
     // validate record
     schema = tcon.getSchema();
-    errs = verify.testFullRecord(schema, this, false);
-    
+    errs = this.verifyOneFull({schema, oneOnly: false});
+
     if (Object.keys(errs).length > 0) return validationFailed(tcon, errs);
-    
+
+    // build SQL
     table = tcon.getTableName({pgschema});
-    [cols, params, values] = tcon.makeInsertValues(this);
+    let [cols, params, values] = tcon.makeInsertValues(this);
 
     text = `INSERT INTO ${table} (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING *;`;
     tm = await tcon.sql({text, values});
@@ -104,7 +113,6 @@ class Model extends ModelBase {
         tm.err = new RowNotInsertedError();
       }
       else {
-        //tm.data = tcon.construct(tm.data)[0];
         tm.data = tm.data[0];
         modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`);
       }
@@ -116,7 +124,7 @@ class Model extends ModelBase {
   async updateOne({pgschema = ''} = {}) {
     // update model object, based on pks
     const tcon = this.constructor;
-    var tm, errs, scerr, schema, table, set, where, values, text;
+    var tm, errs, scerr, schema, table, text;
     
     // make sure a valid pgschema
     scerr = tcon.testPGSchema(pgschema);
@@ -127,12 +135,12 @@ class Model extends ModelBase {
 
     // validate record
     schema = tcon.getSchema();
-    errs = verify.testPartialRecord(schema, this, false);
+    errs = this.verifyOnePartial({schema, oneOnly: false});
 
     if (Object.keys(errs).length > 0) return validationFailed(tcon, errs);
         
     table = tcon.getTableName({pgschema});
-    [set, where, values] = tcon.makeUpdateValues(this);
+    let [set, where, values] = tcon.makeUpdateValues(this);
     
     text = `UPDATE ${table} SET ${set.join(',')} WHERE ${where.join(',')} RETURNING *;`;
     tm = await tcon.sql({text, values});    
@@ -156,7 +164,6 @@ class Model extends ModelBase {
     //https://hashrocket.com/blog/posts/upsert-records-with-postgresql-9-5
     const tcon = this.constructor;
     var tm, scerr, table, text, pks;    
-    var cols, params, values, set, where;
     
     // make sure a valid pgschema
     scerr = tcon.testPGSchema(pgschema);
@@ -164,8 +171,8 @@ class Model extends ModelBase {
         
     table = tcon.getTableName({pgschema});
     pks = tcon.getConstraints().pk;
-    [cols, params, values] = tcon.makeInsertValues(this);
-    [set, where] = tcon.makeUpdateValues(this);
+    let [cols, params, values] = tcon.makeInsertValues(this);
+    let [set, where] = tcon.makeUpdateValues(this);
     
     text = `INSERT INTO ${table} (${cols.join(',')}) VALUES(${params.join(',')})`;
     text += ` ON CONFLICT (${pks.join(',')})`;
@@ -189,7 +196,6 @@ class Model extends ModelBase {
   async deleteOne({pgschema = ''} = {}) {
     // delete a model object
     var tm, rec, scerr, table, text;
-    var where, values;
     const tcon = this.constructor;
     
     scerr = tcon.testPGSchema(pgschema);
@@ -200,7 +206,7 @@ class Model extends ModelBase {
 
     // Do the deleting
     table = tcon.getTableName({pgschema});
-    [, where, values] = tcon.makeUpdateValues(rec);
+    let [, where, values] = tcon.makeUpdateValues(rec);
     text = `DELETE FROM ${table} WHERE ${where.join(',')} RETURNING *;`;
     tm = await tcon.sql({text, values});  
 
@@ -224,7 +230,6 @@ class Model extends ModelBase {
     const tcon = this;
     var tm, scerr, rec;
     var colNames, table, text;
-    var where, values;
 
     scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
@@ -234,7 +239,8 @@ class Model extends ModelBase {
     
     colNames = tcon.getColumnList({cols, isMainTable: true, showHidden});
     table = tcon.getTableName({pgschema});
-    [where, values] = tcon.makeSelectValues(rec);
+
+    let [where, values] = tcon.makeSelectValues(rec);
     text = `SELECT ${colNames} FROM ${table} WHERE ${where.join(',')}`;
     tm = await tcon.sql({text, values});
 
@@ -257,7 +263,7 @@ class Model extends ModelBase {
     const tcon = this;
     var tm, scerr;
     var colNames, table, text;
-    var where, values, orderBy;
+    var orderBy;
 
     scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
@@ -265,7 +271,7 @@ class Model extends ModelBase {
     colNames = tcon.getColumnList({cols, isMainTable: true, showHidden});
     table = tcon.getTableName({pgschema});
     orderBy = tcon.makeOrderBy();
-    [where, values] = tcon.makeSelectValues(rec);
+    let [where, values] = tcon.makeSelectValues(rec);
     text = `SELECT ${colNames} FROM ${table}` + ((where.length > 0) ? ` WHERE ${where.join(',')}` : '');
     text += ' ' + orderBy;
     tm = await tcon.sql({text, values});
@@ -281,7 +287,6 @@ class Model extends ModelBase {
     // response is in data[], {isError: T|F, error: msg, data: rec}
     const tcon = this;
     var tm, tobj, errs, scerr, schema, table, text, row;
-    var cols, params, values;
     var tmx = new TravelMessage();
     
     tmx.data = [];
@@ -297,14 +302,14 @@ class Model extends ModelBase {
       
       await tobj.setSaveDefaults('i');
       
-      errs = verify.testFullRecord(schema, tobj, false);
+      errs = this.verifyOneFull({schema, oneOnly: false});
     
       if (Object.keys(errs).length > 0) {
         tmx.data.push({isError: true, error: validationFailed(tcon, errs).data});
         continue;
       }
       
-      [cols, params, values] = tcon.makeInsertValues(tobj);
+      let [cols, params, values] = tcon.makeInsertValues(tobj);
       text = `INSERT INTO ${table} (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING *;`;
       tm = await tcon.sql({text, values});
     
@@ -333,7 +338,6 @@ class Model extends ModelBase {
     // response is in data[], {isError: T|F, error: msg, data: rec}
     const tcon = this;
     var tm, tobj, errs, scerr, schema, table, text, row;
-    var set, where, values;
     var tmx = new TravelMessage();
     
     tmx.data = [];
@@ -349,14 +353,14 @@ class Model extends ModelBase {
       
       await tobj.setSaveDefaults('u');
       
-      errs = verify.testPartialRecord(schema, tobj, false);
+      errs = this.verifyOnePartial({schema, oneOnly: false});
     
       if (Object.keys(errs).length > 0) {
         tmx.data.push({isError: true, error: validationFailed(tcon, errs).data});
         continue;
       }
       
-      [set, where, values] = tcon.makeUpdateValues(tobj);
+      let [set, where, values] = tcon.makeUpdateValues(tobj);
       text = `UPDATE ${table} SET ${set.join(',')} WHERE ${where.join(',')} RETURNING *;`;
       tm = await tcon.sql({text, values});    
     
@@ -387,7 +391,6 @@ class Model extends ModelBase {
     // delete one or more records
     const tcon = this;
     var tm, scerr, table, text;
-    var where, values;
 
     if (Object.keys(obj).length == 0) return new TravelMessage({err: new UserError('No fields valued')});    
     
@@ -396,7 +399,7 @@ class Model extends ModelBase {
     
     // Do the deleting
     table = tcon.getTableName({pgschema});
-    [, where, values] = tcon.makeUpdateValues(obj);
+    let [, where, values] = tcon.makeUpdateValues(obj);
     text = `DELETE FROM ${table} WHERE ${where.join(',')} RETURNING *;`;
     tm = await tcon.sql({text, values});
 

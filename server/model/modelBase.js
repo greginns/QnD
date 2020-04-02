@@ -41,6 +41,10 @@ Object.assign(Employee, {
     return this.definition().dbschema || '';
   }
   
+  static getApp() {
+    return this.definition().app || '';
+  }
+  
   static getColumnDefns() {
     // return back defn of table columns, plus 'column' (name), and id (for html id)
     var defns = {};
@@ -122,7 +126,8 @@ Object.assign(Employee, {
   static getTableName({pgschema = '', naked = false} = {}) {
     // pgschema = optional dbschema name
     // naked = just the name, no quotes no schema
-    return (naked) ? this.name : (pgschema) ? `"${pgschema}"."${this.name}"` : `"${this.name}"`;
+    var app = this.getApp();
+    return (naked) ? this.name : (pgschema) ? `"${pgschema}"."${app}_${this.name}"` : `"${app}_${this.name}"`;
   }
   
   static makePrimaryKey(pks) {
@@ -176,7 +181,7 @@ Object.assign(Employee, {
     // returns set, where, values
     var set = [], where = [], values = [];
     const pks = this.getConstraints().pk;
-    
+
     Object.keys(obj).forEach(function(col, idx) {
       if (obj[col] !== undefined) {
         if (pks.indexOf(col) == -1) {

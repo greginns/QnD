@@ -1,0 +1,179 @@
+<style>
+.strikediag {
+  display: inline-block;
+  position: relative;
+}
+
+.strikediag::before {
+  content: '';
+  position: absolute;
+  left: -0.0em;
+  right: -0.0em;
+  top: 0.38em;
+  bottom: 0.38em;
+  background: linear-gradient(to left top, transparent 45.5%, red 47.5%, red 52.5%, transparent 54.5%);
+  pointer-events: none;
+}
+</style>
+
+<page id='filters'>
+  <section>
+    <h4>Filters, Edits, Roles</h4>
+    <a href='/bindings'>Bindings</a>
+    <br>
+    <a href='/interfaces'>Interfaces</a>
+    <div class='row'>
+      <div class='col-12 col-lg-6' id='filters1'>
+<input mvc-value='value1'>
+<br><br>
+mvc-filter='upper' <span mvc-text='value1' mvc-filter='upper'></span>
+mvc-filter='lower' <span mvc-text='value1' mvc-filter='lower'></span>
+<br><br>
+mvc-role='date' <input mvc-value='date' mvc-role='date'>
+<br><br>
+mvc-role='time' <input mvc-value='date' mvc-role='time'>
+<br><br>
+mvc-filter='date' <span mvc-text='date' mvc-filter='date'></span>
+<br><br>
+mvc-filter='time' <span mvc-text='time' mvc-filter='time'></span>
+<br><br>
+mvc-role='passwordtoggle' 
+<input type='password' mvc-value='pass' id='password1'>
+<span mvc-role='passwordtoggle' for='password1'>&#128065;</span>
+<br><br>
+mvc-role='stepper', mvc-role='stepperadj' 
+<span mvc-role='stepperadj' for='stepper1' dir='-'>-</span>
+<input mvc-value='step' min='0' max='9' step='.1' id='stepper1' mvc-role='stepper'>
+<span mvc-role='stepperadj' for='stepper1' dir='+'>+</span>
+<br><br>
+mvc-edit='integer' mvc-edit='integer' <input mvc-edit='integer' mvc-filter='integer' mvc-value='integer'>
+<br><br>
+mvc-edit='float' mvc-edit='float' <input mvc-edit='float' mvc-filter='float' mvc-value='float'>
+<br><br>
+mvc-role='floatpos' <input mvc-role='floatpos' mvc-value='floatpos'>
+<br><br>
+mvc-role='dollar' <input mvc-role='dollar' mvc-value='dollar'>
+      </div>
+    
+      <div class='col-12 col-lg-6' id='filters2'>
+        <button mvc-click='showJS'>
+          Javascript
+        </button>
+        <button mvc-click='showHTML'>
+          HTML
+        </button>
+        
+        <pre mvc-show='showJS'>
+          <code mvc-text='js'>
+          </code>
+        </pre>
+
+        <pre mvc-show='showHTML'>
+          <code mvc-text='html'>
+          </code>
+        </pre>
+      </div>
+    </div>
+
+  </section>
+</page>
+
+<script id='filtersClass'>
+class Filters extends QnD.classes.MVC {
+  constructor(element) {
+    super(element);
+    
+    //this.init(); //  use if not in router
+  }
+
+  init() {
+    this.createModel();
+    
+    return new Promise(function(resolve) {
+      resolve();
+    })          
+  }
+  
+  inView(){
+  }
+
+  outView() {
+    return true;  
+  }
+
+  createModel() {
+    this.model.value1='Greg';
+    this.model.pass='Password';
+    this.model.date = new Date().toJSON();
+    this.model.time = new Date().toJSON();
+    this.model.step = 4;
+    this.model.integer = 5;
+    this.model.floatpos = 42.7;
+    this.model.float = -14.5;
+    this.model.dollar = 1.475;
+  }
+
+  showJS() {
+    this.model.showJS = true;
+    this.model.showHTML = false;
+  }
+
+  showHTML() {
+    this.model.showJS = false;
+    this.model.showHTML = true;
+  }    
+}
+</script>
+
+<script id='filtersClass2'>
+  class Filters2 extends QnD.classes.MVC {
+    constructor(element) {
+      super(element);
+      
+      //this.init(); //  use if not in router
+    }
+
+    init() {
+      this.createModel();
+      
+      return new Promise(function(resolve) {
+        resolve();
+      })          
+    }
+    
+    inView(){
+    }
+
+    outView() {
+      return true;  
+    }
+
+    createModel() {
+      this.model.showJS = true;
+      this.model.showHTML = false;
+      this.model.js = document.getElementById('filtersClass').innerText;     
+      this.model.html =  document.getElementById('filters1').innerHTML;           
+    }
+
+    showJS() {
+      this.model.showJS = true;
+      this.model.showHTML = false;
+    }
+
+    showHTML() {
+      this.model.showJS = false;
+      this.model.showHTML = true;
+    }    
+  }
+
+  var t1 = new Filters('filters1');
+  var section1 = new QnD.classes.Section({mvc: t1});
+
+  var t2 = new Filters2('filters2');
+  var section2 = new QnD.classes.Section({mvc: t2});
+
+  var el = document.getElementById('filters');
+  var page = new QnD.classes.Page({el, path: 'filters', title: 'Filters, Edits, and Roles', sections: [section1, section2]});
+      
+  QnD.pages.push(page);    
+</script id='FilterClass'>      

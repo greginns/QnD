@@ -1,16 +1,16 @@
 App.mvcObjs.admin_manage_users = {
   model: {
-    admin_user: {},
+    user: {},
     userOrig: {},
     userPK: '',
     
     defaults: {
-      admin_user: {
+      user: {
         code: '',
         name: '',
         email: '',
         password: '',
-        active: {{admin_user.active.default}},
+        active: {{user.active.default}},
       },
     },
     
@@ -24,7 +24,7 @@ App.mvcObjs.admin_manage_users = {
     created: function() {
       var self = this;
       
-      App.subs.data.subscribe('/admin/admin_user', function(data) {
+      App.subs.data.subscribe('/admin/user', function(data) {
         self.$set('users', data);
       })
 
@@ -52,9 +52,9 @@ App.mvcObjs.admin_manage_users = {
   controllers: {
     save: async function(ev) {
       var self = this;
-      var user = this.$get('admin_user');
+      var user = this.$get('user');
       var userPK = this.$get('userPK');
-      var url = '/admin/admin_user';
+      var url = '/admin/user';
 
       App.modals.spinner.show();
       this.clearErrors();
@@ -73,7 +73,7 @@ App.mvcObjs.admin_manage_users = {
         }
       }      
 
-      ((userPK) ? io.put({admin_user: diffs}, url + '/' + userPK) : io.post({admin_user: user}, url))
+      ((userPK) ? io.put({user: diffs}, url + '/' + userPK) : io.post({user: user}, url))
       .then(function(res) {
         if (res.status == 200) {
           self.$set('toastMessage', 'User Saved');
@@ -102,7 +102,7 @@ App.mvcObjs.admin_manage_users = {
       this.clearErrors();
       App.modals.spinner.show();
       
-      io.delete({}, '/admin/admin_user/' + userPK)
+      io.delete({}, '/admin/user/' + userPK)
       .then(function(res) {
         if (res.status == 200) {
           self.$set('toastMessage', 'User Deleted');
@@ -132,7 +132,7 @@ App.mvcObjs.admin_manage_users = {
     },
     
     canClear: async function() {
-      var user = this.$get('admin_user');
+      var user = this.$get('user');
       var orig = this.$get('userOrig');
       var diffs = App.utils.object.diff(orig, user);
       var ret;
@@ -169,19 +169,19 @@ App.mvcObjs.admin_manage_users = {
     setUser: function(pk) {
       this.clearErrors();
 
-      this.$set('admin_user', this.getUserFromList(pk));
-      this.$set('userOrig', this.$get('admin_user'));
+      this.$set('user', this.getUserFromList(pk));
+      this.$set('userOrig', this.$get('user'));
     },
     
     setDefaults: function() {
-      var dflts = this.$get('defaults.admin_user');
+      var dflts = this.$get('defaults.user');
       
       for (var k in dflts) {
-        this.$set('admin_user.'+k, dflts[k]);
+        this.$set('user.'+k, dflts[k]);
       }
       
       this.$set('userPK', '');
-      this.$set('userOrig', this.$get('admin_user'));
+      this.$set('userOrig', this.$get('user'));
     },
     
     displayErrors: function(res) {

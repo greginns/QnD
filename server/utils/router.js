@@ -4,17 +4,12 @@ const {ResponseMessage} = require(root + '/server/utils/messages.js');
 var routePaths = []
 
 class Router {
-  /* opts {}
-    needLogin: T|F
-    redirect: URL
-    bypassUser: T|F
-  */
   constructor() {
   }
 
   static add(msg) {
     msg.path.forEach(function(p) {
-      routePaths.push({mpath: msg.method + this.app + this._stripSlashes(p), msg});
+      routePaths.push({mpath: msg.method + '/' + msg.app + this._stripSlashes(p), msg});
     }, this)  
   }
 
@@ -52,7 +47,9 @@ class Router {
   }
   
   static _stripSlashes(path) {
-    return path.toString().replace(/\/$/, '').replace(/^\//, '');
+    //return path.toString().replace(/\//g, '');
+    //return path.toString().replace(/\/$/, '').replace(/^\//, '');
+    return path.toString().replace(/\/$/, '');
   }
  
   static _getEntry(path) {
@@ -125,7 +122,7 @@ class RouterMessage {
       needCSRF: true,
       bypassUser: false,
       allowAnon: false,
-      authApp: 'login',
+      authApp: 'login',  // default to login app
       redirect: '',
     }
     
@@ -143,9 +140,9 @@ class RouterMessage {
     //  console.log(`No Path specified for ${this.method}`);
     //}
     
-    if (!this.app) {
-      console.log(`No App specified for ${this.method} ${this.path}`);
-    }
+    //if (!this.app) {
+    //  console.log(`No App specified for ${this.method} ${this.path}`);
+    //}
 
     if (!this.fn) {
       console.log(`No Function specified for ${this.method} ${this.app} ${this.path}`);

@@ -14,7 +14,7 @@ const migration = require(root + '/server/utils/migration.js');
 const {UserError, NunjucksError, InvalidUserError, JSONError} = require(root + '/server/utils/errors.js');
 const {TravelMessage} = require(root + '/server/utils/messages.js');
 const {Tenant, User, Session, CSRF} = require(root + '/apps/admin/models.js');
-const tenantUser = require(root + '/apps/login/models/models.js').User;
+const tenantUser = require(root + '/apps/login/models.js').User;
 const config = require(root + '/config.json');
 const pgschema = 'public';
 const appNames = [];
@@ -25,35 +25,37 @@ config.apps.forEach(function(app) {
   }
 })
 
-const writeMigFile = async function(file, json) {
-  var data = false
-  
-  try {
-    await fs.writeFile(file, JSON.stringify(json));
+const migFile = {
+  write: async function(file, json) {
+    var data = false
     
-    data = true;
-  }
-  catch(err) {
-    console.log(err)
-  }
-  
-  return data;
-}
+    try {
+      await fs.writeFile(file, JSON.stringify(json));
+      
+      data = true;
+    }
+    catch(err) {
+      console.log(err)
+    }
+    
+    return data;
+  },
 
-const deleteMigFile = async function(file) {
-  var rc = false
-  
-  try {
-    await fs.unlink(file);
+  delete: async function(file) {
+    var rc = false
     
-    rc = true;    
+    try {
+      await fs.unlink(file);
+      
+      rc = true;    
+    }
+    catch(err) {
+      console.log(err);
+    }
+    
+    return rc;
   }
-  catch(err) {
-    console.log(err);
-  }
-  
-  return rc;
-}
+};
 
 module.exports = {
   output: {
@@ -64,8 +66,8 @@ module.exports = {
       var tm = new TravelMessage();
       
       try {
-        nj = nunjucks.configure([root + '/apps/admin/views', root + '/apps', root + '/macros'], { autoescape: true });
-        tm.data = nj.render('admin.html', ctx);
+        nj = nunjucks.configure([root], { autoescape: true });
+        tm.data = nj.render('apps/admin/views/admin.html', ctx);
         tm.type = 'html';
       }  
       catch(err) {
@@ -87,15 +89,15 @@ module.exports = {
       rec = new CSRF({token: ctx.CSRFToken, user: req.user.code});
       tm = await rec.insertOne({pgschema});
 
-      ctx.Tenant = Tenant.getColumnDefns();
-      ctx.User = User.getColumnDefns();
+      ctx.tenant = Tenant.getColumnDefns();
+      ctx.user = User.getColumnDefns();
       ctx.dateFormat = 'MM/DD/YYYY';
       ctx.timeFormat = 'hh:mm A';
       ctx.TID = pgschema;
       
       try {
-        nj = nunjucks.configure([root + '/apps/admin/views', root + '/apps', root + '/client/macros', root + '/client/mvc', root + '/client/utils', root + '/server/utils'], { autoescape: true });
-        tm.data = nj.render('admin-manage.html', ctx);
+        nj = nunjucks.configure([root], { autoescape: true });
+        tm.data = nj.render('apps/admin/views/admin-manage.html', ctx);
         tm.type = 'html';
       }  
       catch(err) {
@@ -143,7 +145,7 @@ module.exports = {
       // create Session record 
       // setup cookies
       var match, tm, rec;
-      var url = config.logins.login || '';
+      var url = config.logins.admin || '';
 
       // user valid?
       tm = await User.selectOne({pgschema, cols: 'password', pks: body.username});
@@ -200,34 +202,49 @@ module.exports = {
     },
     
     insert: async function({rec = {}} = {}) {
-      var tm1, tm2, tm3, tobj, sql, sqlFK, jsonModels = {}, errs = [], verrs = [];
+      var tm1, tm2, tm3, tobj, sql;
       var tm = new TravelMessage();
-      var fks = [];
+
+      tobj = new Tenant(rec);
 
       // insert tenant row
-      tobj = new Tenant(rec);
       tm1 = await tobj.insertOne({pgschema});
-      
-      if (tm1.isBad()) return tm1; // insert failure, most likely schema validation failure
+      if (tm1.err.name == 'DataValidationError') return tm1;
+
+      if (tm1.isBad()) {
+        // insert failure, most likely exists already
+        await tobj.deleteOne({pgschema});
+        return tm1;
+      }
 
       // create schema
       sql = `CREATE SCHEMA IF NOT EXISTS "${rec.code}"`;
       tm2 = await sqlUtil.execQuery(sql);
       
-      if (tm2.isBad()) return tm2; // create schema error
+      if (tm2.isBad()) {
+        // create schema error
+        await tobj.deleteOne({pgschema});
+
+        return tm2; 
+      }
       
       // create empty migration files
       for (var app of appNames) {
-        let migrationFile = root + `/apps/${app}/models/migrations/${rec.code}.json`;
-        await writeMigFile(migrationFile, {});
+        let migrationFile = root + `/apps/${app}/migrations/${rec.code}.json`;
+
+        let res = await migFile.write(migrationFile, {});
       }
 
-      tm3 = await migration(rec.code);
+      tm3 = await migration({tenant: rec.code});
 
       if (tm3.status == 200) {
         // create admin user 
         var user = new tenantUser({code: 'admin', name: 'Administrator', password: 'Admin49!', email: rec.email, active: true});
         tm2 = await user.insertOne({pgschema: rec.code});
+      }
+      else {
+        console.log(tm3.data.errors._verify)
+        await tobj.deleteOne({pgschema});
       }
 
       return tm;
@@ -268,9 +285,9 @@ module.exports = {
       if (tm1.isBad()) return tm1;  // delete failure
 
       for (var app of appNames) {
-        let migrationFile = root + `/apps/${app}/models/migrations/${code}.json`;
+        let migrationFile = root + `/apps/${app}/migrations/${code}.json`;
 
-        deleteMigFile(migrationFile);
+        migFile.delete(migrationFile);
       }
       
       return tm;
@@ -316,12 +333,7 @@ module.exports = {
       tm = await Tenant.selectOne({pgschema, cols: '*', showHidden: true, pks: code});
       if (tm.isBad()) return tm;
 
-      return await migration(code);
+      return await migration({tenant: code});
     }    
   },
-  
-  test: function() {
-    var rec = new Tenant({});
-    console.log(rec)
-  }
 }

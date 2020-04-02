@@ -1,0 +1,233 @@
+<style>
+  .class1 {
+    font-size: 36px
+  }
+</style>
+<page id='bindings'>
+  <section>
+    <h4>Bindings</h4>
+    <a href='/filters'>Filters, Edits, and Roles</a>
+    <br>
+    <a href='/interfaces'>Interfaces</a>    
+    <div class='row'>
+      <div class='col-12 col-md-4 col-lg-6' id='bindings1'>
+mvc-value (input event)<input mvc-value='value1'>
+<br>
+Watched field (see console)
+<br><br>
+mvc-text <span mvc-text='value1'></span>
+<br><br>
+mvc-value (blur event) <input mvc-value='value2' mvc-event-type='blur'>
+<br>
+Watched field (see console)
+<br>
+mvc-class, mvc-html <span mvc-class='class' mvc-html='value2'></span>
+<br><br>
+Calculated field <span mvc-text='fullname'></span>
+<br><br>
+mvc-checked (radio) 
+<input type='radio' name='radio1' mvc-checked='radio' value='A'> A
+<input type='radio' name='radio1' mvc-checked='radio' value='B'> B 
+<input type='radio' name='radio1' mvc-checked='radio' value='C'> C
+<br><br>
+mvc-each, mvc-option 
+<select mvc-value='radio' mvc-each='radioSel'>
+  <option mvc-option='{value: "radioSel.$index.value", text: "radioSel.$index.text"}'></option>
+</select>
+<br><br>
+mvc-attr (Inspect element) <span mvc-attr='{"data-value": "attr.value"}'></span>
+<br><br>
+mvc-href <a mvc-href='http://www.google.com/search?q=${value1}' target='_temp'>Googley</a>
+<br><br>
+mvc-each, mvc-optgroup, $index
+<select mvc-value='opt' mvc-each='optgroup' mvc-index='$index1'>
+  <optgroup mvc-optgroup='optgroup.$index1.label' mvc-each='optgroup.$index1.items' mvc-index='$index2'>
+    <option mvc-option='{"text": "optgroup.$index1.items.$index2.text", "value": "optgroup.$index1.items.$index2.value"}'></option>
+  </optgroup>
+</select>
+<br><br>
+<button mvc-on='{click: "showModel"}'>
+  mvc-on
+</button>
+<button mvc-click='showModel'>
+  mvc-click
+</button>
+<br><br>
+<label>
+  mvc-checked (checkbox) 
+  <input type='checkbox' mvc-checked='checkbox'> 
+</label>
+<br><br>
+mvc-enabled <input mvc-enabled='checkbox'>
+mvc-disabled <input mvc-disabled='checkbox'>
+<br><br>
+mvc-show <span mvc-show='checkbox'>Show</span>
+mvc-hide <span mvc-hide='checkbox'>Hide</span>
+<br><br>
+mvc-if/else 
+<span mvc-if='checkbox'>
+  IF
+</span>
+<span mvc-else>
+  ELSE
+</span>
+      </div>
+    
+      <div class='col-12 col-lg-6' id='bindings2'>
+        <button mvc-click='showJS'>
+          Javascript
+        </button>
+        <button mvc-click='showHTML'>
+          HTML
+        </button>
+        
+        <pre mvc-show='showJS'>
+          <code mvc-text='js'>
+          </code>
+        </pre>
+
+        <pre mvc-show='showHTML'>
+          <code mvc-text='html'>
+          </code>
+        </pre>
+      </div>
+    </div>
+
+  </section>
+</page>
+
+<script id='bindingsClass'>
+class Bindings extends QnD.classes.MVC {
+  constructor(element) {
+    super(element);
+    
+    //this.init(); //  use if not in router
+  }
+
+  init() {
+    this.createModel();
+    
+    return new Promise(function(resolve) {
+      resolve();
+    })          
+  }
+  
+  inView(){
+  }
+
+  outView() {
+    return true;  
+  }
+
+  createModel() {
+    this.model.value1 = 'Greg';
+    this.model.value2 = 'Miller';
+    this.model.checkbox = true;
+    this.model.radio = 'B';
+    this.model.radioSel = [
+      {value: 'A', text: 'Choice-A'},
+      {value: 'B', text: 'Choice-B'},
+      {value: 'C', text: 'Choice-C'}
+    ]
+    this.model.class = ['class1'];
+    this.model.attr = {'value': '43'};
+    this.model.optgroup = [
+      {
+        label: 'Group-1', 
+        items: [
+          {value: '11', text: 'Item-11'}, 
+          {value: '12', text: 'Item-12'}, 
+          {value: '13', text: 'Item-13'}
+        ]
+      },
+      {
+        label: 'Group-2', 
+        items: [
+          {value: '21', text: 'Item-21'}, 
+          {value: '22', text: 'Item-22'}, 
+          {value: '23', text: 'Item-23'}
+        ]
+      },
+      {
+        label: 'Group-3', 
+        items: [
+          {value: '31', text: 'Item-31'}, 
+          {value: '32', text: 'Item-32'}, 
+          {value: '33', text: 'Item-33'}
+        ]
+      }
+    ];
+    this.model.opt = '22';
+
+    this.$addWatched('value1', this.watcher.bind(this));
+    this.$addWatched('value2', this.watcher.bind(this));
+
+    this.$addCalculated('fullname', "this.model.value1 + ' ' + this.model.value2");
+  }
+
+  watcher(nv, ov) {
+    console.log(nv)
+  }
+
+  showModel() {
+    this.$display(this.model);
+  }
+
+  showAttr(ev) {
+    console.log(ev.target.getAttribute('data-value'));
+  }
+}
+</script>
+
+<script id='bindingsClass2'>
+  class Bindings2 extends QnD.classes.MVC {
+    constructor(element) {
+      super(element);
+      
+      //this.init(); //  use if not in router
+    }
+
+    init() {
+      this.createModel();
+      
+      return new Promise(function(resolve) {
+        resolve();
+      })          
+    }
+    
+    inView(){
+    }
+
+    outView() {
+      return true;  
+    }
+
+    createModel() {
+      this.model.showJS = true;
+      this.model.showHTML = false;
+      this.model.js = document.getElementById('bindingsClass').innerText;     
+      this.model.html =  document.getElementById('bindings1').innerHTML;                 
+    }
+
+    showJS() {
+      this.model.showJS = true;
+      this.model.showHTML = false;
+    }
+
+    showHTML() {
+      this.model.showJS = false;
+      this.model.showHTML = true;
+    }    
+  }
+
+  var t1 = new Bindings('bindings1');
+  var section1 = new QnD.classes.Section({mvc: t1});
+
+  var t2 = new Bindings2('bindings2');
+  var section2 = new QnD.classes.Section({mvc: t2});
+
+  var el = document.getElementById('bindings');
+  var page = new QnD.classes.Page({el, path: 'bindings', title: 'Bindings', sections: [section1, section2]});
+
+  QnD.pages.push(page);
+</script>      

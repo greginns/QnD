@@ -24,7 +24,7 @@ class TravelMessage {
     var encoding = null;
     var ct;
 
-    if (status == 200 || (status == 400 && !this.err)) {
+    if (status == 200 || (status == 400 && this.data)) {
       if (this.type == 'json') {
         data = JSON.stringify(data);
         ct = 'application/json';

@@ -1,0 +1,203 @@
+<style>
+</style>
+
+<page id='interfaces'>
+  <section>
+    <h4>Interfaces</h4>
+    <a href='/bindings'>Bindings</a>
+    <br>
+    <a href='/filters'>Filters, Edits, and Roles</a>
+
+    <div class='row'>
+      <div class='col-12 col-lg-4' id='interfaces1'>
+<input mvc-value='date' mvc-role='date' id='date-input'>
+<button mvc-click='date:boot' for='date-input'>
+  Calendar
+</button>
+<br><br>
+<input mvc-value='time' mvc-role='time' id='time-input'>
+<button mvc-click='time:boot' for='time-input'>
+  Calendar
+</button>  
+<br><br>
+<button mvc-click='multi'>
+  Multi Select
+</button>
+<br><br>
+<button mvc-click='single'>
+  Single Select
+</button>
+<br><br>
+<button mvc-click='alert'>
+  Alert
+</button>
+<br><br>
+<button mvc-click='confirm'>
+  Confirm
+</button>
+<br><br>
+<button mvc-click='prompt'>
+  Prompt
+</button>
+      </div>
+
+      <div class='col-12 col-lg-8' id='interfaces2'>
+        <button mvc-click='showJS'>
+          Javascript
+        </button>
+        <button mvc-click='showHTML'>
+          HTML
+        </button>
+        
+        <pre mvc-show='showJS'>
+          <code mvc-text='js'>
+          </code>
+        </pre>
+
+        <pre mvc-show='showHTML'>
+          <code mvc-text='html'>
+          </code>
+        </pre>
+      </div>
+    </div>
+  </section>
+</page>
+
+<script id='interfaceClass'>
+class Interfaces extends QnD.classes.MVC {
+  constructor(element) {
+    super(element);
+    
+    //this.init(); //  use if not in router
+  }
+
+  init() {
+    this.createModel();
+    
+    return new Promise(function(resolve) {
+      resolve();
+    })          
+  }
+  
+  inView(){
+  }
+
+  outView() {
+    return true;  
+  }
+
+  createModel() {
+    this.model.date = (new Date).toJSON();
+    this.model.time = (new Date).toJSON();
+    this.model.optgroup = [
+      {
+        label: 'Group-1', 
+        items: [
+          {value: '11', text: 'Item-11'}, 
+          {value: '12', text: 'Item-12'}, 
+          {value: '13', text: 'Item-13'}
+        ]
+      },
+      {
+        label: 'Group-2', 
+        items: [
+          {value: '21', text: 'Item-21'}, 
+          {value: '22', text: 'Item-22'}, 
+          {value: '23', text: 'Item-23'}
+        ]
+      },
+      {
+        label: 'Group-3', 
+        items: [
+          {value: '31', text: 'Item-31'}, 
+          {value: '32', text: 'Item-32'}, 
+          {value: '33', text: 'Item-33'}
+        ]
+      }
+    ];
+  }
+
+  async multi() {
+    let ret = await QnD.widgets.multisel.select('Multi Select Example', this.model.optgroup, []);
+    console.log('returned',ret);
+  }
+
+  async single() {
+    let ret = await QnD.widgets.singlesel.select('Single Select Example', this.model.optgroup, '');
+    console.log('returned',ret)
+  }
+
+  async alert() {
+    let ret = await QnD.widgets.modal.alert('Yo!');
+    console.log(ret)
+  }
+
+  async confirm() {
+    let ret = await QnD.widgets.modal.confirm('Yo!');
+    console.log(ret)
+  }
+
+  async prompt() {
+    try {
+      let ret = await QnD.widgets.modal.prompt('Yo!');
+      console.log(ret)
+    }
+    catch(err) {
+      console.log('rejected', err)
+    }
+  }
+}
+</script>
+
+<script id='interfaceClass2'>
+  class Interfaces2 extends QnD.classes.MVC {
+    constructor(element) {
+      super(element);
+      
+      //this.init(); //  use if not in router
+    }
+
+    init() {
+      this.createModel();
+      
+      return new Promise(function(resolve) {
+        resolve();
+      })          
+    }
+    
+    inView(){
+    }
+
+    outView() {
+      return true;  
+    }
+
+    createModel() {
+      this.model.showJS = true;
+      this.model.showHTML = false;
+      this.model.js = document.getElementById('interfaceClass').innerText;     
+      this.model.html =  document.getElementById('interfaces1').innerHTML;     
+    }
+
+    showJS() {
+      this.model.showJS = true;
+      this.model.showHTML = false;
+    }
+
+    showHTML() {
+      this.model.showJS = false;
+      this.model.showHTML = true;
+    }    
+  }
+
+  var t1 = new Interfaces('interfaces1');
+  var section1 = new QnD.classes.Section({mvc: t1});
+
+  var t2 = new Interfaces2('interfaces2');
+  var section2 = new QnD.classes.Section({mvc: t2});
+
+  var el = document.getElementById('interfaces');
+  var page = new QnD.classes.Page({el, path: 'interfaces', title: 'Interfaces', sections: [section1, section2]});
+      
+  QnD.pages.push(page);    
+</script>      

@@ -29,6 +29,7 @@ const Department = class extends Model {
       orderBy: ['name'],
       
       dbschema: 'tenant',
+      app
     }
   }
 };
@@ -67,6 +68,7 @@ const Employee =  class extends Model {
       orderBy: ['last', 'first'],
       
       dbschema: 'tenant',
+      app
     }
   }
 };
@@ -102,6 +104,7 @@ const Workcode = class extends Model {
       orderBy: ['desc'],
       
       dbschema: 'tenant',
+      app
     }
   }
 };
@@ -129,6 +132,7 @@ const Empwork = class extends Model {
       orderBy: ['employee', 'workcode'],
       
       dbschema: 'tenant',
+      app
     }
   }
 };
@@ -180,6 +184,7 @@ const Work = class extends Model {
       orderBy: ['employee', '-sdate', '-stime', '-etime'],
       
       dbschema: 'tenant',
+      app
     }
   }
 };
@@ -210,6 +215,7 @@ const Payroll = class extends Model {
       orderBy: ['-sdate'],
       
       dbschema: 'tenant',
+      app
     }
   }
 };

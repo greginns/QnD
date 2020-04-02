@@ -29,13 +29,13 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6 col-sm-3'>
-                {{ fields.Char(type='text', id=admin_tenant.code.id, maxlength=admin_tenant.code.maxLength, mvc_value='admin_tenant.code', mvc_disabled='this.$get("tenantPK")', label=admin_tenant.code.verbose) }}
+                {{ fields.Char(type='text', id=tenant.code.id, maxlength=tenant.code.maxLength, mvc_value='tenant.code', mvc_disabled='this.$get("tenantPK")', label=tenant.code.verbose) }}
               </div>
               
               <div class='col-sm-1'></div>
               
               <div class='col-12 col-sm-4'>
-                {{ fields.Boolean(id=admin_tenant.active.id, mvc_checked='admin_tenant.active', label=admin_tenant.active.verbose) }}
+                {{ fields.Boolean(id=tenant.active.id, mvc_checked='tenant.active', label=tenant.active.verbose) }}
               </div>
               
             </div>            
@@ -44,47 +44,47 @@
           <div class='card-body'>
             <div class='row form-group'>
               <div class='col-sm-6'>
-                {{ fields.Char(type='text', id=admin_tenant.coname.id, maxlength=admin_tenant.coname.maxLength, mvc_value='admin_tenant.coname', label=admin_tenant.coname.verbose) }}
+                {{ fields.Char(type='text', id=tenant.coname.id, maxlength=tenant.coname.maxLength, mvc_value='tenant.coname', label=tenant.coname.verbose) }}
               </div>
             </div>
             
             <div class='row form-group'>
               <div class='col-12 col-sm-6'>
-                {{ fields.Char(type='text', id=admin_tenant.first.id, maxlength=admin_tenant.first.maxLength, mvc_value='admin_tenant.first', label=admin_tenant.first.verbose) }}
+                {{ fields.Char(type='text', id=tenant.first.id, maxlength=tenant.first.maxLength, mvc_value='tenant.first', label=tenant.first.verbose) }}
               </div>
 
               <div class='col-12 col-sm-6'>
-                {{ fields.Char(type='text', id=admin_tenant.last.id, maxlength=admin_tenant.last.maxLength, mvc_value='admin_tenant.last', label=admin_tenant.last.verbose) }}
+                {{ fields.Char(type='text', id=tenant.last.id, maxlength=tenant.last.maxLength, mvc_value='tenant.last', label=tenant.last.verbose) }}
               </div>
             </div>
             
             <div class='row form-group'>
               <div class='col-12 col-sm-6'>
-                {{ fields.Char(type='text', id=admin_tenant.address.id, maxlength=admin_tenant.address.maxLength, mvc_value='admin_tenant.address', label=admin_tenant.address.verbose) }}
+                {{ fields.Char(type='text', id=tenant.address.id, maxlength=tenant.address.maxLength, mvc_value='tenant.address', label=tenant.address.verbose) }}
               </div>
 
               <div class='col-12 col-sm-6'>
-                {{ fields.Char(type='text', id=admin_tenant.city.id, maxlength=admin_tenant.city.maxLength, mvc_value='admin_tenant.city', label=admin_tenant.city.verbose) }}
+                {{ fields.Char(type='text', id=tenant.city.id, maxlength=tenant.city.maxLength, mvc_value='tenant.city', label=tenant.city.verbose) }}
               </div>
             </div>
             
             <div class='row form-group'>
               <div class='col-12 col-sm-6'>
-                {{ fields.Char(type='text', id=admin_tenant.state.id, maxlength=admin_tenant.state.maxLength, mvc_value='admin_tenant.state', label=admin_tenant.state.verbose) }}
+                {{ fields.Char(type='text', id=tenant.state.id, maxlength=tenant.state.maxLength, mvc_value='tenant.state', label=tenant.state.verbose) }}
               </div>
 
               <div class='col-12 col-sm-6'>
-                {{ fields.Char(type='text', id=admin_tenant.zipcode.id, maxlength=admin_tenant.zipcode.maxLength, mvc_value='admin_tenant.zipcode', label=admin_tenant.zipcode.verbose) }}
+                {{ fields.Char(type='text', id=tenant.zipcode.id, maxlength=tenant.zipcode.maxLength, mvc_value='tenant.zipcode', label=tenant.zipcode.verbose) }}
               </div>
             </div>
             
             <div class='row'>
               <div class='col-12 col-sm-6'>
-                {{ fields.Char(type='text', id=admin_tenant.phone.id, maxlength=admin_tenant.phone.maxLength, mvc_value='admin_tenant.phone', label=admin_tenant.phone.verbose) }}
+                {{ fields.Char(type='text', id=tenant.phone.id, maxlength=tenant.phone.maxLength, mvc_value='tenant.phone', label=tenant.phone.verbose) }}
               </div>
 
               <div class='col-12 col-sm-6'>
-                {{ fields.Char(type='text', id=admin_tenant.email.id, maxlength=admin_tenant.email.maxLength, mvc_value='admin_tenant.email', label=admin_tenant.email.verbose) }}
+                {{ fields.Char(type='text', id=tenant.email.id, maxlength=tenant.email.maxLength, mvc_value='tenant.email', label=tenant.email.verbose) }}
               </div>
             </div>
           </div>  

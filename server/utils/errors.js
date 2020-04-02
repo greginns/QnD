@@ -72,6 +72,17 @@ class JSONError extends Error {
   }
 }
 
+class DataValidationError extends Error {
+  constructor(params) {
+    super(params);
+
+    this.name = 'DataValidationError';
+    this.message = 'Data Validation Error';
+    this.status = 400;
+    this.type = 'json';
+  }
+}
+
 class SQLInsertError extends Error {
   constructor(params) {
     super(params);
@@ -216,6 +227,7 @@ module.exports = {
   SystemError,
   NunjucksError,
   JSONError,
+  DataValidationError,
   SQLError,
   SQLInsertError,
   SQLUpdateError,

@@ -1,0 +1,233 @@
+<style>
+  #mvc-boot-singlesel span.text-danger, #mvc-boot-singlesel li.text-danger > span {
+    cursor: not-allowed !important;
+  }
+
+  #mvc-boot-singlesel span:not(.text-danger), #mvc-boot-singlesel li:not(.text-danger) > span {
+    cursor: pointer
+  }
+</style>
+
+<div id='mvc-boot-singlesel' class="modal fade" role="dialog" style='z-index: 1100' data-backdrop="static">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class='modal-title'>
+          <span mvc-text='title'></span>
+        </h5>
+        <div class='text-right'>
+          <input type='text' mvc-value='search' list='mvc-multi-search' placeholder='Search' mvc-on='{input: "search"}'>
+        </div>
+        <datalist id='mvc-multi-search' mvc-each='datalist'>
+          <option mvc-option='{value: "datalist.$index.value"}'></option>
+        </datalist>
+      </div>
+
+      <div class="modal-body">
+        <div class='row' mvc-each='groups'>
+          <div class='col-12  col-md-4'>
+            <div class='card mb-2'>
+              <div class='card-header'>
+                <span mvc-text='groups.$index.label' mvc-class='groups.$index.klass'></span>
+              </div>
+              <div class='card-body' style='max-height: 300px; overflow-y: scroll'>
+                <ul class='list-group list-group-flush' mvc-each='groups.$index.items' mvc-index='$index1'>
+                  <li class='list-group-item' style='padding: 0px' mvc-class='groups.$index.items.$index1.klass'>
+                    <span mvc-text='groups.$index.items.$index1.text' mvc-attr = '{"data-value": "groups.$index.items.$index1.value"}' mvc-click='iclick'></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class='modal-footer'>
+        <button class='btn btn-success' mvc-click='accept'>
+          Accept
+        </button>
+        <button class='btn btn-danger' mvc-click='cancel'>
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  (function() {
+    var contextClasses, contextWidgets;
+    
+    if ('QnD' in window) {
+      contextClasses = window.QnD.classes;
+      contextWidgets = window.QnD.widgets;
+    } 
+    else {
+      contextClasses = window;
+      contextWidgets = window;
+    }
+    
+    class Singlesel extends contextClasses.MVC {
+      constructor() {
+        super('mvc-boot-singlesel');
+
+        this.modal = document.getElementById(this._element);
+      }
+
+      select(title, groups, value) {
+        this.model.title = title;
+        this.value = value;
+        this.model.datalist = [];
+
+        // clean up, enhance groups.
+        for (var g=0; g<groups.length; g++) {
+          if (!('active' in groups[g])) groups[g].active = true;
+
+          groups[g].klass = (groups[g].active) ? '' : ['text-danger'];
+
+          for (var i=0; i<groups[g].items.length; i++) {
+            if (!('active' in groups[g].items[i])) groups[g].items[i].active = true;
+
+            if (!groups[g].active) {
+              groups[g].items[i].active = false;
+            }
+
+            if (!groups[g].items[i].active) {
+              groups[g].items[i].selected = false;
+            }
+            else if (value == groups[g].items[i].value) {
+              groups[g].items[i].selected = true;
+
+            }
+            else {
+              groups[g].items[i].selected = false;
+            }
+
+            groups[g].items[i].klass = (groups[g].items[i].active) ? (groups[g].items[i].value == value) ? 'active' : '' : ['disabled', 'text-danger'];
+          }
+        }
+
+        this.model.groups = groups;
+
+        // make datalist
+        for (var g=0; g<groups.length; g++) {
+          for (var i=0; i<groups[g].items.length; i++) {
+            if (groups[g].items[i].active) {
+              this.model.datalist.push({value: `[${groups[g].items[i].value}] ${groups[g].items[i].text}`, dval: groups[g].items[i].value});
+            }
+          }
+        }
+
+        this._modalOpen();
+        
+        return new Promise(function(resolve) {
+          this.resolve = resolve;
+        }.bind(this));
+      }
+
+      iclick(ev) {
+        var el = ev.target;
+        var value = el.getAttribute('data-value');
+
+        this.selectByValue(value);
+      }
+
+      search() {
+        var sch = this.model.search;
+        var value;
+
+        if (!sch) return;
+
+        for (var i=0; i<this.model.datalist.length; i++) {
+          if (this.model.datalist[i].value == sch) {
+            value = this.model.datalist[i].dval;
+            break;
+          }
+        }
+
+        if (!value) return;
+
+        this.selectByValue(value);
+        this.model.search = '';
+      }
+
+      selectByValue(value) {
+        for (var g=0; g<this.model.groups.length; g++) {
+          for (var i=0; i<this.model.groups[g].items.length; i++) {
+            if (this.model.groups[g].items[i].active) {
+              if (this.model.groups[g].items[i].value == value) {
+                if (this.model.groups[g].items[i].selected) {
+                  this.model.groups[g].items[i].selected = false;
+                  this.model.groups[g].items[i].klass = '';
+                }
+                else {
+                  this.model.groups[g].items[i].selected = true;
+                  this.model.groups[g].items[i].klass = 'active';
+                }
+              }
+              else {
+                this.model.groups[g].items[i].selected = false;
+                this.model.groups[g].items[i].klass = '';
+              }
+            }
+          }
+        };
+      }
+
+      accept() {
+        var res = '';
+
+        // extract values
+        for (var g=0; g<this.model.groups.length; g++) {
+          for (var i=0; i<this.model.groups[g].items.length; i++) {
+            if (this.model.groups[g].items[i].selected) {
+              res = this.model.groups[g].items[i].value;
+              break;
+            }
+          }
+        };
+
+        this.close();
+        this.resolve(res);
+      }
+
+      cancel() {
+        this.close();
+        this.resolve(this.value);
+      }
+
+      close() {
+        this._modalClose();
+      }
+      
+      _modalOpen() {
+        this.modal.className="modal fade show";
+        this.modal.style.display = 'block';
+        this.modal.style['padding-right'] = '17px';
+
+        document.body.className = 'modal-open';
+        document.body.style['padding-right'] = '17px';
+
+        this.backdropDiv = document.createElement('div');
+        this.backdropDiv.className='modal-backdrop fade show';
+        document.body.appendChild(this.backdropDiv);
+      }
+
+      _modalClose() {
+        this.modal.className="modal fade";
+        this.modal.style.display = 'none';
+        this.modal.style['padding-right'] = '0px';
+
+        document.body.style['padding-right'] = '0px'
+        document.body.className = '';
+        this.backdropDiv.remove();
+      }      
+    }
+    
+    contextClasses.Singlesel = Singlesel;
+    contextWidgets.singlesel = new contextClasses.Singlesel();
+    /*
+      QnD.widgets.singlesel.select(title, groups, values)
+    */
+  })();
+</script>
