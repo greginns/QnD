@@ -56,17 +56,19 @@ mvc-role='dollar' <input mvc-role='dollar' mvc-value='dollar'>
       </div>
     
       <div class='col-12 col-lg-6' id='filters2'>
-        <button mvc-click='showJS'>
-          Javascript
-        </button>
-        <button mvc-click='showHTML'>
-          HTML
-        </button>
+        <p>
+          <button mvc-click='showJS'>
+            Javascript
+          </button>
+          <button mvc-click='showHTML'>
+            HTML
+          </button>
+        </p>
         
-        <pre mvc-show='showJS'>
-          <code mvc-text='js'>
-          </code>
-        </pre>
+  <pre mvc-show='showJS'>
+    <code mvc-text='js'>
+    </code>
+  </pre>
 
         <pre mvc-show='showHTML'>
           <code mvc-text='html'>
@@ -77,103 +79,3 @@ mvc-role='dollar' <input mvc-role='dollar' mvc-value='dollar'>
 
   </section>
 </page>
-
-<script id='filtersClass'>
-class Filters extends QnD.classes.MVC {
-  constructor(element) {
-    super(element);
-    
-    //this.init(); //  use if not in router
-  }
-
-  init() {
-    this.createModel();
-    
-    return new Promise(function(resolve) {
-      resolve();
-    })          
-  }
-  
-  inView(){
-  }
-
-  outView() {
-    return true;  
-  }
-
-  createModel() {
-    this.model.value1='Greg';
-    this.model.pass='Password';
-    this.model.date = new Date().toJSON();
-    this.model.time = new Date().toJSON();
-    this.model.step = 4;
-    this.model.integer = 5;
-    this.model.floatpos = 42.7;
-    this.model.float = -14.5;
-    this.model.dollar = 1.475;
-  }
-
-  showJS() {
-    this.model.showJS = true;
-    this.model.showHTML = false;
-  }
-
-  showHTML() {
-    this.model.showJS = false;
-    this.model.showHTML = true;
-  }    
-}
-</script>
-
-<script id='filtersClass2'>
-  class Filters2 extends QnD.classes.MVC {
-    constructor(element) {
-      super(element);
-      
-      //this.init(); //  use if not in router
-    }
-
-    init() {
-      this.createModel();
-      
-      return new Promise(function(resolve) {
-        resolve();
-      })          
-    }
-    
-    inView(){
-    }
-
-    outView() {
-      return true;  
-    }
-
-    createModel() {
-      this.model.showJS = true;
-      this.model.showHTML = false;
-      this.model.js = document.getElementById('filtersClass').innerText;     
-      this.model.html =  document.getElementById('filters1').innerHTML;           
-    }
-
-    showJS() {
-      this.model.showJS = true;
-      this.model.showHTML = false;
-    }
-
-    showHTML() {
-      this.model.showJS = false;
-      this.model.showHTML = true;
-    }    
-  }
-
-  var t1 = new Filters('filters1');
-  var section1 = new QnD.classes.Section({mvc: t1});
-
-  var t2 = new Filters2('filters2');
-  var section2 = new QnD.classes.Section({mvc: t2});
-
-  var el = document.getElementById('filters');
-  var page = new QnD.classes.Page({el, path: 'filters', title: 'Filters, Edits, and Roles', sections: [section1, section2]});
-      
-  QnD.pages.push(page);    
-</script id='FilterClass'>      

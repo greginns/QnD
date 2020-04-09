@@ -1,4 +1,13 @@
-var ga;
+// NEED:
+// set csrf token in io
+
+//;window['QnD'] = {};
+//import {MVC} from '/static/apps/static/js/mvc.js';
+//import {Router, Pages, Page, Section} from '/static/apps/static/js/router.js';
+//import {WSDataComm, TableStore, TableView} from '/static/apps/static/js/data.js';
+//import {io} from '/static/apps/static/js/iofetch.js';
+//import {utils} from '/static/apps/static/js/utils.js';
+
 var QnD = {};
 
 QnD.classes = {};
@@ -16,21 +25,25 @@ QnD.pages = [];
 //QnD.subs = {};
 //QnD.tables = {};
 //QnD.tableData = {};
-QnD.utils = {object: {}};
 QnD.widgets = {};
 
 QnD.dateFormat = 'YYYY-MM-DD';
 QnD.timeFormat = 'h:mm A';
 
 /*
-QnD.constants.dateFormat = {
-	moment: 'YYYY-MM-DD',
-	QnD:  'YYYY-MM-DD',
-	nice: 'MMM Do, YYYY',
-	long: 'dddd, MMMM Do, YYYY',
-	time: 'h:mm A',
-};
+QnD.classes.MVC = MVC;
+QnD.classes.Router = Router;
+QnD.classes.Pages = Pages;
+QnD.classes.Page = Page;
+QnD.classes.Section = Section;
+QnD.classes.WSDataComm = WSDataComm;
+QnD.classes.TableStore = TableStore;
+QnD.classes.TableView = TableView;
+QnD.io = io;
+QnD.utils = utils;
+*/
 
+/*
 QnD.config.EE = {
 	email: 'info@wildanimaltracks.com',
 	name: 'Greg Miller',
@@ -38,39 +51,6 @@ QnD.config.EE = {
 	url: 'https://api.elasticemail.com/v2/',
 };
 */
-
-QnD.utils.escapeRegExp = function(string) {
-  return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-};
-
-QnD.utils.camelCase = function(string) {
-  return string.substr(0,1).toUpperCase() + string.substr(1);
-};
-
-QnD.utils.object.isObject = function(a) {
-  if (!a) return false;
-    return (a) && (a.constructor === Object);
-};
-    
-QnD.utils.object.diff = function(obj1, obj2) {
-  // old vs new, return diffs
-  var diffs = {};
-  
-  Object.keys(obj1).forEach(function(k) {
-    if (! (k in obj2)) {
-      diffs[k] = '';
-    }
-    else if (obj1[k] != obj2[k]) {
-      diffs[k] = obj2[k];
-    }
-  })
-  
-  Object.keys(obj2).forEach(function(k) {
-    if (! (k in obj1)) diffs[k] = obj2[k];
-  })
-  
-  return diffs;
-};
 
 //var nwio = {{nwio}}
 //console.log(nwio.fred())
@@ -144,3 +124,5 @@ window.roam3_focusOnOpener = function() {
   }
 }
 */
+
+export {QnD};

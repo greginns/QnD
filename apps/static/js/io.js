@@ -4,8 +4,15 @@ var io = {
   _formatURL: function(url, params) {
     // NOTE `_.pickBy(params, _.negate(_.isNil))` removes undefined/null entries
     // so you don't have to worry about `undefined` getting coerced to a string
-    // https://medium.com/cameron-nokes/4-common-mistakes-front-end-developers-make-when-using-fetch-1f974f9d1aa1    
-    return url + '?' + new URLSearchParams(_.pickBy(params, _.negate(_.isNil))).toString();
+    // https://medium.com/cameron-nokes/4-common-mistakes-front-end-developers-make-when-using-fetch-1f974f9d1aa1
+    //return url + '?' + new URLSearchParams(_.pickBy(params, _.negate(_.isNil))).toString();
+    let p2 = {};
+
+    for (let [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) p2[key] = value;
+    }
+    
+    return url + '?' + new URLSearchParams(p2).toString();
   },
   
   _login: function(orig) {
@@ -38,7 +45,7 @@ var io = {
     })
   },
   
-  fetch: function({method='GET', url = '', data = '', type='text'} = {}) {
+  _fetch: function({method='GET', url = '', data = '', type='text'} = {}) {
     var orig = {method, url, data, type};
     var ret = {data: '', 'Content-type': '', status: 200};
     var init = {headers: {'X-CSRF-TOKEN': io.CSRFToken}};
@@ -104,18 +111,20 @@ var io = {
   },
   
   get: function(params, url) {
-    return io.fetch({method: 'GET', url: url, data: params, type: 'json'});
+    return io._fetch({method: 'GET', url: url, data: params, type: 'json'});
   },
     
   post: function(params, url) {
-    return io.fetch({method: 'POST', url: url, data: params, type: 'json'});
+    return io._fetch({method: 'POST', url: url, data: params, type: 'json'});
   },
   
   put: function(params, url) {
-    return io.fetch({method: 'PUT', url: url, data: params, type: 'json'});
+    return io._fetch({method: 'PUT', url: url, data: params, type: 'json'});
   },
   
   delete: function(params, url) {
-    return io.fetch({method: 'DELETE', url: url, data: params, type: 'json'});
+    return io._fetch({method: 'DELETE', url: url, data: params, type: 'json'});
   },  
 }
+
+export {io};

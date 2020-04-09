@@ -35,6 +35,12 @@ class TravelMessage {
       else if (this.type == 'html') {
         ct = 'text/html';
       }
+      else if (this.type == 'js') {
+        ct = 'application/javascript';
+      }
+      else if (this.type == 'css') {
+        ct = 'text/css; charset=utf-8';
+      }
       else if (this.type == 'icon') {
         ct = 'image/x-icon';
         encoding = 'binary';

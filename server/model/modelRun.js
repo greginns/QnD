@@ -113,8 +113,9 @@ class Model extends ModelBase {
         tm.err = new RowNotInsertedError();
       }
       else {
+        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '+', rows: tm.data});
+
         tm.data = tm.data[0];
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`);
       }
     }
 
@@ -151,8 +152,9 @@ class Model extends ModelBase {
       }
       else {
         //tm.data = tcon.construct(tm.data)[0];
+        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '*', rows: tm.data});
+
         tm.data = tm.data[0];
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`);
       }
     }
     
@@ -185,8 +187,9 @@ class Model extends ModelBase {
       }
       else {
         //tm.data = tcon.construct(tm.data)[0];
+        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '*', rows: tm.data});
+
         tm.data = tm.data[0];
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`);
       }
     }
     
@@ -216,8 +219,9 @@ class Model extends ModelBase {
       }
       else {
         //tm.data = tcon.construct(tm.data)[0];  // return back model instance
+        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '-', rows: tm.data});
+
         tm.data = tm.data[0];
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`);
       }
     }
     
@@ -327,7 +331,7 @@ class Model extends ModelBase {
       }
     }
     
-    modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`);    
+    modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '+', rows: tm.data});    
 
     return tmx;
   }
@@ -378,7 +382,7 @@ class Model extends ModelBase {
       }
     }
     
-    modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`);    
+    modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '*', rows: tm.data});    
 
     return tmx;    
   }
@@ -409,7 +413,7 @@ class Model extends ModelBase {
       }
       else {
         //tm.data = tcon.construct(tm.data);
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`);
+        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '-', rows: tm.data});
       }
     }
     

@@ -1,4 +1,5 @@
 const root = process.cwd();
+const fs = require('fs').promises;
 const {TravelMessage} = require(root + '/server/utils/messages.js');
 const {Router, RouterMessage} = require(root + '/server/utils/router.js');
 const {Error404} = require(root + '/server/utils/errors.js');
@@ -12,13 +13,13 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false}
+  options: {needLogin: false, bypassUser: true, authApp: ''}
 }));
 
 Router.add(new RouterMessage({
   method: 'get',
   app: '',
-  path: '/favicon.ico', 
+  path: 'favicon.ico', 
   fn: async function(req, res) {
     var tm = new TravelMessage();
 
@@ -29,8 +30,8 @@ Router.add(new RouterMessage({
     catch(err) {
       tm.err = new Error404();
     }
-    
+
     return tm.toResponse();
   }, 
-  options: {needLogin: false, bypassUser: true}
+  options: {needLogin: false, bypassUser: true, authApp: ''}
 }));

@@ -16,7 +16,7 @@ class Router {
   static async go(req, res) {
     var path = req.method + this._stripSlashes(req.parsedURL.pathname);
     var [entry, params] = this._getEntry(path);
-
+console.log(path)
     //if (!entry) {  
       //var entry, params; // weird error if entry and params == false  "TypeError: Cannot set property 'false' of undefined"
       // no match, use 404 page if exists
@@ -61,8 +61,6 @@ class Router {
     var x = path.split('?');
     var parts = x[0].split('/');
 
-console.log(path)
-    
     if (parts[parts.length - 1] == '') parts.pop();
     var sch = (x.length > 1) ? x[1].split('&') : [];
 
@@ -96,7 +94,6 @@ console.log(path)
 
     return [false, false];
   }
-
 }
 
 class RouterMessage {

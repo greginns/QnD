@@ -1,7 +1,7 @@
-{% extends "../../base.html" %}
+{% extends "apps/base.html" %}
 
 {% block title %}
-  Payroll
+  QnD
 {% endblock %}
 
 {% block css %}
@@ -10,7 +10,8 @@
 {% endblock %}
 
 {% block script %}
-  <!--script type="text/javascript" src="https://static.roam3hosting.com/js/node/dymo.js"></!--script-->
+  <script type="module">
+  </script>
 
   <script type="text/javascript">
   </script>
@@ -22,19 +23,21 @@
       {% include "./bindings.html" %}
       {% include "./filters.html" %}
       {% include "./interfaces.html" %}
+      {% include "./data.html" %}
     </div>
   </div>
 
-  {% include "../../../client/mvc-addons/modals.html" %}
-  {% include "../../../client/mvc-addons/mdate.html" %}
-  {% include "../../../client/mvc-addons/mtime.html" %}
-  {% include "../../../client/mvc-addons/multisel.html" %}
-  {% include "../../../client/mvc-addons/singlesel.html" %}
-
+  {% include "client/mvc-addons/modals.html" %}
+  {% include "client/mvc-addons/mdate.html" %}
+  {% include "client/mvc-addons/mtime.html" %}
+  {% include "client/mvc-addons/multisel.html" %}
+  {% include "client/mvc-addons/singlesel.html" %}
 {% endblock %}
 
 {% block init %}
+<script type="module" src="/static/apps/test/views/module.js">
+</script>
+
 <script type="text/javascript">
-  {% include "./test.js" %}
 </script>
 {% endblock %}

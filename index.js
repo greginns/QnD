@@ -18,11 +18,12 @@ const WSclients = new Map();
 
 require(root + '/server/routes/routes.js');  // process system routes.
 
-//config.apps.forEach(function(app) {
-//  require(root + `/apps/${app}/routes.js`);  // process app routes.
-//})
-require(root + `/apps/admin/routes.js`);  // process app routes.
-require(root + `/apps/test/routes.js`);  // process app routes.
+for (app of config.apps) {
+  require(root + `/apps/${app}/routes.js`);  // process app routes.
+};
+//require(root + `/apps/static/routes.js`);  // process app routes.
+//require(root + `/apps/admin/routes.js`);  // process app routes.
+//require(root + `/apps/test/routes.js`);  // process app routes.
 
 process
 .on('unhandledRejection', (reason, rej) => {
@@ -73,7 +74,8 @@ server
   });
 });
 
-wss.on('connection', function(socket, ws, TID, userID) {
+wss
+.on('connection', function(socket, ws, TID, userID) {
   // record clients 
   const wsID = uuidv1();
   
@@ -92,6 +94,7 @@ wss.on('connection', function(socket, ws, TID, userID) {
   
   ws.on('message', function message(msg) {
     if (!Wouter.route(msg, wsID, TID, WSclients)) {
+      // invalid message
       ws.terminate();
       //socket.destroy();
     }

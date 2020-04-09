@@ -14,8 +14,8 @@ class Wouter {
         rc = this.subscribe(msg, id, tenant, WSclients);
         break;
 
-      case 'pub':
-        this.publish(msg, id, tenant, WSclients);
+      case 'unsub':
+        this.unsubscribe(msg, id, tenant, WSclients);
         break;
         
       default:
@@ -30,25 +30,14 @@ class Wouter {
   }
 
   static subscribe(msg, id, tenant, WSclients) {
-    var rc = true;
+    let rc = true;
 
     switch (msg.source) {
-      case 'table':
-        var topic = `${tenant}.${msg.table}`;
+      case 'url':
+        let topic = `${tenant}.${msg.url}`;
 
-        modelPubsub.subscribe(topic, id, function() {
-          var oMsg = JSON.stringify({cat: 'pub', source: 'table', table: msg.table});
-
-          WSclients.get(id).ws.send(oMsg);
-        })
-
-        break;
-
-      case 'subset':
-        var topic = `${tenant}.${msg.table}.${msg.filter}`;
-
-        modelPubsub.subscribe(topic, id, function() {
-          var oMsg = JSON.stringify({cat: 'pub', source: 'subset', table: msg.table, filter: msg.filter});
+        modelPubsub.subscribe(topic, id, function(info) {
+          let oMsg = JSON.stringify({cat: 'pub', source: 'url', url: msg.url, action: info.action, rows: info.rows});
 
           WSclients.get(id).ws.send(oMsg);
         })
@@ -61,24 +50,16 @@ class Wouter {
 
     return rc;
   }
-  
-  static publish(msg, id, tenant, WSclients) {
-    // some client somewhere has decided to tell everyone that a table/subset has changed
+
+  static unsubscribe(msg, id, tenant) {
     switch (msg.source) {
-      case 'table':
-        var topic = `${tenant}.${msg.table}`;
+      case 'url':
+        var topic = `${tenant}.${msg.url}`;
 
-        modelPubsub.publish(topic)
+        modelPubsub.unsubscribe(topic, id);
         break;
-
-      case 'subset':
-        var topic = `${tenant}.${msg.table}.${msg.filter}`;
-
-        modelPubsub.publish(topic)
-        break;
-    }  
+    }
   }
-
 }
 
 module.exports = {

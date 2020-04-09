@@ -1,0 +1,70 @@
+<style>
+</style>
+
+<page id='data'>
+  <section>
+    <h4>Data</h4>
+    <a href='/main'>Main Page</a>
+
+    <div class='row'>
+<div class='col-12 col-lg-6' id='data1'>
+<div class='row form-group' style='max-height: 600px; overflow-y: scroll'>
+  <div class='col-6'>
+    <h4>Sorted</h4>
+    <ul mvc-each='sortedData'>
+      <li>
+        <span mvc-text='sortedData.$index.last'></span>
+        <span mvc-text='sortedData.$index.first'></span>
+      </li>
+    </ul>
+  </div>
+
+  <div class='col-6'>
+    <h4>Filtered</h4>
+    <ul mvc-each='filteredData'>
+      <li>
+        <span mvc-text='filteredData.$index.last'></span>
+        <span mvc-text='filteredData.$index.first'></span>
+      </li>
+    </ul>
+  </div>          
+</div>
+
+<div class='row form-group'>
+  <div class='col-12'>
+    <button mvc-click='addDrew'>
+      Add Drew Carey
+    </button>
+    <button mvc-click='changeMerv'>
+      Change Merv Griffin
+    </button>
+    <button mvc-click='deleteAlex'>
+      Delete Alex Trebek
+    </button>            
+  </div>
+</div>
+      </div>
+
+      <div class='col-12 col-lg-6' id='data2'>
+        <p>
+          <button mvc-click='showJS'>
+            Javascript
+          </button>
+          <button mvc-click='showHTML'>
+            HTML
+          </button>
+        </p>
+        
+  <pre mvc-show='showJS'>
+    <code mvc-text='js'>
+    </code>
+  </pre>
+
+        <pre mvc-show='showHTML'>
+          <code mvc-text='html'>
+          </code>
+        </pre>
+      </div>
+    </div>
+  </section>
+</page>

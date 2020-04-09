@@ -1,4 +1,10 @@
 class Pubsub{
+  /*
+    this.listeners = {topic: Map2}
+    Map2 = {ws id: callback}
+    ex:
+    this.listeners: {tenant.url : {id1: fn1, id2: fn2}}
+  */
   constructor() {
     this.listeners = new Map();
   }
@@ -11,7 +17,7 @@ class Pubsub{
     tMap = this.listeners.get(topic);
     
     tMap.set(id, fn);
-    
+
     this.listeners.set(topic, tMap);
   }
   
@@ -19,7 +25,7 @@ class Pubsub{
     if (this.listeners.has(topic)) {
       var tMap = this.listeners.get(topic);
       
-      this._delete(topic, tMap, id)  ;
+      this._delete(topic, tMap, id);
     }
   }
   
@@ -30,13 +36,9 @@ class Pubsub{
   }
   
   publish(topic, info) {
-    var tMap;
-    
     if (!(this.listeners.has(topic))) return;
-    
-    tMap = this.listeners.get(topic);
-    
-    tMap.forEach(function(fn, id) {
+
+    this.listeners.get(topic).forEach(function(fn, id) {
       fn(info);
     })
   }
