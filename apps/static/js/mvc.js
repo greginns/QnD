@@ -1,18 +1,5 @@
 import {QnD} from '/static/apps/static/js/qnd.js';
-
-/* ======================================== MISC ================================== */
-var camelCase = function(string) {
-  return string.substr(0,1).toUpperCase() + string.substr(1);
-};
-
-var isObject = function(a) {
-  if (!a) return false;
-  return (a) && (a.constructor === Object);
-};
-
-var escapeRegExp = function(string) {
-  return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-};
+import {utils} from '/static/apps/static/js/utils.js';
 
 /* ====================================== MVC ==================================== */
 class MVC {
@@ -65,7 +52,7 @@ class MVC {
         attr = el.getAttribute('mvc-role');
 
         if (MVC._roles.indexOf(attr) > -1) {
-          role = '_role' + camelCase(attr);
+          role = '_role' + utils.camelCase(attr);
 
           this[role](el);
         }
@@ -78,7 +65,7 @@ class MVC {
         attr = attrs[idx].name.substr(4);
 
         if (MVC._bindings.indexOf(attr) > -1) {
-          binding = '_bind' + camelCase(attr);
+          binding = '_bind' + utils.camelCase(attr);
 
           this[binding](el);
         }
@@ -142,7 +129,7 @@ class MVC {
         filter = filters[idx];
 
         if (MVC._filters.indexOf(filter) > -1) {
-          filter = '_filter' + camelCase(filter);
+          filter = '_filter' + utils.camelCase(filter);
 
           value = this[filter](el, value);
         }
@@ -165,7 +152,7 @@ class MVC {
         edit = edits[idx];
 
         if (MVC._edits.indexOf(edit) > -1) {
-          edit = '_edit' + camelCase(edit);
+          edit = '_edit' + utils.camelCase(edit);
 
           value = this[edit](el, value);
         }
@@ -250,7 +237,7 @@ class MVC {
     binding = binding.toLowerCase();
     MVC._bindings.push(binding);
 
-    binding = '_bind' + camelCase(binding);
+    binding = '_bind' + utils.camelCase(binding);
     this.prototype[binding] = method;
   }
 
@@ -259,7 +246,7 @@ class MVC {
     filter = filter.toLowerCase();
     MVC._filters.push(filter);
 
-    filter = '_filter' + camelCase(filter);
+    filter = '_filter' + utils.camelCase(filter);
     this.prototype[filter] = method;
   }
 
@@ -268,7 +255,7 @@ class MVC {
     edit = edit.toLowerCase();
     MVC._edits.push(edit);
 
-    edit = '_edit' + camelCase(edit);
+    edit = '_edit' + utils.camelCase(edit);
     this.prototype[edit] = method;
   }
 
@@ -277,7 +264,7 @@ class MVC {
     role = role.toLowerCase();
     MVC._roles.push(role);
 
-    role = '_role' + camelCase(role);
+    role = '_role' + utils.camelCase(role);
     this.prototype[role] = method;
   }
 
@@ -290,7 +277,7 @@ class MVC {
     
     MVC._interfaces.push(intfc);
 
-    intfc = '_interface' + camelCase(intfc);
+    intfc = '_interface' + utils.camelCase(intfc);
     this.prototype[intfc] = method;
   }
 
@@ -310,7 +297,7 @@ MVC._interfaces = [];
 var proxyHandler = {
   set(target, key, value, rcv) {
 //console.log('SET',target, 'KEY', key, 'VALUE', value, 'RCVR', rcv)
-    if (isObject(value)) {
+    if (utils.object.isObject(value)) {
       //if (!(key in target))
       target[key] = this._makeProxyFor({}, key);
 
@@ -428,7 +415,7 @@ var proxyHandler = {
         this._traverse(y, base + '.' + idx)
       }, this)
     }
-    else if (isObject(x)) {
+    else if (utils.object.isObject(x)) {
       for (var k in x) {
         if (x.hasOwnProperty(k)) {
           this._traverse(x[k], base + '.' + k)
@@ -943,7 +930,7 @@ MVC._addBinding('each', function(el) {
 
   // build regexp from index variable.
   var indexVar = el.getAttribute('mvc-index') || '$index';
-  var expr = escapeRegExp(indexVar);
+  var expr = utils.escapeRegExp(indexVar);
   var reText = new RegExp(expr, 'g');  // /(\$index)/g
 
   // get contents of target element, then empty it
@@ -1066,7 +1053,7 @@ var eventBinder = function(event, fn, el) {
 
   if (colon > -1) {
     fn = fn.substring(0, colon) + fn.substring(colon+1, fn.length);
-    fn = '_interface' + camelCase(fn);
+    fn = '_interface' + utils.camelCase(fn);
     desc = 'interface';
   }
   else {

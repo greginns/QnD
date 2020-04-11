@@ -1,6 +1,4 @@
 var io = {
-  CSRFToken: '{{CSRFToken}}',
-  
   _formatURL: function(url, params) {
     // NOTE `_.pickBy(params, _.negate(_.isNil))` removes undefined/null entries
     // so you don't have to worry about `undefined` getting coerced to a string
@@ -48,7 +46,7 @@ var io = {
   _fetch: function({method='GET', url = '', data = '', type='text'} = {}) {
     var orig = {method, url, data, type};
     var ret = {data: '', 'Content-type': '', status: 200};
-    var init = {headers: {'X-CSRF-TOKEN': io.CSRFToken}};
+    var init = {headers: {'X-CSRF-TOKEN': window.QnD_CSRF || ''}};
 
     init.method = method;
     init.credentials = 'same-origin';

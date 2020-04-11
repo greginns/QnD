@@ -16,14 +16,9 @@ const {Wouter} = require(root + '/server/utils/wouter.js');
 const sqlUtil = require(root + '/server/utils/sqlUtil.js');
 const WSclients = new Map();
 
-require(root + '/server/routes/routes.js');  // process system routes.
-
 for (app of config.apps) {
   require(root + `/apps/${app}/routes.js`);  // process app routes.
 };
-//require(root + `/apps/static/routes.js`);  // process app routes.
-//require(root + `/apps/admin/routes.js`);  // process app routes.
-//require(root + `/apps/test/routes.js`);  // process app routes.
 
 process
 .on('unhandledRejection', (reason, rej) => {

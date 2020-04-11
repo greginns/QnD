@@ -1,7 +1,7 @@
 import {QnD} from '/static/apps/static/js/qnd.js';
 import {MVC} from '/static/apps/static/js/mvc.js';
 import {Page, Section} from '/static/apps/static/js/router.js';
-import {TableStore, TableView} from '/static/apps/static/js/data.js';
+import {TableView} from '/static/apps/static/js/data.js';
 
 class Data extends MVC {
   constructor(element) {
@@ -28,6 +28,7 @@ class Data extends MVC {
   createModel() {
     this.model.sortedData = [];
     this.model.filteredData = [];
+    this.model.bothData = [];
 
     let sortFunc = function(a,b) {
       return (a.last < b.last) ? -1 : (a.last > b.last) ? 1 : 0;
@@ -38,29 +39,31 @@ class Data extends MVC {
     }
 
     // setup data/view stores
-    this.testdataStore = new TableStore({url: '/test/testdata', safemode: false});
     let viewSorted = new TableView({proxy: this.model.sortedData, sortFunc});
     let viewFiltered = new TableView({proxy: this.model.filteredData, filterFunc});
+    let viewBoth = new TableView({proxy: this.model.bothData, filterFunc, sortFunc});
 
-    this.testdataStore.addView(viewSorted);
-    this.testdataStore.addView(viewFiltered);
-
-    // get some data
-    this.testdataStore.getAll();
+    // QnD.tableStores.testdata setup in module.js
+    QnD.tableStores.testdata.addView(viewSorted);
+    QnD.tableStores.testdata.addView(viewFiltered);
+    QnD.tableStores.testdata.addView(viewBoth);
   }
 
   async addDrew() {
     let row = {_pk: 'DK', first: 'Drew', last: 'Carey'};
-    let res = await this.testdataStore.insert(row);
+    let res = await QnD.tableStores.testdata.insert(row);
+    console.log(res)
   }
 
   async changeMerv() {
     let row = {_pk: '456', first: 'Perv', last: 'Griffin'};
-    let res = await this.testdataStore.update('456', row);
+    let res = await QnD.tableStores.testdata.update('456', row);
+    console.log(res)
   }
 
   async deleteAlex() {
-    let res = await this.testdataStore.delete('123');
+    let res = await QnD.tableStores.testdata.delete('123');
+    console.log(res)
   }
 }
 
@@ -108,11 +111,10 @@ class Data2 extends MVC {
 let t1 = new Data('data1');
 let t2 = new Data2('data2');
 
-// hook them up to router
+// hook them up to sections that will eventually end up in a page (done in module)
 let section1 = new Section({mvc: t1});
 let section2 = new Section({mvc: t2});
-
-let el = document.getElementById('data');
+let el = document.getElementById('data');   // page html
 let page = new Page({el, path: 'data', title: 'Data', sections: [section1, section2]});
     
 QnD.pages.push(page);  
