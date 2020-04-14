@@ -47,6 +47,7 @@ module.exports = {
 
       if (options.needCSRF) {
         let tokenOK = await csrf.fn(req, res);
+
         if (!tokenOK) throw new ResponseMessage({status: 401});
       }
     }

@@ -1,7 +1,6 @@
 // main
 import {QnD} from '/static/apps/static/js/qnd.js';
-import {WSDataComm} from '/static/apps/static/js/data.js';
-import {TableStore} from '/static/apps/static/js/data.js';
+import {WSDataComm, TableStore} from '/static/apps/static/js/data.js';
 import {Pages} from '/static/apps/static/js/router.js';
 
 import '/static/apps/test/views/js/bindings.js';
@@ -9,11 +8,11 @@ import '/static/apps/test/views/js/filters.js';
 import '/static/apps/test/views/js/interfaces.js';
 import '/static/apps/test/views/js/data.js';
 
-import '/static/client/mvc-addons/js/modals.js';
-import '/static/client/mvc-addons/js/mtime.js';
-import '/static/client/mvc-addons/js/mdate.js';
-import '/static/client/mvc-addons/js/multisel.js';
-import '/static/client/mvc-addons/js/singlesel.js';
+import '/static/client/widgets/js/modals.js';
+import '/static/client/widgets/js/mtime.js';
+import '/static/client/widgets/js/mdate.js';
+import '/static/client/widgets/js/multisel.js';
+import '/static/client/widgets/js/singlesel.js';
 
 let init = async function() {
   // setup data access

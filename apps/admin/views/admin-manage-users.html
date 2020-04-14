@@ -16,7 +16,7 @@
             <div class='row'>
               <div class='col-12'>
                 <select mvc-each='users' mvc-value='userPK' class='form-control' size='10' style='width: 100%'>
-                  <option mvc-option='{text: "users[$index].name", value: "users[$index].code"}'></option>
+                  <option mvc-option='{text: "users.$index.name", value: "users.$index.code"}'></option>
                 </select>
               </div>
             </div>
@@ -29,7 +29,7 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6 col-sm-3'>
-                {{ fields.Char(type='text', id=user.code.id, maxlength=user.code.maxLength, mvc_value='user.code', mvc_disabled='this.$get("userPK")', label=user.code.verbose) }}
+                {{ fields.Char(type='text', id=user.code.id, maxlength=user.code.maxLength, mvc_value='user.code', mvc_disabled='userPK', label=user.code.verbose) }}
               </div>
               
               <div class='col-sm-1'></div>
@@ -61,10 +61,10 @@
           <div class='card-footer'>
             <div class='row'>
               <div class='col-12'>
-                <span mvc-hide='this.$get("userPK")'>
+                <span mvc-hide='userPK'>
                   {{ buttons.btn(class='primary', mvc_click='save', text='Add User') }}
                 </span>
-                <span mvc-show='this.$get("userPK")'>
+                <span mvc-show='userPK'>
                   {{ buttons.btn(class='primary', mvc_click='save', text='Update User') }}
                   {{ buttons.btn(class='danger', mvc_click='delete', text='Delete User') }}
                 </span>
@@ -80,7 +80,7 @@
       <div style="position: absolute; bottom: 5px; right: 0; min-width: 350px">
         <div class="toast" id="admin-manage-users-toast1" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
-            <strong class="mr-auto">TimeKeep</strong>
+            <strong class="mr-auto">Users</strong>
             <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -92,15 +92,4 @@
       </div>
     </div>
   </section>
-  
-  <script>
-    (function() {
-      var page = $('#admin-manage-users');
-      var section = $('#admin-manage-users-section');
-      var path = '/users';
-      var title = 'Admin';
-
-      App.mvcs[section[0].id] = {mvcObj: App.mvcObjs.admin_manage_users, page: page, section: section, path: path, title: title};
-    })();
-  </script>
 </page>

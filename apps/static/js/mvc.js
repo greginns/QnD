@@ -11,6 +11,8 @@ class MVC {
     this._init();
   }
 
+  createModel() {}
+
   // lifecycle methods - to be over-ridden in user code.  Used by Router
   init() {
     return new Promise(function(resolve) {
@@ -34,16 +36,18 @@ class MVC {
     proxy._eventEl = this._section;
 
     // setup model base
-    this.model = new Proxy({}, proxy);
+    this.$data = {};
+    this.model = new Proxy(this.$data, proxy);
+    this.createModel();
 
     // find all initial section elements and process
-    for (var el of this._section.querySelectorAll('*')) {
+    for (let el of this._section.querySelectorAll('*')) {
       this._processElement(el);
     };
   }
 
   _processElement(el) {
-    // for one element find all of it's mvc attributes and run Approrpriate role and binding
+    // for one element find all of it's mvc attributes and run approrpriate role and binding
     var attrs, attr, idx, role, binding;
 
     if (el.hasAttributes()) {
@@ -201,6 +205,10 @@ class MVC {
     // Proxy data looks weird.
     // This un-weirds it.
     console.log(JSON.parse(JSON.stringify(model)))
+  }
+
+  $copy(model) {
+    return JSON.parse(JSON.stringify(model));
   }
   
   $addCalculated(name, expr) {

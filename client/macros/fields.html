@@ -3,6 +3,7 @@
   <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-edit='{{mvc_edit}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-control" />
   <label for="{{id}}">{{label}}</label>
 </div>
+
 <div mvc-show='this.$get("errors.{{mvc_value}}")'>
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>
@@ -13,6 +14,7 @@
   <textarea id="{{id}}" rows="{{rows}}" cols="{{cols}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-control" /></textarea>
   <label for="{{id}}">{{label}}</label>
 </div>
+
 <div mvc-show='this.$get("errors.{{mvc_value}}")'>
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>
@@ -24,7 +26,7 @@
     <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-control" />
     <label for="{{id}}">{{label}}</label>
   </div>
-  <div class='input-group-append' mvc-on='{click: "password:toggle"}'>
+  <div class='input-group-append' mvc-role='passwordtoggle' for='{{id}}'>
     <div class="input-group-text strikediag passwordeye">&#128065;</div>
   </div>
 </div>
@@ -34,13 +36,14 @@
 </div>
 {% endmacro %}
 
-{% macro Date(type='text', id='', maxlength='', mvc_value='', dateFormat='YYYY-MM-DD', label, mvc_enabled='', mvc_disabled='') %}
+{% macro Date(type='text', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='') %}
 <div class='input-group'>
   <div class="form-label-group">
-    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}|date['{{dateFormat}}']" mvc-edit="date" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-control" />
+    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="date" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-control" />
     <label for="{{id}}">{{label}}</label>
   </div>
-  <div class='input-group-append' mvc-on='{click: "date:bootcal"}'>
+
+  <div class='input-group-append' mvc-click='date:boot' for='{{id}}'>
     <div class="input-group-text">&#128197;</div>
   </div>
 </div>
@@ -50,13 +53,14 @@
 </div>
 {% endmacro %}
 
-{% macro Time(type='text', id='', maxlength='', mvc_value='', timeFormat='hh:mm A', label, mvc_enabled='', mvc_disabled='') %}
+{% macro Time(type='text', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='') %}
 <div class='input-group'>
   <div class="form-label-group">
     <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}|time['{{timeFormat}}']" mvc-edit="time" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-control" />
     <label for="{{id}}">{{label}}</label>
   </div>
-  <div class='input-group-append' mvc-on='{click: "time:bootcal"}'>
+
+  <div class='input-group-append' mvc-click='time:boot' for='{{id}}'>
     <div class="input-group-text">&#128338;</div>
   </div>
 </div>
@@ -75,14 +79,15 @@
 
 {% macro Integer(id='', min='1', max='999', step='1', mvc_value='', mvc_edit='integer', label='') %}
 <div class='input-group'>
-  <div class='input-group-prepend' mvc-on='{click: "stepper:minus"}'>
+  <div class='input-group-prepend' mvc-role='stepperadj' for='{{id}}' dir='-'>
     <div class="input-group-text">&mdash;</div>
   </div>
   <div class="form-label-group form-label-group-double">
     <input type="text" id='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' placeholder='{{label}}' class="form-control mvc-boot-input-right" />
     <label for="{{id}}">{{label}}</label>
   </div>
-  <div class='input-group-append' mvc-on='{click: "stepper:plus"}'>
+
+  <div class='input-group-append' mvc-role='stepperadj' for='{{id}}' dir='+'>
     <div class="input-group-text">&plus;</div>
   </div>
 </div>
@@ -99,6 +104,7 @@
   </select>
   <label for="{{id}}">{{label}}</label>
 </div>
+
 <div mvc-show='this.$get("errors.{{mvc_value}}")'>
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>
@@ -113,6 +119,7 @@
   </select>
   <label for="{{id}}">{{label}}</label>
 </div>
+
 <div mvc-show='this.$get("errors.{{mvc_value}}")'>
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>

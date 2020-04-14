@@ -1,4 +1,4 @@
-{% extends "apps/base.html" %}
+{% extends "client/base.html" %}
 
 {% block title %}
   Admin
@@ -11,32 +11,27 @@
 
 {% block script %}
   <script type="text/javascript">
-    App.module = '/admin/manage/';
-    {% include "apps/admin/views/admin-manage-tenants.js" %}
-    {% include "apps/admin/views/admin-manage-users.js" %}
-    {% include "apps/admin/views/admin-manage-migrate.js" %}
+    window.QnD_CSRF = '{{CSRFToken}}'
   </script>
 {% endblock %}
 
 {% block body %}
   <div class="container-fluid">
-    <div id='mainPages'>
-      {% include "apps/admin/views/admin-manage-navbar.html" %}
-      {% include "apps/admin/views/admin-manage-tenants.html" %}
-      {% include "apps/admin/views/admin-manage-users.html" %}
-      {% include "apps/admin/views/admin-manage-migrate.html" %}
-      {% include "client/mvc/mvc-boot-cal.html" %}
-      {% include "client/mvc/mvc-boot-time.html" %}
-      {% include "client/mvc/mvc-modals.html" %}
+    <div id='qndPages'>
+      {% include "./admin-manage-navbar.html" %}
+      {% include "./admin-manage-tenants.html" %}
+      {% include "./admin-manage-users.html" %}
+      {% include "./admin-manage-migrate.html" %}
     </div>
   </div>
+
+  {% include "client/widgets/modals.html" %}
+  {% include "client/widgets/mdate.html" %}
+  {% include "client/widgets/mtime.html" %}
   
-  {% include "apps/admin/views/admin-login.html" %}
+  {% include "./admin-login.html" %}
 {% endblock %}
 
 {% block init %}
-<script type="text/javascript">
-  {% include "client/utils/object.js" %}
-  {% include "apps/admin/views/admin-manage.js" %}
-</script>
+<script type="module" src="/static/apps/admin/views/js/admin-manage.js"></script>
 {% endblock %}

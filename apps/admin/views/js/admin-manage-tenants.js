@@ -1,3 +1,249 @@
+import {QnD} from '/static/apps/static/js/qnd.js';
+import {MVC} from '/static/apps/static/js/mvc.js';
+import {Page, Section} from '/static/apps/static/js/router.js';
+import {TableView} from '/static/apps/static/js/data.js';
+
+class Tenants extends MVC {
+  constructor(element) {
+    super(element);
+  }
+
+  createModel() {
+    this.model.tenant = {};
+    this.model.tenantOrig = {};
+    this.model.tenantPk = '';
+    this.model.tenants = [];
+    this.model.errors = {
+      tenant: {},
+      message: '',
+      _verify: []
+    }
+
+    this.$addWatched('userPK', async function(nv, ov) {
+      if (nv) {
+        if (await this.canClear()) {
+          this.setTenant(nv);  
+        }
+        else {
+          this.model.userPK = ov;
+        }
+      }
+    }.bind(this));
+
+    //this.init(); //  use if not in router
+  }
+
+  init() {
+    let tenants = new TableView({proxy: this.model.tenants});
+    QnD.tableStores.tenant.addView(tenants);
+    
+    return new Promise(function(resolve) {
+      resolve();
+    })          
+  }
+  
+  inView() {
+    document.getElementById('admin-manage-navbar-tenants').classList.add('active');
+    document.getElementById('admin-manage-navbar-tenants').classList.add('disabled');
+    //$('#admin-manage-navbar-users').addClass('active disabled');
+    //$('#admin-users-toast1').toast('hide');
+  }
+
+  outView() {
+    document.getElementById('admin-manage-navbar-tenants').classList.remove('active');
+    document.getElementById('admin-manage-navbar-tenants').classList.remove('disabled');
+    //$('#admin-manage-navbar-users').removeClass('active disabled');
+
+    return true;  
+  }
+  async save() {
+    var tenant = this.model.tenant;
+    var tenantOrig = this.model.tenantOrig;
+    var tenantPK = this.model.tenantPK;
+    var diffs;
+
+    this.clearErrors();
+          
+    if (tenantPK) {
+      diffs = QnD.utils.object.diff(tenantOrig, tenant);
+      
+      if (Object.keys(diffs).length == 0) {
+        QnD.widgets.modal.alert('Nothing to update');
+        return;
+      }
+    }      
+
+    QnD.widgets.modal.spinner.show();
+
+    // new (post) or old (put)?
+    let res = (tenantPK) ? await QnD.tableStores.tenant.update(diffs) : await QnD.tableStores.tenant.insert(tenant);
+
+    if (res.status == 200) {
+      this.model.toastMessage = 'Tenant Saved';
+      $('#admin-manage-tenants-toast1').toast('show');
+      
+      this.clearIt();
+    }
+    else {
+      this.displayErrors(res);
+    }
+    
+    QnD.widgets.modal.spinner.hide();
+  }
+  
+  async delete() {
+    var tenantPK = this.model.tenantPK;      
+    
+    if (!tenantPK) return;
+    
+    var ret = await QnD.widgets.modal.confirm('Are you sure that you wish to delete this Tenant?')
+    if (ret != 0) return;
+    
+    this.clearErrors();
+    QnD.widgets.modal.spinner.show();
+    
+    let res = await QnD.tableStores.tenant.delete(tenantPk);
+
+    if (res.status == 200) {
+      this.model.toastMessage = 'Tenant Deleted';
+      $('#admin-manage-tenants-toast1').toast('show');
+
+      this.clearit();
+    }
+    else {
+      this.displayErrors(res);
+    }
+
+    QnD.widgets.modal.spinner.hide();
+  }
+  
+  async clear() {
+    if (await this.canClear()) {
+      this.clearIt();
+    }
+  }
+  
+  async newTenant() {
+    if (await this.canClear()) {
+      this.clearIt(); 
+    }
+  }
+  
+  async canClear() {
+    var tenant = this.model.tenant;
+    var orig = this.model.tenantOrig;
+    var diffs = QnD.utils.object.diff(orig, tenant);
+    var ret;
+
+    if (Object.keys(diffs).length > 0) {
+      ret = await QnD.widgets.modal.confirm('Abandon changes?');
+      if (ret != 0) return false;
+    }
+
+    return true;
+  }
+  
+  clearIt() {
+    this.clearErrors();
+    this.setDefaults();
+  }
+  
+  async getTenantFromList(pk) {
+    var tenret = {};
+
+    if (pk) {
+      let res = await QnD.tableStores.tenant.get(tenantPk);
+
+      tenret = (res.status == '200') ? res.data : {};
+    }
+
+    return tenret;
+  }
+  
+  async setTenant(pk) {
+    this.clearErrors();
+
+    this.model.tenant = await this.getTenantFromList(pk);
+    this.model.tenantOrig = this.$copy(this.model.tenant);
+  }
+  
+  setDefaults() {
+    var dflts = this.defaults.tenant;
+    
+    for (var k in dflts) {
+      this.model['tenant.'+k] = dflts[k];
+    }
+    
+    this.model.tenantPK = '';
+    this.model.tenantOrig = this.$copy(this.model.tenant);
+  }
+  
+  displayErrors(res) {
+    if ('data' in res && 'errors' in res.data) {
+      for (let key of Object.keys(res.data.errors)) {
+        if (key == 'message') {
+          QnD.widgets.modal.alert(res.data.errors.message);  
+        }
+        else {
+          for (let k of res.data.errors[key]) {
+            this.model.errors[key][k] = v;
+          };  
+        }
+      }
+    }
+    
+    this.model.errors._verify = res.errors._verify;
+  }
+  
+  clearErrors() {
+    for (let key of Object.keys(this.model.errors)) {
+      if (errors[key] instanceof Object) {
+        for (let key2 of Object.keys(this.model.errors[key])) {
+          this.model.errors[key][key2] = '';
+        }
+      }
+      else {
+        this.model.errors[key] = '';
+      }
+    }
+  }
+    
+  async migrate() {
+    var tenantPK = this.model.tenantPK;      
+    
+    if (!tenantPK) return;
+    
+    var ret = await QnD.widgets.modal.confirm("Are you sure you wish to run the migration for this Tenant?")
+    if (ret != 0) return;
+        
+    this.clearErrors();
+    QnD.widgets.modal.spinner.show();
+    
+    let res = await QnD.io.post({code: tenantPK}, '/admin/migrate');
+
+    if (res.status == 200) {
+      this.model.toastMessage = 'Tenant Migrated';
+      $('#admin-manage-tenants-toast1').toast('show');
+    }
+    else {
+      this.displayErrors(res);
+    }
+    
+    QnD.widgets.modal.spinner.hide();
+  }
+}
+
+// instantiate MVCs
+let mvc = new Tenants('admin-manage-tenants-section');
+
+// hook them up to sections that will eventually end up in a page (done in module)
+let section1 = new Section({mvc});
+let el = document.getElementById('admin-manage-tenants');   // page html
+let page = new Page({el, path: 'tenants', title: 'Tenants', sections: [section1]});
+    
+QnD.pages.push(page);
+
+/*
 App.mvcObjs.admin_manage_tenants = {
   model: {
     tenant: {},
@@ -285,3 +531,4 @@ App.mvcObjs.admin_manage_tenants = {
     }
   }
 }
+*/

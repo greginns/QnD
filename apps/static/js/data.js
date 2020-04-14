@@ -258,7 +258,7 @@ class TableView {
       
       rows = leftovers.slice(0);
     }
-    
+
     // we may not want them all
     let rowsToProcess = (action == '-') ? rows : rows.filter(this.filterFunc);
     

@@ -35,7 +35,7 @@ class TravelMessage {
       else if (this.type == 'html') {
         ct = 'text/html';
       }
-      else if (this.type == 'js') {
+      else if (this.type == 'js' || this.type == 'mjs') {
         ct = 'application/javascript';
       }
       else if (this.type == 'css') {

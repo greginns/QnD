@@ -14,32 +14,32 @@
       <div class="modal-body">
         <div class='row form-group'>
           <div class='col-sm-4'>
-            <input type='text' mvc-value='data.tenant' class='form-control' placeholder='Tenant' mvc-on='{keyup: "key13"}' disabled>
+            <input type='text' id='tenant-relogin-tenant' class='form-control' placeholder='Tenant' value='{{TID}}' disabled>
           </div>
         </div>
         
         <div class='row form-group'>
           <div class='col-sm-4'>
-            <input type='text' mvc-value='data.username' class='form-control' placeholder='User Name' mvc-on='{keyup: "key13"}'>
+            <input type='text' id='tenant-relogin-username' class='form-control' placeholder='User Name'>
           </div>
         </div>
 
         <div class='row form-group'>
           <div class='col-sm-4'>
-            <input type='password' mvc-value='data.password' class='form-control' placeholder='Password' mvc-on='{keyup: "key13"}'>
+            <input type='password' id='tenant-relogin-password' class='form-control' placeholder='Password'>
           </div>
         </div>
 
         <div class='row form-group'>
           <div class='col-sm-12'>
-            <span style='color: red' mvc-text='error'>
+            <span style='color: red' id='tenant-login-error'>
             </span>
           </div>
         </div>
 
         <div class='row form-group'>
           <div class='col-sm-4'>
-            <button class='btn btn-primary' mvc-on='{click: "login"}'>
+            <button class='btn btn-primary' id='tenant-relogin-button'>
               Re-Login
             </button>
           </div>
@@ -50,76 +50,68 @@
   </div>
 </div>
 
-<script type="text/javascript">
-  (function() {
-    var modalEl = '#tenant-relogin';
+<script type="module">
+import {io} from "/static/apps/static/js/io.js";
 
-    var mvcObj = {
-      model: {
-        data: {
-          tenant: '{{TID}}',
-          username: '',
-          password: ''
-        }
-      },
+(function() {  
+  var opts;
+  var modalEl = '#tenant-relogin';
 
-      lifecycle: {
-        created: function() {
-          var self = this;
+  $('#tenant').on('keyup', key13);
+  $('#tenant-relogin-username').on('keyup', key13);
+  $('#tenant-relogin-password').on('keyup', key13);
+  $('#tenant-relogin-button').on('click', login);
 
-          return new Promise(function(resolve) {
-            resolve();
-          });
-        },
+  function key13(ev) {
+    if (ev.which == 13) {
+      login();
+    }
+  };
 
-        ready: function() {
-        }
-      },
+  function login() {
+    var username = $('#tenant-relogin-username').val();
+    var password = $('#tenant-relogin-password').val();
 
-      controllers: {
-        login: function() {
-          var self = this;
-          var data = this.$get('data');
+    $('#tenant-login-error').text('');
 
-          this.$set('error', '');
-
-          io.post(data, '/tenant/login')
-          .then(function(res) {
-            if (res.status == 200) {
-              self.$get('opts.cb')();
-              self.close();
-            }
-            else {
-              self.$set('error', res.data.errors.message);
-            }
-          })
-        },
-
-        key13: function(ev) {
-          if (ev.which == 13) {
-            this.login();
-          }
-        },
-
-        open: function() {
-          $(modalEl).modal({backdrop: 'static', keyboard: false, show: true});
-        },
-
-        close: function() {
-          $(modalEl).modal('hide');
-        },
-
-        popup: function(opts) {
-          this.$set('opts', opts);
-          this.open();
-        }
-      },
-
-      watch: {
-      }
+    if (!username) {
+      $('#tenant-login-error').text('Username is required');
+      return;
+    }
+    
+    if (!password) {
+      $('#tenant-login-error').text('Password is required');
+      return;
     }
 
-    App.helpers.modalLogin = new MVC($(modalEl)[0], mvcObj);
-    App.helpers.modalLogin.init();
-  })();
+    io.post({tenant: '{{TID}}', username, password}, '/login/login')
+    .then(function(res) {
+      if (res.status == 200) {
+        opts.cb();
+        close();
+      }
+      else {
+        $('#tenant-login-error').text(res.data.errors.message);
+      }
+    })
+    .catch(function(err) {
+      alert(err.errMsg)
+    })
+  }
+
+  function open() {
+    $(modalEl).modal({backdrop: 'static', keyboard: false, show: true});
+  }
+
+  function close() {
+    $(modalEl).modal('hide');
+  }
+
+  function popup(popts) {
+    opts = popts;
+    open();
+  }
+
+  QnD.widgets.login = {open};
+})();
 </script>

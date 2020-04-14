@@ -118,6 +118,7 @@ module.exports = {
 
         if (tm.isGood()) {
           tm = await User.selectOne({pgschema, cols: '*', pks: tm.data.user});
+
           if (tm.isGood()) user = tm.data;
         }
       }

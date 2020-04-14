@@ -65,8 +65,8 @@
       </div>
     </div>
     
-    <script type="text/javascript">
-      {% include "../../iofetch.js" %}    
+    <script type="module">
+      import {io} from "/static/apps/static/js/io.js";
 
       $('#tenant').on('keyup', key13);
       $('#username').on('keyup', key13);
@@ -99,7 +99,7 @@
           $('#errMsg').text('Password is required');
           return;
         }
-        
+
         io.post({tenant, username, password}, '/login/login')
         .then(function(res) {
           if (res.status == 200) {
