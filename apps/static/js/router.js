@@ -194,12 +194,12 @@ class Pages {
     this.pages = pages;
   }
 
-  async init(path) {
+  async ready(path) {
     // Init All Page Sections
     var inits = [];
 
     for (let page of this.pages) {
-      inits = inits.concat(page.init());
+      inits = inits.concat(page.ready());
     }
 
     try {
@@ -239,11 +239,11 @@ class Page {
     this.el.style.display = 'none';
   }
 
-  init() {
+  ready() {
     var inits = [];
 
     for (let section of this.sections) {
-      inits.push(section.init());
+      inits.push(section.ready());
     }
 
     return inits;
@@ -275,8 +275,8 @@ class Section {
     this.mvc = mvc;
   }
 
-  init() {
-    return this.mvc.init();
+  ready() {
+    return this.mvc.ready();
   }
 
   inView(params) {

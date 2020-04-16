@@ -11,10 +11,11 @@ class MVC {
     this._init();
   }
 
+  // lifecycle methods - to be over-ridden in user code.  
   createModel() {}
 
-  // lifecycle methods - to be over-ridden in user code.  Used by Router
-  init() {
+  // Used by Router
+  ready() {   
     return new Promise(function(resolve) {
       resolve();
     })
@@ -36,8 +37,7 @@ class MVC {
     proxy._eventEl = this._section;
 
     // setup model base
-    this.$data = {};
-    this.model = new Proxy(this.$data, proxy);
+    this.model = new Proxy({}, proxy);
     this.createModel();
 
     // find all initial section elements and process
@@ -335,6 +335,12 @@ var proxyHandler = {
   get(target, key) {
     //console.log('get',target, key)
     var self = this;
+
+    if (key == 'toJSON') {
+      return function() {
+        return JSON.parse(JSON.stringify(target));
+      }
+    }
 
     if (key == 'shift') {
       return function() {

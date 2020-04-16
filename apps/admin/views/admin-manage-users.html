@@ -2,11 +2,11 @@
   <section id='admin-manage-users-section'>
     <div class='row form-group justify-content-center'>
       
-      <div class='col-12 col-sm-3 mb-4'>
+      <div class='col-12 col-md-6 col-lg-4 col-xl-3 mb-4'>
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-8'>
+              <div class='col-9'>
                 {{ buttons.btnsm(class='success', mvc_click='newUser', text='+ New User') }}
               </div>
             </div>          
@@ -15,7 +15,7 @@
           <div class='card-body'>
             <div class='row'>
               <div class='col-12'>
-                <select mvc-each='users' mvc-value='userPK' class='form-control' size='10' style='width: 100%'>
+                <select mvc-each='users' mvc-value='userPK' class='form-control' size='10' style='width: 100%' mvc-disabled='user.code'>
                   <option mvc-option='{text: "users.$index.name", value: "users.$index.code"}'></option>
                 </select>
               </div>
@@ -24,42 +24,40 @@
         </div>
       </div>
       
-      <div class='col-12 col-sm-6'>
+      <div class='col-12 col-md-6 col-lg-6 col-xl-6'>
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6 col-sm-3'>
+              <div class='col-6 col-lg-6'>
                 {{ fields.Char(type='text', id=user.code.id, maxlength=user.code.maxLength, mvc_value='user.code', mvc_disabled='userPK', label=user.code.verbose) }}
               </div>
               
-              <div class='col-sm-1'></div>
-              
-              <div class='col-12 col-sm-4'>
+              <div class='col-12 col-lg-3'>
                 {{ fields.Boolean(id=user.active.id, mvc_checked='user.active', label=user.active.verbose) }}
               </div>
             </div>          
           </div>
           
           <div class='card-body'>
-            <div class='row form-group'>
-              <div class='col-sm-6'>
+            <div class='row'>
+              <div class='col-12 col-lg-6 mb-2'>
                 {{ fields.Char(type='text', id=user.name.id, maxlength=user.name.maxLength, mvc_value='user.name', label=user.name.verbose) }}
               </div>
             </div>
             
             <div class='row'>
-              <div class='col-12 col-sm-6'>
+              <div class='col-12 col-lg-6 mb-2'>
                 {{ fields.Char(type='text', id=user.email.id, maxlength=user.email.maxLength, mvc_value='user.email', label=user.email.verbose) }}
               </div>
               
-              <div class='col-12 col-sm-6'>
+              <div class='col-12 col-lg-6 mb-2'>
                 {{ fields.Password(type='password', id=user.password.id, maxlength=user.password.maxLength, mvc_value='user.password', label=user.password.verbose) }}
               </div>          
             </div>
           </div>
           
           <div class='card-footer'>
-            <div class='row'>
+            <div class='row mb-2'>
               <div class='col-12'>
                 <span mvc-hide='userPK'>
                   {{ buttons.btn(class='primary', mvc_click='save', text='Add User') }}
@@ -71,24 +69,17 @@
                 {{ buttons.btn(class='secondary', mvc_click='clear', text='Clear') }}
               </div>
             </div>            
+
+            <div class='row'>
+              <div class='col-12 text-success'>
+                <span mvc-text='goodMessage'></span>
+              </div>
+              <div class='col-12 text-danger'>
+                <span mvc-text='badMessage'></span>
+              </div>
+            </div>         
           </div>
         </div>
-      </div>
-    </div>
-  
-    <div aria-live="polite" aria-atomic="true" style="position: absolute; bottom: 5px; right: 0; z-index:20000">
-      <div style="position: absolute; bottom: 5px; right: 0; min-width: 350px">
-        <div class="toast" id="admin-manage-users-toast1" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="toast-header">
-            <strong class="mr-auto">Users</strong>
-            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="toast-body">
-            <span mvc-text='toastMessage'></span>
-          </div>
-        </div>  
       </div>
     </div>
   </section>

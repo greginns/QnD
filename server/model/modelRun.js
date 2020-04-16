@@ -86,7 +86,7 @@ class Model extends ModelBase {
   async insertOne({pgschema = ''} = {}) {
     // insert model object
     const tcon = this.constructor;
-    var tm, errs, scerr, schema, table, text;
+    var tm, errs, scerr, schema, table, text, retcols, app;
     
     // make sure a valid pgschema
     scerr = tcon.testPGSchema(pgschema);
@@ -101,11 +101,14 @@ class Model extends ModelBase {
 
     if (Object.keys(errs).length > 0) return validationFailed(tcon, errs);
 
+    // get all columns
+    retcols = tcon.getColumnList({cols: '*', isMainTable: true, joinName: false, showHidden: true, includeDerived: true});
+
     // build SQL
     table = tcon.getTableName({pgschema});
     let [cols, params, values] = tcon.makeInsertValues(this);
 
-    text = `INSERT INTO ${table} (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING *;`;
+    text = `INSERT INTO ${table} (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING ${retcols};`;
     tm = await tcon.sql({text, values});
 
     if (!tm.err) {
@@ -113,7 +116,8 @@ class Model extends ModelBase {
         tm.err = new RowNotInsertedError();
       }
       else {
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '+', rows: tm.data});
+        app = tcon.getApp();
+        modelPubsub.publish(`${pgschema.toLowerCase()}./${app.toLowerCase()}/${tcon.name.toLowerCase()}`, {action: '+', rows: tm.data});
 
         tm.data = tm.data[0];
       }
@@ -125,7 +129,7 @@ class Model extends ModelBase {
   async updateOne({pgschema = ''} = {}) {
     // update model object, based on pks
     const tcon = this.constructor;
-    var tm, errs, scerr, schema, table, text;
+    var tm, errs, scerr, schema, table, text, retcols, app;
     
     // make sure a valid pgschema
     scerr = tcon.testPGSchema(pgschema);
@@ -140,10 +144,14 @@ class Model extends ModelBase {
 
     if (Object.keys(errs).length > 0) return validationFailed(tcon, errs);
         
+    // get all columns
+    retcols = tcon.getColumnList({cols: '*', isMainTable: true, joinName: false, showHidden: true, includeDerived: true});
+
+    // build SQL
     table = tcon.getTableName({pgschema});
     let [set, where, values] = tcon.makeUpdateValues(this);
     
-    text = `UPDATE ${table} SET ${set.join(',')} WHERE ${where.join(',')} RETURNING *;`;
+    text = `UPDATE ${table} SET ${set.join(',')} WHERE ${where.join(',')} RETURNING ${retcols};`;
     tm = await tcon.sql({text, values});    
 
     if (!tm.err) {
@@ -152,8 +160,8 @@ class Model extends ModelBase {
       }
       else {
         //tm.data = tcon.construct(tm.data)[0];
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '*', rows: tm.data});
-
+        app = tcon.getApp();
+        modelPubsub.publish(`${pgschema.toLowerCase()}./${app.toLowerCase()}/${tcon.name.toLowerCase()}`, {action: '*', rows: tm.data});
         tm.data = tm.data[0];
       }
     }
@@ -165,12 +173,16 @@ class Model extends ModelBase {
     // upsert model object - NOT COMPLETE
     //https://hashrocket.com/blog/posts/upsert-records-with-postgresql-9-5
     const tcon = this.constructor;
-    var tm, scerr, table, text, pks;    
+    var tm, scerr, table, text, pks, retcols, app;    
     
     // make sure a valid pgschema
     scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});    
         
+    // get all columns
+    retcols = tcon.getColumnList({cols: '*', isMainTable: true, joinName: false, showHidden: true, includeDerived: true});
+
+    // build SQL
     table = tcon.getTableName({pgschema});
     pks = tcon.getConstraints().pk;
     let [cols, params, values] = tcon.makeInsertValues(this);
@@ -178,7 +190,7 @@ class Model extends ModelBase {
     
     text = `INSERT INTO ${table} (${cols.join(',')}) VALUES(${params.join(',')})`;
     text += ` ON CONFLICT (${pks.join(',')})`;
-    text += ` UPDATE ${table} SET ${set.join(',')} WHERE ${where.join(',')} RETURNING *;`;
+    text += ` UPDATE ${table} SET ${set.join(',')} WHERE ${where.join(',')} RETURNING ${retcols};`;
     tm = await tcon.sql({text, values});    
 
     if (!tm.err) {
@@ -187,7 +199,8 @@ class Model extends ModelBase {
       }
       else {
         //tm.data = tcon.construct(tm.data)[0];
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '*', rows: tm.data});
+        app = tcon.getApp();
+        modelPubsub.publish(`${pgschema.toLowerCase()}./${app.toLowerCase()}/${tcon.name.toLowerCase()}`, {action: '*', rows: tm.data});
 
         tm.data = tm.data[0];
       }
@@ -198,7 +211,7 @@ class Model extends ModelBase {
     
   async deleteOne({pgschema = ''} = {}) {
     // delete a model object
-    var tm, rec, scerr, table, text;
+    var tm, rec, scerr, table, text, retcols, app;
     const tcon = this.constructor;
     
     scerr = tcon.testPGSchema(pgschema);
@@ -207,10 +220,13 @@ class Model extends ModelBase {
     rec = this.extractPrimaryKey();
     if (rec == false) return new TravelMessage({err: new UserError('Missing PK field')});        
 
+    // get all columns
+    retcols = tcon.getColumnList({cols: '*', isMainTable: true, joinName: false, showHidden: true, includeDerived: true});
+
     // Do the deleting
     table = tcon.getTableName({pgschema});
     let [, where, values] = tcon.makeUpdateValues(rec);
-    text = `DELETE FROM ${table} WHERE ${where.join(',')} RETURNING *;`;
+    text = `DELETE FROM ${table} WHERE ${where.join(',')} RETURNING ${retcols};`;
     tm = await tcon.sql({text, values});  
 
     if (!tm.err) {
@@ -219,7 +235,8 @@ class Model extends ModelBase {
       }
       else {
         //tm.data = tcon.construct(tm.data)[0];  // return back model instance
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '-', rows: tm.data});
+        app = tcon.getApp();
+        modelPubsub.publish(`${pgschema.toLowerCase()}./${app.toLowerCase()}/${tcon.name.toLowerCase()}`, {action: '-', rows: tm.data});
 
         tm.data = tm.data[0];
       }
@@ -275,6 +292,7 @@ class Model extends ModelBase {
     colNames = tcon.getColumnList({cols, isMainTable: true, showHidden});
     table = tcon.getTableName({pgschema});
     orderBy = tcon.makeOrderBy();
+
     let [where, values] = tcon.makeSelectValues(rec);
     text = `SELECT ${colNames} FROM ${table}` + ((where.length > 0) ? ` WHERE ${where.join(',')}` : '');
     text += ' ' + orderBy;
@@ -290,7 +308,7 @@ class Model extends ModelBase {
     // iterate over rows inserting each
     // response is in data[], {isError: T|F, error: msg, data: rec}
     const tcon = this;
-    var tm, tobj, errs, scerr, schema, table, text, row;
+    var tm, tobj, errs, scerr, schema, table, text, row, retcols, app;
     var tmx = new TravelMessage();
     
     tmx.data = [];
@@ -300,7 +318,10 @@ class Model extends ModelBase {
     // make sure a valid pgschema
     scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
-    
+
+    // get all columns
+    retcols = tcon.getColumnList({cols: '*', isMainTable: true, joinName: false, showHidden: true, includeDerived: true});
+
     for (row of rows) {
       tobj = new this(row);
       
@@ -314,7 +335,7 @@ class Model extends ModelBase {
       }
       
       let [cols, params, values] = tcon.makeInsertValues(tobj);
-      text = `INSERT INTO ${table} (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING *;`;
+      text = `INSERT INTO ${table} (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING ${cols};`;
       tm = await tcon.sql({text, values});
     
       if (tm.err) {
@@ -331,7 +352,8 @@ class Model extends ModelBase {
       }
     }
     
-    modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '+', rows: tm.data});    
+    app = tcon.getApp();
+    modelPubsub.publish(`${pgschema.toLowerCase()}./${app.toLowerCase()}/${tcon.name.toLowerCase()}`, {action: '+', rows: tm.data});    
 
     return tmx;
   }
@@ -341,7 +363,7 @@ class Model extends ModelBase {
     // iterate over rows updating each
     // response is in data[], {isError: T|F, error: msg, data: rec}
     const tcon = this;
-    var tm, tobj, errs, scerr, schema, table, text, row;
+    var tm, tobj, errs, scerr, schema, table, text, row, retcols, app;
     var tmx = new TravelMessage();
     
     tmx.data = [];
@@ -351,7 +373,10 @@ class Model extends ModelBase {
     // make sure a valid pgschema
     scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});        
-    
+
+    // get all columns
+    retcols = tcon.getColumnList({cols: '*', isMainTable: true, joinName: false, showHidden: true, includeDerived: true});
+
     for (row of rows) {
       tobj = new this(row);
       
@@ -365,7 +390,7 @@ class Model extends ModelBase {
       }
       
       let [set, where, values] = tcon.makeUpdateValues(tobj);
-      text = `UPDATE ${table} SET ${set.join(',')} WHERE ${where.join(',')} RETURNING *;`;
+      text = `UPDATE ${table} SET ${set.join(',')} WHERE ${where.join(',')} RETURNING ${retcols};`;
       tm = await tcon.sql({text, values});    
     
       if (tm.err) {
@@ -382,7 +407,8 @@ class Model extends ModelBase {
       }
     }
     
-    modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '*', rows: tm.data});    
+    app = tcon.getApp();
+    modelPubsub.publish(`${pgschema.toLowerCase()}./${app.toLowerCase()}/${tcon.name.toLowerCase()}`, {action: '*', rows: tm.data});    
 
     return tmx;    
   }
@@ -394,17 +420,20 @@ class Model extends ModelBase {
   static async delete({pgschema = '', obj = {}}) {
     // delete one or more records
     const tcon = this;
-    var tm, scerr, table, text;
+    var tm, scerr, table, text, retcols, app;
 
     if (Object.keys(obj).length == 0) return new TravelMessage({err: new UserError('No fields valued')});    
     
     scerr = tcon.testPGSchema(pgschema);
     if (scerr) return new TravelMessage({err: new SQLSchemaError(scerr)});    
     
+    // get all columns
+    retcols = tcon.getColumnList({cols: '*', isMainTable: true, joinName: false, showHidden: true, includeDerived: true});
+
     // Do the deleting
     table = tcon.getTableName({pgschema});
     let [, where, values] = tcon.makeUpdateValues(obj);
-    text = `DELETE FROM ${table} WHERE ${where.join(',')} RETURNING *;`;
+    text = `DELETE FROM ${table} WHERE ${where.join(',')} RETURNING ${retcols};`;
     tm = await tcon.sql({text, values});
 
     if (!tm.err) {
@@ -413,7 +442,8 @@ class Model extends ModelBase {
       }
       else {
         //tm.data = tcon.construct(tm.data);
-        modelPubsub.publish(`${pgschema.toLowerCase()}.${tcon.name.toLowerCase()}`, {action: '-', rows: tm.data});
+        app = tcon.getApp();
+        modelPubsub.publish(`${pgschema.toLowerCase()}./${app.toLowerCase()}/${tcon.name.toLowerCase()}`, {action: '-', rows: tm.data});
       }
     }
     

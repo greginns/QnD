@@ -25,6 +25,19 @@ config.apps.forEach(function(app) {
   }
 })
 
+async function verifyCSRF(user, token) {
+  // get token, check if user matches
+  var tm;
+
+  if (!token) return false;
+
+  tm = await CSRF.selectOne({pgschema, pks: token})
+
+  if (tm.isBad()) return false;
+
+  return tm.data.user == user.code;    
+};
+
 const migFile = {
   write: async function(file, json) {
     var data = false
@@ -83,18 +96,15 @@ module.exports = {
       var nj;
       var tm = new TravelMessage();
 
+      ctx.TID = pgschema;
       ctx.CSRFToken = uuidv1();
+      ctx.tenant = Tenant.getColumnDefns();   // for field defns
+      ctx.user = User.getColumnDefns();
       
       // create CSRF record
       rec = new CSRF({token: ctx.CSRFToken, user: req.user.code});
       tm = await rec.insertOne({pgschema});
 
-      ctx.tenant = Tenant.getColumnDefns();
-      ctx.user = User.getColumnDefns();
-      ctx.dateFormat = 'MM/DD/YYYY';
-      ctx.timeFormat = 'hh:mm A';
-      ctx.TID = pgschema;
-      
       try {
         nj = nunjucks.configure([root], { autoescape: true });
         tm.data = nj.render('apps/admin/views/admin-manage.html', ctx);
@@ -109,6 +119,48 @@ module.exports = {
   },
   
   auth: {
+    session: async function(req, security, strategy) {
+      /*
+        test SessionID
+        test User
+        test Anonymous
+        test CSRF
+      */
+      var tm, status=401, tenant = null, user = null;
+      var sessID = req.cookies.admin_session || '';
+
+      if (sessID) {
+        tm = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
+
+        if (tm.isGood()) {  // good session ID, get user associated with session
+          tm = await User.selectOne({pgschema, cols: '*', pks: tm.data.user});
+
+          if (tm.isGood()) {  // good user
+            tenant = {code: 'public'};  // this is the system app
+            user = tm.data;
+
+            // can we have an Anonymous user?
+            if (user.code != 'Anonymous' || (user.code == 'Anonymous' && strategy.allowAnon)) {
+              let res = true;
+
+              if (strategy.needCSRF) { // must we have a valid CSRF token?
+                res = await verifyCSRF(user, req.CSRFToken || null);
+              }
+
+              if (res) status = 200;
+            }
+          }
+        }
+      }
+
+      if (status == 401) {
+        if (security.redirect) return new ResponseMessage({type: 'text', status: 302, err: {message: security.redirect}});
+        return new TravelMessage({type: 'text', status: 401});
+      }
+        
+      return new ResponseMessage({type: 'text', status: 200, data: [tenant, user]});
+    }
+
     verifySession: async function(req) {
       var tm, user = null;
       var sessID = req.cookies.admin_session || '';
@@ -126,20 +178,7 @@ module.exports = {
       return [{code: 'public'}, user];
     },
     
-    verifyCSRF: async function(req) {
-      // get token, check if user matches
-      var user = req.user;
-      var token = req.CSRFToken || null;
-      var tm;
 
-      if (!token) return false;
-
-      tm = await CSRF.selectOne({pgschema, pks: token})
-
-      if (tm.isBad()) return false;
-
-      return tm.data.user == user.code;    
-    },
     
     login: async function(body) {
       // credentials good?
@@ -199,6 +238,15 @@ module.exports = {
   tenant: {
     get: async function({rec = {}} = {}) {
       // get one or more tenants
+      if ('code' in rec && rec.code == '_default') {
+        let tm = new TravelMessage();
+
+        tm.data = [Tenant.getColumnDefaults()];
+        tm.type = 'json';
+
+        return tm;
+      }
+            
       return await Tenant.select({pgschema, rec});
     },
     
@@ -260,7 +308,7 @@ module.exports = {
       }
           
       rec.code = code;
-      
+
       tobj = new Tenant(rec);
       
       return await tobj.updateOne({pgschema});
@@ -298,6 +346,15 @@ module.exports = {
   user: {
     get: async function({rec = {}} = {}) {
       // get one or more users
+      if ('code' in rec && rec.code == '_default') {
+        let tm = new TravelMessage();
+
+        tm.data = [Tenant.getColumnDefaults()];
+        tm.type = 'json';
+
+        return tm;
+      }
+
       return await User.select({pgschema, rec});
     },
     

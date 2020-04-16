@@ -32,11 +32,11 @@ console.log(path)
     return await entry.fn(req, res);
   }
 
-  static getOptions(req) {
+  static getSecurity(req) {
     var path = req.method + this._stripSlashes(req.parsedURL.pathname);
     var [entry, params] = this._getEntry(path);
     
-    return (!entry) ? false : entry.options;
+    return (!entry) ? false : entry.security;
   }
   
   static getInfo(path) {
@@ -97,7 +97,16 @@ console.log(path)
 }
 
 class RouterMessage {
-  constructor({method='post', app='', path='', fn='', options={}} = {}) {
+  constructor({method='post', app='', path='', fn='', security={}} = {}) {
+    /*
+      security: {
+        strategies: [
+          {session: {allowAnon, needCSRF}},
+          {basic: {allowAnon, needCSRF}},
+        ],
+        redirect: ''
+      }
+    */
     path = path || '';
 
     if (!Array.isArray(path)) path = [path];
@@ -106,61 +115,53 @@ class RouterMessage {
     this.app = app;
     this.path = path;
     this.fn = fn;
-    this.options = options;
-    
+    this.security = security;
+    this.security.app = app;
+  
     this.test();
   }
   
   test() {
     var methods = ['GET', 'POST', 'PUT', 'DELETE', 'INFO'];
-    
-    var defaults = {
-      needLogin: true,
+    var defaults = {};
+
+    defaults.session = {
       needCSRF: true,
-      bypassUser: false,
       allowAnon: false,
-      authApp: 'login',  // default to login app
-      redirect: '',
+    }
+
+    defaults.basic = {
+      needCSRF: false,
+      allowAnon: false,
     }
     
-    Object.keys(defaults).forEach(function(k) {
-      if (!(k in this.options)) {
-        this.options[k] = defaults[k];
+    for (let strategy of this.security.strategies) {
+      let type = Object.keys(strategy)[0];    // session or basic
+
+      for (let k in defaults[type]) {
+        if (!(k in strategy)) {
+          this.options[k] = defaults[type][k];
+        }
       }
-    }, this)
+    }
 
     if (methods.indexOf(this.method) == -1) {
       console.log(`Invalid Method ${this.method}`);
     }
 
-    //if (!this.path[0]) {
-    //  console.log(`No Path specified for ${this.method}`);
-    //}
-    
-    //if (!this.app) {
-    //  console.log(`No App specified for ${this.method} ${this.path}`);
-    //}
-
     if (!this.fn) {
       console.log(`No Function specified for ${this.method} ${this.app} ${this.path}`);
     }
     
-    if (this.options.needLogin && (this.options.needLogin !== true && this.options.needLogin !== false)) {
-      console.log(`Invalid needLogin Option for ${this.method} ${this.app} ${this.path}`);
-    }
-    
-    if (this.options.needCSRF && (this.options.needCSRF !== true && this.options.needCSRF !== false)) {
-      console.log(`Invalid needCSRF Option for ${this.method} ${this.app} ${this.path}`);
-    }
-    
-    if (this.options.bypassUser && (this.options.bypassUser !== true && this.options.bypassUser !== false)) {
-      console.log(`Invalid bypassUser option for ${this.method} ${this.app} ${this.path}`);
-    }
+    for (let strategy of this.security.strategies) {
+      if strategy.needCSRF && (strategy.needCSRF !== true && strategy.needCSRF !== false)) {
+        console.log(`Invalid needCSRF Option for ${this.method} ${this.app} ${this.path} ${strategy}`);
+      }      
 
-    if (this.options.allowAnon && (this.options.allowAnon !== true && this.options.allowAnon !== false)) {
-      console.log(`Invalid allowAnon Option for ${this.method} ${this.app} ${this.path}`);
+      if strategy.allowAnon && (strategy.allowAnon !== true && strategy.allowAnon !== false)) {
+        console.log(`Invalid allowAnon Option for ${this.method} ${this.app} ${this.path} ${strategy}`);
+      }            
     }
-
   }
 }
     

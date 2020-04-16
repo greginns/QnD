@@ -1,24 +1,30 @@
 import {QnD} from '/static/apps/static/js/qnd.js';
 import {MVC} from '/static/apps/static/js/mvc.js';
 import {Page, Section} from '/static/apps/static/js/router.js';
+import {TableView} from '/static/apps/static/js/data.js';
 
 class Migrate extends MVC {
   constructor(element) {
     super(element);
-    
-    //this.init(); //  use if not in router
   }
 
   createModel() {
     this.model.tenant = {};
     this.model.runAll = false;
-    this.model.errors = {
-      message: '',
-      _verify: []
-    }
+    this.model.tenants = [];
+    this.model.errors = [];
+
+    // wait until common data access is going.
+    document.getElementById('qndPages').addEventListener('tablestoreready', async function() {
+      let tenants = new TableView({proxy: this.model.tenants});
+
+      QnD.tableStores.tenant.addView(tenants);
+    }.bind(this), {once: true});
+
+    //this.ready(); //  use if not in router    
   }
 
-  init() {
+  ready() {
     return new Promise(function(resolve) {
       resolve();
     })          
@@ -27,22 +33,18 @@ class Migrate extends MVC {
   inView() {
     document.getElementById('admin-manage-navbar-migrate').classList.add('active');
     document.getElementById('admin-manage-navbar-migrate').classList.add('disabled');
-    //$('#admin-manage-navbar-migrate').addClass('active disabled');
-    //$('#admin-migrate-toast1').toast('hide');
   }
 
   outView() {
     document.getElementById('admin-manage-navbar-migrate').classList.remove('active');
     document.getElementById('admin-manage-navbar-migrate').classList.remove('disabled');
-    //$('#admin-manage-navbar-migrate').removeClass('active disabled');
 
     return true;  
   }
 
   async migrateOne(ev) {
-    var self = this;
     var idx = ev.target.querySelector('div.row').getAttribute('data-index');
-    var tenants = this.model.tenants;
+    var tenants = this.model.tenants.toJSON();
     var code = tenants[idx].code;
 
     QnD.widgets.modal.spinner.show();
@@ -53,7 +55,7 @@ class Migrate extends MVC {
   }
   
   async migrateAll() {
-    var tenants = this.model.tenants;
+    var tenants = this.model.tenants.toJSON();
     var res = await QnD.widgets.modal.confirm('Are you sure that you want to run ALL migrations?');
 
     if (res != '0') return;
@@ -72,7 +74,7 @@ class Migrate extends MVC {
   }
   
   async migrate(code, idx) {
-    var err;
+    let err;
     
     let res = await io.post({code}, '/admin/migrate');
 
@@ -89,27 +91,27 @@ class Migrate extends MVC {
   abortAll() {
     this.model.runAll = false;
   }
-  
+/*  
   displayErrors(res) {
     if ('data' in res && 'errors' in res.data) {
       for (let key of Object.keys(res.data.errors)) {
         if (key == 'message') {
-          QnD.widgets.modal.alert(res.data.errors.message);  
+          this.setBadMessage(res.data.errors.message);  
         }
         else {
-          for (let k of res.data.errors[key]) {
-            this.model.errors[key][k] = v;
+          for (let k in res.data.errors[key]) {
+            this.model.errors[key][k] = res.data.errors[key][k];
           };  
         }
       }
     }
     
-    this.model.errors._verify = res.errors._verify;
+    this.model.errors._verify = res.data.errors._verify;
   }
   
   clearErrors() {
     for (let key of Object.keys(this.model.errors)) {
-      if (errors[key] instanceof Object) {
+      if (this.model.errors[key] instanceof Object) {
         for (let key2 of Object.keys(this.model.errors[key])) {
           this.model.errors[key][key2] = '';
         }
@@ -118,6 +120,20 @@ class Migrate extends MVC {
         this.model.errors[key] = '';
       }
     }
+
+    this.setBadMessage('');
+  }
+*/
+  setGoodMessage(msg) {
+    this.model.goodMessage = msg;
+
+    setTimeout(function() {
+      this.model.goodMessage = '';
+    }.bind(this), 5000);
+  }
+
+  setBadMessage(msg) {
+    this.model.badMessage = msg;
   }
 }
 
@@ -127,7 +143,7 @@ let mvc= new Migrate('admin-manage-migrate-section');
 // hook them up to sections that will eventually end up in a page (done in module)
 let section1 = new Section({mvc});
 let el = document.getElementById('admin-manage-migrate');   // page html
-let page = new Page({el, path: 'migrations', title: 'Migrations', sections: [section1]});
+let page = new Page({el, path: '/migrations', title: 'Migrations', sections: [section1]});
     
 QnD.pages.push(page);
 

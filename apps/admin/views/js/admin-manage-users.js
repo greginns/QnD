@@ -1,5 +1,6 @@
 import {QnD} from '/static/apps/static/js/qnd.js';
 import {MVC} from '/static/apps/static/js/mvc.js';
+import {utils} from '/static/apps/static/js/utils.js';
 import {Page, Section} from '/static/apps/static/js/router.js';
 import {TableView} from '/static/apps/static/js/data.js';
 
@@ -17,36 +18,26 @@ class Users extends MVC {
       user: {},
       message: ''
     }
-    this.model.toastMessage = '';
 
-    this.defaults = {
-      user: {
-        code: '',
-        name: '',
-        email: '',
-        password: '',
-        active: '{{user.active.default}}'
-      }
-    };
+    this.model.goodMessage = '';
+    this.model.badMessage = '';
 
-    this.$addWatched('userPK', async function(nv, ov) {
-      if (nv) {
-        if (await this.canClear()) {
-          this.setUser(nv);  
-        }
-        else {
-          //this.model.userPK = ov;  ***
-        }
-      }
-    }.bind(this));
+    this.$addWatched('userPK', this.userSelected.bind(this));
         
-    //this.init(); //  use if not in router
+    this.defaults = {};
+
+    document.getElementById('qndPages').addEventListener('tablestoreready', async function() {
+      let users = new TableView({proxy: this.model.users});
+
+      QnD.tableStores.user.addView(users);
+    
+      this.defaults.user = await QnD.tableStores.user.getDefault();      
+    }.bind(this), {once: true})    
+
+    //this.ready(); //  use if not in router
   }
 
-  init() {
-    let users = new TableView({proxy: this.model.users});
-    QnD.tableStores.user.addView(users);
-    
+  ready() {
     return new Promise(function(resolve) {
       resolve();
     })          
@@ -55,28 +46,25 @@ class Users extends MVC {
   inView() {
     document.getElementById('admin-manage-navbar-users').classList.add('active');
     document.getElementById('admin-manage-navbar-users').classList.add('disabled');
-    //$('#admin-manage-navbar-users').addClass('active disabled');
-    //$('#admin-users-toast1').toast('hide');
   }
 
   outView() {
     document.getElementById('admin-manage-navbar-users').classList.remove('active');
     document.getElementById('admin-manage-navbar-users').classList.remove('disabled');
-    //$('#admin-manage-navbar-users').removeClass('active disabled');
 
     return true;  
   }
 
   async save() {
-    var user = this.model.user;
-    var userOrig = this.model.userOrig;
+    var user = this.model.user.toJSON();
+    var userOrig = this.model.userOrig.toJSON();
     var userPK = this.model.userPK;
     var diffs;
 
     this.clearErrors();
           
     if (userPK) {
-      diffs = QnD.utils.object.diff(userOrig, user);
+      diffs = utils.object.diff(userOrig, user);
       
       if (Object.keys(diffs).length == 0) {
         QnD.widgets.modal.alert('Nothing to update');
@@ -87,13 +75,12 @@ class Users extends MVC {
     QnD.widgets.modal.spinner.show();
 
     // new (post) or old (put)?
-    let res = (userPK) ? await QnD.tableStores.user.update(diffs) : await QnD.tableStores.user.insert(user);
+    let res = (userPK) ? await QnD.tableStores.user.update(userPK, {user: diffs}) : await QnD.tableStores.user.insert({user});
 
     if (res.status == 200) {
-      this.model.toastMessage = 'User Saved';
-      $('#admin-manage-users-toast1').toast('show');
-      
-      this.clearIt();
+      this.setGoodMessage('User Saved');
+    
+      this.model.userOrig = this.$copy(this.model.user);
     }
     else {
       this.displayErrors(res);
@@ -116,8 +103,7 @@ class Users extends MVC {
     let res = await QnD.tableStores.user.delete(userPk);
 
     if (res.status == 200) {
-      this.model.toastMessage = 'User Deleted';
-      $('#admin-manage-users-toast1').toast('show');
+      this.setGoodMessage('User Deleted');
 
       this.clearit();
     }
@@ -141,9 +127,9 @@ class Users extends MVC {
   }
   
   async canClear() {
-    var user = this.model.user;
-    var orig = this.model.userOrig;
-    var diffs = QnD.utils.object.diff(orig, user);
+    var user = this.model.user.toJSON();
+    var orig = this.model.userOrig.toJSON();
+    var diffs = utils.object.diff(orig, user);
     var ret;
 
     if (Object.keys(diffs).length > 0) {
@@ -159,16 +145,15 @@ class Users extends MVC {
     this.setDefaults();
   }
   
-  async getUserFromList(pk) {
-    var tenret = {};
-
-    if (pk) {
-      let res = await QnD.tableStores.user.get(userPk);
-
-      tenret = (res.status == '200') ? res.data : {};
+  userSelected(nv) {
+    // new user select from list
+    if (nv) {
+      this.setUser(nv);  
     }
+  }
 
-    return tenret;
+  async getUserFromList(pk) {
+    return (pk) ? await QnD.tableStores.user.getOne(pk) : {};
   }
   
   async setUser(pk) {
@@ -193,22 +178,22 @@ class Users extends MVC {
     if ('data' in res && 'errors' in res.data) {
       for (let key of Object.keys(res.data.errors)) {
         if (key == 'message') {
-          QnD.widgets.modal.alert(res.data.errors.message);  
+          this.setBadMessage(res.data.errors.message);  
         }
         else {
-          for (let k of res.data.errors[key]) {
-            this.model.errors[key][k] = v;
+          for (let k in res.data.errors[key]) {
+            this.model.errors[key][k] = res.data.errors[key][k];
           };  
         }
       }
     }
     
-    this.model.errors._verify = res.errors._verify;
+    this.model.errors._verify = res.data.errors._verify;
   }
   
   clearErrors() {
     for (let key of Object.keys(this.model.errors)) {
-      if (errors[key] instanceof Object) {
+      if (this.model.errors[key] instanceof Object) {
         for (let key2 of Object.keys(this.model.errors[key])) {
           this.model.errors[key][key2] = '';
         }
@@ -217,6 +202,20 @@ class Users extends MVC {
         this.model.errors[key] = '';
       }
     }
+
+    this.model.badMessage = '';
+  }
+  
+  setGoodMessage(msg) {
+    this.model.goodMessage = msg;
+
+    setTimeout(function() {
+      this.model.goodMessage = '';
+    }.bind(this), 5000);
+  }
+
+  setBadMessage(msg) {
+    this.model.badMessage = msg;
   }
 }
 

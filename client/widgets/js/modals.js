@@ -38,6 +38,7 @@ class Modal extends MVC {
     };
 
     this.model.isPrompt = false;
+    this.backdropDiv;
     
     this.resolve = '';
     this.reject = '';

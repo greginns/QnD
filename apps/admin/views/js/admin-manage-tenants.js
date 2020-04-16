@@ -1,5 +1,6 @@
 import {QnD} from '/static/apps/static/js/qnd.js';
 import {MVC} from '/static/apps/static/js/mvc.js';
+import {utils} from '/static/apps/static/js/utils.js';
 import {Page, Section} from '/static/apps/static/js/router.js';
 import {TableView} from '/static/apps/static/js/data.js';
 
@@ -19,24 +20,28 @@ class Tenants extends MVC {
       _verify: []
     }
 
-    this.$addWatched('userPK', async function(nv, ov) {
-      if (nv) {
-        if (await this.canClear()) {
-          this.setTenant(nv);  
-        }
-        else {
-          this.model.userPK = ov;
-        }
-      }
-    }.bind(this));
+    this.model.goodMessage = '';
+    this.model.baddMessage = '';
 
-    //this.init(); //  use if not in router
+    this.$addWatched('tenantPK', this.tenantSelected.bind(this));
+
+    this.defaults = {};
+
+    // wait until common data access is going.
+    document.getElementById('qndPages').addEventListener('tablestoreready', async function() {
+      let tenants = new TableView({proxy: this.model.tenants});
+
+      QnD.tableStores.tenant.addView(tenants);
+    
+      this.defaults.tenant = await QnD.tableStores.tenant.getDefault();
+    }.bind(this), {once: true});
+
+    //this.ready(); //  use if not in router
   }
 
-  init() {
-    let tenants = new TableView({proxy: this.model.tenants});
-    QnD.tableStores.tenant.addView(tenants);
-    
+  ready() {
+    this.clearIt();
+
     return new Promise(function(resolve) {
       resolve();
     })          
@@ -45,27 +50,24 @@ class Tenants extends MVC {
   inView() {
     document.getElementById('admin-manage-navbar-tenants').classList.add('active');
     document.getElementById('admin-manage-navbar-tenants').classList.add('disabled');
-    //$('#admin-manage-navbar-users').addClass('active disabled');
-    //$('#admin-users-toast1').toast('hide');
   }
 
   outView() {
     document.getElementById('admin-manage-navbar-tenants').classList.remove('active');
     document.getElementById('admin-manage-navbar-tenants').classList.remove('disabled');
-    //$('#admin-manage-navbar-users').removeClass('active disabled');
 
     return true;  
   }
   async save() {
-    var tenant = this.model.tenant;
-    var tenantOrig = this.model.tenantOrig;
+    var tenant = this.model.tenant.toJSON();
+    var tenantOrig = this.model.tenantOrig.toJSON();
     var tenantPK = this.model.tenantPK;
     var diffs;
 
     this.clearErrors();
-          
+
     if (tenantPK) {
-      diffs = QnD.utils.object.diff(tenantOrig, tenant);
+      diffs = utils.object.diff(tenantOrig, tenant);
       
       if (Object.keys(diffs).length == 0) {
         QnD.widgets.modal.alert('Nothing to update');
@@ -74,15 +76,13 @@ class Tenants extends MVC {
     }      
 
     QnD.widgets.modal.spinner.show();
-
     // new (post) or old (put)?
-    let res = (tenantPK) ? await QnD.tableStores.tenant.update(diffs) : await QnD.tableStores.tenant.insert(tenant);
+    let res = (tenantPK) ? await QnD.tableStores.tenant.update(tenantPK, {tenant: diffs}) : await QnD.tableStores.tenant.insert({tenant});
 
     if (res.status == 200) {
-      this.model.toastMessage = 'Tenant Saved';
-      $('#admin-manage-tenants-toast1').toast('show');
-      
-      this.clearIt();
+      this.setGoodMessage('Tenant Saved');
+
+      this.model.tenantOrig = this.$copy(this.model.tenant);
     }
     else {
       this.displayErrors(res);
@@ -105,8 +105,7 @@ class Tenants extends MVC {
     let res = await QnD.tableStores.tenant.delete(tenantPk);
 
     if (res.status == 200) {
-      this.model.toastMessage = 'Tenant Deleted';
-      $('#admin-manage-tenants-toast1').toast('show');
+      this.setGoodMessage('Tenant Deleted');
 
       this.clearit();
     }
@@ -130,9 +129,9 @@ class Tenants extends MVC {
   }
   
   async canClear() {
-    var tenant = this.model.tenant;
-    var orig = this.model.tenantOrig;
-    var diffs = QnD.utils.object.diff(orig, tenant);
+    var tenant = this.model.tenant.toJSON();
+    var orig = this.model.tenantOrig.toJSON();
+    var diffs = utils.object.diff(orig, tenant);
     var ret;
 
     if (Object.keys(diffs).length > 0) {
@@ -148,16 +147,15 @@ class Tenants extends MVC {
     this.setDefaults();
   }
   
-  async getTenantFromList(pk) {
-    var tenret = {};
-
-    if (pk) {
-      let res = await QnD.tableStores.tenant.get(tenantPk);
-
-      tenret = (res.status == '200') ? res.data : {};
+  tenantSelected(nv) {
+    // new tenant select from list
+    if (nv) {
+      this.setTenant(nv);  
     }
+  }
 
-    return tenret;
+  async getTenantFromList(pk) {
+    return (pk) ? await QnD.tableStores.tenant.getOne(pk) : {};
   }
   
   async setTenant(pk) {
@@ -182,22 +180,22 @@ class Tenants extends MVC {
     if ('data' in res && 'errors' in res.data) {
       for (let key of Object.keys(res.data.errors)) {
         if (key == 'message') {
-          QnD.widgets.modal.alert(res.data.errors.message);  
+          this.setBadMessage(res.data.errors.message);  
         }
         else {
-          for (let k of res.data.errors[key]) {
-            this.model.errors[key][k] = v;
+          for (let k in res.data.errors[key]) {
+            this.model.errors[key][k] = res.data.errors[key][k];
           };  
         }
       }
     }
     
-    this.model.errors._verify = res.errors._verify;
+    this.model.errors._verify = res.data.errors._verify;
   }
   
   clearErrors() {
     for (let key of Object.keys(this.model.errors)) {
-      if (errors[key] instanceof Object) {
+      if (this.model.errors[key] instanceof Object) {
         for (let key2 of Object.keys(this.model.errors[key])) {
           this.model.errors[key][key2] = '';
         }
@@ -206,8 +204,22 @@ class Tenants extends MVC {
         this.model.errors[key] = '';
       }
     }
+
+    this.setBadMessage('');
   }
-    
+
+  setGoodMessage(msg) {
+    this.model.goodMessage = msg;
+
+    setTimeout(function() {
+      this.model.goodMessage = '';
+    }.bind(this), 5000);
+  }
+
+  setBadMessage(msg) {
+    this.model.badMessage = msg;
+  }
+
   async migrate() {
     var tenantPK = this.model.tenantPK;      
     
@@ -222,8 +234,7 @@ class Tenants extends MVC {
     let res = await QnD.io.post({code: tenantPK}, '/admin/migrate');
 
     if (res.status == 200) {
-      this.model.toastMessage = 'Tenant Migrated';
-      $('#admin-manage-tenants-toast1').toast('show');
+      this.setGoodMessage('Tenant Migrated');
     }
     else {
       this.displayErrors(res);
@@ -239,7 +250,7 @@ let mvc = new Tenants('admin-manage-tenants-section');
 // hook them up to sections that will eventually end up in a page (done in module)
 let section1 = new Section({mvc});
 let el = document.getElementById('admin-manage-tenants');   // page html
-let page = new Page({el, path: 'tenants', title: 'Tenants', sections: [section1]});
+let page = new Page({el, path: '/tenants', title: 'Tenants', sections: [section1]});
     
 QnD.pages.push(page);
 

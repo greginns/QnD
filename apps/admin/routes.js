@@ -5,7 +5,6 @@ const {ResponseMessage} = require(root + '/server/utils/messages.js');
 const services = require(root + '/apps/admin/services.js');
 const {Router, RouterMessage} = require(root + '/server/utils/router.js');
 const app = 'admin';
-const authApp = 'admin';
 
 // Pages
 // Main/Login
@@ -18,7 +17,13 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false, needCSRF: false, authApp}
+  security: {
+    strategies: [
+      {session: {}},
+      {basic: {}}
+    ]
+  }
+  //options: {needLogin: false, needCSRF: false, authApp}
 }));
 
 // Manage page
@@ -38,18 +43,18 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'info',
   app,
-  path: '/auth', 
-  fn: async function(req) {
-    return await services.auth.verifySession(req);
+  path: '/session', 
+  fn: async function(req, security, strategy) {
+    return await services.auth.session(req, security, strategy);
   },
 }));
 
 Router.add(new RouterMessage({
   method: 'info',
   app,
-  path: '/csrf', 
-  fn: async function(req) {
-    return await services.auth.verifyCSRF(req);
+  path: '/basic', 
+  fn: async function(req, security, strategy) {
+    return await services.auth.basic(req, security, strategy);
   },
 }));
 

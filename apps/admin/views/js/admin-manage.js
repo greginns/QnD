@@ -31,12 +31,15 @@ let init = async function() {
 	QnD.tableStores.user = new TableStore({url: url2, safemode: false});  // setup a table store in QnD so all pages can access
   QnD.tableStores.user.getAll();      // seed the table store
 
-  // Start up pages.  QnD.pages saved up all page references
+  // tell everybody that data is ready
+  document.getElementById('qndPages').dispatchEvent(new CustomEvent('tablestoreready', {bubbles: false}));
+
+  // Start up router.  QnD.pages saved up all page references
   let pages = new Pages({root: '/admin/manage', pages: QnD.pages});
 
   try {
     // fire off init method in each section of each page.
-    await pages.init('tenants');   // default page
+    await pages.ready('tenants');   // default page
   }
   catch(e) {
     console.log('FAILURE TO LAUNCH');

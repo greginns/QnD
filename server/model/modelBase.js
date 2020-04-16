@@ -51,15 +51,28 @@ Object.assign(Employee, {
     var tn = this.getTableName({pgschema: null, naked: true}).toLowerCase();
     var schema = this.getSchema();
     
-    for (var col in schema) {
+    for (let col in schema) {
       defns[col] = schema[col].defn; 
+      if (typeof defns[col].default === 'function') defns[col].default = defns[col].default();
       defns[col].column = col;
       defns[col].id = `${tn}_${col}`;
     }
     
     return defns;
   }
-  
+
+  static getColumnDefaults() {
+    // return back defaults for each column
+    var defaults = {};
+    var schema = this.getSchema();
+    
+    for (let col in schema) {
+      defaults[col] = (schema[col].defn.default) ? typeof schema[col].defn.default === 'function' ? schema[col].defn.default() : schema[col].defn.default : '';
+    }
+    
+    return defaults;
+  }
+ 
   static getColumnList({cols = '*', isMainTable=false, joinName=false, showHidden = false, includeDerived = true} = {}) {
     // list of fully qualified, quoted, column names, ie "Department"."code"
     // Main Table name is "code" vs joinName/Derived "Department.code"
@@ -67,6 +80,7 @@ Object.assign(Employee, {
     var tnx = this.getTableName({pgschema: null, naked: true});   // without quotes
     var schema = this.getSchema();
     var as, colx, fl = [], colNames = [], goodCols = [];
+    var pks = this.getConstraints().pk;
 
     // select columns, either all or specific
     if (!cols || cols == '*') {
@@ -98,6 +112,11 @@ Object.assign(Employee, {
         fl.push(`${colx}${as}`);  
       }
     })
+
+    // add in _pk
+    if (isMainTable) {
+      (pks.length > 1) ? fl.push(`concat(${pks.join(',')}) AS _pk`) : fl.push(`"${pks[0]}" AS _pk`);
+    }
 
     return fl.join(',');   
   }

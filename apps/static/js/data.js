@@ -92,7 +92,7 @@ class WSDataComm {
 
   _handleIncomingMessage(text) {
     var data = JSON.parse(text);
-
+console.log('WS', data)
     switch(data.cat) {
       case 'pub':
         switch(data.source) {
@@ -141,15 +141,21 @@ class TableStore {
       this._updateStore('+', rows);
     }
     
-    return this.store.get(_pk);
+    return this.store.get(_pk) || {};
   }
-  
+
+  async getDefault() {
+    let res = await io.get({}, this.url + '/_default');
+
+    return (res.status == 200) ? res.data[0] : {};
+  }
+
   async insert(data) {
     let res = await io.post(data, this.url);
     
     if (this.safemode) {
       if (res.status == 200) {
-        this._updateStore('+', res.data);
+        this._updateStore('+', [res.data]);
       }
     }
     
@@ -161,7 +167,7 @@ class TableStore {
     
     if (this.safemode) {
       if (res.status == 200) {
-        this._updateStore('*', res.data);
+        this._updateStore('*', [res.data]);
       }
     }
     
@@ -237,7 +243,7 @@ class TableView {
     
     // if replacements, then replace in proxy
     // just in case, keep leftovers to add
-    if (action == '*') {
+    if (action == '*' || action == '+') {
       let leftovers = [], ppks = [], rpks = [];
       
       // make two lists of pks, to compare.  Faster than outer/inner iteration
@@ -294,6 +300,7 @@ class TableView {
       // 4. figure out where new entries went
       // it would be easier to add to the proxy, then sort the proxy but then it's replaced 100% each time
       let temp = JSON.parse(JSON.stringify(this.proxy));
+
       temp = temp.concat(rows)
       temp.sort(this.sortFunc);
 
