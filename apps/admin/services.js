@@ -25,6 +25,66 @@ config.apps.forEach(function(app) {
   }
 })
 
+async function verifySession(req) {
+  var sessID = req.cookies.admin_session || '';
+  var tenant = null, user = null, tm;
+
+  if (sessID) {
+    tm = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
+
+    if (tm.isGood()) {  // good session ID, get user associated with session
+      tm = await User.selectOne({pgschema, cols: '*', pks: tm.data.user});
+
+      if (tm.isGood()) {  // good user
+        tenant = {code: 'public'};  // this is the system app
+        user = tm.data;
+      }
+    }
+  } 
+  
+  return [tenant, user];
+}
+
+async function verifyBasic(req) {
+  var tenant = null, user = null, tm;
+  var tup, tu, pswd, x;
+  var authHdr = req.headers.authorization || null;
+
+  if (!authHdr) return [tenant, user];
+
+  tup = Buffer.from(authHdr.substr(6), 'base64').toString('ascii');
+  [tu, pswd, ...x] = tup.split(':');
+  [tenant, user, ...x] = tu.split('-');
+
+  tm = await User.selectOne({pgschema, cols: '*', showHidden: true, pks: user});
+
+  if (tm.isGood()) {
+    user = tm.data;
+    let match = await bcrypt.compare(pswd, tm.data.password);
+
+    if (match) return [{code: 'public'}, user];
+  }
+
+  return [tenant, user];
+}
+
+async function verifyAnonAndCSRF(user, strategy) {
+  // can we have an Anonymous user?
+  var status = 401;
+
+  if (user.code != 'Anonymous' || (user.code == 'Anonymous' && strategy.allowAnon)) {
+    let res = true;
+
+    if (strategy.needCSRF) { // must we have a valid CSRF token?
+      res = await verifyCSRF(user, req.CSRFToken || null);
+    }
+
+    if (res) status = 200;
+  }
+
+  return status;
+}
+
 async function verifyCSRF(user, token) {
   // get token, check if user matches
   var tm;
@@ -126,41 +186,47 @@ module.exports = {
         test Anonymous
         test CSRF
       */
-      var tm, status=401, tenant = null, user = null;
-      var sessID = req.cookies.admin_session || '';
+      var status = 401;
+      var [tenant, user] = await verifySession(req);
 
-      if (sessID) {
-        tm = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
-
-        if (tm.isGood()) {  // good session ID, get user associated with session
-          tm = await User.selectOne({pgschema, cols: '*', pks: tm.data.user});
-
-          if (tm.isGood()) {  // good user
-            tenant = {code: 'public'};  // this is the system app
-            user = tm.data;
-
-            // can we have an Anonymous user?
-            if (user.code != 'Anonymous' || (user.code == 'Anonymous' && strategy.allowAnon)) {
-              let res = true;
-
-              if (strategy.needCSRF) { // must we have a valid CSRF token?
-                res = await verifyCSRF(user, req.CSRFToken || null);
-              }
-
-              if (res) status = 200;
-            }
-          }
-        }
+      if (tenant && user) {
+        status = verifyAnonAndCSRF(user, strategy);
       }
 
       if (status == 401) {
-        if (security.redirect) return new ResponseMessage({type: 'text', status: 302, err: {message: security.redirect}});
+        if (security.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: security.redirect}});
         return new TravelMessage({type: 'text', status: 401});
       }
         
-      return new ResponseMessage({type: 'text', status: 200, data: [tenant, user]});
-    }
+      return new TravelMessage({type: 'text', status: 200, data: {tenant, user}});
+    },
 
+    basic: async function(req, security, strategy) {
+      // tenant-user:password
+      // decode base64 authorization header
+      // get user, compare password
+      // test Anonymous
+      // test CSRF
+
+      var status = 401;
+      var [tenant, user] = await verifyBasic(req);
+
+      if (tenant && user) {
+        status = verifyAnonAndCSRF(user, strategy);
+      }
+
+      if (status == 401) {
+        if (security.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: security.redirect}});
+        return new TravelMessage({type: 'text', status: 401});
+      }
+        
+      return new TravelMessage({type: 'text', status: 200, data: {tenant, user}});
+    },
+
+    ws: async function(req) {
+      return await verifySession(req);
+    },
+/*
     verifySession: async function(req) {
       var tm, user = null;
       var sessID = req.cookies.admin_session || '';
@@ -177,9 +243,7 @@ module.exports = {
         
       return [{code: 'public'}, user];
     },
-    
-
-    
+*/   
     login: async function(body) {
       // credentials good?
       // create Session record 

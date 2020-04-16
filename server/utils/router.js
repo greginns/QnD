@@ -8,9 +8,9 @@ class Router {
   }
 
   static add(msg) {
-    msg.path.forEach(function(p) {
+    for (let p of msg.path) {
       routePaths.push({mpath: msg.method + '/' + msg.app + this._stripSlashes(p), msg});
-    }, this)  
+    }
   }
 
   static async go(req, res) {
@@ -33,14 +33,16 @@ console.log(path)
   }
 
   static getSecurity(req) {
+    // get security for a route
     var path = req.method + this._stripSlashes(req.parsedURL.pathname);
     var [entry, params] = this._getEntry(path);
     
     return (!entry) ? false : entry.security;
   }
   
-  static getInfo(path) {
-    path = 'INFO' + this._stripSlashes(path);
+  static getStrategy(path) {
+    // get strategy route
+    path = 'STRATEGY' + this._stripSlashes(path);
     var [entry, params] = this._getEntry(path);
 
     return entry;
@@ -117,12 +119,16 @@ class RouterMessage {
     this.fn = fn;
     this.security = security;
     this.security.app = app;
+
+    if (!('strategies' in this.security)) this.security.strategies = [];
+    if (!('redirect' in this.security)) this.security.redirect = '';
   
     this.test();
   }
   
   test() {
-    var methods = ['GET', 'POST', 'PUT', 'DELETE', 'INFO'];
+    var methods = ['GET', 'POST', 'PUT', 'DELETE', 'STRATEGY'];
+    var types = ['SESSION', 'BASIC'];
     var defaults = {};
 
     defaults.session = {
@@ -138,10 +144,15 @@ class RouterMessage {
     for (let strategy of this.security.strategies) {
       let type = Object.keys(strategy)[0];    // session or basic
 
-      for (let k in defaults[type]) {
-        if (!(k in strategy)) {
-          this.options[k] = defaults[type][k];
+      if (types.indexOf(type.toUpperCase()) > -1) {
+        for (let k in defaults[type]) {
+          if (!(k in strategy)) {
+            strategy[type][k] = defaults[type][k];
+          }
         }
+      }
+      else {
+        console.log(`Strategy type ${type} is not valid`);
       }
     }
 
@@ -154,11 +165,11 @@ class RouterMessage {
     }
     
     for (let strategy of this.security.strategies) {
-      if strategy.needCSRF && (strategy.needCSRF !== true && strategy.needCSRF !== false)) {
+      if (strategy.needCSRF && (strategy.needCSRF !== true && strategy.needCSRF !== false)) {
         console.log(`Invalid needCSRF Option for ${this.method} ${this.app} ${this.path} ${strategy}`);
       }      
 
-      if strategy.allowAnon && (strategy.allowAnon !== true && strategy.allowAnon !== false)) {
+      if (strategy.allowAnon && (strategy.allowAnon !== true && strategy.allowAnon !== false)) {
         console.log(`Invalid allowAnon Option for ${this.method} ${this.app} ${this.path} ${strategy}`);
       }            
     }
