@@ -1,8 +1,8 @@
 const root = process.cwd();
 const nunjucks = require('nunjucks');
 
-const {TravelMessage} = require(root + '/server/utils/messages.js');
-const {NunjucksError} = require(root + '/server/utils/errors.js');
+const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
+const {NunjucksError} = require(root + '/lib/server/utils/errors.js');
 /*
 const {CSRF} = require(root + '/apps/timeclock/models/models.js');
 

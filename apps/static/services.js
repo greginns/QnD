@@ -1,8 +1,8 @@
 const root = process.cwd();
 const fs = require('fs').promises;
 
-const {TravelMessage} = require(root + '/server/utils/messages.js');
-const {Error404} = require(root + '/server/utils/errors.js');
+const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
+const {Error404} = require(root + '/lib/server/utils/errors.js');
 
 /*
   /static is an app that can get a file in any folder
@@ -25,6 +25,20 @@ module.exports = {
     try {
       tm.data = await fs.readFile(root + '/' + url);  
       tm.type = ft;
+    }
+    catch(err) {
+      tm.err = new Error404();
+    }
+
+    return tm;
+  },
+
+  getFavicon: async function(req) {
+    let tm = new TravelMessage();
+
+    try {
+      tm.data = await fs.readFile(root + '/favicon.ico');  
+      tm.type = 'icon';
     }
     catch(err) {
       tm.err = new Error404();

@@ -1,11 +1,10 @@
 const root = process.cwd();
 
-const {TravelMessage} = require(root + '/server/utils/messages.js');
+const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
+const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
+const {modelPubsub} = require(root + '/lib/server/utils/pubsub.js');
 const services = require(root + '/apps/test/services.js');
-const {Router, RouterMessage} = require(root + '/server/utils/router.js');
-const {modelPubsub} = require(root + '/server/utils/pubsub.js');
 const app = 'test';
-const authApp = 'test';
 
 var rows;
 var rowsInit = [
@@ -33,7 +32,9 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false, needCSRF: false, authApp}
+  security: {
+    strategies: []
+  }
 }));
 
 Router.add(new RouterMessage({
@@ -52,7 +53,9 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false, needCSRF: false, authApp}
+  security: {
+    strategies: []
+  }
 }));
 
 Router.add(new RouterMessage({
@@ -82,7 +85,9 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false, needCSRF: false, authApp}
+  security: {
+    strategies: []
+  }
 }));
 
 Router.add(new RouterMessage({
@@ -110,7 +115,9 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false, needCSRF: false, authApp}
+  security: {
+    strategies: []
+  }
 }));
 
 Router.add(new RouterMessage({
@@ -133,7 +140,9 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false, needCSRF: false, authApp}
+  security: {
+    strategies: []
+  }
 }));
 
 // Main/Login
@@ -148,24 +157,17 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false, needCSRF: false, authApp}
+  security: {
+    strategies: []
+  }
 }));
 
 // info rtns
 Router.add(new RouterMessage({
-  method: 'info',
+  method: 'strategy',
   app,
-  path: '/auth', 
+  path: '/session', 
   fn: async function(req) {
     return [{code: 'david'}, {id: 'test'}];
-  },
-}));
-
-Router.add(new RouterMessage({
-  method: 'info',
-  app,
-  path: '/csrf', 
-  fn: async function(req) {
-    return true;
   },
 }));

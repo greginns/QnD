@@ -1,6 +1,6 @@
 const root = process.cwd();
-const Fields = require(root + '/server/model/modelFields');
-const Model = require(root + '/server/model/modelRun.js');
+const Fields = require(root + '/lib/server/model/modelFields');
+const Model = require(root + '/lib/server/model/modelRun.js');
 const app = 'admin';
 
 var setNewDate = function() {

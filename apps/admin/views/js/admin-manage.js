@@ -1,15 +1,15 @@
 // main
-import {QnD} from '/static/apps/static/js/qnd.js';
-import {WSDataComm, TableStore} from '/static/apps/static/js/data.js';
-import {Pages} from '/static/apps/static/js/router.js';
+import {QnD} from '/static/lib/client/core/qnd.js';
+import {WSDataComm, TableStore} from '/static/lib/client/core/data.js';
+import {Pages} from '/static/lib/client/core/router.js';
 
 import '/static/apps/admin/views/js/admin-manage-tenants.js';
 import '/static/apps/admin/views/js/admin-manage-users.js';
 import '/static/apps/admin/views/js/admin-manage-migrate.js';
 
-import '/static/client/widgets/js/modals.js';
-import '/static/client/widgets/js/mtime.js';
-import '/static/client/widgets/js/mdate.js';
+import '/static/lib/client/widgets/js/modals.js';
+import '/static/lib/client/widgets/js/mtime.js';
+import '/static/lib/client/widgets/js/mdate.js';
 
 let init = async function() {
   // setup data access

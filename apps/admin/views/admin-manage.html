@@ -1,4 +1,4 @@
-{% extends "client/base.html" %}
+{% extends "lib/client/base.html" %}
 
 {% block title %}
   Admin
@@ -25,9 +25,9 @@
     </div>
   </div>
 
-  {% include "client/widgets/modals.html" %}
-  {% include "client/widgets/mdate.html" %}
-  {% include "client/widgets/mtime.html" %}
+  {% include "lib/client/widgets/modals.html" %}
+  {% include "lib/client/widgets/mdate.html" %}
+  {% include "lib/client/widgets/mtime.html" %}
   
   {% include "./admin-login.html" %}
 {% endblock %}

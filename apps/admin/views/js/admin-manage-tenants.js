@@ -1,8 +1,8 @@
-import {QnD} from '/static/apps/static/js/qnd.js';
-import {MVC} from '/static/apps/static/js/mvc.js';
-import {utils} from '/static/apps/static/js/utils.js';
-import {Page, Section} from '/static/apps/static/js/router.js';
-import {TableView} from '/static/apps/static/js/data.js';
+import {QnD} from '/static/lib/client/core/qnd.js';
+import {MVC} from '/static/lib/client/core/mvc.js';
+import {utils} from '/static/lib/client/core/utils.js';
+import {Page, Section} from '/static/lib/client/core/router.js';
+import {TableView} from '/static/lib/client/core/data.js';
 
 class Tenants extends MVC {
   constructor(element) {

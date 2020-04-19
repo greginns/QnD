@@ -9,10 +9,10 @@ const nunjucks = require('nunjucks');
 const uuidv1 = require('uuid/v1');
 const bcrypt = require('bcrypt');
 
-const sqlUtil = require(root + '/server/utils/sqlUtil.js');
-const migration = require(root + '/server/utils/migration.js');
-const {UserError, NunjucksError, InvalidUserError, JSONError} = require(root + '/server/utils/errors.js');
-const {TravelMessage} = require(root + '/server/utils/messages.js');
+const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
+const migration = require(root + '/lib/server/utils/migration.js');
+const {UserError, NunjucksError, InvalidUserError, JSONError} = require(root + '/lib/server/utils/errors.js');
+const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {Tenant, User, Session, CSRF} = require(root + '/apps/admin/models.js');
 const tenantUser = require(root + '/apps/login/models.js').User;
 const config = require(root + '/config.json');
@@ -26,6 +26,7 @@ config.apps.forEach(function(app) {
 })
 
 async function verifySession(req) {
+  // verify session strategy
   var sessID = req.cookies.admin_session || '';
   var tenant = null, user = null, tm;
 
@@ -35,7 +36,7 @@ async function verifySession(req) {
     if (tm.isGood()) {  // good session ID, get user associated with session
       tm = await User.selectOne({pgschema, cols: '*', pks: tm.data.user});
 
-      if (tm.isGood()) {  // good user
+      if (tm.isGood() && tm.data.active) {  // good user
         tenant = {code: 'public'};  // this is the system app
         user = tm.data;
       }
@@ -46,29 +47,32 @@ async function verifySession(req) {
 }
 
 async function verifyBasic(req) {
+  // verify basic strategy
   var tenant = null, user = null, tm;
-  var tup, tu, pswd, x;
+  var tup, tu, pswd, x, xtenant, xuser;
   var authHdr = req.headers.authorization || null;
 
   if (!authHdr) return [tenant, user];
 
   tup = Buffer.from(authHdr.substr(6), 'base64').toString('ascii');
   [tu, pswd, ...x] = tup.split(':');
-  [tenant, user, ...x] = tu.split('-');
+  [xtenant, xuser, ...x] = tu.split('-');
 
-  tm = await User.selectOne({pgschema, cols: '*', showHidden: true, pks: user});
+  tm = await User.selectOne({pgschema, cols: '*', showHidden: true, pks: xuser});
 
-  if (tm.isGood()) {
-    user = tm.data;
+  if (tm.isGood() && tm.data.active) {
     let match = await bcrypt.compare(pswd, tm.data.password);
 
-    if (match) return [{code: 'public'}, user];
+    if (match) {
+      tenant = {code: 'public'};
+      user = tm.data;
+    }
   }
 
   return [tenant, user];
 }
 
-async function verifyAnonAndCSRF(user, strategy) {
+async function verifyAnonAndCSRF(req, user, strategy) {
   // can we have an Anonymous user?
   var status = 401;
 
@@ -96,7 +100,7 @@ async function verifyCSRF(user, token) {
   if (tm.isBad()) return false;
 
   return tm.data.user == user.code;    
-};
+}
 
 const migFile = {
   write: async function(file, json) {
@@ -131,53 +135,6 @@ const migFile = {
 };
 
 module.exports = {
-  output: {
-    main: async function(req) {
-      // Login Page
-      var ctx = {};
-      var nj;
-      var tm = new TravelMessage();
-      
-      try {
-        nj = nunjucks.configure([root], { autoescape: true });
-        tm.data = nj.render('apps/admin/views/admin.html', ctx);
-        tm.type = 'html';
-      }  
-      catch(err) {
-        tm.err = new NunjucksError(err);
-      }
-
-      return tm;
-    },
-    
-    manage: async function(req) {
-      // Main admin manage page.  Needs a user so won't get here without one
-      var ctx = {};
-      var nj;
-      var tm = new TravelMessage();
-
-      ctx.TID = pgschema;
-      ctx.CSRFToken = uuidv1();
-      ctx.tenant = Tenant.getColumnDefns();   // for field defns
-      ctx.user = User.getColumnDefns();
-      
-      // create CSRF record
-      rec = new CSRF({token: ctx.CSRFToken, user: req.user.code});
-      tm = await rec.insertOne({pgschema});
-
-      try {
-        nj = nunjucks.configure([root], { autoescape: true });
-        tm.data = nj.render('apps/admin/views/admin-manage.html', ctx);
-        tm.type = 'html';
-      }  
-      catch(err) {
-        tm.err = new NunjucksError(err);
-      }
-
-      return tm;
-    },
-  },
-  
   auth: {
     session: async function(req, security, strategy) {
       /*
@@ -190,7 +147,7 @@ module.exports = {
       var [tenant, user] = await verifySession(req);
 
       if (tenant && user) {
-        status = verifyAnonAndCSRF(user, strategy);
+        status = verifyAnonAndCSRF(req, user, strategy);
       }
 
       if (status == 401) {
@@ -212,7 +169,7 @@ module.exports = {
       var [tenant, user] = await verifyBasic(req);
 
       if (tenant && user) {
-        status = verifyAnonAndCSRF(user, strategy);
+        status = verifyAnonAndCSRF(req, user, strategy);
       }
 
       if (status == 401) {
@@ -273,17 +230,64 @@ module.exports = {
       // delete session record
       // remove cookie
       var id = req.cookies.admin_session || '';
-      var tobj, tm;
+      var tobj;
       
       if (id) {
         tobj = new Session({id});
-        tm = await tobj.deleteOne({pgschema});
+        await tobj.deleteOne({pgschema});
       }
       
       return new TravelMessage({data: '/admin', type: 'text', status: 200, cookies: [{name: 'admin_session', value: ''}]});
     },
   },
-  
+
+  output: {
+    main: async function(req) {
+      // Login Page
+      var ctx = {};
+      var nj;
+      var tm = new TravelMessage();
+      
+      try {
+        nj = nunjucks.configure([root], { autoescape: true });
+        tm.data = nj.render('apps/admin/views/admin.html', ctx);
+        tm.type = 'html';
+      }  
+      catch(err) {
+        tm.err = new NunjucksError(err);
+      }
+
+      return tm;
+    },
+    
+    manage: async function(req) {
+      // Main admin manage page.  Needs a user so won't get here without one
+      var ctx = {};
+      var nj, rec;
+      var tm = new TravelMessage();
+
+      ctx.TID = pgschema;
+      ctx.CSRFToken = uuidv1();
+      ctx.tenant = Tenant.getColumnDefns();   // for field defns
+      ctx.user = User.getColumnDefns();
+      
+      // create CSRF record
+      rec = new CSRF({token: ctx.CSRFToken, user: req.user.code});
+      tm = await rec.insertOne({pgschema});
+
+      try {
+        nj = nunjucks.configure([root], { autoescape: true });
+        tm.data = nj.render('apps/admin/views/admin-manage.html', ctx);
+        tm.type = 'html';
+      }  
+      catch(err) {
+        tm.err = new NunjucksError(err);
+      }
+
+      return tm;
+    },
+  },
+
   query: async function(query) {
     var sql, tm;
     
@@ -345,7 +349,7 @@ module.exports = {
       for (var app of appNames) {
         let migrationFile = root + `/apps/${app}/migrations/${rec.code}.json`;
 
-        let res = await migFile.write(migrationFile, {});
+        await migFile.write(migrationFile, {});
       }
 
       tm3 = await migration({tenant: rec.code});
@@ -452,7 +456,7 @@ module.exports = {
       // run migrations for this tenant
       if (!code) return new TravelMessage({err: new UserError('No Tenant Code Supplied')});
       
-      tm = await Tenant.selectOne({pgschema, cols: '*', showHidden: true, pks: code});
+      let tm = await Tenant.selectOne({pgschema, cols: '*', showHidden: true, pks: code});
       if (tm.isBad()) return tm;
 
       return await migration({tenant: code});

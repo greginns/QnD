@@ -1,6 +1,6 @@
 const root = process.cwd();
+const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
 const services = require(root + '/apps/login/services.js');
-const {Router, RouterMessage} = require(root + '/server/utils/router.js');
 const app = 'login';
 
 // login page
@@ -13,7 +13,9 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: false, needCSRF: false, allowAnon: true}
+  security: {
+    strategies: []
+  }
 }));
 
 // login
@@ -26,7 +28,9 @@ Router.add(new RouterMessage({
   
     return tm.toResponse();
   },
-  options: {needLogin: false, needCSRF: false}
+  security: {
+    strategies: []
+  }
 }));
 
 // logout
@@ -39,25 +43,35 @@ Router.add(new RouterMessage({
   
     return tm.toResponse();
   },
-  options: {needLogin: false, needCSRF: false}
+  security: {
+    strategies: []
+  }
 }));
 
-// check session
+//strategy rtns
 Router.add(new RouterMessage({
-  method: 'info',
+  method: 'strategy',
   app,
-  path: '/auth', 
-  fn: async function(req) {
-    return await services.auth.verifySession(req);
+  path: '/session', 
+  fn: async function(req, security, strategy) {
+    return await services.auth.session(req, security, strategy);
   },
 }));
 
-// check csrf
 Router.add(new RouterMessage({
-  method: 'info',
+  method: 'strategy',
   app,
-  path: '/csrf', 
+  path: '/basic', 
+  fn: async function(req, security, strategy) {
+    return await services.auth.basic(req, security, strategy);
+  },
+}));
+
+Router.add(new RouterMessage({
+  method: 'strategy',
+  app,
+  path: '/ws', 
   fn: async function(req) {
-    return await services.auth.verifyCSRF(req);
+    return await services.auth.ws(req);
   },
 }));

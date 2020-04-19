@@ -1,11 +1,11 @@
 const root = process.cwd();
 const fs = require('fs').promises;
 
-const {ResponseMessage} = require(root + '/server/utils/messages.js');
+const {ResponseMessage} = require(root + '/lib/server/utils/messages.js');
+const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
+
 const services = require(root + '/apps/admin/services.js');
-const {Router, RouterMessage} = require(root + '/server/utils/router.js');
 const app = 'admin';
-const authApp = 'admin';
 
 // Pages
 // Main/Login
@@ -22,7 +22,6 @@ Router.add(new RouterMessage({
     strategies: [
     ]
   }
-  //options: {needLogin: false, needCSRF: false, authApp}
 }));
 
 // Manage page
@@ -42,10 +41,9 @@ Router.add(new RouterMessage({
     ],
     redirect: '/admin'
   } 
-  //options: {needLogin: true, needCSRF: false, redirect: '/admin', authApp}
 }));
 
-// Login/out, info rtns
+//strategy rtns
 Router.add(new RouterMessage({
   method: 'strategy',
   app,
@@ -73,6 +71,7 @@ Router.add(new RouterMessage({
   },
 }));
 
+// login in/out
 Router.add(new RouterMessage({
   method: 'post',
   app,
@@ -86,7 +85,6 @@ Router.add(new RouterMessage({
     strategies: [
     ]
   }
-  //options: {needLogin: false, needCSRF: false, authApp}
 }));
 
 Router.add(new RouterMessage({
@@ -98,7 +96,11 @@ Router.add(new RouterMessage({
   
     return tm.toResponse();
   },
-  options: {needLogin: false, needCSRF: false, authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
 }));
 
 // tenant management
@@ -110,8 +112,12 @@ Router.add(new RouterMessage({
     var tm = await services.tenant.get();
   
     return tm.toResponse();
-  }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 Router.add(new RouterMessage({
@@ -123,7 +129,11 @@ Router.add(new RouterMessage({
   
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 Router.add(new RouterMessage({
@@ -135,7 +145,11 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 Router.add(new RouterMessage({
@@ -147,7 +161,11 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 Router.add(new RouterMessage({
@@ -159,7 +177,11 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 // Admin Users
@@ -172,7 +194,11 @@ Router.add(new RouterMessage({
   
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 Router.add(new RouterMessage({
@@ -184,7 +210,11 @@ Router.add(new RouterMessage({
   
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 Router.add(new RouterMessage({
@@ -196,7 +226,11 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 Router.add(new RouterMessage({
@@ -208,7 +242,11 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 Router.add(new RouterMessage({
@@ -220,7 +258,11 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 // Migrations
@@ -233,7 +275,11 @@ Router.add(new RouterMessage({
 
     return tm.toResponse();
   }, 
-  options: {needLogin: true, needCSRF: true, redirect: '', authApp}
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+    ],
+  } 
 }));
 
 // misc for testing
@@ -259,5 +305,8 @@ Router.add(new RouterMessage({
 
     return rm;
   }, 
-  options: {needLogin: false, bypassuser: true}
+  security: {
+    strategies: [
+    ],
+  } 
 }));

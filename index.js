@@ -7,13 +7,13 @@ const uuidv1 = require('uuid/v1');
 const config = require(root + '/config.json');
 
 const mw = {}
-mw.request = require(root + '/server/middleware/request.js');
-mw.security = require(root + '/server/middleware/security.js');
-mw.reply = require(root + '/server/middleware/reply.js');
+mw.request = require(root + '/lib/server/middleware/request.js');
+mw.security = require(root + '/lib/server/middleware/security.js');
+mw.reply = require(root + '/lib/server/middleware/reply.js');
 
-const {Router} = require(root + '/server/utils/router.js');
-const {Wouter} = require(root + '/server/utils/wouter.js');
-const sqlUtil = require(root + '/server/utils/sqlUtil.js');
+const {Router} = require(root + '/lib/server/utils/router.js');
+const {Wouter} = require(root + '/lib/server/utils/wouter.js');
+const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
 const WSclients = new Map();
 
 for (app of config.apps) {
