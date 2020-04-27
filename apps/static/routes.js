@@ -5,6 +5,7 @@ const app = 'static';
 const allowedSubdirs = [
   '/apps/test/views/js/:fn', 
   '/apps/admin/views/js/:fn', 
+  '/apps/contacts/views/js/:fn', 
   '/lib/client/widgets/js/:fn',
   '/lib/client/core/:fn', 
 ]

@@ -1,0 +1,84 @@
+<page id='contacts-main' style='display: none'>
+  <section id='contacts-main-section'>
+    <div class='row form-group justify-content-center'>
+      
+      <div class='col-12 col-md-6 col-lg-4 col-xl-3 mb-4'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-9'>
+                {{ buttons.btnsm(class='success', mvc_click='newContact', text='+ New Contact') }}
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-12'>
+                <select mvc-each='contacts' mvc-value='contactPK' class='form-control' size='10' style='width: 100%' mvc-disabled='contact.id'>
+                  <option mvc-option='{text: "contacts.$index.fullname", value: "contacts.$index.id"}'></option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class='col-12 col-md-6 col-lg-6 col-xl-6'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6 col-lg-6'>
+                {{ fields.Char(type='text', id=contact.id.id, maxlength=contact.id.maxLength, mvc_value='contact.id', mvc_disabled='contactPK', label=contact.id.verbose) }}
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-12 col-lg-6 mb-2'>
+                {{ fields.Char(type='text', id=contact.first.id, maxlength=contact.first.maxLength, mvc_value='contact.first', label=contact.first.verbose) }}
+              </div>
+              <div class='col-12 col-lg-6 mb-2'>
+                {{ fields.Char(type='text', id=contact.last.id, maxlength=contact.last.maxLength, mvc_value='contact.last', label=contact.last.verbose) }}
+              </div>
+            </div>
+            
+            <div class='row'>
+              <div class='col-12 col-lg-6 mb-2'>
+                {{ fields.Char(type='text', id=contact.group.id, maxlength=contact.group.maxLength, mvc_value='contact.group', label=contact.group.verbose) }}
+              </div>
+              <div class='col-12 col-lg-6 mb-2'>
+                {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact.email', label=contact.email.verbose) }}
+              </div>
+            </div>
+          </div>
+          
+          <div class='card-footer'>
+            <div class='row mb-2'>
+              <div class='col-12'>
+                <span mvc-hide='contactPK'>
+                  {{ buttons.btn(class='primary', mvc_click='save', text='Add Contact') }}
+                </span>
+                <span mvc-show='contactPK'>
+                  {{ buttons.btn(class='primary', mvc_click='save', text='Update Contact') }}
+                  {{ buttons.btn(class='danger', mvc_click='delete', text='Delete Contact') }}
+                </span>
+                {{ buttons.btn(class='secondary', mvc_click='clear', text='Clear') }}
+              </div>
+            </div>            
+
+            <div class='row'>
+              <div class='col-12 text-success'>
+                <span mvc-text='goodMessage'></span>
+              </div>
+              <div class='col-12 text-danger'>
+                <span mvc-text='badMessage'></span>
+              </div>
+            </div>         
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</page>

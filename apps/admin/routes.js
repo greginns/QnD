@@ -49,7 +49,9 @@ Router.add(new RouterMessage({
   app,
   path: '/session', 
   fn: async function(req, security, strategy) {
-    return await services.auth.session(req, security, strategy);
+    let tm = await services.auth.session(req, security, strategy);
+
+    return tm.toResponse();
   },
 }));
 
@@ -58,7 +60,9 @@ Router.add(new RouterMessage({
   app,
   path: '/basic', 
   fn: async function(req, security, strategy) {
-    return await services.auth.basic(req, security, strategy);
+    let tm = await services.auth.basic(req, security, strategy);
+    
+    return tm.toResponse();
   },
 }));
 
@@ -67,7 +71,9 @@ Router.add(new RouterMessage({
   app,
   path: '/ws', 
   fn: async function(req) {
-    return await services.auth.ws(req);
+    let tm = await services.auth.ws(req);
+
+    return tm.toResponse();
   },
 }));
 

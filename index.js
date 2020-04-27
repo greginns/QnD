@@ -1,8 +1,8 @@
 const root = process.cwd();
+const fs = require('fs');
 const http = require('http');
-const server = http.createServer();
+const https = require('https');
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTracking: false});
 const uuidv1 = require('uuid/v1');
 const config = require(root + '/config.json');
 
@@ -14,12 +14,29 @@ mw.reply = require(root + '/lib/server/middleware/reply.js');
 const {Router} = require(root + '/lib/server/utils/router.js');
 const {Wouter} = require(root + '/lib/server/utils/wouter.js');
 const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
+const {modelPubsub} = require(root + '/lib/server/utils/pubsubs.js');
+
 const WSclients = new Map();
+
+const options = {
+  key: fs.readFileSync('./private.key'),
+  ca: fs.readFileSync('./ca_bundle.crt'),
+  cert: fs.readFileSync('./certificate.crt')
+};
+
+//const server = http.createServer();
+//const wss = new WebSocket.Server({server, maxPayload: 50000, clientTracking: false});
+//const wss = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTracking: false});
+
+const sslServer = https.createServer(options);
+//const wssl = new WebSocket.Server({server: sslServer, maxPayload: 50000, clientTracking: false});
+const wssl = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTracking: false});
 
 for (app of config.apps) {
   require(root + `/apps/${app}/routes.js`);  // process app routes.
 };
 
+// PROCESS ERRORS
 process
 .on('unhandledRejection', (reason, rej) => {
   console.error(reason);
@@ -35,8 +52,8 @@ process
   process.exit(1) //mandatory (as per the Node docs)
 });
 
-server
-.on('request', async function(req, res) {
+// SETUP HTTPS/WSS SERVERS
+const serverRequest = async function(req, res) {
   var rm;
 
   try {
@@ -48,16 +65,18 @@ server
     rm = await Router.go(req, res)
   }
   catch(erm) {
-    console.log(erm);
+    //console.log(erm);
     rm = erm;
   }
 
   mw.reply.reply(res, rm);
-})
-.on('upgrade', async function(req, socket, head) {
+};
+
+const serverUpgrade = async function(req, socket, head) {
   await mw.request.processWS(req);
 
-  var [tenant, user] = await mw.security.checkWS(req);
+  let tm = await mw.security.checkWS(req);
+  let {tenant, user} = tm.data;
 
   if (!user) {
     socket.destroy();
@@ -67,10 +86,25 @@ server
   wss.handleUpgrade(req, socket, head, function(ws) {
     wss.emit('connection', socket, ws, tenant.code, user.id);
   });
-});
+};
 
-wss
-.on('connection', function(socket, ws, TID, userID) {
+const sslServerUpgrade = async function(req, socket, head) {
+  await mw.request.processWS(req);
+
+  let tm = await mw.security.checkWS(req);
+  let {tenant, user} = tm.data;
+
+  if (!user) {
+    socket.destroy();
+    return;
+  }
+
+  wssl.handleUpgrade(req, socket, head, function(ws) {
+    wssl.emit('connection', socket, ws, tenant.code, user.id);
+  });
+};
+
+const wsConnect = function(socket, ws, TID, userID) {
   // record clients 
   const wsID = uuidv1();
   
@@ -94,8 +128,25 @@ wss
       //socket.destroy();
     }
   });
-});
+};
+
+//server
+//.on('request', serverRequest)
+//.on('upgrade', serverUpgrade)
+//.listen(config.server.port);
+
+sslServer
+.on('request', serverRequest)
+.on('upgrade', sslServerUpgrade)
+.listen(config.server.sslport);
+
+//wss
+//.on('connection', wsConnect);
+
+wssl
+.on('connection', wsConnect);
   
+// CHECK IF WS ARE STILL ALIVE
 setInterval(function() {
   for (var wsObj of WSclients.values()) {
     if (!wsObj.ws.isAlive) { 
@@ -108,9 +159,14 @@ setInterval(function() {
   }
 }, 30000);
 
+// ZAP SUBS
+modelPubsub.subscribe('gm./contacts/contact', '', function(info) {
+  console.log('PUBSUB', info);
+});
 
-server.listen(config.server.port);
-console.log('GO! on ' + config.server.port);
+// GIDDY UP!
+//console.log('GO! on ' + config.server.port);
+console.log('GO! on ' + config.server.sslport);
 
 /*
 if(this.limitCounter >= Socket.limit) {

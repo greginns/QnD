@@ -164,47 +164,11 @@ module.exports = {
     },
 
     ws: async function(req) {
-      return await verifySession(req);
+      var [tenant, user] = await verifySession(req);
+
+      return new TravelMessage({type: 'text', status: 200, data: {tenant, user}});
     },
 
-/*    
-    verifySession: async function(req) {
-      var sess, tm, tenant = null, user = null;
-      var sessID = req.cookies.tenant_session || '';
-
-      if (sessID) {
-        sess = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
-
-        if (!sess.err) {
-          tm = await Tenant.selectOne({pgschema, cols: '*', pks: sess.data.tenant});
-
-          if (tm.isGood()) {
-            tenant = tm.data;
-
-            tm = await User.selectOne({pgschema: tenant.code, cols: '*', pks: sess.data.user});
-            if (tm.isGood()) user = tm.data;
-          }
-        }
-      }
-
-      return [tenant, user];
-    },
-    
-    verifyCSRF: async function(req) {
-      // get token, check if user matches
-      var TID = req.TID;
-      var user = req.user;
-      var token = req.CSRFToken || null;
-      var tm;
-
-      if (!token) return false;
-
-      tm = await CSRF.selectOne({pgschema: TID, pks: token});
-      if (tm.err) return false;
-
-      return tm.data.user == user.code;    
-    },
-*/    
     login: async function(body) {
       // credentials good?
       // create Session record 

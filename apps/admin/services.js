@@ -181,26 +181,11 @@ module.exports = {
     },
 
     ws: async function(req) {
-      return await verifySession(req);
+      var [tenant, user] = await verifySession(req);
+
+      return new TravelMessage({type: 'text', status: 200, data: {tenant, user}});
     },
-/*
-    verifySession: async function(req) {
-      var tm, user = null;
-      var sessID = req.cookies.admin_session || '';
-
-      if (sessID) {
-        tm = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
-
-        if (tm.isGood()) {
-          tm = await User.selectOne({pgschema, cols: '*', pks: tm.data.user});
-
-          if (tm.isGood()) user = tm.data;
-        }
-      }
-        
-      return [{code: 'public'}, user];
-    },
-*/   
+   
     login: async function(body) {
       // credentials good?
       // create Session record 

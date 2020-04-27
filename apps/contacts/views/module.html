@@ -1,0 +1,42 @@
+{% extends "lib/client/base.html" %}
+
+{% block title %}
+  Contacts
+{% endblock %}
+
+{% block css %}
+<style>
+</style>
+{% endblock %}
+
+{% block script %}
+  <script type="module">
+  </script>
+
+  <script type="text/javascript">
+  </script>
+{% endblock %}
+
+{% block body %}
+  <div class="container-fluid">
+    <div id='qndPages'>
+      {% include "./main.html" %}
+    </div>
+  </div>
+
+  {% include "lib/client/widgets/modals.html" %}
+  {% include "lib/client/widgets/mdate.html" %}
+  {% include "lib/client/widgets/mtime.html" %}
+  {% include "lib/client/widgets/multisel.html" %}
+  {% include "lib/client/widgets/singlesel.html" %}
+
+  {% include "apps/login/views/relogin.html" %}
+{% endblock %}
+
+{% block init %}
+<script type="module" src="/static/apps/contacts/views/js/module.js">
+</script>
+
+<script type="text/javascript">
+</script>
+{% endblock %}
