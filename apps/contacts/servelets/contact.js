@@ -1,5 +1,6 @@
 const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
+const {zapPubsub} = require(root + '/lib/server/utils/pubsubs.js');
 const { Contact } = require(root + '/apps/contacts/models.js');
 
 module.exports = {
@@ -9,7 +10,7 @@ module.exports = {
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {
-    // get one or more Contacts
+    // get specific Contact
     if ('id' in rec && rec.id == '_default') {
       let tm = new TravelMessage();
 
@@ -25,8 +26,13 @@ module.exports = {
   insert: async function({pgschema = '', rec = {}} = {}) {
     // insert Contact row
     let tobj = new Contact(rec);
-    
-    return await tobj.insertOne({pgschema});
+    let tm = await tobj.insertOne({pgschema});
+
+    if (tm.status == 200) {
+      zapPubsub.publish(`${pgschema.toLowerCase()}.${app.toLowerCase()}.create`, tm.data);
+    }
+
+    return tm;    
   },
   
   update: async function({pgschema = '', id = '', rec= {}} = {}) {
@@ -38,8 +44,13 @@ module.exports = {
     rec.id = id;
 
     let tobj = new Contact(rec);
+    let tm = await tobj.updateOne({pgschema});
+
+    if (tm.status == 200) {
+      zapPubsub.publish(`${pgschema.toLowerCase()}.${app.toLowerCase()}.update`, tm.data);
+    }
     
-    return await tobj.updateOne({pgschema});
+    return tm;
   },
   
   delete: async function({pgschema = '', id = ''} = {}) {
@@ -47,7 +58,12 @@ module.exports = {
     if (!id) return new TravelMessage({err: new UserError('No Contact id Supplied')});
 
     let tobj = new Contact({id});
+    let tm = await tobj.deleteOne({pgschema});
 
-    return await tobj.deleteOne({pgschema});
+    if (tm.status == 200) {
+      zapPubsub.publish(`${pgschema.toLowerCase()}.${app.toLowerCase()}.delete`, tm.data);
+    }
+
+    return tm;
   }
 };
