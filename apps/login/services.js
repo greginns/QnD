@@ -134,7 +134,7 @@ module.exports = {
       }
 
       if (status == 401) {
-        if (security.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: security.redirect}});
+        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: strategy.redirect}});
         return new TravelMessage({type: 'text', status: 401});
       }
         
@@ -156,7 +156,7 @@ module.exports = {
       }
 
       if (status == 401) {
-        if (security.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: security.redirect}});
+        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: strategy.redirect}});
         return new TravelMessage({type: 'text', status: 401});
       }
         

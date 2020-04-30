@@ -25,8 +25,13 @@ Router.add(new RouterMessage({
   app,
   path: '/basic', 
   fn: async function(req) {
-    // if we got here, then we're ok
-    var tm = new TravelMessage();
+    // if we got here, then we're ok.  Get user name
+    var tm = await services.auth.basic(req, {}, {});
+
+    if (tm.status == 200) {
+      tm.data = {username: tm.data.user.name};
+      tm.type = 'json';
+    }
 
     return tm.toResponse();
   }, 
@@ -44,7 +49,7 @@ Router.add(new RouterMessage({
   path: '/login', 
   fn: async function(req) {
     var tm = await services.auth.login(req.body);
-  console.log(tm)
+
     return tm.toResponse();
   },
   security: {

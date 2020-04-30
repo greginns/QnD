@@ -14,7 +14,7 @@ mw.reply = require(root + '/lib/server/middleware/reply.js');
 const {Router} = require(root + '/lib/server/utils/router.js');
 const {Wouter} = require(root + '/lib/server/utils/wouter.js');
 const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
-const {modelPubsub} = require(root + '/lib/server/utils/pubsubs.js');
+const zapiServices = require(root + '/apps/zapi/services.js');
 
 const WSclients = new Map();
 
@@ -159,10 +159,8 @@ setInterval(function() {
   }
 }, 30000);
 
-// ZAP SUBS
-modelPubsub.subscribe('gm./contacts/contact', '', function(info) {
-  console.log('PUBSUB', info);
-});
+// Subscribe all zap events for all tenants
+zapiServices.init();
 
 // GIDDY UP!
 //console.log('GO! on ' + config.server.port);

@@ -33,7 +33,7 @@ module.exports = {
     }    
   },
     
-  insert: async function({pgschema = '', rec = {}} = {}) {
+  create: async function({pgschema = '', rec = {}} = {}) {
     // insert Zapsub row
     try {
       let tobj = new Zapsub(rec);

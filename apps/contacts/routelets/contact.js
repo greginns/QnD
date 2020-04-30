@@ -45,7 +45,7 @@ Router.add(new RouterMessage({
   app,
   path: '/contact', 
   fn: async function(req) {
-    var tm = await services.contact.insert({pgschema: req.TID, rec: req.body.contact});
+    var tm = await services.contact.create({pgschema: req.TID, rec: req.body.contact});
 
     return tm.toResponse();
   }, 

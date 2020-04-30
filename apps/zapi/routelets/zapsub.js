@@ -18,7 +18,7 @@ Router.add(new RouterMessage({
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));
@@ -35,7 +35,7 @@ Router.add(new RouterMessage({
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));
@@ -45,14 +45,14 @@ Router.add(new RouterMessage({
   app,
   path: '/zapsub', 
   fn: async function(req) {
-    var tm = await services.zapsub.insert({pgschema: req.TID, rec: req.body.zapsub});
+    var tm = await services.zapsub.create({pgschema: req.TID, rec: req.body.zapsub});
 
     return tm.toResponse();
   }, 
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));
@@ -69,7 +69,7 @@ Router.add(new RouterMessage({
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));
@@ -86,7 +86,7 @@ Router.add(new RouterMessage({
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));

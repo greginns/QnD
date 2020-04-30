@@ -24,8 +24,8 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      {session: {allowAnon: false, needCSRF: false}},
-      {basic: {allowAnon: false, needCSRF: false}},
+      {session: {allowAnon: false, needCSRF: false, redirect: '/login'}},
+      {basic: {allowAnon: false, needCSRF: false, redirect: '/login'}},
     ],
   }
 }));

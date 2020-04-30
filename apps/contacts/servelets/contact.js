@@ -2,6 +2,8 @@ const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {zapPubsub} = require(root + '/lib/server/utils/pubsubs.js');
 const { Contact } = require(root + '/apps/contacts/models.js');
+const app = 'contacts';
+const subapp = 'contact'
 
 module.exports = {
   getAll: async function({pgschema = '', params = {}} = {}) {
@@ -23,13 +25,13 @@ module.exports = {
     return await Contact.select({pgschema, rec});
   },
     
-  insert: async function({pgschema = '', rec = {}} = {}) {
+  create: async function({pgschema = '', rec = {}} = {}) {
     // insert Contact row
     let tobj = new Contact(rec);
     let tm = await tobj.insertOne({pgschema});
 
     if (tm.status == 200) {
-      zapPubsub.publish(`${pgschema.toLowerCase()}.${app.toLowerCase()}.create`, tm.data);
+      zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, [tm.data]);
     }
 
     return tm;    
@@ -47,7 +49,7 @@ module.exports = {
     let tm = await tobj.updateOne({pgschema});
 
     if (tm.status == 200) {
-      zapPubsub.publish(`${pgschema.toLowerCase()}.${app.toLowerCase()}.update`, tm.data);
+      zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.update`, [tm.data]);
     }
     
     return tm;
@@ -61,7 +63,7 @@ module.exports = {
     let tm = await tobj.deleteOne({pgschema});
 
     if (tm.status == 200) {
-      zapPubsub.publish(`${pgschema.toLowerCase()}.${app.toLowerCase()}.delete`, tm.data);
+      zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.delete`, [tm.data]);
     }
 
     return tm;

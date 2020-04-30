@@ -13,6 +13,7 @@ const Zapsub = class extends Model {
       schema: {
         id: new Fields.Serial({}),
         app: new Fields.Char({notNull: true, maxLength: 40, verbose: 'App Name'}),
+        subapp: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Sub App Name'}),
         url: new Fields.Char({notNull: true, maxLength: 250, verbose: 'Zapier URL'}),
         events: new Fields.Jsonb({null: true, verbose: 'Events'}),
       },
