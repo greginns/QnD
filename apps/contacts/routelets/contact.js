@@ -11,8 +11,8 @@ Router.add(new RouterMessage({
   app,
   path: '/contact', 
   fn: async function(req) {
-    let tm = await services.contact.getAll({pgschema: req.TID, params: req.params});
-  
+    let tm = await services.contact.getAll({pgschema: req.TID, query: req.query});
+      
     return tm.toResponse();
   },
   security: {
@@ -28,8 +28,8 @@ Router.add(new RouterMessage({
   app,
   path: '/contact/:id', 
   fn: async function(req) {
-    var tm = await services.contact.getOne({pgschema: req.TID, rec: { id: req.params.id }});
-  
+    let tm = await services.contact.getOne({pgschema: req.TID, rec: { id: req.params.id }});
+
     return tm.toResponse();
   }, 
   security: {
@@ -45,7 +45,7 @@ Router.add(new RouterMessage({
   app,
   path: '/contact', 
   fn: async function(req) {
-    var tm = await services.contact.create({pgschema: req.TID, rec: req.body.contact});
+    let tm = await services.contact.create({pgschema: req.TID, rec: req.body.contact});
 
     return tm.toResponse();
   }, 
@@ -62,7 +62,7 @@ Router.add(new RouterMessage({
   app,
   path: '/contact/:id', 
   fn: async function(req) {
-    var tm = await services.contact.update({pgschema: req.TID, id: req.params.id, rec: req.body.contact});
+    let tm = await services.contact.update({pgschema: req.TID, id: req.params.id, rec: req.body.contact});
 
     return tm.toResponse();
   }, 
@@ -79,7 +79,7 @@ Router.add(new RouterMessage({
   app,
   path: '/contact/:id', 
   fn: async function(req) {
-    var tm = await services.contact.delete({pgschema: req.TID, id: req.params.id});
+    let tm = await services.contact.delete({pgschema: req.TID, id: req.params.id});
 
     return tm.toResponse();
   }, 

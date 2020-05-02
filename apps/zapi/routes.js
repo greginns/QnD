@@ -2,6 +2,7 @@ const root = process.cwd();
 const fs = require("fs");
 
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
+const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const loginServices = require(root + '/apps/login/services.js');
 const services = require(root + '/apps/zapi/services.js');
 
@@ -42,6 +43,8 @@ Router.add(new RouterMessage({
   app,
   path: '/ws', 
   fn: async function(req) {
-    return await loginServices.auth.ws(req);
+    let tm = await loginServices.auth.ws(req);
+
+    return tm.toResponse();
   },
 }));

@@ -1,6 +1,7 @@
 const root = process.cwd();
 
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
+const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 
 const services = require(root + '/apps/zapi/services.js');
 const app = 'zapi';
@@ -11,8 +12,8 @@ Router.add(new RouterMessage({
   app,
   path: '/zapsub', 
   fn: async function(req) {
-    let tm = await services.zapsub.getAll({pgschema: req.TID, params: req.params});
-  
+    let tm = await services.zapsub.getAll({pgschema: req.TID, params: req.query});
+
     return tm.toResponse();
   },
   security: {
@@ -28,8 +29,8 @@ Router.add(new RouterMessage({
   app,
   path: '/zapsub/:id', 
   fn: async function(req) {
-    var tm = await services.zapsub.getOne({pgschema: req.TID, rec: { id: req.params.id }});
-  
+    let tm = await services.zapsub.getOne({pgschema: req.TID, rec: { id: req.params.id }});
+
     return tm.toResponse();
   }, 
   security: {
@@ -45,7 +46,7 @@ Router.add(new RouterMessage({
   app,
   path: '/zapsub', 
   fn: async function(req) {
-    var tm = await services.zapsub.create({pgschema: req.TID, rec: req.body.zapsub});
+    let tm = await services.zapsub.create({pgschema: req.TID, rec: req.body.zapsub});
 
     return tm.toResponse();
   }, 
@@ -62,7 +63,7 @@ Router.add(new RouterMessage({
   app,
   path: '/zapsub/:id', 
   fn: async function(req) {
-    var tm = await services.zapsub.update({pgschema: req.TID, id: req.params.id, rec: req.body.zapsub});
+    let tm = await services.zapsub.update({pgschema: req.TID, id: req.params.id, rec: req.body.zapsub});
 
     return tm.toResponse();
   }, 
@@ -79,7 +80,7 @@ Router.add(new RouterMessage({
   app,
   path: '/zapsub/:id', 
   fn: async function(req) {
-    var tm = await services.zapsub.delete({pgschema: req.TID, id: req.params.id});
+    let tm = await services.zapsub.delete({pgschema: req.TID, id: req.params.id});
 
     return tm.toResponse();
   }, 

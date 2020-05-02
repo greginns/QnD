@@ -6,9 +6,9 @@ const app = 'contacts';
 const subapp = 'contact'
 
 module.exports = {
-  getAll: async function({pgschema = '', params = {}} = {}) {
+  getAll: async function({pgschema = '', query = {}} = {}) {
     // get one or more Contacts
-    return await Contact.select({pgschema, rec: {}, params});
+    return await Contact.select({pgschema, rec: {}, query});
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

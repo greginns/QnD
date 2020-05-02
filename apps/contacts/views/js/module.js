@@ -7,11 +7,11 @@ import {Pages} from '/static/lib/client/core/router.js';
 import '/static/apps/contacts/views/js/main.js';
 
 // js for widgets
-import '/static/lib/client/widgets/js/modals.js';
-import '/static/lib/client/widgets/js/mtime.js';
-import '/static/lib/client/widgets/js/mdate.js';
-import '/static/lib/client/widgets/js/multisel.js';
-import '/static/lib/client/widgets/js/singlesel.js';
+//import '/static/lib/client/widgets/js/modals.js';
+//import '/static/lib/client/widgets/js/mtime.js';
+//import '/static/lib/client/widgets/js/mdate.js';
+//import '/static/lib/client/widgets/js/multisel.js';
+//import '/static/lib/client/widgets/js/singlesel.js';
 
 let init = async function() {
   // setup data access
@@ -30,7 +30,7 @@ let init = async function() {
   QnD.tableStores.contact.getAll();      // seed the table store
 
   // tell everybody that data is ready
-  document.getElementById('qndPages').dispatchEvent(new CustomEvent('tablestoreready', {bubbles: false}));
+  document.dispatchEvent(new CustomEvent('tablestoreready', {bubbles: false}));  // getElementById('qndPages').
 
   // Start up pages.  QnD.pages saved up all page references
   let pages = new Pages({root: `/${app}`, pages: QnD.pages});
@@ -43,6 +43,12 @@ let init = async function() {
     console.log('FAILURE TO LAUNCH');
     console.log(e)
   }
+}
+
+mobiscroll.settings = {
+  theme: 'mobiscroll',
+  themeVariant: 'light',
+  lang: 'en'
 }
 
 init();

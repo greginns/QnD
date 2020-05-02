@@ -7,6 +7,9 @@ import {TableView} from '/static/lib/client/core/data.js';
 class Contact extends MVC {
   constructor(element) {
     super(element);
+
+    //var el = document.getElementById('datetime')
+    //mobiscroll.calendar(el);
   }
 
   createModel() {
@@ -19,6 +22,8 @@ class Contact extends MVC {
       message: ''
     }
 
+    this.model.greg=(new Date()).toJSON();
+
     this.model.goodMessage = '';
     this.model.badMessage = '';
 
@@ -26,7 +31,7 @@ class Contact extends MVC {
         
     this.defaults = {};
 
-    document.getElementById('qndPages').addEventListener('tablestoreready', async function() {
+    document.addEventListener('tablestoreready', async function() {  // .getElementById('qndPages')
       let contacts = new TableView({proxy: this.model.contacts});
 
       QnD.tableStores.contact.addView(contacts);

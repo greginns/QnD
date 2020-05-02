@@ -13,6 +13,7 @@ mw.reply = require(root + '/lib/server/middleware/reply.js');
 
 const {Router} = require(root + '/lib/server/utils/router.js');
 const {Wouter} = require(root + '/lib/server/utils/wouter.js');
+const {ResponseMessage} = require(root + '/lib/server/utils/messages.js');
 const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
 const zapiServices = require(root + '/apps/zapi/services.js');
 
@@ -62,7 +63,12 @@ const serverRequest = async function(req, res) {
     await mw.security.check(req, res);
 
     // Routes - communicate via params and response message
-    rm = await Router.go(req, res)
+    try {
+      rm = await Router.go(req, res)
+    }
+    catch(err) {
+      rm = new ResponseMessage({status: 500, err});
+    }
   }
   catch(erm) {
     //console.log(erm);

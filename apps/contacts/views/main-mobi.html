@@ -1,0 +1,91 @@
+<page id='contacts-main' style='display: none' xclass='mbsc-page' mvc-page>
+  <section id='contacts-main-section'>
+    <div mbsc-form class=" class="md-grid-responsive" mvc-mobi-form>
+      <div class="mbsc-grid">
+        <div class="mbsc-row">
+          <div class='mbsc-col-12 mbsc-col-md-6'>
+
+            <div class="mbsc-row">
+              <div class='mbsc-col-12 mbsc-col-md-6 mbsc-col-lg-4 mbsc-col-xl-4'>
+                {{ buttons.btnsm(class='success', mvc_click='newContact', text='+ New Contact') }}
+              </div>
+            </div>
+
+            <div class='mbsc-row'>
+              <div class='mbsc-col-12 mbsc-col-md-6'>
+                <label>
+                  Select Contact
+                  <select mvc-each='contacts' mvc-value='contactPK' class='mbsc-input' mvc-disabled='contact.id'>
+                    <option mvc-option='{text: "contacts.$index.fullname", value: "contacts.$index.id"}'></option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class='mbsc-col-12 mbsc-col-md-6'>
+            <div class="mbsc-row mbsc-justify-content-center">
+              <h4>
+                Contact Details
+              </h4>               
+            </div>
+
+            <div class="mbsc-row">
+              <div class='mbsc-col-12 mbsc-col-md-6 mbsc-col-lg-6 mbsc-col-xl-6'>
+                {{ fields.Char(type='text', id=contact.id.id, maxlength=contact.id.maxLength, mvc_value='contact.id', mvc_disabled='contactPK', label=contact.id.verbose) }}
+              </div>
+            </div>
+
+            <div class="mbsc-row">
+              <div class='mbsc-col-12 mbsc-col-lg-6'>
+                {{ fields.Char(type='text', id=contact.first.id, maxlength=contact.first.maxLength, mvc_value='contact.first', label=contact.first.verbose) }}
+              </div>
+              <div class='mbsc-col-12 mbsc-col-lg-6'>
+                {{ fields.Char(type='text', id=contact.last.id, maxlength=contact.last.maxLength, mvc_value='contact.last', label=contact.last.verbose) }}
+              </div>
+              <div class='mbsc-col-12 mbsc-col-lg-6'>
+                {{ fields.Char(type='text', id=contact.group.id, maxlength=contact.group.maxLength, mvc_value='contact.group', label=contact.group.verbose) }}
+              </div>
+              <div class='mbsc-col-12 mbsc-col-lg-6'>
+                {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact.email', label=contact.email.verbose) }}
+              </div>
+            </div>
+
+            <div class="mbsc-row">
+              <div class='mbsc-col-12'>
+                <br>
+              </div>
+            </div>
+
+            <div class="mbsc-row">
+              <div class='mbsc-col-12'>
+                <span mvc-hide='contactPK'>
+                  {{ buttons.btn(class='primary', mvc_click='save', text='Add Contact') }}
+                </span>
+                <span mvc-show='contactPK'>
+                  {{ buttons.btn(class='primary', mvc_click='save', text='Update Contact') }}
+                  {{ buttons.btn(class='danger', mvc_click='delete', text='Delete Contact') }}
+                </span>
+                {{ buttons.btn(class='warning', mvc_click='clear', text='Clear') }}
+              </div>
+            </div>
+
+            <div class='mbsc-row'>
+              <div class='mbsc-col-12'>
+                <div class='mbsc-note mbsc-note-success' mvc-show='goodMessage'>
+                  <span mvc-text='goodMessage'></span>
+                </div>
+
+                <div class='mbsc-note mbsc-note-danger' mvc-show='badMessage'>
+                  <span mvc-text='badMessage'></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</page>

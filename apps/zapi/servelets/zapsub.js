@@ -1,17 +1,12 @@
 const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
-const {UserError, SystemError} = require(root + '/lib/server/utils/errors.js');
+const {UserError} = require(root + '/lib/server/utils/errors.js');
 const { Zapsub } = require(root + '/apps/zapi/models.js');
 
 module.exports = {
-  getAll: async function({pgschema = '', params = {}} = {}) {
+  getAll: async function({pgschema = '', query = {}} = {}) {
     // get one or more Zapsubs
-    try {
-      return await Zapsub.select({pgschema, rec: {}, params});
-    }
-    catch(err) {
-      return new TravelMessage({err: new SystemError(err.message)});
-    }
+    return await Zapsub.select({pgschema, rec: {}, query});
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {
@@ -25,24 +20,14 @@ module.exports = {
       return tm;
     }
           
-    try {
-      return await Zapsub.select({pgschema, rec});
-    }
-    catch(err) {
-      return new TravelMessage({err: new SystemError(err.message)});
-    }    
+    return await Zapsub.select({pgschema, rec});
   },
     
   create: async function({pgschema = '', rec = {}} = {}) {
     // insert Zapsub row
-    try {
-      let tobj = new Zapsub(rec);
+    let tobj = new Zapsub(rec);
 
-      return await tobj.insertOne({pgschema});
-    }
-    catch(err) {
-      return new TravelMessage({err: new SystemError(err.message)});
-    }
+    return await tobj.insertOne({pgschema});
   },
   
   update: async function({pgschema = '', id = '', rec= {}} = {}) {
@@ -51,29 +36,19 @@ module.exports = {
       return new TravelMessage({err: new UserError('No Zapsub id Supplied')});
     }
         
-    try {
-      rec.id = id;
+    rec.id = id;
 
-      let tobj = new Zapsub(rec);
-      
-      return await tobj.updateOne({pgschema});
-    }
-    catch(err) {
-      return new TravelMessage({err: new SystemError(err.message)});
-    }    
+    let tobj = new Zapsub(rec);
+    
+    return await tobj.updateOne({pgschema});
   },
   
   delete: async function({pgschema = '', id = ''} = {}) {
     // delete Zapsub
     if (!id) return new TravelMessage({err: new UserError('No Zapsub id Supplied')});
 
-    try {
-      let tobj = new Zapsub({id});
+    let tobj = new Zapsub({id});
 
-      return await tobj.deleteOne({pgschema});
-    }
-    catch(err) {
-      return new TravelMessage({err: new SystemError(err.message)});
-    }    
+    return await tobj.deleteOne({pgschema});
   }
 };
