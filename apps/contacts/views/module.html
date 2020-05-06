@@ -21,17 +21,17 @@
 {% endblock %}
 
 {% block body %}
-  <!--div class="container-fluid">
+  <div class="container-fluid">
     <div id='qndPages'>
       {% include "./main.html" %}
     </div>
-  </div-->
+  </div>
   
-  {% include "./main-mobi.html" %}
+  {#% include "./main-mobi.html" %#}
 
   {#% include "lib/client/widgets/modals.html" %#}
-  {#% include "lib/client/widgets/mdate.html" %#}
-  {#% include "lib/client/widgets/mtime.html" %#}
+  {% include "lib/client/widgets/mdate.html" %}
+  {% include "lib/client/widgets/mtime.html" %}
   {#% include "lib/client/widgets/multisel.html" %#}
   {#% include "lib/client/widgets/singlesel.html" %#}
 
@@ -43,5 +43,12 @@
 </script>
 
 <script type="text/javascript">
+  
+//mobiscroll.settings = {
+//  theme: 'ios',
+//  themeVariant: 'light',
+//  lang: 'en'
+//}
+
 </script>
 {% endblock %}

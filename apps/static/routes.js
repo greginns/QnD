@@ -8,6 +8,7 @@ const allowedSubdirs = [
   '/apps/contacts/views/js/:fn', 
   '/lib/client/widgets/js/:fn',
   '/lib/client/core/:fn', 
+  '/project/mixins/:fn', 
   '/lib/mobiscroll/js/:fn', 
   '/lib/mobiscroll/css/:fn', 
 ]

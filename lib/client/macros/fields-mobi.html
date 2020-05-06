@@ -1,7 +1,7 @@
-{% macro Char(type='text', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_edit='') %}
+{% macro Char(type='text', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_edit='', placeholder='') %}
   <label>
     {{label}}
-    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-edit='{{mvc_edit}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' class="mbsc-input" />
+    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-edit='{{mvc_edit}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="mbsc-input" />
   </label>
 
 <div mvc-show='errors.{{mvc_value}}'>
@@ -9,9 +9,9 @@
 </div>
 {% endmacro %}
 
-{% macro Text(id='', rows='10', cols='40', mvc_value='', label, mvc_enabled='', mvc_disabled='') %}
+{% macro Text(id='', rows='10', cols='40', mvc_value='', label, mvc_enabled='', mvc_disabled='', placeholder='') %}
 <div class="form-label-group">
-  <textarea id="{{id}}" rows="{{rows}}" cols="{{cols}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' class="mbsc-input" /></textarea>
+  <textarea id="{{id}}" rows="{{rows}}" cols="{{cols}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="mbsc-input" /></textarea>
   <label for="{{id}}">{{label}}</label>
 </div>
 
@@ -20,10 +20,10 @@
 </div>
 {% endmacro %}
 
-{% macro Password(type='password', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='') %}
+{% macro Password(type='password', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='', placeholder='') %}
 <div class='input-group'>
   <div class="form-label-group">
-    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' class="mbsc-input" />
+    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="mbsc-input" />
     <label for="{{id}}">{{label}}</label>
   </div>
 </div>
@@ -33,10 +33,10 @@
 </div>
 {% endmacro %}
 
-{% macro Date(type='text', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='') %}
+{% macro Date(type='text', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='', placeholder='') %}
 <div class='input-group'>
   <div class="form-label-group">
-    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="date" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' class="mbsc-input" />
+    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="date" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="mbsc-input" />
     <label for="{{id}}">{{label}}</label>
   </div>
 </div>
@@ -46,10 +46,10 @@
 </div>
 {% endmacro %}
 
-{% macro Time(type='text', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='') %}
+{% macro Time(type='text', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='', placeholder='') %}
 <div class='input-group'>
   <div class="form-label-group">
-    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}|time['{{timeFormat}}']" mvc-edit="time" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' class="mbsc-input" />
+    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}|time['{{timeFormat}}']" mvc-edit="time" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="mbsc-input" />
     <label for="{{id}}">{{label}}</label>
   </div>
 
@@ -63,20 +63,20 @@
 </div>
 {% endmacro %}
 
-{% macro Boolean(id='', mvc_checked='', label='') %}
+{% macro Boolean(id='', mvc_checked='', label='', placeholder='') %}
 <div class="custom-control custom-checkbox pt-2">
   <input type="checkbox" id="{{id}}" mvc-checked="{{mvc_checked}}" class="custom-control-input" />
   <label class="custom-control-label label-color" for="{{id}}">{{label}}</label>
 </div>
 {% endmacro %}
 
-{% macro Integer(id='', min='1', max='999', step='1', mvc_value='', mvc_edit='integer', label='') %}
+{% macro Integer(id='', min='1', max='999', step='1', mvc_value='', mvc_edit='integer', label='', placeholder='') %}
 <div class='input-group'>
   <div class='input-group-prepend' mvc-role='stepperadj' for='{{id}}' dir='-'>
     <div class="input-group-text">&mdash;</div>
   </div>
   <div class="form-label-group form-label-group-double">
-    <input type="text" id='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' class="mbsc-input mvc-boot-input-right" />
+    <input type="text" id='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' placeholder='{{placeholder}}' class="mbsc-input mvc-boot-input-right" />
     <label for="{{id}}">{{label}}</label>
   </div>
 
@@ -90,9 +90,9 @@
 </div>
 {% endmacro %}
 
-{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', valueField='', textField='', label='') %}
+{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', valueField='', textField='', label='', placeholder='') %}
 <div class="form-label-group">
-  <select id="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' class="mbsc-input">
+  <select id="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' placeholder='{{placeholder}}' class="mbsc-input">
     <option mvc-option='{value: "{{mvc_each}}[$index].{{valueField}}", text: "{{mvc_each}}[$index].{{textField}}"}'></option>
   </select>
   <label for="{{id}}">{{label}}</label>
@@ -103,9 +103,9 @@
 </div>
 {% endmacro %}            
 
-{% macro SelectChoices(id='', size='10', mvc_value='', choices=[], label='') %}
+{% macro SelectChoices(id='', size='10', mvc_value='', choices=[], label='', placeholder='') %}
 <div class="form-label-group">
-  <select id="{{id}}" mvc-value="{{mvc_value}}" class="mbsc-input">
+  <select id="{{id}}" mvc-value="{{mvc_value}}" placeholder='{{placeholder}}' class="mbsc-input">
     {% for choice in choices %}
     <option value='{{choice.value}}'>{{choice.text}}</option>
     {% endfor %}

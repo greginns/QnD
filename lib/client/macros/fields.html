@@ -56,7 +56,7 @@
 {% macro Time(type='text', id='', maxlength='', mvc_value='', label, mvc_enabled='', mvc_disabled='') %}
 <div class='input-group'>
   <div class="form-label-group">
-    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}|time['{{timeFormat}}']" mvc-edit="time" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-control" />
+    <input type="{{type}}" id="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="time" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-control" />
     <label for="{{id}}">{{label}}</label>
   </div>
 

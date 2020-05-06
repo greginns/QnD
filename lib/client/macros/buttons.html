@@ -1,11 +1,11 @@
-{% macro btn(class='primary', mvc_click='', text) %}
-<button class='btn btn-{{class}}' mvc-click='{{mvc_click}}'>
+{% macro btn(class='primary', mvc_click='', text, mvc_disabled='') %}
+<button class='btn btn-{{class}}' mvc-click='{{mvc_click}}' mvc-disabled='{{mvc_disabled}}'>
   {{text}}
 </button>
 {% endmacro %}
 
-{% macro btnsm(class='primary', mvc_click='', text) %}
-<button class='btn btn-sm btn-{{class}}' mvc-click='{{mvc_click}}'>
+{% macro btnsm(class='primary', mvc_click='', text, mvc_disabled='') %}
+<button class='btn btn-sm btn-{{class}}' mvc-click='{{mvc_click}}' mvc-disabled='{{mvc_disabled}}'>
   {{text}}
 </button>
 {% endmacro %}

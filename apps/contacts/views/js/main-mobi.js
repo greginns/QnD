@@ -4,29 +4,30 @@ import {utils} from '/static/lib/client/core/utils.js';
 import {Page, Section} from '/static/lib/client/core/router.js';
 import {TableView} from '/static/lib/client/core/data.js';
 
-//console.log(MVC)
-import '/static/project/mixins/overlay.js';
-
 class Contact extends MVC {
   constructor(element) {
     super(element);
+
+    //var el = document.getElementById('datetime')
+    //mobiscroll.calendar(el);
   }
 
   createModel() {
     this.model.contact = {};
     this.model.contactOrig = {};
-    this.model.contactPK = '';
+    this.model.contactPk = '';
     this.model.contacts = [];
     this.model.errors = {
       contact: {},
       message: ''
     }
 
+    this.model.greg=(new Date()).toJSON();
+
+    this.model.goodMessage = '';
     this.model.badMessage = '';
-    this.model.fred = (new Date()).toJSON();
 
     this.$addWatched('contactPK', this.contactSelected.bind(this));
-    this.$addWatched('contact.id', this.contactEntered.bind(this));
         
     this.defaults = {};
 
@@ -59,7 +60,7 @@ class Contact extends MVC {
     return true;  
   }
 
-  async save(ev) {
+  async save() {
     var contact = this.model.contact.toJSON();
     var contactOrig = this.model.contactOrig.toJSON();
     var contactPK = this.model.contactPK;
@@ -71,52 +72,44 @@ class Contact extends MVC {
       diffs = utils.object.diff(contactOrig, contact);
       
       if (Object.keys(diffs).length == 0) {
-        this.model.badMessage = 'No Changes to Update';
-        
-        setTimeout(function() {
-          this.model.badMessage = '';
-        }.bind(this), 2500);
-
+        mobiscroll.alert({message: 'Nothing to update', display: 'center'});
         return;
       }
     }      
 
-    let spinner = MVC.$buttonSpinner(ev.target, true);
-    MVC.$overlay(true);
+    document.getElementById('overlay').style.display = 'block';
 
     // new (post) or old (put)?
     let res = (contactPK) ? await QnD.tableStores.contact.update(contactPK, {contact: diffs}) : await QnD.tableStores.contact.insert({contact});
 
     if (res.status == 200) {
-      MVC.$toast('CONTACT',(contactPK) ? 'Contact Updated' : 'Contact Created', 2000);
-   
+      this.setGoodMessage('Contact Saved');
+    
       this.model.contactOrig = this.$copy(this.model.contact);
     }
     else {
       this.displayErrors(res);
     }
     
-    MVC.$overlay(false);
-    MVC.$buttonSpinner(ev.target, false, spinner);
+    document.getElementById('overlay').style.display = 'none';
   }
   
-  async delete(ev) {
-    let contactPK = this.model.contactPK;      
+  async delete() {
+    var contactPK = this.model.contactPK;      
     
     if (!contactPK) return;
     
-    let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?')
-    if (!ret) return;
+    let ret = await mobiscroll.confirm({message: 'Are you sure that you wish to delete this Contact?'})
 
-    let spinner = MVC.$buttonSpinner(ev.target, true);
-    MVC.$overlay(true);
-
+    if (ret != 0) return;
+    
     this.clearErrors();
+    QnD.widgets.modal.spinner.show();
     
     let res = await QnD.tableStores.contact.delete(contactPk);
 
     if (res.status == 200) {
-      MVC.$toast('CONTACT', 'Contact Removed', 1000);
+      this.setGoodMessage('Contact Deleted');
 
       this.clearit();
     }
@@ -124,27 +117,33 @@ class Contact extends MVC {
       this.displayErrors(res);
     }
 
-    MVC.$overlay(false);
-    MVC.$buttonSpinner(ev.target, false, spinner);
+    QnD.widgets.modal.spinner.hide();
   }
   
-  async clear(ev) {
-    if (await this.canClear(ev)) {
+  async clear() {
+    if (await this.canClear()) {
       this.clearIt();
     }
   }
-
-  async canClear(ev) {
-    let contact = this.model.contact.toJSON();
-    let orig = this.model.contactOrig.toJSON();
-    let diffs = utils.object.diff(orig, contact);
-    let ret = true;
+  
+  async newContact() {
+    if (await this.canClear()) {
+      this.clearIt(); 
+    }
+  }
+  
+  async canClear() {
+    var contact = this.model.contact.toJSON();
+    var orig = this.model.contactOrig.toJSON();
+    var diffs = utils.object.diff(orig, contact);
+    var ret;
 
     if (Object.keys(diffs).length > 0) {
-      ret = await MVC.$reConfirm(ev.target, 'Abandon changes?');
+      ret = await mobiscroll.confirm({message: 'Abandon changes?'});
+      if (ret != 0) return false;
     }
 
-    return ret;
+    return true;
   }
   
   clearIt() {
@@ -152,26 +151,8 @@ class Contact extends MVC {
     this.setDefaults();
   }
   
-  listClick(ev) {
-    let el = ev.target.closest('button');
-    if (!el) return;
-
-    let id = el.getAttribute('data-id');
-    if (id) this.setContact(id);
-  }
-
-  async contactEntered(nv) {
-    // contact ID entered
-    let ret = await this.getContactFromList(nv);
-
-    if (ret.id) {
-      this.model.contactPK = ret.id;
-      this.setContact(nv);
-    }
-  }
-
   contactSelected(nv) {
-    // Contact selected from list
+    // new contact select from list
     if (nv) {
       this.setContact(nv);  
     }
@@ -206,8 +187,6 @@ class Contact extends MVC {
           this.setBadMessage(res.data.errors.message);  
         }
         else {
-          if (!res.data.errors.message) this.model.badMessage = 'Please Correct any entry errors';
-
           for (let k in res.data.errors[key]) {
             this.model.errors[key][k] = res.data.errors[key][k];
           };  
@@ -231,6 +210,14 @@ class Contact extends MVC {
     }
 
     this.model.badMessage = '';
+  }
+  
+  setGoodMessage(msg) {
+    this.model.goodMessage = msg;
+
+    setTimeout(function() {
+      this.model.goodMessage = '';
+    }.bind(this), 5000);
   }
 
   setBadMessage(msg) {

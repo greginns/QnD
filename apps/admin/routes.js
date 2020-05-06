@@ -316,3 +316,19 @@ Router.add(new RouterMessage({
     ],
   } 
 }));
+
+Router.add(new RouterMessage({
+  method: 'post',
+  app,
+  path: '/echo', 
+  fn: async function(req) {
+    console.log('ECHO')
+    console.log(req.body)
+  
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+    ]
+  }
+}));

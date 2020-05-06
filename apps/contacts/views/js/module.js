@@ -8,8 +8,8 @@ import '/static/apps/contacts/views/js/main.js';
 
 // js for widgets
 //import '/static/lib/client/widgets/js/modals.js';
-//import '/static/lib/client/widgets/js/mtime.js';
-//import '/static/lib/client/widgets/js/mdate.js';
+import '/static/lib/client/widgets/js/mtime.js';
+import '/static/lib/client/widgets/js/mdate.js';
 //import '/static/lib/client/widgets/js/multisel.js';
 //import '/static/lib/client/widgets/js/singlesel.js';
 
@@ -43,12 +43,6 @@ let init = async function() {
     console.log('FAILURE TO LAUNCH');
     console.log(e)
   }
-}
-
-mobiscroll.settings = {
-  theme: 'mobiscroll',
-  themeVariant: 'light',
-  lang: 'en'
 }
 
 init();

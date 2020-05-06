@@ -7,19 +7,34 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-9'>
-                {{ buttons.btnsm(class='success', mvc_click='newContact', text='+ New Contact') }}
+                <h4>
+                  Contacts
+                </h4>
               </div>
             </div>          
           </div>
           
           <div class='card-body'>
-            <div class='row'>
+            <!--div class='row'>
               <div class='col-12'>
                 <select mvc-each='contacts' mvc-value='contactPK' class='form-control' size='10' style='width: 100%' mvc-disabled='contact.id'>
                   <option mvc-option='{text: "contacts.$index.fullname", value: "contacts.$index.id"}'></option>
                 </select>
               </div>
+            </div-->
+
+            <div class='row'>
+              <div class='col-12'>
+                <ul class="list-group list-group-flush" mvc-each='contacts' mvc-click='listClick'>
+                  <button type="button" class="list-group-item list-group-item-action" mvc-attr='{"data-id": "contacts.$index.id"}' mvc-disabled='contact.id'>
+                    <span mvc-text='contacts.$index.id'></span>
+                    -
+                    <span mvc-text='contacts.$index.fullname'></span>
+                  </button>
+                </ul>
+              </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -29,8 +44,21 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6 col-lg-6'>
-                {{ fields.Char(type='text', id=contact.id.id, maxlength=contact.id.maxLength, mvc_value='contact.id', mvc_disabled='contactPK', label=contact.id.verbose) }}
+                {{ fields.Char(type='text', id=contact.id.id, maxlength=contact.id.maxLength, mvc_value='contact.id', mvc_event_type='blur', mvc_disabled='contactPK', label=contact.id.verbose) }}
               </div>
+              <!--div class='col-6 col-lg-6'-->
+                <!--input class='form-control' mvc-mobi-calendar mvc-value='greg' mvc-role='date' placeholder='Date'-->
+                <!--label>Stepper</label>
+                <input type="number" mbsc-stepper value="50" min="-500" max="500" step="100" id='greg' mvc-value='greg'-->
+                <!--input type='checkbox' mvc-checked='greg' mbsc-checkbox-->
+                <!--input type='checkbox' mvc-checked='greg' mbsc-switch-->
+                <!--label>
+                <input type='radio' name='radio1' mvc-checked='greg' value='1' mbsc-radio data-input-style="box"> One
+                </label>
+                <label>
+                <input type='radio' name='radio1' mvc-checked='greg' value='2' mbsc-radio data-input-style="box"> Two
+                </label-->
+              <!--/div-->
             </div>          
           </div>
           
@@ -68,12 +96,11 @@
               </div>
             </div>            
 
-            <div class='row'>
-              <div class='col-12 text-success'>
-                <span mvc-text='goodMessage'></span>
-              </div>
-              <div class='col-12 text-danger'>
-                <span mvc-text='badMessage'></span>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
               </div>
             </div>         
           </div>

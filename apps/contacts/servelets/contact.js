@@ -31,7 +31,7 @@ module.exports = {
     let tm = await tobj.insertOne({pgschema});
 
     if (tm.status == 200) {
-      zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, [tm.data]);
+      zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, tm.data);
     }
 
     return tm;    
@@ -49,7 +49,7 @@ module.exports = {
     let tm = await tobj.updateOne({pgschema});
 
     if (tm.status == 200) {
-      zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.update`, [tm.data]);
+      zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.update`, tm.data);
     }
     
     return tm;
@@ -63,7 +63,7 @@ module.exports = {
     let tm = await tobj.deleteOne({pgschema});
 
     if (tm.status == 200) {
-      zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.delete`, [tm.data]);
+      zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.delete`, tm.data);
     }
 
     return tm;
