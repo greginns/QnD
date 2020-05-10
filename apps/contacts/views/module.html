@@ -22,7 +22,8 @@
 
 {% block body %}
   <div class="container-fluid">
-    <div id='qndPages'>
+    {% include "./navbar.html" %}
+    <div id='qndPages' style='padding-top: 60px'>
       {% include "./main.html" %}
     </div>
   </div>

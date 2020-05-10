@@ -15,6 +15,7 @@ const Contact = class extends Model {
         first: new Fields.Char({notNull: true, maxLength: 40, verbose: 'First Name'}),
         last: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Last Name'}),
         group: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Group Name'}),
+        address: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Address'}),
         email: new Fields.Char({null: true, maxLength: 50, isEmail: true, verbose: 'Email Address'}),
         fullname: new Fields.Derived({defn: 'concat("first",\' \',"last")', verbose: 'Contact Name'}) 
       },

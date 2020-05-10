@@ -14,23 +14,21 @@ class Contact extends MVC {
 
   createModel() {
     this.model.contact = {};
-    this.model.contactOrig = {};
-    this.model.contactPK = '';
+    this.model.existingEntry = false;
     this.model.contacts = [];
+    this.model.badMessage = '';
     this.model.errors = {
       contact: {},
       message: ''
     }
 
-    this.model.badMessage = '';
-    this.model.fred = (new Date()).toJSON();
-
-    this.$addWatched('contactPK', this.contactSelected.bind(this));
     this.$addWatched('contact.id', this.contactEntered.bind(this));
         
+    this.contactOrig = {};
     this.defaults = {};
+    this.contactListEl = document.getElementById('contactList');
 
-    document.addEventListener('tablestoreready', async function() {  // .getElementById('qndPages')
+    document.addEventListener('tablestoreready', async function() {
       let contacts = new TableView({proxy: this.model.contacts});
 
       QnD.tableStores.contact.addView(contacts);
@@ -61,14 +59,12 @@ class Contact extends MVC {
 
   async save(ev) {
     var contact = this.model.contact.toJSON();
-    var contactOrig = this.model.contactOrig.toJSON();
-    var contactPK = this.model.contactPK;
     var diffs;
 
     this.clearErrors();
           
-    if (contactPK) {
-      diffs = utils.object.diff(contactOrig, contact);
+    if (this.model.existingEntry) {
+      diffs = utils.object.diff(this.contactOrig, contact);
       
       if (Object.keys(diffs).length == 0) {
         this.model.badMessage = 'No Changes to Update';
@@ -85,12 +81,12 @@ class Contact extends MVC {
     MVC.$overlay(true);
 
     // new (post) or old (put)?
-    let res = (contactPK) ? await QnD.tableStores.contact.update(contactPK, {contact: diffs}) : await QnD.tableStores.contact.insert({contact});
+    let res = (this.model.existingEntry) ? await QnD.tableStores.contact.update(contact.id, {contact: diffs}) : await QnD.tableStores.contact.insert({contact});
 
     if (res.status == 200) {
-      MVC.$toast('CONTACT',(contactPK) ? 'Contact Updated' : 'Contact Created', 2000);
+      MVC.$toast('CONTACT',(this.model.existingEntry) ? contact.fullname + ' Updated' : 'Created', 2000);
    
-      this.model.contactOrig = this.$copy(this.model.contact);
+      this.contactOrig = this.model.contact.toJSON();
     }
     else {
       this.displayErrors(res);
@@ -101,11 +97,11 @@ class Contact extends MVC {
   }
   
   async delete(ev) {
-    let contactPK = this.model.contactPK;      
-    
-    if (!contactPK) return;
-    
-    let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?')
+    if (!this.model.existingEntry) return;
+
+    let contact = this.model.contact.toJSON();
+    let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?');
+
     if (!ret) return;
 
     let spinner = MVC.$buttonSpinner(ev.target, true);
@@ -113,12 +109,12 @@ class Contact extends MVC {
 
     this.clearErrors();
     
-    let res = await QnD.tableStores.contact.delete(contactPk);
+    let res = await QnD.tableStores.contact.delete(contact.id);
 
     if (res.status == 200) {
       MVC.$toast('CONTACT', 'Contact Removed', 1000);
 
-      this.clearit();
+      this.clearIt();
     }
     else {
       this.displayErrors(res);
@@ -136,7 +132,7 @@ class Contact extends MVC {
 
   async canClear(ev) {
     let contact = this.model.contact.toJSON();
-    let orig = this.model.contactOrig.toJSON();
+    let orig = this.contactOrig;
     let diffs = utils.object.diff(orig, contact);
     let ret = true;
 
@@ -150,31 +146,35 @@ class Contact extends MVC {
   clearIt() {
     this.clearErrors();
     this.setDefaults();
+    this.clearList();
+
+    this.model.existingEntry = false;
+    window.scrollTo(0,0);
+  }
+
+  newContact() {
+    this.$focus('contact.id');
+    window.scrollTo(0,document.body.scrollHeight);
   }
   
-  listClick(ev) {
+  listClicked(ev) {
+    // Contact selected from list
     let el = ev.target.closest('button');
     if (!el) return;
 
-    let id = el.getAttribute('data-id');
-    if (id) this.setContact(id);
+    let id = el.getAttribute('data-pk');
+    if (id) this.model.contact.id = id;
+
+    window.scrollTo(0,document.body.scrollHeight);
   }
 
   async contactEntered(nv) {
-    // contact ID entered
+    // Contact ID entered
+    if (!nv) return;
+
     let ret = await this.getContactFromList(nv);
 
-    if (ret.id) {
-      this.model.contactPK = ret.id;
-      this.setContact(nv);
-    }
-  }
-
-  contactSelected(nv) {
-    // Contact selected from list
-    if (nv) {
-      this.setContact(nv);  
-    }
+    if (ret.id) this.setContact(ret.id);
   }
 
   async getContactFromList(pk) {
@@ -184,19 +184,34 @@ class Contact extends MVC {
   async setContact(pk) {
     this.clearErrors();
 
+    this.model.existingEntry = true;
     this.model.contact = await this.getContactFromList(pk);
-    this.model.contactOrig = this.$copy(this.model.contact);
+    this.contactOrig = this.model.contact.toJSON();
+
+    this.highlightList(pk);
+  }
+
+  highlightList(pk) {
+    // highlight chosen contact in list
+    let btn = this.contactListEl.querySelector(`button[data-pk="${pk}"]`);
+    
+    if (btn) btn.classList.add('active');
+  }
+
+  clearList() {
+    // clear list of active entry
+    let btn = this.contactListEl.querySelector('button.active');
+
+    if (btn) btn.classList.remove('active');
   }
   
   setDefaults() {
-    var dflts = this.defaults.contact;
-    
-    for (var k in dflts) {
-      this.model['contact.'+k] = dflts[k];
+    // set contact to default value
+    for (let k in this.defaults.contact) {
+      this.model.contact[k] = this.defaults.contact[k];
     }
-    
-    this.model.contactPK = '';
-    this.model.contactOrig = this.$copy(this.model.contact);
+
+    this.contactOrig = this.model.contact.toJSON();
   }
   
   displayErrors(res) {

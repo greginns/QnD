@@ -9,7 +9,7 @@ module.exports = {
     return await Zapsub.select({pgschema, rec: {}, query});
   },
   
-  getOne: async function({pgschema = '', rec = {}} = {}) {
+  getOne: async function({pgschema = '', id = ''} = {}) {
     // get specific Zapsub
     if ('id' in rec && rec.id == '_default') {
       let tm = new TravelMessage();
@@ -20,7 +20,7 @@ module.exports = {
       return tm;
     }
           
-    return await Zapsub.select({pgschema, rec});
+    return await Zapsub.selectOne({pgschema, pks: id});
   },
     
   create: async function({pgschema = '', rec = {}} = {}) {

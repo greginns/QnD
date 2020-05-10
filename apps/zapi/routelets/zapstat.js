@@ -6,13 +6,13 @@ const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const services = require(root + '/apps/zapi/services.js');
 const app = 'zapi';
 
-// Zapsub
+// Zapstat
 Router.add(new RouterMessage({
   method: 'get',
   app,
-  path: '/zapsub', 
+  path: '/zapstat', 
   fn: async function(req) {
-    let tm = await services.zapsub.getAll({pgschema: req.TID, params: req.query});
+    let tm = await services.zapstat.getAll({pgschema: req.TID, query: req.query});
 
     return tm.toResponse();
   },
@@ -27,10 +27,10 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
-  path: '/zapsub/:id', 
+  path: '/zapstat/:id', 
   fn: async function(req) {
-    let tm = await services.zapsub.getOne({pgschema: req.TID, id: req.params.id});
-
+    let tm = await services.zapstat.getOne({pgschema: req.TID, id: req.params.id });
+  
     return tm.toResponse();
   }, 
   security: {
@@ -44,9 +44,9 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app,
-  path: '/zapsub', 
+  path: '/zapstat', 
   fn: async function(req) {
-    let tm = await services.zapsub.create({pgschema: req.TID, rec: req.body.zapsub});
+    let tm = await services.zapstat.create({pgschema: req.TID, rec: req.body.zapstat});
 
     return tm.toResponse();
   }, 
@@ -61,9 +61,9 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'put',
   app,
-  path: '/zapsub/:id', 
+  path: '/zapstat/:id', 
   fn: async function(req) {
-    let tm = await services.zapsub.update({pgschema: req.TID, id: req.params.id, rec: req.body.zapsub});
+    let tm = await services.zapstat.update({pgschema: req.TID, id: req.params.id, rec: req.body.zapstat});
 
     return tm.toResponse();
   }, 
@@ -78,9 +78,9 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app,
-  path: '/zapsub/:id', 
+  path: '/zapstat/:id', 
   fn: async function(req) {
-    let tm = await services.zapsub.delete({pgschema: req.TID, id: req.params.id});
+    let tm = await services.zapstat.delete({pgschema: req.TID, id: req.params.id});
 
     return tm.toResponse();
   }, 

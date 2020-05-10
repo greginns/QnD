@@ -24,7 +24,7 @@ Object.assign(MVC, {
   async $reConfirm(btn, msg) {
     var newBtn = document.createElement('button');
     
-    newBtn.classList.add('btn', 'btn-dark');
+    newBtn.classList.add('btn', 'btn-dark', 'mb-2');
     newBtn.innerHTML = msg;
 
     btn.style.display = 'none';
@@ -100,12 +100,13 @@ Object.assign(MVC, {
     toast.style['min-width'] = '200px';
     
     toastHeader.classList.add('toast-header');
+    toastHeader.style['background-color'] = 'rgba(0,0,0,.03)';
 
     toastBody.classList.add('toast-body');
 
     strong.classList.add('mr-auto');
 
-    btn.classList.add('ml-2', 'mb-1', 'close');
+    btn.classList.add('ml-2', 'mb-2', 'close');
     btn.setAttribute('data-dismiss', 'toast');
     btn.setAttribute('aria-label', 'Close');
 
@@ -125,8 +126,8 @@ Object.assign(MVC, {
     // show, hide
     $(toast).toast('show');
 
-    $(toast).on('hidden.bs.toast', function () {
+    toast.addEventListener('hidden.bs.toast', function () {
       toast.remove();
-    })
+    }, {once: true});
   }
 });

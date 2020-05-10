@@ -36,7 +36,7 @@
     {% endblock %}
 
   </head>
-  <body>
+  <body style='background-color: #fffeff'>
     {% import "lib/client/macros/fields.html" as fields %}
     {% import "lib/client/macros/buttons.html" as buttons %}
 
@@ -56,7 +56,7 @@
     </div>
 
     <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
-      <div style="position: absolute; bottom: 0; right: 0;" id='toaster'>
+      <div style="position: fixed; bottom: 0; right: 0;" id='toaster'>
       </div>  
     </div>
   </body>

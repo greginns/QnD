@@ -16,7 +16,7 @@ module.exports = {
     if ('id' in rec && rec.id == '_default') {
       let tm = new TravelMessage();
 
-      tm.data = [Contact.getColumnDefaults()];
+      tm.data = Contact.getColumnDefaults();
       tm.type = 'json';
 
       return tm;
