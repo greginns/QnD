@@ -16,9 +16,9 @@
           <span mvc-text='title'></span>
         </h5>
         <div class='text-right'>
-          <input type='text' mvc-value='search' list='mvc-multi-search' placeholder='Search' mvc-on='{input: "search"}'>
+          <input type='text' mvc-value='search' list='mvc-single-search' placeholder='Search' mvc-event-type='input' mvc-on='{"input": "search"}' class='form-control'>
         </div>
-        <datalist id='mvc-multi-search' mvc-each='datalist'>
+        <datalist id='mvc-single-search' mvc-each='datalist'>
           <option mvc-option='{value: "datalist.$index.value"}'></option>
         </datalist>
       </div>
@@ -32,8 +32,8 @@
               </div>
               <div class='card-body' style='max-height: 300px; overflow-y: scroll'>
                 <ul class='list-group list-group-flush' mvc-each='groups.$index.items' mvc-index='$index1'>
-                  <li class='list-group-item' style='padding: 0px' mvc-class='groups.$index.items.$index1.klass'>
-                    <span mvc-text='groups.$index.items.$index1.text' mvc-attr = '{"data-value": "groups.$index.items.$index1.value"}' mvc-click='iclick'></span>
+                  <li class='list-group-item' style='padding: 0px' mvc-class='groups.$index.items.$index1.klass' mvc-attr = '{"data-value": "groups.$index.items.$index1.value"}' mvc-click='iclick'>
+                    <span mvc-text='groups.$index.items.$index1.text'></span>
                   </li>
                 </ul>
               </div>

@@ -5,9 +5,9 @@ const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const loginServices = require(root + '/apps/login/services.js');
 const services = require(root + '/apps/zapi/services.js');
-
+const {getAppName} = require(root + '/lib/server/utils/utils.js');
+const app = getAppName(__dirname);
 const path = 'routelets';
-const app = 'zapi';
 
 for (let file of fs.readdirSync(`${__dirname}/${path}`)) {
   require(`./${path}/${file}`);

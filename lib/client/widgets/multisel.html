@@ -16,7 +16,7 @@
           <span mvc-text='title'></span>
         </h5>
         <div class='text-right'>
-          <input type='text' mvc-value='search' list='mvc-multi-search' placeholder='Search' mvc-on='{input: "search"}'>
+          <input type='text' mvc-value='search' list='mvc-multi-search' placeholder='Search' mvc-event-type='input' mvc-on='{"input": "search"}' class='form-control'>
         </div>
         <datalist id='mvc-multi-search' mvc-each='datalist'>
           <option mvc-option='{value: "datalist.$index.value"}'></option>

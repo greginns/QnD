@@ -33,7 +33,7 @@ const sslServer = https.createServer(options);
 //const wssl = new WebSocket.Server({server: sslServer, maxPayload: 50000, clientTracking: false});
 const wssl = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTracking: false});
 
-for (app of config.apps) {
+for (let app of config.apps) {
   require(root + `/apps/${app}/routes.js`);  // process app routes.
 };
 
@@ -68,6 +68,7 @@ const serverRequest = async function(req, res) {
     }
     catch(err) {
       rm = new ResponseMessage({status: 500, err});
+console.log(rm)      
     }
   }
   catch(erm) {

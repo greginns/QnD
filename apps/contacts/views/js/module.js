@@ -7,23 +7,23 @@ import {Pages} from '/static/lib/client/core/router.js';
 import '/static/apps/contacts/views/js/main.js';
 
 // js for widgets
-//import '/static/lib/client/widgets/js/modals.js';
 import '/static/lib/client/widgets/js/mtime.js';
 import '/static/lib/client/widgets/js/mdate.js';
-//import '/static/lib/client/widgets/js/multisel.js';
-//import '/static/lib/client/widgets/js/singlesel.js';
+import '/static/lib/client/widgets/js/multisel.js';
+import '/static/lib/client/widgets/js/singlesel.js';
 
 let init = async function() {
   // setup data access
   let app = 'contacts';                       // app name
-  let url = `/${app}/contact`;             // url of interest. to access data, follow with WS
+  let url = `/${app}/v1/contact`;             // url of interest to access data
+  let wurl = `/${app}/contact`;               // url of interest to follow data changes
   let startPage = 'main';
   
   // WS data change notifications.
-  let data = new WSDataComm(app);     // WS instances for this app
+  let data = new WSDataComm(app);       // WS instances for this app
 
-  data.addURL(url);                   // save url.  first path must be the same as app
-  data.start();                       // start following via WS
+  data.addURL(wurl);                    // save url.  first path must be the same as app
+  data.start();                         // start following via WS
 
   // HTTP data access
   QnD.tableStores.contact = new TableStore({url, safemode: false});  // setup a table store in QnD so all pages can access

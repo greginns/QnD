@@ -1,7 +1,9 @@
 const root = process.cwd();
+
 const Fields = require(root + '/lib/server/model/modelFields');
 const Model = require(root + '/lib/server/model/modelRun.js');
-const app = 'contacts';
+const {getAppName} = require(root + '/lib/server/utils/utils.js');
+const app = getAppName(__dirname);
 
 const Contact = class extends Model {
   constructor(obj, opts) {
@@ -15,7 +17,7 @@ const Contact = class extends Model {
         first: new Fields.Char({notNull: true, maxLength: 40, verbose: 'First Name'}),
         last: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Last Name'}),
         group: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Group Name'}),
-        address: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Address'}),
+        address: new Fields.Char({null: true, maxLength: 40, verbose: 'Address'}),
         email: new Fields.Char({null: true, maxLength: 50, isEmail: true, verbose: 'Email Address'}),
         fullname: new Fields.Derived({defn: 'concat("first",\' \',"last")', verbose: 'Contact Name'}) 
       },

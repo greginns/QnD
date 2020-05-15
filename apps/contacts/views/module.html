@@ -1,4 +1,4 @@
-{% extends "lib/client/base.html" %}
+{% extends "project/base.html" %}
 
 {% block title %}
   Contacts
@@ -9,6 +9,7 @@
   label.mbsc-mobiscroll.mbsc-input {
     margin: 1.5em 1em .1em 1em !important;
   }
+
 </style>
 {% endblock %}
 
@@ -28,13 +29,10 @@
     </div>
   </div>
   
-  {#% include "./main-mobi.html" %#}
-
-  {#% include "lib/client/widgets/modals.html" %#}
   {% include "lib/client/widgets/mdate.html" %}
   {% include "lib/client/widgets/mtime.html" %}
-  {#% include "lib/client/widgets/multisel.html" %#}
-  {#% include "lib/client/widgets/singlesel.html" %#}
+  {% include "lib/client/widgets/multisel.html" %}
+  {% include "lib/client/widgets/singlesel.html" %}
 
   {#% include "apps/login/views/relogin.html" %#}
 {% endblock %}
@@ -44,12 +42,5 @@
 </script>
 
 <script type="text/javascript">
-  
-//mobiscroll.settings = {
-//  theme: 'ios',
-//  themeVariant: 'light',
-//  lang: 'en'
-//}
-
 </script>
 {% endblock %}

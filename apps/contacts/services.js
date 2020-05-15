@@ -40,9 +40,15 @@ services.output = {
     try {
       let ctx = {};
       let tmpl = 'apps/contacts/views/module.html';
+      //let rando1 = Math.round(Math.random() * 10000000);
+      //let rando2 = Math.round(Math.random() * 10000000);
+      //let rando3 = Math.round(Math.random() * 10000000);
 
       ctx.CSRFToken = await makeCSRF(req.TID, req.user.code);
       ctx.contact = Contact.getColumnDefns();
+      //ctx.contactSearch = Contact.getColumnDefns(rando1);
+      //ctx.contactCreate = Contact.getColumnDefns(rando2);
+      //ctx.contactUpdate = Contact.getColumnDefns(rando3);
       ctx.dateFormat = dateFormat;
       ctx.timeFormat = timeFormat;
       ctx.TID = req.TID;    

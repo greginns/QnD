@@ -4,9 +4,10 @@ const fs = require("fs");
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
 const loginServices = require(root + '/apps/login/services.js');
 const services = require(root + '/apps/contacts/services.js');
+const {getAppName} = require(root + '/lib/server/utils/utils.js');
+const app = getAppName(__dirname);
 
 const path = 'routelets';
-const app = 'contacts';
 
 for (let file of fs.readdirSync(`${__dirname}/${path}`)) {
   require(`./${path}/${file}`);

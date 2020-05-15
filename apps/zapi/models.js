@@ -1,7 +1,8 @@
 const root = process.cwd();
 const Fields = require(root + '/lib/server/model/modelFields');
 const Model = require(root + '/lib/server/model/modelRun.js');
-const app = 'zapi';
+const {getAppName} = require(root + '/lib/server/utils/utils.js');
+const app = getAppName(__dirname);
 
 const Zapsub = class extends Model {
   constructor(obj, opts) {
@@ -14,8 +15,8 @@ const Zapsub = class extends Model {
         id: new Fields.Serial({}),
         app: new Fields.Char({notNull: true, maxLength: 40, verbose: 'App Name'}),
         subapp: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Sub App Name'}),
+        event: new Fields.Char({null: true, maxLength: 40, verbose: 'Event Name'}),
         url: new Fields.Char({notNull: true, maxLength: 250, verbose: 'Zapier URL'}),
-        events: new Fields.Jsonb({null: true, verbose: 'Events'}),
       },
       
       constraints: {
@@ -51,6 +52,7 @@ const Zapq = class extends Model {
         runat: new Fields.DateTime({notNull: true, verbose: 'Next Run Time'}),
         retries: new Fields.Integer({notNull: true, default: 0, verbose: 'Retry Attempts'}),
         result: new Fields.Jsonb({null: true, verbose: 'Latest Result'}),
+        status: new Fields.Char({null: true, maxLength: 3, verbose: 'HTTP Status'}),
       },
       
       constraints: {
@@ -86,6 +88,7 @@ const Zapstat = class extends Model {
         success: new Fields.Boolean({notNull: true, default: true, verbose: 'Success or Fail'}),
         retries: new Fields.Integer({notNull: true, default: 0, verbose: 'Retry Attempts'}),
         result: new Fields.Jsonb({null: true, verbose: 'Latest Result'}),
+        status: new Fields.Char({null: true, maxLength: 3, verbose: 'HTTP Status'}),
       },
       
       constraints: {

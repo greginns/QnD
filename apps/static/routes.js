@@ -30,8 +30,8 @@ Router.add(new RouterMessage({
 
 Router.add(new RouterMessage({
   method: 'get',
-  app: '',
-  path: 'favicon.ico', 
+  app,
+  path: '/favicon.ico', 
   fn: async function(req, res) {
     let rm = await services.getFavicon(req);
 

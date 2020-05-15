@@ -6,19 +6,26 @@ const adminServices = require(root + '/apps/admin/services.js');
 const {send} = require(root + '/lib/server/utils/send.js');
 const {SendMessage} = require(root + '/lib/server/utils/messages.js');
 const {zapPubsub} = require(root + '/lib/server/utils/pubsubs.js');
+const {Zapsub} = require(root + '/apps/zapi/models.js');
 
 const path = 'servelets';
 const services = {};
 
 const postToZapier = async function(body, options) {
+console.log(body, options)  
   let sm = new SendMessage({body, options});
-  return await send(sm);  
+console.log(sm)  
+  
+  let ret = await send(sm);  
+console.log(ret)
+
+  return ret;
 };
 
-const saveZapstat = async function({tenant='', app='', subapp='', event='', body='', options={}, success, retries, result} = {}) {
+const saveZapstat = async function({tenant='', app='', subapp='', event='', body='', options={}, success, retries, status='', result} = {}) {
   // save info to Zapstat
   let added = new Date();
-  let rec = {app, subapp, event, body, options, added, success, retries, result};
+  let rec = {app, subapp, event, body, options, added, success, retries, status, result};
 
   return await services.zapstat.create({pgschema: tenant, rec});
 };
@@ -72,7 +79,12 @@ services.deinitOne = function(tenant, id) {
 
 services.subscribe = async function({pgschema = '', rec = {}} = {}) {
   // create Zapsub row
-  let tm = await services.zapsub.create({pgschema, rec});
+  // delete any matching first
+  let tm;
+  let delRec = {app: rec.app, subapp: rec.subapp, event: rec.event};
+
+  tm = await Zapsub.delete({pgschema, obj: delRec});
+  tm = await services.zapsub.create({pgschema, rec});
 
   if (tm.isGood()) {
     services.deinitOne(pgschema, tm.data.id);
@@ -86,7 +98,7 @@ services.unsubscribe = async function({pgschema = '', id = ''} = {}) {
   // delete Zapsub row
   let tm = await services.zapsub.delete({pgschema, id});
 
-  if (tm.status == 200) {
+  if (tm.isGood()) {
     services.deinitOne(pgschema, id);
   }
   
@@ -94,6 +106,8 @@ services.unsubscribe = async function({pgschema = '', id = ''} = {}) {
 }
 
 services.try = async function(tenant, app, subapp, event, body, options) {
+  // Known issue:
+  // if a zap is turned off/on, then the post url changes.  If entries are in the queue they'll have the wrong(old) URL
   let res = await postToZapier(body, options);
   
   if (res.status != 200) {
@@ -101,13 +115,13 @@ services.try = async function(tenant, app, subapp, event, body, options) {
     let now = new Date();
     let then = new Date(); 
     then.setMinutes(then.getMinutes()+1);
-    let rec = {app, subapp, event, body, options, added: now, runat: then, retries: 0, result: res.data};
+    let rec = {app, subapp, event, body, options, added: now, runat: then, retries: 0, status: res.status, result: res.data};
 
     await saveZapq(tenant, rec);
   }
   else {
     // made it!  This should be the norm.
-    await saveZapstat({tenant, app, subapp, event, body, options, success: true, retries: 0, result: res.data});
+    await saveZapstat({tenant, app, subapp, event, body, options, success: true, retries: 0, status: res.status, result: res.data});
   }
 }
 
@@ -137,6 +151,7 @@ services.retry = async function() {
                 let rec = {id: row.id};
   
                 rec.retries = row.retries+1;
+                rec.status = res.status;
                 rec.result = res.data;
                 
                 runat.setMinutes(runat.getMinutes() + rec.retries);
@@ -146,13 +161,13 @@ services.retry = async function() {
               }
               else {
                 // total fail after 5 tries
-                await saveZapstat({tenant: tenant.code, app: row.app, subapp: row.subapp, event: row.event, body: row.body, options: row.options, success: false, retries: row.retries, result: res.data});
+                await saveZapstat({tenant: tenant.code, app: row.app, subapp: row.subapp, event: row.event, body: row.body, options: row.options, success: false, retries: row.retries, status: res.status, result: res.data});
                 await deleteZapq(tenant.code, row.id);
               }
             }
             else {
               // success
-              await saveZapstat({tenant: tenant.code, app: row.app, subapp: row.subapp, event: row.event, body: row.body, options: row.options, success: true, retries: row.retries++, result: res.data});
+              await saveZapstat({tenant: tenant.code, app: row.app, subapp: row.subapp, event: row.event, body: row.body, options: row.options, success: true, retries: row.retries++, status: res.status, result: res.data});
               await deleteZapq(tenant.code, row.id);
             }
 
@@ -177,13 +192,9 @@ class Zouter {
     let url = zapRow.url;
     let app = zapRow.app;
     let subapp = zapRow.subapp;
-    let events = zapRow.events;
+    let event = zapRow.event;
 
-    for (let event of Object.keys(events)) {
-      if (events[event] === true) {
-        this.subscribe(tenant, app, subapp, event, url, id);
-      }
-    }
+    this.subscribe(tenant, app, subapp, event, url, id);
   }
 
   static unroute(tenant, id) {

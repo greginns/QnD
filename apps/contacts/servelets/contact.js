@@ -1,8 +1,10 @@
 const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
+const {UserError} = require(root + '/lib/server/utils/errors.js');
 const {zapPubsub} = require(root + '/lib/server/utils/pubsubs.js');
 const { Contact } = require(root + '/apps/contacts/models.js');
-const app = 'contacts';
+const {getAppName} = require(root + '/lib/server/utils/utils.js');
+const app = getAppName(__dirname);
 const subapp = 'contact'
 
 module.exports = {
@@ -30,7 +32,7 @@ module.exports = {
     let tobj = new Contact(rec);
     let tm = await tobj.insertOne({pgschema});
 
-    if (tm.status == 200) {
+    if (tm.isGood()) {
       zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, tm.data);
     }
 
@@ -48,7 +50,7 @@ module.exports = {
     let tobj = new Contact(rec);
     let tm = await tobj.updateOne({pgschema});
 
-    if (tm.status == 200) {
+    if (tm.isGood()) {
       zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.update`, tm.data);
     }
     
@@ -62,7 +64,7 @@ module.exports = {
     let tobj = new Contact({id});
     let tm = await tobj.deleteOne({pgschema});
 
-    if (tm.status == 200) {
+    if (tm.isGood()) {
       zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.delete`, tm.data);
     }
 

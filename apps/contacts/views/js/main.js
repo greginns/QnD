@@ -57,6 +57,25 @@ class Contact extends MVC {
     return true;  
   }
 
+  async test () {
+    var title = 'test'
+    var groups = [
+      { 
+        label: 'Group 1', 
+        items: [{text: 'Item 1.1', value: '11'}, {text: 'Item 1.2', value: '12'}],
+      },
+      {
+        label: 'Group 2',
+        items: [{text: 'Item 2.1', value: '21'}, {text: 'Item 2.2', value: '22'}]
+      }
+    ];
+
+    var value = '12';
+
+    let res = await QnD.widgets.singlesel.select(title, groups, value);
+    console.log(res)
+  }
+
   async save(ev) {
     var contact = this.model.contact.toJSON();
     var diffs;
@@ -87,6 +106,8 @@ class Contact extends MVC {
       MVC.$toast('CONTACT',(this.model.existingEntry) ? contact.fullname + ' Updated' : 'Created', 2000);
    
       this.contactOrig = this.model.contact.toJSON();
+
+      this.clearIt();
     }
     else {
       this.displayErrors(res);

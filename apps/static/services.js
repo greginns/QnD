@@ -18,6 +18,7 @@ module.exports = {
 
     urlParts.shift();  // get rid of ""
     urlParts.shift();  // get rid of app (static)  
+    urlParts.shift();  // get rid of version
 
     url = urlParts.join('/');
     ft = req.params.fn.split('.').pop();  // pop off ft
