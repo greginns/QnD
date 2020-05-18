@@ -191,7 +191,7 @@ module.exports = {
       // create Session record 
       // setup cookies
       var match, tm, rec;
-      var url = config.logins.admin || '';
+      var url = config.loginRedirects.admin || '';
 
       // user valid?
       tm = await User.selectOne({pgschema, cols: 'password', pks: body.username});

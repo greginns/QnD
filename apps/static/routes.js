@@ -31,7 +31,9 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  version: 'v1',
   path: '/favicon.ico', 
+  rewrite: true,
   fn: async function(req, res) {
     let rm = await services.getFavicon(req);
 
@@ -45,6 +47,7 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  version: 'v1',
   path: allowedSubdirs,
   fn: async function(req) {
     var tm = await services.getResource(req);

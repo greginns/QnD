@@ -67,15 +67,15 @@ const serverRequest = async function(req, res) {
       rm = await Router.go(req, res)
     }
     catch(err) {
+      console.log(err)      
       rm = new ResponseMessage({status: 500, err});
-console.log(rm)      
     }
   }
   catch(erm) {
-    //console.log(erm);
+    console.log(erm);
     rm = erm;
   }
-
+  
   mw.reply.reply(res, rm);
 };
 

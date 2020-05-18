@@ -3,12 +3,15 @@ const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const services = require(root + '/apps/login/services.js');
 const app = 'login';
+const version = 'v1';
 
 // login page
 Router.add(new RouterMessage({
   method: 'get',
   app,
-  path: '', 
+  version,
+  path: '/loginPage', 
+  rewrite: true,
   fn: async function(req) {
     var tm = await services.output.main(req);
 
@@ -23,7 +26,9 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
-  path: '/basic', 
+  version,
+  path: '/basic',
+  rewrite: true,
   fn: async function(req) {
     // if we got here, then we're ok.  Get user name
     var tm = await services.auth.basic(req, {}, {});
@@ -46,6 +51,7 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app,
+  version,
   path: '/login', 
   fn: async function(req) {
     var tm = await services.auth.login(req.body);
@@ -61,6 +67,7 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app,
+  version,
   path: '/logout', 
   fn: async function(req) {
     var tm = await services.auth.logout(req);

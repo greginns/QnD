@@ -10,7 +10,22 @@ const subapp = 'contact'
 module.exports = {
   getAll: async function({pgschema = '', query = {}} = {}) {
     // get one or more Contacts
-    return await Contact.select({pgschema, rec: {}, query});
+    const cols = ['*'], rec = {};
+
+    if ('fields' in query) {
+      cols = query.fields.split(',');
+    }
+
+    if ('filters' in query) {
+      let fldVals = query.filters.split(',');
+
+      for (let fldVal in fldVals) {
+        let pair = fldVal.split('|');
+        rec[pair[0]] = pair[1];
+      }
+    }
+
+    return await Contact.select({pgschema, rec, cols, options: query});
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

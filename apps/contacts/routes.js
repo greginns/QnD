@@ -17,7 +17,9 @@ for (let file of fs.readdirSync(`${__dirname}/${path}`)) {
 Router.add(new RouterMessage({
   method: 'get',
   app,
-  path: ['', '/:etc'], 
+  version: 'v1',
+  path: ['/contactPage', '/contactPage/:etc'], 
+  rewrite: true,
   fn: async function(req) {
     let tm = await services.output.main(req);
 
@@ -25,8 +27,8 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      {session: {allowAnon: false, needCSRF: false, redirect: '/login'}},
-      {basic: {allowAnon: false, needCSRF: false, redirect: '/login'}},
+      {session: {allowAnon: false, needCSRF: false, redirect: '/loginPage'}},
+      {basic: {allowAnon: false, needCSRF: false, redirect: '/loginPage'}},
     ],
   }
 }));

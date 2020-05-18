@@ -1,22 +1,24 @@
 // main
-import {QnD} from '/static/lib/client/core/qnd.js';
-import {WSDataComm, TableStore} from '/static/lib/client/core/data.js';
-import {Pages} from '/static/lib/client/core/router.js';
+import {QnD} from '/static/v1/lib/client/core/qnd.js';
+import {WSDataComm, TableStore} from '/static/v1/lib/client/core/data.js';
+import {Pages} from '/static/v1/lib/client/core/router.js';
 
 // js for pages
-import '/static/apps/contacts/views/js/main.js';
+import '/static/v1/apps/contacts/views/js/main.js';
 
 // js for widgets
-import '/static/lib/client/widgets/js/mtime.js';
-import '/static/lib/client/widgets/js/mdate.js';
-import '/static/lib/client/widgets/js/multisel.js';
-import '/static/lib/client/widgets/js/singlesel.js';
+import '/static/v1/lib/client/widgets/js/mtime.js';
+import '/static/v1/lib/client/widgets/js/mdate.js';
+import '/static/v1/lib/client/widgets/js/multisel.js';
+import '/static/v1/lib/client/widgets/js/singlesel.js';
 
 let init = async function() {
   // setup data access
   let app = 'contacts';                       // app name
-  let url = `/${app}/v1/contact`;             // url of interest to access data
-  let wurl = `/${app}/contact`;               // url of interest to follow data changes
+  let subapp = 'contact';
+  let url = `/${app}/v1/${subapp}`;             // url of interest to access data
+  let wurl = `/${app}/${subapp}`;               // url of interest to follow data changes
+  let modulePage = 'contactPage';
   let startPage = 'main';
   
   // WS data change notifications.
@@ -33,7 +35,7 @@ let init = async function() {
   document.dispatchEvent(new CustomEvent('tablestoreready', {bubbles: false}));  // getElementById('qndPages').
 
   // Start up pages.  QnD.pages saved up all page references
-  let pages = new Pages({root: `/${app}`, pages: QnD.pages});
+  let pages = new Pages({root: `/${modulePage}`, pages: QnD.pages});
 
   try {
     // fire off init method in each section of each page.

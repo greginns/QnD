@@ -1,4 +1,4 @@
-import {MVC} from '/static/lib/client/core/mvc.js';
+import {MVC} from '/static/v1/lib/client/core/mvc.js';
 
 Object.assign(MVC, {
   $alert(msg) {

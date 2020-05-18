@@ -1,0 +1,139 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Contacts
+  license:
+    MIT
+servers:
+  - url: https:roam3.adventurebooking.com/v1
+paths:
+  /contact:
+    get:
+      summary: Return one or more Contacts
+      tags:
+        - contacts
+      parameters:
+        $ref: "#/components/query/get"
+      responses:
+        "200":
+          description:Array of Contacts
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/Contacts"
+    post:
+      summary: Create a Contact
+      tags:
+        - contacts
+      parameters:
+        $ref: "#/components/query/get"
+      responses:
+        "200":
+          description:One Contact
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/Contacts"
+  /contact/:id:
+    get:
+      summary: Return one Contact
+      tags:
+        - contacts
+      parameters:
+        $ref: "#/components/query/get"
+      responses:
+        "200":
+          description:One Contact
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/Contacts"
+    put:
+      summary: Update a Contact
+      tags:
+        - contacts
+      parameters:
+        $ref: "#/components/query/get"
+      responses:
+        "200":
+          description:One Contact
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/Contacts"
+    delete:
+      summary: Delete a Contact
+      tags:
+        - contacts
+      parameters:
+        $ref: "#/components/query/get"
+      responses:
+        "200":
+          description:One Contact
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/Contacts"
+components:
+  query:
+    get:
+      - name: limit
+        in: query
+        description: How many items to return at one time (max 100)
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: offset
+        in: query
+        description: How many entries to skip
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: orderby
+        in: query
+        description: "Comma separated list of sort order fields: ie col1,-col2"
+        required: false
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: "Comma separated list of fields to return, ie: col1,col2"
+        required: false
+        schema:
+          type: string
+      - name: filters
+        in: query
+        description: "Comma separated list of filter fields: ie col1|Miller,col2|Greg"
+        required: false
+        schema:
+          type: string
+  schemas:
+    Contact:
+      type: object
+      required:
+        - id
+        - first
+        - last
+        - group
+        - fullname
+      properties:
+        id:
+          type: Char
+        first:
+          type: Char
+        last:
+          type: Char
+        group:
+          type: Char
+        address:
+          type: Char
+        email:
+          type: Char
+        fullname:
+          type: Derived
+    Contacts:
+      type: array
+      items:
+        $ref: "#components/schemas/Contact"

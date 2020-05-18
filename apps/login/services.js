@@ -174,7 +174,7 @@ module.exports = {
       // create Session record 
       // setup cookies
       var match, tm, rec;
-      var url = config.logins.login || '';
+      var url = config.loginRedirects.login || '';
 
       // tenant valid?
       tm = await Tenant.selectOne({pgschema, cols: '', pks: body.tenant});
