@@ -1,10 +1,13 @@
 const root = process.cwd();
 
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
+const {VIEW, CREATE, UPDATE, DELETE} = require(root + '/lib/server/utils/authorization.js');
+const { Contact } = require(root + '/apps/contacts/models.js');
 
 const services = require(root + '/apps/contacts/services.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const app = getAppName(__dirname);
+const subapp = 'contact';
 const version = 'v1';
 
 // Contact
@@ -13,10 +16,11 @@ Router.add(new RouterMessage({
   app,
   version,
   path: '/contact', 
-  desc: 'Return one or more Contacts',
-  resp: {type: 'json', desc: 'Array of Contacts', schema: 'Contacts'},
+  id: `${app}.${subapp}.getMany`,
+  level: VIEW,
+  resp: {type: 'json', schema: [Contact]},
   fn: async function(req) {
-    let tm = await services.contact.getAll({pgschema: req.TID, query: req.query});
+    let tm = await services.contact.getMany({pgschema: req.TID, query: req.query});
       
     return tm.toResponse();
   },
@@ -33,8 +37,9 @@ Router.add(new RouterMessage({
   app,
   version,
   path: '/contact/:id', 
-  desc: 'Return one Contact',
-  resp: {type: 'json', desc: 'One Contact', schema: 'Contact'},
+  id: `${app}.${subapp}.getOne`,
+  level: VIEW,
+  resp: {type: 'json', schema: Contact},
   fn: async function(req) {
     let tm = await services.contact.getOne({pgschema: req.TID, rec: { id: req.params.id }});
 
@@ -53,8 +58,9 @@ Router.add(new RouterMessage({
   app,
   version,
   path: '/contact', 
-  desc: 'Create a Contact',
-  resp: {type: 'json', desc: 'One Contact', schema: 'Contact'},
+  id: `${app}.${subapp}.create`,
+  level: CREATE,
+  resp: {type: 'json', schema: Contact},
   fn: async function(req) {
     let tm = await services.contact.create({pgschema: req.TID, rec: req.body.contact});
 
@@ -73,8 +79,9 @@ Router.add(new RouterMessage({
   app,
   version,
   path: '/contact/:id', 
-  desc: 'Update a Contact',
-  resp: {type: 'json', desc: 'One Contact', schema: 'Contact'},
+  id: `${app}.${subapp}.update`,
+  level: UPDATE,
+  resp: {type: 'json', schema: Contact},
   fn: async function(req) {
     let tm = await services.contact.update({pgschema: req.TID, id: req.params.id, rec: req.body.contact});
 
@@ -93,8 +100,9 @@ Router.add(new RouterMessage({
   app,
   version,
   path: '/contact/:id', 
-  desc: 'Delete a Contact',
-  resp: {type: 'json', desc: 'One Contact', schema: 'Contact'},
+  id: `${app}.${subapp}.delete`,
+  level: DELETE,
+  resp: {type: 'json', schema: Contact},
   fn: async function(req) {
     let tm = await services.contact.delete({pgschema: req.TID, id: req.params.id});
 

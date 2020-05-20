@@ -1,6 +1,6 @@
 const root = process.cwd();
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
-const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
+const {Authentication} = require(root + '/lib/server/utils/authentication.js');
 const services = require(root + '/apps/login/services.js');
 const app = 'login';
 const version = 'v1';
@@ -10,7 +10,7 @@ Router.add(new RouterMessage({
   method: 'get',
   app,
   version,
-  path: '/loginPage', 
+  path: '/loginpage', 
   rewrite: true,
   fn: async function(req) {
     var tm = await services.output.main(req);
@@ -80,35 +80,20 @@ Router.add(new RouterMessage({
 }));
 
 //strategy rtns
-Router.add(new RouterMessage({
-  method: 'strategy',
-  app,
-  path: '/session', 
-  fn: async function(req, security, strategy) {
-    let tm = await services.auth.session(req, security, strategy);
+Authentication.add(app, 'session', async function(req, security, strategy) {
+  let tm = await services.auth.session(req, security, strategy);
 
-    return tm.toResponse();
-  },
-}));
+  return tm.toResponse();    
+})
 
-Router.add(new RouterMessage({
-  method: 'strategy',
-  app,
-  path: '/basic', 
-  fn: async function(req, security, strategy) {
-    let tm = await services.auth.basic(req, security, strategy);
+Authentication.add(app, 'basic', async function(req, security, strategy) {
+  let tm = await services.auth.basic(req, security, strategy);
 
-    return tm.toResponse();
-  },
-}));
+  return tm.toResponse();    
+})
 
-Router.add(new RouterMessage({
-  method: 'strategy',
-  app,
-  path: '/ws', 
-  fn: async function(req) {
-    let tm = await services.auth.ws(req);
+Authentication.add(app, 'ws', async function(req, security, strategy) {
+  let tm = await services.auth.ws(req, security, strategy);
 
-    return tm.toResponse();
-  },
-}));
+  return tm.toResponse();    
+})

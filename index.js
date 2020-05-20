@@ -13,6 +13,7 @@ mw.reply = require(root + '/lib/server/middleware/reply.js');
 
 const {Router} = require(root + '/lib/server/utils/router.js');
 const {Wouter} = require(root + '/lib/server/utils/wouter.js');
+const {Authorization} = require(root + '/lib/server/utils/authorization.js');
 const {ResponseMessage} = require(root + '/lib/server/utils/messages.js');
 const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
 const zapiServices = require(root + '/apps/zapi/services.js');
@@ -55,25 +56,23 @@ process
 
 // SETUP HTTPS/WSS SERVERS
 const serverRequest = async function(req, res) {
-  var rm;
+  let rm;
 
   try {
-    // Middleware - decorates req, res 
+    // Middleware 
+    // process augments req, res 
     await mw.request.process(req, res);
-    await mw.security.check(req, res);
 
-    // Routes - communicate via params and response message
-    try {
+    // Routes - augments res with tenant/user.  tests user authentication/authorization
+    rm = await mw.security.check(req, res);
+
+    if (rm.status == 200) {
       rm = await Router.go(req, res)
-    }
-    catch(err) {
-      console.log(err)      
-      rm = new ResponseMessage({status: 500, err});
-    }
+    }    
   }
-  catch(erm) {
-    console.log(erm);
-    rm = erm;
+  catch(err) {
+    console.log(err)      
+    rm = new ResponseMessage({status: 500, err});
   }
   
   mw.reply.reply(res, rm);
@@ -82,8 +81,7 @@ const serverRequest = async function(req, res) {
 const serverUpgrade = async function(req, socket, head) {
   await mw.request.processWS(req);
 
-  let tm = await mw.security.checkWS(req);
-  let {tenant, user} = tm.data;
+  let {tenant, user} = await mw.security.checkWS(req);
 
   if (!user) {
     socket.destroy();
@@ -98,8 +96,7 @@ const serverUpgrade = async function(req, socket, head) {
 const sslServerUpgrade = async function(req, socket, head) {
   await mw.request.processWS(req);
 
-  let tm = await mw.security.checkWS(req);
-  let {tenant, user} = tm.data;
+  let {tenant, user} = await mw.security.checkWS(req);
 
   if (!user) {
     socket.destroy();
@@ -166,8 +163,8 @@ setInterval(function() {
   }
 }, 30000);
 
-// Subscribe all zap events for all tenants
-zapiServices.init();
+zapiServices.init();  // Subscribe all zap events for all tenants
+Authorization.initGroups();   // setup all access groups
 
 // GIDDY UP!
 //console.log('GO! on ' + config.server.port);

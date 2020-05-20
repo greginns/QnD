@@ -18,7 +18,7 @@ let init = async function() {
   let subapp = 'contact';
   let url = `/${app}/v1/${subapp}`;             // url of interest to access data
   let wurl = `/${app}/${subapp}`;               // url of interest to follow data changes
-  let modulePage = 'contactPage';
+  let modulePage = 'contactpage';
   let startPage = 'main';
   
   // WS data change notifications.

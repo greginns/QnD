@@ -8,7 +8,7 @@ const app = getAppName(__dirname);
 const subapp = 'contact'
 
 module.exports = {
-  getAll: async function({pgschema = '', query = {}} = {}) {
+  getMany: async function({pgschema = '', query = {}} = {}) {
     // get one or more Contacts
     const cols = ['*'], rec = {};
 
