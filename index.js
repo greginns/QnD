@@ -13,7 +13,6 @@ mw.reply = require(root + '/lib/server/middleware/reply.js');
 
 const {Router} = require(root + '/lib/server/utils/router.js');
 const {Wouter} = require(root + '/lib/server/utils/wouter.js');
-const {Authorization} = require(root + '/lib/server/utils/authorization.js');
 const {ResponseMessage} = require(root + '/lib/server/utils/messages.js');
 const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
 const zapiServices = require(root + '/apps/zapi/services.js');
@@ -164,7 +163,6 @@ setInterval(function() {
 }, 30000);
 
 zapiServices.init();  // Subscribe all zap events for all tenants
-Authorization.initGroups();   // setup all access groups
 
 // GIDDY UP!
 //console.log('GO! on ' + config.server.port);

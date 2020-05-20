@@ -2,3 +2,13 @@ node_modules/
 *.bak
 tenant-data/neoc/appConfig.json
 config.json
+usergroups.json
+private.key
+ca_bundle.crt
+certificate.crt
+favicon.ico
+indexBuild.js
+indexBuild2.js
+indexBuildtest.js
+migrationTests.js 
+req.js 
