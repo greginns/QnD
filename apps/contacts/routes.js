@@ -8,7 +8,7 @@ const loginServices = require(root + '/apps/login/services.js');
 const services = require(root + '/apps/contacts/services.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const app = getAppName(__dirname);
-
+const subapp = 'contact';
 const path = 'routelets';
 
 for (let file of fs.readdirSync(`${__dirname}/${path}`)) {
@@ -19,10 +19,11 @@ for (let file of fs.readdirSync(`${__dirname}/${path}`)) {
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  subapp,
   version: 'v1',
   path: ['/contactpage', '/contactpage/:etc'], 
   rewrite: true,
-  id: 'contacts.contact.contactpage',
+  id: 'contactpage',
   level: ACCESS,
   desc: 'Contact Page',
   fn: async function(req) {

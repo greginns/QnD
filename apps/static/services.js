@@ -2,7 +2,6 @@ const root = process.cwd();
 const fs = require('fs').promises;
 
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
-const {Error404} = require(root + '/lib/server/utils/errors.js');
 
 /*
   /static is an app that can get a file in any folder
@@ -28,7 +27,7 @@ module.exports = {
       tm.type = ft;
     }
     catch(err) {
-      tm.err = new Error404();
+      tm.status = 404;
     }
 
     return tm;
@@ -42,7 +41,7 @@ module.exports = {
       tm.type = 'icon';
     }
     catch(err) {
-      tm.err = new Error404();
+      tm.status = 404;
     }
 
     return tm;

@@ -1,18 +1,24 @@
 const root = process.cwd();
-const fs = require('fs').promises;
 
-const {ResponseMessage} = require(root + '/lib/server/utils/messages.js');
+const {Authentication} = require(root + '/lib/server/utils/authentication.js');
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
+const {OPEN, ACCESS, VIEW, CREATE, UPDATE, DELETE} = require(root + '/lib/server/utils/authorization.js');
 
 const services = require(root + '/apps/admin/services.js');
 const app = 'admin';
+const subapp = 'admin';
+const version = 'v1';
 
 // Pages
 // Main/Login
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  subapp,
+  version,
   path: '', 
+  id: 'main',
+  level: OPEN,
   fn: async function(req) {
     var tm = await services.output.main(req);
 
@@ -28,7 +34,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  subapp,
+  version,
   path: ['/manage/:etc', '/manage'], 
+  id: 'manage',
+  level: ACCESS,
   fn: async function(req) {
     var tm = await services.output.manage(req);
 
@@ -43,45 +53,15 @@ Router.add(new RouterMessage({
   } 
 }));
 
-//strategy rtns
-Router.add(new RouterMessage({
-  method: 'strategy',
-  app,
-  path: '/session', 
-  fn: async function(req, security, strategy) {
-    let tm = await services.auth.session(req, security, strategy);
-
-    return tm.toResponse();
-  },
-}));
-
-Router.add(new RouterMessage({
-  method: 'strategy',
-  app,
-  path: '/basic', 
-  fn: async function(req, security, strategy) {
-    let tm = await services.auth.basic(req, security, strategy);
-    
-    return tm.toResponse();
-  },
-}));
-
-Router.add(new RouterMessage({
-  method: 'strategy',
-  app,
-  path: '/ws', 
-  fn: async function(req) {
-    let tm = await services.auth.ws(req);
-
-    return tm.toResponse();
-  },
-}));
-
 // login in/out
 Router.add(new RouterMessage({
   method: 'post',
   app,
+  subapp,
+  version,
   path: '/login', 
+  id: 'login',
+  level: OPEN,
   fn: async function(req) {
     var tm = await services.auth.login(req.body);
   
@@ -96,7 +76,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app,
+  subapp,
+  version,
   path: '/logout', 
+  id: 'logout',
+  level: OPEN,
   fn: async function(req) {
     var tm = await services.auth.logout(req);
   
@@ -113,7 +97,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  subapp: 'tenant',
+  version,
   path: '/tenant', 
+  id: 'getMany',
+  level: VIEW,
   fn: async function(req) {
     var tm = await services.tenant.get();
   
@@ -129,7 +117,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  subapp: 'tenant',
+  version,
   path: '/tenant/:code', 
+  id: 'getOne',
+  level: VIEW,
   fn: async function(req) {
     var tm = await services.tenant.get({rec: {code: req.params.code}});
   
@@ -145,7 +137,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app,
+  subapp: 'tenant',
+  version,
   path: '/tenant', 
+  id: 'create',
+  level: CREATE,
   fn: async function(req) {
     var tm = await services.tenant.insert({rec: req.body.tenant});
 
@@ -161,7 +157,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'put',
   app,
+  subapp: 'tenant',
+  version,
   path: '/tenant/:code', 
+  id: 'update',
+  level: UPDATE,
   fn: async function(req) {
     var tm = await services.tenant.update({code: req.params.code, rec: req.body.tenant});
 
@@ -177,7 +177,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app,
+  subapp: 'tenant',
+  version,
   path: '/tenant/:code', 
+  id: 'delete',
+  level: DELETE,
   fn: async function(req) {
     var tm = await services.tenant.delete({code: req.params.code});
 
@@ -194,7 +198,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  subapp: 'user',
+  version,
   path: '/user', 
+  id: 'getMany',
+  level: VIEW,
   fn: async function(req) {
     var tm = await services.user.get();
   
@@ -210,7 +218,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  subapp: 'user',
+  version,
   path: '/user/:code', 
+  id: 'getOne',
+  level: VIEW,
   fn: async function(req) {
     var tm = await services.user.get({rec: {code: req.params.code}});
   
@@ -226,7 +238,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app,
+  subapp: 'user',
+  version,
   path: '/user', 
+  id: 'create',
+  level: CREATE,
   fn: async function(req) {
     var tm = await services.user.insert({rec: req.body.user});
 
@@ -242,7 +258,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'put',
   app,
+  subapp: 'user',
+  version,
   path: '/user/:code', 
+  id: 'update',
+  level: UPDATE,
   fn: async function(req) {
     var tm = await services.user.update({code: req.params.code, rec: req.body.user});
 
@@ -258,7 +278,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app,
+  subapp: 'user',
+  version,
   path: '/user/:code', 
+  id: 'delete',
+  level: DELETE,
   fn: async function(req) {
     var tm = await services.user.delete({code: req.params.code});
 
@@ -275,7 +299,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app,
+  subapp: 'migrate',
+  version,
   path: '/migrate', 
+  id: 'migrate',
+  level: UPDATE,
   fn: async function(req) {
     var tm = await services.migrate.run({code: req.body.code});
 
@@ -289,9 +317,12 @@ Router.add(new RouterMessage({
 }));
 
 // misc for testing
+/*
 Router.add(new RouterMessage({
   method: 'post',
   app,
+  subapp,
+  version,
   path: '/form', 
   fn: async function(req) {
     var rm = new ResponseMessage();
@@ -320,6 +351,8 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app,
+  subapp,
+  version,
   path: '/echo', 
   fn: async function(req) {
     console.log('ECHO')
@@ -332,3 +365,23 @@ Router.add(new RouterMessage({
     ]
   }
 }));
+*/
+
+//strategy rtns
+Authentication.add(app, 'session', async function(req, security, strategy) {
+  let tm = await services.auth.session(req, security, strategy);
+
+  return tm.toResponse();    
+})
+
+Authentication.add(app, 'basic', async function(req, security, strategy) {
+  let tm = await services.auth.basic(req, security, strategy);
+
+  return tm.toResponse();    
+})
+
+Authentication.add(app, 'ws', async function(req, security, strategy) {
+  let tm = await services.auth.ws(req, security, strategy);
+
+  return tm.toResponse();    
+})

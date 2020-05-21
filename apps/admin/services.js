@@ -11,7 +11,6 @@ const bcrypt = require('bcrypt');
 
 const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
 const migration = require(root + '/lib/server/utils/migration.js');
-const {UserError, NunjucksError, InvalidUserError, JSONError} = require(root + '/lib/server/utils/errors.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {Tenant, User, Session, CSRF} = require(root + '/apps/admin/models.js');
 const tenantUser = require(root + '/apps/login/models.js').User;
@@ -151,7 +150,8 @@ module.exports = {
       }
 
       if (status == 401) {
-        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: strategy.redirect}});
+        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, message: strategy.redirect});
+
         return new TravelMessage({type: 'text', status: 401});
       }
         
@@ -173,7 +173,8 @@ module.exports = {
       }
 
       if (status == 401) {
-        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: strategy.redirect}});
+        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, message: strategy.redirect});
+
         return new TravelMessage({type: 'text', status: 401});
       }
         
@@ -195,11 +196,11 @@ module.exports = {
 
       // user valid?
       tm = await User.selectOne({pgschema, cols: 'password', pks: body.username});
-      if (tm.isBad()) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
+      if (tm.isBad()) return new TravelMessage({status: 403});
 
       // password valid?
       match = await bcrypt.compare(body.password, tm.data.password);
-      if (!match) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
+      if (!match) return new TravelMessage({status: 403});
       
       // create session record
       rec = new Session({id: uuidv1(), tenant: 'public', user: body.username});
@@ -239,7 +240,8 @@ module.exports = {
         tm.type = 'html';
       }  
       catch(err) {
-        tm.err = new NunjucksError(err);
+        tm.status = 500;
+        tm.message = err;
       }
 
       return tm;
@@ -266,7 +268,8 @@ module.exports = {
         tm.type = 'html';
       }  
       catch(err) {
-        tm.err = new NunjucksError(err);
+        tm.status = 500;
+        tm.message = err;
       }
 
       return tm;
@@ -280,7 +283,7 @@ module.exports = {
       sql = sqlUtil.jsonToQuery(query, 'admin', pgschema, {verbose: false});
     }
     catch(err) {
-      return new TravelMessage({err: new JSONError(err)});
+      return new TravelMessage({status: 500, message: err});
     }
     
     tm = await sqlUtil.execQuery(sql);
@@ -311,7 +314,7 @@ module.exports = {
 
       // insert tenant row
       tm1 = await tobj.insertOne({pgschema});
-      if (tm1.err.name == 'DataValidationError') return tm1;
+      if (tm1.isBad() && 'errors' in tm.data) return tm1;
 
       if (tm1.isBad()) {
         // insert failure, most likely exists already
@@ -356,9 +359,7 @@ module.exports = {
       // Update record
       var tobj;
       
-      if (!code) {
-        return new TravelMessage({err: new UserError('No Tenant Code Supplied')});
-      }
+      if (!code) return new TravelMessage({status: 400, data: {message: 'No Tenant Code Supplied'}});
           
       rec.code = code;
 
@@ -373,7 +374,7 @@ module.exports = {
       var tm1, tm2, tobj, sql;
       var tm = new TravelMessage();
       
-      if (!code) return new TravelMessage({err: new UserError('No Tenant Code Supplied')});
+      if (!code) return new TravelMessage({status: 400, data: {message: 'No Tenant Code Supplied'}});
 
       // drop schema
       sql = `DROP SCHEMA IF EXISTS "${code}" CASCADE`;
@@ -420,7 +421,7 @@ module.exports = {
     
     update: async function({code = '', rec= {}} = {}) {
       // Update record
-      if (!code) return new TravelMessage({err: new UserError('No User Code Supplied')});
+      if (!code) return new TravelMessage({status: 400, data: {message: 'No User Code Supplied'}});
           
       rec.code = code;
       var tobj = new User(rec);
@@ -429,7 +430,7 @@ module.exports = {
     },
     
     delete: async function({code = ''} = {}) {
-      if (!code) return new TravelMessage({err: new UserError('No User Code Supplied')});
+      if (!code) return new TravelMessage({status: 400, data: {message: 'No User Code Supplied'}});
       
       var tobj = new User({code});
       return await tobj.deleteOne({pgschema});
@@ -439,7 +440,7 @@ module.exports = {
   migrate: {
     run: async function({code = ''} = {}) {
       // run migrations for this tenant
-      if (!code) return new TravelMessage({err: new UserError('No Tenant Code Supplied')});
+      if (!code) if (!code) return new TravelMessage({status: 400, data: {message: 'No Tenant Code Supplied'}});
       
       let tm = await Tenant.selectOne({pgschema, cols: '*', showHidden: true, pks: code});
       if (tm.isBad()) return tm;

@@ -24,7 +24,7 @@ class Navbar extends MVC {
   async logout() {
     let res = await io.delete({}, '/admin/logout');
 
-    if (res.status == 200) {
+    if (res.status == 302) {
       location = res.data;
     }
     else {

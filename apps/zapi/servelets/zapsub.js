@@ -1,6 +1,5 @@
 const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
-const {UserError} = require(root + '/lib/server/utils/errors.js');
 const { Zapsub } = require(root + '/apps/zapi/models.js');
 
 module.exports = {
@@ -11,7 +10,11 @@ module.exports = {
   
   getOne: async function({pgschema = '', id = ''} = {}) {
     // get specific Zapsub
-    if ('id' in rec && rec.id == '_default') {
+    if (!id) {
+      return new TravelMessage({status: 400, data: {message: 'No Zapsub id Supplied'}});
+    }
+
+    if (rec.id == '_default') {
       let tm = new TravelMessage();
 
       tm.data = [Zapsub.getColumnDefaults()];
@@ -33,7 +36,7 @@ module.exports = {
   update: async function({pgschema = '', id = '', rec= {}} = {}) {
     // Update record
     if (!id) {
-      return new TravelMessage({err: new UserError('No Zapsub id Supplied')});
+      return new TravelMessage({status: 400, data: {message: 'No Zapsub id Supplied'}});
     }
         
     rec.id = id;
@@ -45,7 +48,9 @@ module.exports = {
   
   delete: async function({pgschema = '', id = ''} = {}) {
     // delete Zapsub
-    if (!id) return new TravelMessage({err: new UserError('No Zapsub id Supplied')});
+    if (!id) {
+      return new TravelMessage({status: 400, data: {message: 'No Zapsub id Supplied'}});
+    }
 
     let tobj = new Zapsub({id});
 

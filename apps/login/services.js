@@ -3,7 +3,6 @@ const nunjucks = require('nunjucks');
 const uuidv1 = require('uuid/v1');
 const bcrypt = require('bcrypt');
 
-const {NunjucksError, InvalidUserError} = require(root + '/lib/server/utils/errors.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {User, CSRF} = require(root + '/apps/login/models.js');
 const {Session, Tenant} = require(root + '/apps/admin/models.js');
@@ -111,7 +110,8 @@ module.exports = {
         tm.type = 'html';
       }  
       catch(err) {
-        tm.err = new NunjucksError(err);
+        tm.status = 500;
+        tm.message = err;
       }
       
       return tm;
@@ -134,7 +134,7 @@ module.exports = {
       }
 
       if (status == 401) {
-        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: strategy.redirect}});
+        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, message: strategy.redirect});
         return new TravelMessage({type: 'text', status: 401});
       }
         
@@ -156,7 +156,7 @@ module.exports = {
       }
 
       if (status == 401) {
-        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, err: {message: strategy.redirect}});
+        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, message: strategy.redirect});
         return new TravelMessage({type: 'text', status: 401});
       }
         
@@ -178,15 +178,15 @@ module.exports = {
 
       // tenant valid?
       tm = await Tenant.selectOne({pgschema, cols: '', pks: body.tenant});
-      if (tm.err) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
+      if (tm.err) return new TravelMessage({status: 403});
 
       // user valid?
       tm = await User.selectOne({pgschema: body.tenant, cols: 'password', pks: body.username});
-      if (tm.err) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
+      if (tm.err) return new TravelMessage({status: 403});
 
       // password valid?
       match = await bcrypt.compare(body.password, tm.data.password);
-      if (!match) return new TravelMessage({data: '', type: 'text', err: new InvalidUserError()});
+      if (!match) return new TravelMessage({status: 403});
       
       // create session record
       rec = new Session({id: uuidv1(), tenant: body.tenant, user: body.username});

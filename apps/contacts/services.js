@@ -4,7 +4,6 @@ const uuidv1 = require('uuid/v1');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
-const {NunjucksError, SystemError} = require(root + '/lib/server/utils/errors.js');
 const {CSRF} = require(root + '/apps/login/models.js');
 const {Contact} = require(root + '/apps/contacts/models.js');
 
@@ -58,11 +57,13 @@ services.output = {
         tm.type = 'html';
       }
       catch(err) {
-        tm.err = new NunjucksError(err);
+        tm.status = 500;
+        tm.message = err;
       }
     }
     catch(err) {
-      tm.err = new SystemError(err);
+      tm.status = 500;
+      tm.message = err;
     }
 
     return tm;

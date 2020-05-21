@@ -1,16 +1,17 @@
 const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
-const {UserError} = require(root + '/lib/server/utils/errors.js');
 const {zapPubsub} = require(root + '/lib/server/utils/pubsubs.js');
+const {getAppName, getSubappName} = require(root + '/lib/server/utils/utils.js');
+
 const { Contact } = require(root + '/apps/contacts/models.js');
-const {getAppName} = require(root + '/lib/server/utils/utils.js');
+
 const app = getAppName(__dirname);
-const subapp = 'contact'
+const subapp = getSubappName(__dirname);
 
 module.exports = {
   getMany: async function({pgschema = '', query = {}} = {}) {
     // get one or more Contacts
-    const cols = ['*'], rec = {};
+    let cols = ['*'], rec = {};
 
     if ('fields' in query) {
       cols = query.fields.split(',');
@@ -56,10 +57,6 @@ module.exports = {
   
   update: async function({pgschema = '', id = '', rec= {}} = {}) {
     // Update record
-    if (!id) {
-      return new TravelMessage({err: new UserError('No Contact id Supplied')});
-    }
-        
     rec.id = id;
 
     let tobj = new Contact(rec);
@@ -74,8 +71,6 @@ module.exports = {
   
   delete: async function({pgschema = '', id = ''} = {}) {
     // delete Contact
-    if (!id) return new TravelMessage({err: new UserError('No Contact id Supplied')});
-
     let tobj = new Contact({id});
     let tm = await tobj.deleteOne({pgschema});
 

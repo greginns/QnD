@@ -1,17 +1,22 @@
 const root = process.cwd();
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
 const {Authentication} = require(root + '/lib/server/utils/authentication.js');
+const {OPEN} = require(root + '/lib/server/utils/authorization.js');
 const services = require(root + '/apps/login/services.js');
 const app = 'login';
+const subapp = 'login';
 const version = 'v1';
 
 // login page
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  subapp,
   version,
   path: '/loginpage', 
   rewrite: true,
+  id: 'loginpage',
+  level: OPEN,
   fn: async function(req) {
     var tm = await services.output.main(req);
 
@@ -26,9 +31,12 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
+  subapp,
   version,
   path: '/basic',
   rewrite: true,
+  id: 'basic',
+  level: OPEN,
   fn: async function(req) {
     // if we got here, then we're ok.  Get user name
     var tm = await services.auth.basic(req, {}, {});
@@ -51,8 +59,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app,
+  subapp,
   version,
   path: '/login', 
+  id: 'login',
+  level: OPEN,
   fn: async function(req) {
     var tm = await services.auth.login(req.body);
 
@@ -67,8 +78,11 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app,
+  subapp,
   version,
   path: '/logout', 
+  id: 'logout',
+  level: OPEN,
   fn: async function(req) {
     var tm = await services.auth.logout(req);
   

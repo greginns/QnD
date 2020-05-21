@@ -1,6 +1,6 @@
 const root = process.cwd();
 const fs = require('fs');
-const http = require('http');
+//const http = require('http');
 const https = require('https');
 const WebSocket = require('ws');
 const uuidv1 = require('uuid/v1');
@@ -13,7 +13,7 @@ mw.reply = require(root + '/lib/server/middleware/reply.js');
 
 const {Router} = require(root + '/lib/server/utils/router.js');
 const {Wouter} = require(root + '/lib/server/utils/wouter.js');
-const {ResponseMessage} = require(root + '/lib/server/utils/messages.js');
+const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
 const zapiServices = require(root + '/apps/zapi/services.js');
 
@@ -35,7 +35,7 @@ const wssl = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTrac
 
 for (let app of config.apps) {
   require(root + `/apps/${app}/routes.js`);  // process app routes.
-};
+}
 
 // PROCESS ERRORS
 process
@@ -71,12 +71,12 @@ const serverRequest = async function(req, res) {
   }
   catch(err) {
     console.log(err)      
-    rm = new ResponseMessage({status: 500, err});
+    rm = (new TravelMessage({status: 500, data: err})).toResponse();
   }
   
   mw.reply.reply(res, rm);
 };
-
+/*
 const serverUpgrade = async function(req, socket, head) {
   await mw.request.processWS(req);
 
@@ -91,7 +91,7 @@ const serverUpgrade = async function(req, socket, head) {
     wss.emit('connection', socket, ws, tenant.code, user.id);
   });
 };
-
+*/
 const sslServerUpgrade = async function(req, socket, head) {
   await mw.request.processWS(req);
 
