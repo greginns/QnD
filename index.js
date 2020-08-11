@@ -3,7 +3,6 @@ const fs = require('fs');
 //const http = require('http');
 const https = require('https');
 const WebSocket = require('ws');
-const uuidv1 = require('uuid/v1');
 const config = require(root + '/config.json');
 
 const mw = {}
@@ -12,12 +11,10 @@ mw.security = require(root + '/lib/server/middleware/security.js');
 mw.reply = require(root + '/lib/server/middleware/reply.js');
 
 const {Router} = require(root + '/lib/server/utils/router.js');
-const {Wouter} = require(root + '/lib/server/utils/wouter.js');
+const {Wouter, WSclients} = require(root + '/lib/server/utils/wouter.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const sqlUtil = require(root + '/lib/server/utils/sqlUtil.js');
-const zapiServices = require(root + '/apps/zapi/services.js');
-
-const WSclients = new Map();
+//const zapiServices = require(root + '/apps/zapi/services.js');
 
 const options = {
   key: fs.readFileSync('./private.key'),
@@ -92,7 +89,34 @@ const serverUpgrade = async function(req, socket, head) {
   });
 };
 */
+
+const wsConnect = function(socket, ws, TID, userID) {
+  // setup wouter
+  const wouter = new Wouter(ws, TID, userID);
+console.log('wsConnect')
+  ws.isAlive = true;
+    
+  ws.on('pong', function() {
+    // client ponged us
+    ws.isAlive = true;
+  });
+  
+  ws.on('close', function() {
+    wouter.kill();
+  });
+  
+  ws.on('message', function message(text) {
+    // message from browser
+    if (!wouter.handleMessage(text)) {
+      // invalid message
+      ws.terminate();
+      //socket.destroy();
+    }
+  });
+};
+
 const sslServerUpgrade = async function(req, socket, head) {
+  // server upgrading to WS
   await mw.request.processWS(req);
 
   let {tenant, user} = await mw.security.checkWS(req);
@@ -103,33 +127,7 @@ const sslServerUpgrade = async function(req, socket, head) {
   }
 
   wssl.handleUpgrade(req, socket, head, function(ws) {
-    wssl.emit('connection', socket, ws, tenant.code, user.id);
-  });
-};
-
-const wsConnect = function(socket, ws, TID, userID) {
-  // record clients 
-  const wsID = uuidv1();
-  
-  ws.isAlive = true;
-  WSclients.set(wsID, {ws, TID});
-  
-  ws.on('pong', function() {
-    ws.isAlive = true;
-  });
-  
-  ws.on('close', function() {
-    // unsubscribe
-    Wouter.unroute(wsID);
-    WSclients.delete(wsID);
-  });
-  
-  ws.on('message', function message(msg) {
-    if (!Wouter.route(msg, wsID, TID, WSclients)) {
-      // invalid message
-      ws.terminate();
-      //socket.destroy();
-    }
+    wsConnect(socket, ws, tenant.code, user.code);
   });
 };
 
@@ -146,12 +144,12 @@ sslServer
 //wss
 //.on('connection', wsConnect);
 
-wssl
-.on('connection', wsConnect);
+//wssl
+//.on('connection', wsConnect);
   
 // CHECK IF WS ARE STILL ALIVE
 setInterval(function() {
-  for (var wsObj of WSclients.values()) {
+  for (let wsObj of WSclients.values()) {
     if (!wsObj.ws.isAlive) { 
       wsObj.ws.terminate(); 
       return; 
@@ -162,7 +160,7 @@ setInterval(function() {
   }
 }, 30000);
 
-zapiServices.init();  // Subscribe all zap events for all tenants
+//zapiServices.init();  // Subscribe all zap events for all tenants
 
 // GIDDY UP!
 //console.log('GO! on ' + config.server.port);

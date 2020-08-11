@@ -45,5 +45,20 @@ module.exports = {
     }
 
     return tm;
+  },
+
+  getLogo: async function(req) {
+    let tm = new TravelMessage();
+
+    try {
+      tm.data = await fs.readFile(root + '/hub-spoke.png');  
+      tm.type = 'png';
+    }
+    catch(err) {
+      tm.status = 404;
+    }
+
+    return tm;
   }
+
 }

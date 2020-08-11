@@ -14,21 +14,22 @@ import '/static/v1/lib/client/widgets/js/singlesel.js';
 
 let init = async function() {
   // setup data access
-  let app = 'contacts';                       // app name
+  let app = 'contacts';                         // app name
   let subapp = 'contact';
-  let url = `/${app}/v1/${subapp}`;             // url of interest to access data
-  let wurl = `/${app}/${subapp}`;               // url of interest to follow data changes
+  let version = 'v1';
+  let model = `/${app}/${version}/${subapp}`;     // url of interest to access data
+  let wmodel = `/${app}/${subapp}`;               // url-like of interest to follow model changes
   let modulePage = 'contactpage';
   let startPage = 'main';
   
   // WS data change notifications.
   let data = new WSDataComm(app);       // WS instances for this app
 
-  data.addURL(wurl);                    // save url.  first path must be the same as app
+  data.addModel(wmodel);                    // save model.  first path must be the same as app
   data.start();                         // start following via WS
 
   // HTTP data access
-  QnD.tableStores.contact = new TableStore({url, safemode: false});  // setup a table store in QnD so all pages can access
+  QnD.tableStores.contact = new TableStore({model, wmodel, safemode: false});  // setup a table store in QnD so all pages can access
   QnD.tableStores.contact.getAll();      // seed the table store
 
   // tell everybody that data is ready

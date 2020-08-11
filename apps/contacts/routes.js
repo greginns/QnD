@@ -26,6 +26,7 @@ Router.add(new RouterMessage({
   id: 'contactpage',
   level: ACCESS,
   desc: 'Contact Page',
+  inAPI: false,
   fn: async function(req) {
     let tm = await services.output.main(req);
 

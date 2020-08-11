@@ -6,7 +6,7 @@ const {getAppName, getSubappName} = require(root + '/lib/server/utils/utils.js')
 const { Contact } = require(root + '/apps/contacts/models.js');
 
 const app = getAppName(__dirname);
-const subapp = getSubappName(__dirname);
+const subapp = getSubappName(__filename);
 
 module.exports = {
   getMany: async function({pgschema = '', query = {}} = {}) {

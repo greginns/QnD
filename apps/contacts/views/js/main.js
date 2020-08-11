@@ -20,7 +20,8 @@ class Contact extends MVC {
     this.model.errors = {
       contact: {},
       message: ''
-    }
+    };
+    this.model.ctrycode='CA';
 
     this.$addWatched('contact.id', this.contactEntered.bind(this));
         

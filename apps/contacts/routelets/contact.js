@@ -9,7 +9,7 @@ const { Contact } = require(root + '/apps/contacts/models.js');
 const services = require(root + '/apps/contacts/services.js');
 
 const app = getAppName(__dirname);
-const subapp = getSubappName(__dirname);
+const subapp = getSubappName(__filename);
 const version = 'v1';
 
 // Contact
@@ -75,6 +75,7 @@ Router.add(new RouterMessage({
   path: '/contact', 
   id: 'create',
   level: CREATE,
+  input: {schema: Contact},
   resp: {type: 'json', schema: Contact},
   fn: async function(req) {
     let tm = await services.contact.create({pgschema: req.TID, rec: req.body.contact});
@@ -97,6 +98,7 @@ Router.add(new RouterMessage({
   path: '/contact/:id', 
   id: 'update',
   level: UPDATE,
+  input: {schema: Contact},
   resp: {type: 'json', schema: Contact},
   fn: async function(req) {
     let id = req.params.id;

@@ -1,18 +1,20 @@
 const root = process.cwd();
 
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
-const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 
 const services = require(root + '/apps/zapi/services.js');
-const {getAppName} = require(root + '/lib/server/utils/utils.js');
+const {getAppName, getSubappName} = require(root + '/lib/server/utils/utils.js');
 const app = getAppName(__dirname);
+const subapp = getSubappName(__filename);
 const version = 'v1';
 
 Router.add(new RouterMessage({
   method: 'post',
   app,
+  subapp,
   version,
   path: '/:app/:subapp/:event/hooks', 
+  id: 'subscribe',
   fn: async function(req) {
     let body = req.body;
     let rec = {};
@@ -37,8 +39,10 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app,
+  subapp,
   version,
   path: '/:app/:subapp/hooks/:id', 
+  id: 'unsubscribe',
   fn: async function(req) {
     let tm = await services.unsubscribe({pgschema: req.TID, id: req.params.id});
 

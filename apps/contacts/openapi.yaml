@@ -3,112 +3,142 @@ info:
   version: 1.0.0
   title: Contacts
   license:
-    MIT
+    name: MIT
 servers:
-  - url: https:roam3.adventurebooking.com/v1
+  - url: https:roam3.adventurebooking.com/contacts/v1
 paths:
   /contact:
     get:
-      summary: Return one or more Contacts
+      summary: Get many Contacts
+      operationId: "contacts.contact.getMany"
       tags:
-        - contacts
+        - "contacts.contact"
       parameters:
-        $ref: "#/components/query/get"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/offsetParam"
+        - $ref: "#/components/parameters/orderbyParam"
+        - $ref: "#/components/parameters/fieldsParam"
+        - $ref: "#/components/parameters/filtersParam"
       responses:
         "200":
-          description:Array of Contacts
+          description: Array of Contact objects
           content:
             application/json:
               schema:
-                $ref: "#components/schemas/Contacts"
+                $ref: "#/components/schemas/Contacts"
     post:
-      summary: Create a Contact
+      summary: Create Contact entry
+      operationId: "contacts.contact.create"
       tags:
-        - contacts
-      parameters:
-        $ref: "#/components/query/get"
+        - "contacts.contact"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Contact"
       responses:
         "200":
-          description:One Contact
+          description: One Contact object
           content:
             application/json:
               schema:
-                $ref: "#components/schemas/Contacts"
-  /contact/:id:
+                $ref: "#/components/schemas/Contact"
+  /contact/{id}:
     get:
-      summary: Return one Contact
+      summary: Get one Contact
+      operationId: "contacts.contact.getOne"
       tags:
-        - contacts
+        - "contacts.contact"
       parameters:
-        $ref: "#/components/query/get"
+        - $ref: "#/components/parameters/contactid"
       responses:
         "200":
-          description:One Contact
+          description: One Contact object
           content:
             application/json:
               schema:
-                $ref: "#components/schemas/Contacts"
+                $ref: "#/components/schemas/Contact"
     put:
-      summary: Update a Contact
+      summary: Update Contact entry
+      operationId: "contacts.contact.update"
       tags:
-        - contacts
+        - "contacts.contact"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Contact"
       parameters:
-        $ref: "#/components/query/get"
+        - $ref: "#/components/parameters/contactid"
       responses:
         "200":
-          description:One Contact
+          description: One Contact object
           content:
             application/json:
               schema:
-                $ref: "#components/schemas/Contacts"
+                $ref: "#/components/schemas/Contact"
     delete:
-      summary: Delete a Contact
+      summary: Delete Contact entry
+      operationId: "contacts.contact.delete"
       tags:
-        - contacts
+        - "contacts.contact"
       parameters:
-        $ref: "#/components/query/get"
+        - $ref: "#/components/parameters/contactid"
       responses:
         "200":
-          description:One Contact
+          description: One Contact object
           content:
             application/json:
               schema:
-                $ref: "#components/schemas/Contacts"
+                $ref: "#/components/schemas/Contact"
 components:
-  query:
-    get:
-      - name: limit
-        in: query
-        description: How many items to return at one time (max 100)
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: offset
-        in: query
-        description: How many entries to skip
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: orderby
-        in: query
-        description: "Comma separated list of sort order fields: ie col1,-col2"
-        required: false
-        schema:
-          type: string
-      - name: fields
-        in: query
-        description: "Comma separated list of fields to return, ie: col1,col2"
-        required: false
-        schema:
-          type: string
-      - name: filters
-        in: query
-        description: "Comma separated list of filter fields: ie col1|Miller,col2|Greg"
-        required: false
-        schema:
-          type: string
+  parameters:
+    limitParam:
+      name: limit
+      in: query
+      description: How many items to return at one time (max 100)
+      required: false
+      schema:
+        type: integer
+        format: int32
+    offsetParam:
+      name: offset
+      in: query
+      description: How many entries to skip
+      required: false
+      schema:
+        type: integer
+        format: int32
+    orderbyParam:
+      name: orderby
+      in: query
+      description: "Comma separated list of sort order fields: ie col1,-col2"
+      required: false
+      schema:
+        type: string
+    fieldsParam:
+      name: fields
+      in: query
+      description: "Comma separated list of fields to return, ie: col1,col2"
+      required: false
+      schema:
+        type: string
+    filtersParam:
+      name: filters
+      in: query
+      description: "Comma separated list of filter fields: ie col1|Miller,col2|Greg"
+      required: false
+      schema:
+        type: string
+    contactid:
+      name: id
+      in: path
+      required: true
+      description: The id of the Contact to retrieve
+      schema:
+        type: string
   schemas:
     Contact:
       type: object
@@ -117,23 +147,22 @@ components:
         - first
         - last
         - group
-        - fullname
       properties:
         id:
-          type: Char
+          type: string
         first:
-          type: Char
+          type: string
         last:
-          type: Char
+          type: string
         group:
-          type: Char
+          type: string
         address:
-          type: Char
+          type: string
         email:
-          type: Char
+          type: string
         fullname:
-          type: Derived
+          type: string
     Contacts:
       type: array
       items:
-        $ref: "#components/schemas/Contact"
+        $ref: "#/components/schemas/Contact"

@@ -9,7 +9,13 @@ const ContactHidden = Contact.getHidden();
 
 const base = root + '/apps';
 const docName = 'openapi.yaml';
-const paths = [];
+const paths = [], paramRefs = {};
+const file = base + '/contacts/' + docName;
+const spaces = '  '
+var contents = '', prevPath = '';
+
+const required = [];
+
 const methodOrder = {
   'GET': 0,
   'POST': 1,
@@ -29,7 +35,9 @@ const routes = Router.getRoutes('contacts', 'v1');
 
 for (let routeMap of routes) {
   for (let [path, rmsg] of routeMap) {
-    paths.push([path, methodOrder[rmsg.method], rmsg]);
+    if (rmsg.inAPI) {
+      paths.push([path, methodOrder[rmsg.method], rmsg]);
+    }
   }
 }
 
@@ -37,14 +45,12 @@ paths.sort(function(a, b) {
   return (a[0] < b[0]) ? -1 : (a[0] > b[0]) ? 1 : (a[1] < b[1]) ? -1 : (a[1] > b[1]) ? 1 : 0;
 });
 
-const file = base + '/contacts/' + docName;
-const spaces = '  '
-var contents = '', prevPath = '';
-
-const required = [];
-
 for (let field in ContactFields) {
-  if (ContactFields[field].notNull || !ContactFields[field].null) required.push(field);
+  if (ContactFields[field].type != 'Derived') {
+    if (ContactFields[field].notNull || !ContactFields[field].null) required.push(field);
+  }
+  
+  ContactFields[field].type = 'string';
 }
 
 contents += 'openapi: "3.0.0"\n';
@@ -52,70 +58,169 @@ contents += 'info:\n';
 contents += spaces + 'version: 1.0.0\n';
 contents += spaces + 'title: Contacts\n';
 contents += spaces + 'license:\n';
-contents += spaces.repeat(2) + 'MIT\n';
+contents += spaces.repeat(2) + 'name: MIT\n';
 contents += 'servers:\n';
-contents += spaces + '- url: https:roam3.adventurebooking.com/v1\n';
+contents += spaces + '- url: https:roam3.adventurebooking.com/contacts/v1\n';
+
+// Paths
 contents += 'paths:\n';
 
 for (let pathInfo of paths) {
   let path = pathInfo[0], rmsg = pathInfo[2];
   let method = rmsg.method.toLowerCase(), desc = rmsg.desc, resp = rmsg.resp;
+  let app = rmsg.app, subapp = rmsg.subapp, id = rmsg.id;
   let type = ctypes[resp.type];
+  let inputSchema = rmsg.input.schema;
+  let inputSchemaName = (inputSchema) ? inputSchema.name : '';
+  let responseArray = Array.isArray(resp.schema);
+  let schemaName = (resp.schema) ? (responseArray) ? resp.schema[0].name : resp.schema.name : '';
+  let params = [], body = [];
+  
+  if (id == 'getMany') {
+    params.push('- $ref: "#/components/parameters/limitParam"');
+    params.push('- $ref: "#/components/parameters/offsetParam"');
+    params.push('- $ref: "#/components/parameters/orderbyParam"');
+    params.push('- $ref: "#/components/parameters/fieldsParam"');
+    params.push('- $ref: "#/components/parameters/filtersParam"');
+  }
 
-  if (path != prevPath) contents += spaces + path + ':\n';
+  if (id == 'create' || id == 'update') {
+    if (inputSchemaName) {
+      body.push('required: true');
+      body.push('content:');
+      body.push('  application/json:');
+      body.push('    schema:');
+      body.push(`      $ref: "#/components/schemas/${inputSchemaName}"`);
+    }
+  }
+
+  // gather up unique path variables
+  for (let part of path.split('/')) {
+    if (part.substr(0,1) == ':') {
+      let ppath = part.substr(1);
+
+      if (!(ppath in paramRefs)) {
+        params.push(`- $ref: "#/components/parameters/${subapp}${ppath}"`);
+
+        paramRefs[subapp+ppath] = [];
+        paramRefs[subapp+ppath].push('name: ' + ppath);
+        paramRefs[subapp+ppath].push('in: path');
+        paramRefs[subapp+ppath].push('required: true');
+        paramRefs[subapp+ppath].push('description: The id of the ' + schemaName + ' to retrieve');
+        paramRefs[subapp+ppath].push('schema:');
+        paramRefs[subapp+ppath].push('  type: string');
+      }
+    }
+  }
+
+  if (path != prevPath) {
+    let newPath = [];
+
+    for (let part of path.split('/')) {
+      let ppath = (part.substr(0,1) == ':') ? '{' + part.substr(1) + '}' : part;
+
+      newPath.push(ppath)
+    }
+
+    contents += spaces + newPath.join('/') + ':\n';
+  }
 
   contents += spaces.repeat(2) + method + ':\n';
   contents += spaces.repeat(3) + 'summary: ' + desc + '\n';
+
+  contents += spaces.repeat(3) + 'operationId: ' + `"${app}.${subapp}.${id}"` + '\n';
+
   contents += spaces.repeat(3) + 'tags:\n';
-  contents += spaces.repeat(4) + '- contacts\n';
-  contents += spaces.repeat(3) + 'parameters:\n';
-  contents += spaces.repeat(4) + '$ref: "#/components/query/get"\n';
+  contents += spaces.repeat(4) + `- "${app}.${subapp}"\n`;
+
+  // body
+  if (body.length > 0) {
+    contents += spaces.repeat(3) + 'requestBody:\n';
+
+    for (let b of body) {
+      contents += spaces.repeat(4) + b + '\n';
+    }
+  }
+
+  // parameters
+  if (params.length > 0) {
+    contents += spaces.repeat(3) + 'parameters:\n';
+
+    for (let ref of params) {
+      contents += spaces.repeat(4) + ref + '\n';
+    }
+  }
+
   contents += spaces.repeat(3) + 'responses:\n';
   contents += spaces.repeat(4) + '"200":\n';
-  contents += spaces.repeat(5) + 'description:' + resp.desc + '\n';
+  contents += spaces.repeat(5) + 'description: ' + resp.desc + '\n';
   contents += spaces.repeat(5) + 'content:\n';
   contents += spaces.repeat(6) + type + ':\n';
   contents += spaces.repeat(7) + 'schema:\n'
-  contents += spaces.repeat(8) + '$ref: "#components/schemas/Contacts"\n';
+  contents += spaces.repeat(8) + `$ref: "#/components/schemas/${schemaName}${(responseArray) ? 's' : ''}"\n`;
 
   prevPath = path;
 }
 
+// Components
 contents += 'components:\n';
-contents += spaces + 'query:\n';
-contents += spaces.repeat(2) + 'get:\n';
-contents += spaces.repeat(3) + '- name: limit\n';
-contents += spaces.repeat(4) + 'in: query\n';
-contents += spaces.repeat(4) + 'description: How many items to return at one time (max 100)\n';
-contents += spaces.repeat(4) + 'required: false\n';
-contents += spaces.repeat(4) + 'schema:\n';
-contents += spaces.repeat(5) + 'type: integer\n';
-contents += spaces.repeat(5) + 'format: int32\n';
-contents += spaces.repeat(3) + '- name: offset\n';
-contents += spaces.repeat(4) + 'in: query\n';
-contents += spaces.repeat(4) + 'description: How many entries to skip\n';
-contents += spaces.repeat(4) + 'required: false\n';
-contents += spaces.repeat(4) + 'schema:\n';
-contents += spaces.repeat(5) + 'type: integer\n';
-contents += spaces.repeat(5) + 'format: int32\n';
-contents += spaces.repeat(3) + '- name: orderby\n';
-contents += spaces.repeat(4) + 'in: query\n';
-contents += spaces.repeat(4) + 'description: "Comma separated list of sort order fields: ie col1,-col2"\n';
-contents += spaces.repeat(4) + 'required: false\n';
-contents += spaces.repeat(4) + 'schema:\n';
-contents += spaces.repeat(5) + 'type: string\n';
-contents += spaces.repeat(3) + '- name: fields\n';
-contents += spaces.repeat(4) + 'in: query\n';
-contents += spaces.repeat(4) + 'description: "Comma separated list of fields to return, ie: col1,col2"\n';
-contents += spaces.repeat(4) + 'required: false\n';
-contents += spaces.repeat(4) + 'schema:\n';
-contents += spaces.repeat(5) + 'type: string\n';
-contents += spaces.repeat(3) + '- name: filters\n';
-contents += spaces.repeat(4) + 'in: query\n';
-contents += spaces.repeat(4) + 'description: "Comma separated list of filter fields: ie col1|Miller,col2|Greg"\n';
-contents += spaces.repeat(4) + 'required: false\n';
-contents += spaces.repeat(4) + 'schema:\n';
-contents += spaces.repeat(5) + 'type: string\n';
+
+//  Parameters
+contents += spaces + 'parameters:\n';
+
+contents += spaces.repeat(2) + 'limitParam:\n';
+contents += spaces.repeat(3) + 'name: limit\n';
+contents += spaces.repeat(3) + 'in: query\n';
+contents += spaces.repeat(3) + 'description: How many items to return at one time (max 100)\n';
+contents += spaces.repeat(3) + 'required: false\n';
+contents += spaces.repeat(3) + 'schema:\n';
+contents += spaces.repeat(4) + 'type: integer\n';
+contents += spaces.repeat(4) + 'format: int32\n';
+
+contents += spaces.repeat(2) + 'offsetParam:\n';
+contents += spaces.repeat(3) + 'name: offset\n';
+contents += spaces.repeat(3) + 'in: query\n';
+contents += spaces.repeat(3) + 'description: How many entries to skip\n';
+contents += spaces.repeat(3) + 'required: false\n';
+contents += spaces.repeat(3) + 'schema:\n';
+contents += spaces.repeat(4) + 'type: integer\n';
+contents += spaces.repeat(4) + 'format: int32\n';
+
+contents += spaces.repeat(2) + 'orderbyParam:\n';
+contents += spaces.repeat(3) + 'name: orderby\n';
+contents += spaces.repeat(3) + 'in: query\n';
+contents += spaces.repeat(3) + 'description: "Comma separated list of sort order fields: ie col1,-col2"\n';
+contents += spaces.repeat(3) + 'required: false\n';
+contents += spaces.repeat(3) + 'schema:\n';
+contents += spaces.repeat(4) + 'type: string\n';
+
+contents += spaces.repeat(2) + 'fieldsParam:\n';
+contents += spaces.repeat(3) + 'name: fields\n';
+contents += spaces.repeat(3) + 'in: query\n';
+contents += spaces.repeat(3) + 'description: "Comma separated list of fields to return, ie: col1,col2"\n';
+contents += spaces.repeat(3) + 'required: false\n';
+contents += spaces.repeat(3) + 'schema:\n';
+contents += spaces.repeat(4) + 'type: string\n';
+
+contents += spaces.repeat(2) + 'filtersParam:\n';
+contents += spaces.repeat(3) + 'name: filters\n';
+contents += spaces.repeat(3) + 'in: query\n';
+contents += spaces.repeat(3) + 'description: "Comma separated list of filter fields: ie col1|Miller,col2|Greg"\n';
+contents += spaces.repeat(3) + 'required: false\n';
+contents += spaces.repeat(3) + 'schema:\n';
+contents += spaces.repeat(4) + 'type: string\n';
+
+let refKeys = Object.keys(paramRefs);
+
+if (refKeys.length > 0) {
+  for (let key of refKeys) {
+    contents += spaces.repeat(2) + key + ':\n';
+
+    for (let entry of paramRefs[key]) {
+      contents += spaces.repeat(3) + entry + '\n';
+    }
+  }  
+}
 
 contents += spaces + 'schemas:\n';
 contents += spaces.repeat(2) + 'Contact:\n';
@@ -139,7 +244,7 @@ for (let field in ContactFields) {
 contents += spaces.repeat(2) + 'Contacts:\n';
 contents += spaces.repeat(3) + 'type: array\n';
 contents += spaces.repeat(3) + 'items:\n';
-contents += spaces.repeat(4) + '$ref: "#components/schemas/Contact"\n';
+contents += spaces.repeat(4) + '$ref: "#/components/schemas/Contact"\n';
 
 fs.writeFile(file, contents);
 
