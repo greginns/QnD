@@ -72,7 +72,9 @@ V
 <td>
 Process response     
 </td>
-<td></td>
+<td>
+<----
+</td>
 <td>
 Send response
 </td>
@@ -80,11 +82,13 @@ Send response
 
 <tr>
 <td>
-Process message
--update tablestore
+Process message<br>
+-update tablestore<br>
 -update tableview (via proxy)
 </td>
-<td></td>
+<td>
+<----
+</td>
 <td>
 Send WS message (initiated from modelRun)
 -action (+-*) and data rows
