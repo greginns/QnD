@@ -22,13 +22,9 @@ const options = {
   cert: fs.readFileSync('./certificate.crt')
 };
 
-//const server = http.createServer();
-//const wss = new WebSocket.Server({server, maxPayload: 50000, clientTracking: false});
-//const wss = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTracking: false});
-
 const sslServer = https.createServer(options);
-//const wssl = new WebSocket.Server({server: sslServer, maxPayload: 50000, clientTracking: false});
 const wssl = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTracking: false});
+const WSCHECKINTERVAL = 30000;
 
 for (let app of config.apps) {
   require(root + `/apps/${app}/routes.js`);  // process app routes.
@@ -51,49 +47,10 @@ process
 });
 
 // SETUP HTTPS/WSS SERVERS
-const serverRequest = async function(req, res) {
-  let rm;
-
-  try {
-    // Middleware 
-    // process augments req, res 
-    await mw.request.process(req, res);
-
-    // Routes - augments res with tenant/user.  tests user authentication/authorization
-    rm = await mw.security.check(req, res);
-
-    if (rm.status == 200) {
-      rm = await Router.go(req, res)
-    }    
-  }
-  catch(err) {
-    console.log(err)      
-    rm = (new TravelMessage({status: 500, data: err})).toResponse();
-  }
-  
-  mw.reply.reply(res, rm);
-};
-/*
-const serverUpgrade = async function(req, socket, head) {
-  await mw.request.processWS(req);
-
-  let {tenant, user} = await mw.security.checkWS(req);
-
-  if (!user) {
-    socket.destroy();
-    return;
-  }
-
-  wss.handleUpgrade(req, socket, head, function(ws) {
-    wss.emit('connection', socket, ws, tenant.code, user.id);
-  });
-};
-*/
-
 const wsConnect = function(socket, ws, TID, userID) {
   // setup wouter
   const wouter = new Wouter(ws, TID, userID);
-console.log('wsConnect')
+
   ws.isAlive = true;
     
   ws.on('pong', function() {
@@ -115,6 +72,29 @@ console.log('wsConnect')
   });
 };
 
+const sslServerRequest = async function(req, res) {
+  let rm;
+
+  try {
+    // Middleware 
+    // process augments req, res 
+    await mw.request.process(req, res);
+
+    // Routes - augments res with tenant/user.  tests user authentication/authorization
+    rm = await mw.security.check(req, res);
+
+    if (rm.status == 200) {
+      rm = await Router.go(req, res)
+    }    
+  }
+  catch(err) {
+    console.log(err)      
+    rm = (new TravelMessage({status: 500, data: err})).toResponse();
+  }
+  
+  mw.reply.reply(res, rm);
+};
+
 const sslServerUpgrade = async function(req, socket, head) {
   // server upgrading to WS
   await mw.request.processWS(req);
@@ -131,22 +111,11 @@ const sslServerUpgrade = async function(req, socket, head) {
   });
 };
 
-//server
-//.on('request', serverRequest)
-//.on('upgrade', serverUpgrade)
-//.listen(config.server.port);
-
 sslServer
-.on('request', serverRequest)
+.on('request', sslServerRequest)
 .on('upgrade', sslServerUpgrade)
 .listen(config.server.sslport);
 
-//wss
-//.on('connection', wsConnect);
-
-//wssl
-//.on('connection', wsConnect);
-  
 // CHECK IF WS ARE STILL ALIVE
 setInterval(function() {
   for (let wsObj of WSclients.values()) {
@@ -158,13 +127,49 @@ setInterval(function() {
     wsObj.ws.isAlive = false;
     wsObj.ws.ping();
   }
-}, 30000);
+}, WSCHECKINTERVAL);
 
 //zapiServices.init();  // Subscribe all zap events for all tenants
 
 // GIDDY UP!
 //console.log('GO! on ' + config.server.port);
 console.log('GO! on ' + config.server.sslport);
+
+/* leftover from http 
+
+//const server = http.createServer();
+//const wss = new WebSocket.Server({server, maxPayload: 50000, clientTracking: false});
+//const wss = new WebSocket.Server({noServer: true, maxPayload: 50000, clientTracking: false});
+//const wssl = new WebSocket.Server({server: sslServer, maxPayload: 50000, clientTracking: false});
+
+const serverUpgrade = async function(req, socket, head) {
+  await mw.request.processWS(req);
+
+  let {tenant, user} = await mw.security.checkWS(req);
+
+  if (!user) {
+    socket.destroy();
+    return;
+  }
+
+  wss.handleUpgrade(req, socket, head, function(ws) {
+    wss.emit('connection', socket, ws, tenant.code, user.id);
+  });
+};
+
+//server
+//.on('request', serverRequest)
+//.on('upgrade', serverUpgrade)
+//.listen(config.server.port);
+
+//wss
+//.on('connection', wsConnect);
+
+//wssl
+//.on('connection', wsConnect);
+*/
+
+
 
 /*
 if(this.limitCounter >= Socket.limit) {

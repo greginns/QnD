@@ -14,16 +14,16 @@ import '/static/v1/lib/client/widgets/js/singlesel.js';
 
 let init = async function() {
   // setup data access
-  let app = 'contacts';                         // app name
-  let subapp = 'contact';
-  let version = 'v1';
-  let model = `/${app}/${version}/${subapp}`;     // url of interest to access data
-  let wmodel = `/${app}/${subapp}`;               // url-like of interest to follow model changes
-  let modulePage = 'contactpage';
-  let startPage = 'main';
+  const app = 'contacts';                         // app name
+  const subapp = 'contact';
+  const version = 'v1';
+  const model = `/${app}/${version}/${subapp}`;     // url of interest to access data
+  const wmodel = `/${app}/${subapp}`;               // url-like of interest to follow model changes
+  const modulePage = 'contactpage';
+  const startPage = 'main';
   
   // WS data change notifications.
-  let data = new WSDataComm(app);       // WS instances for this app
+  const data = new WSDataComm(app);       // WS instances for this app
 
   data.addModel(wmodel);                    // save model.  first path must be the same as app
   data.start();                         // start following via WS
