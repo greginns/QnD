@@ -1,28 +1,92 @@
 # QnD
 
 #### Data setup
-<u>Client Side</u>                           <u>Server Side</u>
-WSDataComm sets up WS with server     Wouter handles incoming WS messages
-sends and receives ws messages        usually to (un)subscribe to data changes
+<table>
+<thead>
+<tr>
+<th>Client Side</th>
+<th>Server Side</th>
+</tr>
+</thead>
+<tbody>
 
+<tr>
+<td>
+WSDataComm sets up WS with server
+sends and receives ws messages
+</td>
+<td>
+Wouter handles incoming WS messages
+usually to (un)subscribe to data changes
+</td>
+</tr>
+
+<tr>
+<td>
 TableStore is used to mantain data 
 on the client
 Handles inserts, updates, deletes.
 Reacts to WS messages from server
+</td>
+<td>
+</td>
+</tr>
 
+<tr>
+<td>
 TableView is a view to a tablestore.
 It can filter and sort data.
+</td>
+<td>
+</td>
+</tr>
 
+<tr>
+<td>
+Post to Server      ---->
+</td>
+<td>
+Process request
+</td>
+</tr>
 
-#### Data (insert, update, etc) Flow
-<u>Client Side</u>                           <u>Server Side</u>
+<tr>
+<td>
+</td>
+<td>
+|<br>
+|<br>
+V
+</td>
+</tr>
 
-Post to Server      ---->             Process request
-                                            |
-                                            |
-                                            V
+<tr>
+<td>
+Process response     
+</td>
+<td>
+Send response
+</td>
+</tr>
 
-Process response    <----             Send response
-Process message     <----             Send WS message (initiated from modelRun)
--update tablestore                    -action (+-*) and data rows
+<tr>
+<td>
+Process message
+-update tablestore
 -update tableview (via proxy)
+</td>
+<td>
+Send WS message (initiated from modelRun)
+-action (+-*) and data rows
+</td>
+</tr>
+
+<tr>
+<td>
+</td>
+<td>
+</td>
+</tr>
+
+</tbody>
+</table>
