@@ -5,6 +5,7 @@
 <thead>
 <tr>
 <th>Client Side</th>
+<th></th>
 <th>Server Side</th>
 </tr>
 </thead>
@@ -12,9 +13,10 @@
 
 <tr>
 <td>
-WSDataComm sets up WS with server
+WSDataComm sets up WS with server<br>
 sends and receives ws messages
 </td>
+<td></td>
 <td>
 Wouter handles incoming WS messages
 usually to (un)subscribe to data changes
@@ -24,26 +26,31 @@ usually to (un)subscribe to data changes
 <tr>
 <td>
 TableStore is used to mantain data 
-on the client
+on the client<br>
 Handles inserts, updates, deletes.
 Reacts to WS messages from server
 </td>
+<td></td>
 <td>
 </td>
 </tr>
 
 <tr>
 <td>
-TableView is a view to a tablestore.
+TableView is a view to a tablestore.<br>
 It can filter and sort data.
 </td>
 <td>
+<td></td>
 </td>
 </tr>
 
 <tr>
 <td>
-Post to Server      ---->
+Post/Put/Delete      
+</td>
+<td>
+---->
 </td>
 <td>
 Process request
@@ -53,6 +60,7 @@ Process request
 <tr>
 <td>
 </td>
+<td></td>
 <td>
 |<br>
 |<br>
@@ -64,6 +72,7 @@ V
 <td>
 Process response     
 </td>
+<td></td>
 <td>
 Send response
 </td>
@@ -75,6 +84,7 @@ Process message
 -update tablestore
 -update tableview (via proxy)
 </td>
+<td></td>
 <td>
 Send WS message (initiated from modelRun)
 -action (+-*) and data rows
@@ -84,6 +94,7 @@ Send WS message (initiated from modelRun)
 <tr>
 <td>
 </td>
+<td></td>
 <td>
 </td>
 </tr>
