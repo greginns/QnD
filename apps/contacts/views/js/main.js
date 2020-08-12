@@ -4,7 +4,6 @@ import {utils} from '/static/v1/lib/client/core/utils.js';
 import {Page, Section} from '/static/v1/lib/client/core/router.js';
 import {TableView} from '/static/v1/lib/client/core/data.js';
 
-//console.log(MVC)
 import '/static/v1/project/mixins/overlay.js';
 
 class Contact extends MVC {
@@ -21,7 +20,7 @@ class Contact extends MVC {
       contact: {},
       message: ''
     };
-    this.model.ctrycode='CA';
+    this.model.ctrycode = 'CA';
 
     this.$addWatched('contact.id', this.contactEntered.bind(this));
         
@@ -29,6 +28,7 @@ class Contact extends MVC {
     this.defaults = {};
     this.contactListEl = document.getElementById('contactList');
 
+    // fired when module gets common data
     document.addEventListener('tablestoreready', async function() {
       let contacts = new TableView({proxy: this.model.contacts});
 
@@ -275,12 +275,10 @@ class Contact extends MVC {
   }
 }
 
-// instantiate MVCs
-let mvc= new Contact('contacts-main-section');
-
-// hook them up to sections that will eventually end up in a page (done in module)
-let section1 = new Section({mvc});
+// instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el = document.getElementById('contacts-main');   // page html
+let mvc = new Contact('contacts-main-section');
+let section1 = new Section({mvc});
 let page = new Page({el, path: '/main', title: 'Contacts', sections: [section1]});
     
 QnD.pages.push(page);

@@ -1,5 +1,17 @@
 # QnD
 
+#### Page setup
+Module 
+- js - sets up data common to all pages
+- html - includes pages and helpers
+<br>
++Pages 
+- js - page logic, subclasses mvc
+- html - page layout includes 1+ sections 
+<br>
+++Sections
+- each section requires an mvc
+<br>
 #### Data setup
 <table>
 <thead>
