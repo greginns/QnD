@@ -3,34 +3,33 @@ const root = process.cwd();
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {VIEW, CREATE, UPDATE, DELETE} = require(root + '/lib/server/utils/authorization.js');
-const {getAppName, getSubappName} = require(root + '/lib/server/utils/utils.js');
+const {getAppName} = require(root + '/lib/server/utils/utils.js');
 
-const { Contact } = require(root + '/apps/contacts/models.js');
-const services = require(root + '/apps/contacts/services.js');
+const { CSRF } = require(root + `/apps/${app}/models.js`);
+const services = require(root + `/apps/${app}/services.js`);
 
 const app = getAppName(__dirname);
 const subapp = getSubappName(__filename);
 const version = 'v1';
 
-// Contact
 Router.add(new RouterMessage({
   method: 'get',
   app,
   subapp,
   version,
-  path: '/', 
+  path: `/${subapp}`, 
   id: 'getMany',
   level: VIEW,
-  resp: {type: 'json', schema: [Contact]},
+  resp: {type: 'json', schema: [CSRF]},
   fn: async function(req) {
-    let tm = await services.contact.getMany({pgschema: req.TID, query: req.query});
-      
+    let tm = await services[subapp].getMany({pgschema: req.TID, query: req.query});
+
     return tm.toResponse();
   },
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));
@@ -40,29 +39,29 @@ Router.add(new RouterMessage({
   app,
   subapp,
   version,
-  path: '/:id', 
+  path: `/${subapp}/:token`, 
   id: 'getOne',
   level: VIEW,
-  resp: {type: 'json', schema: Contact},
+  resp: {type: 'json', schema: CSRF},
   fn: async function(req) {
-    let id = req.params.id;
+    let token = req.params[token];
     let tm;
 
-    if (!id) {
+    if (!token) {
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services.contact.getOne({pgschema: req.TID, rec: { id }});
+      tm = await services[subapp].getOne({pgschema: req.TID, rec: token });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
-
+  
     return tm.toResponse();
   }, 
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));
@@ -72,20 +71,19 @@ Router.add(new RouterMessage({
   app,
   subapp,
   version,
-  path: '/', 
+  path: `/${subapp}`, 
   id: 'create',
   level: CREATE,
-  input: {schema: Contact},
-  resp: {type: 'json', schema: Contact},
+  resp: {type: 'json', schema: CSRF},
   fn: async function(req) {
-    let tm = await services.contact.create({pgschema: req.TID, rec: req.body.contact});
+    let tm = await services[subapp].create({pgschema: req.TID, rec: req.body[subapp] || {} });
 
     return tm.toResponse();
   }, 
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));
@@ -95,20 +93,19 @@ Router.add(new RouterMessage({
   app,
   subapp,
   version,
-  path: '/:id', 
+  path: `/${subapp}/:token`, 
   id: 'update',
   level: UPDATE,
-  input: {schema: Contact},
-  resp: {type: 'json', schema: Contact},
+  resp: {type: 'json', schema: CSRF},
   fn: async function(req) {
-    let id = req.params.id;
+    let token = req.params[token];
     let tm;
 
-    if (!id) {
+    if (!token) {
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services.contact.update({pgschema: req.TID, id, rec: req.body.contact});
+      tm = await services[subapp].update({pgschema: req.TID, token, rec: req.body[subapp] || {} });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -118,7 +115,7 @@ Router.add(new RouterMessage({
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));
@@ -128,19 +125,19 @@ Router.add(new RouterMessage({
   app,
   subapp,
   version,
-  path: '/:id', 
+  path: `/${subapp}/:token`, 
   id: 'delete',
   level: DELETE,
-  resp: {type: 'json', schema: Contact},
+  resp: {type: 'json', schema: CSRF},
   fn: async function(req) {
-    let id = req.params.id;
+    let token = req.params[token];
     let tm;
 
-    if (!id) {
+    if (!token) {
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services.contact.delete({pgschema: req.TID, id: req.params.id});
+      tm = await services[subapp].delete({pgschema: req.TID, token });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -150,7 +147,7 @@ Router.add(new RouterMessage({
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      {basic: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
     ],
   } 
 }));

@@ -38,7 +38,7 @@ services.output = {
 
     try {
       let ctx = {};
-      let tmpl = 'apps/contacts/views/module.html';
+      let tmpl = 'apps/contacts/modules/main/module.html';
       //let rando1 = Math.round(Math.random() * 10000000);
       //let rando2 = Math.round(Math.random() * 10000000);
       //let rando3 = Math.round(Math.random() * 10000000);

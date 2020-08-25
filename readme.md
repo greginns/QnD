@@ -1,6 +1,10 @@
 # QnD
 
-#### Page setup
+#### App/Page setup
+App
+  - may have 1+ modules
+  - may have 1+ versions
+  
 Module 
 - js - sets up data common to all pages
 - html - includes pages and helpers

@@ -16,7 +16,7 @@ Router.add(new RouterMessage({
   app,
   subapp,
   version,
-  path: '', 
+  path: '/', 
   id: 'main',
   level: OPEN,
   fn: async function(req) {
@@ -99,7 +99,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'tenant',
   version,
-  path: '/tenant', 
+  path: '/', 
   id: 'getMany',
   level: VIEW,
   fn: async function(req) {
@@ -119,7 +119,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'tenant',
   version,
-  path: '/tenant/:code', 
+  path: '/:code', 
   id: 'getOne',
   level: VIEW,
   fn: async function(req) {
@@ -139,7 +139,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'tenant',
   version,
-  path: '/tenant', 
+  path: '/', 
   id: 'create',
   level: CREATE,
   fn: async function(req) {
@@ -159,7 +159,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'tenant',
   version,
-  path: '/tenant/:code', 
+  path: '/:code', 
   id: 'update',
   level: UPDATE,
   fn: async function(req) {
@@ -179,7 +179,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'tenant',
   version,
-  path: '/tenant/:code', 
+  path: '/:code', 
   id: 'delete',
   level: DELETE,
   fn: async function(req) {
@@ -200,7 +200,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'user',
   version,
-  path: '/user', 
+  path: '/', 
   id: 'getMany',
   level: VIEW,
   fn: async function(req) {
@@ -220,7 +220,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'user',
   version,
-  path: '/user/:code', 
+  path: '/:code', 
   id: 'getOne',
   level: VIEW,
   fn: async function(req) {
@@ -240,7 +240,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'user',
   version,
-  path: '/user', 
+  path: '/', 
   id: 'create',
   level: CREATE,
   fn: async function(req) {
@@ -260,7 +260,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'user',
   version,
-  path: '/user/:code', 
+  path: '/:code', 
   id: 'update',
   level: UPDATE,
   fn: async function(req) {
@@ -280,7 +280,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'user',
   version,
-  path: '/user/:code', 
+  path: '/:code', 
   id: 'delete',
   level: DELETE,
   fn: async function(req) {
@@ -301,7 +301,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'migrate',
   version,
-  path: '/migrate', 
+  path: '/', 
   id: 'migrate',
   level: UPDATE,
   fn: async function(req) {

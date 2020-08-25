@@ -51,8 +51,8 @@
 </div>
 
 <script type="module">
-import {QnD} from '/static/lib/client/core/qnd.js';
-import {io} from "/static/lib/client/core/io.js";
+import {QnD} from '/static/v1/static/lib/client/core/qnd.js';
+import {io} from "/static/v1/static/lib/client/core/io.js";
 
 (function() {  
   var opts;
@@ -85,7 +85,7 @@ import {io} from "/static/lib/client/core/io.js";
       return;
     }
 
-    io.post({tenant: '{{TID}}', username, password}, '/login/login')
+    io.post({tenant: '{{TID}}', username, password}, '/login/v1/login/login')
     .then(function(res) {
       if (res.status == 200) {
         opts.cb();

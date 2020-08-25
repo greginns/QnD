@@ -1,10 +1,10 @@
-import {QnD} from '/static/v1/lib/client/core/qnd.js';
-import {MVC} from '/static/v1/lib/client/core/mvc.js';
-import {utils} from '/static/v1/lib/client/core/utils.js';
-import {Page, Section} from '/static/v1/lib/client/core/router.js';
-import {TableView} from '/static/v1/lib/client/core/data.js';
+import {QnD} from '/static/v1/static/lib/client/core/qnd.js';
+import {MVC} from '/static/v1/static/lib/client/core/mvc.js';
+import {utils} from '/static/v1/static/lib/client/core/utils.js';
+import {Page, Section} from '/static/v1/static/lib/client/core/router.js';
+import {TableView} from '/static/v1/static/lib/client/core/data.js';
 
-import '/static/v1/project/mixins/overlay.js';
+import '/static/v1/static/project/mixins/overlay.js';
 
 class Contact extends MVC {
   constructor(element) {

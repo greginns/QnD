@@ -16,9 +16,19 @@ const Contact = class extends Model {
         id: new Fields.Char({notNull: true, maxLength: 10, verbose: 'Contact ID'}),
         first: new Fields.Char({notNull: true, maxLength: 40, verbose: 'First Name'}),
         last: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Last Name'}),
-        group: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Group Name'}),
-        address: new Fields.Char({null: true, maxLength: 40, verbose: 'Address'}),
-        email: new Fields.Char({null: true, maxLength: 50, isEmail: true, verbose: 'Email Address'}),
+        group: new Fields.Char({notNull: false, maxLength: 40, verbose: 'Group Name'}),
+        title: new Fields.Char({notNull: false, maxLength: 4, verbose: 'Title'}),
+
+        address1: new Fields.Char({null: true, maxLength: 40, verbose: 'Address-1'}),
+        address2: new Fields.Char({null: true, maxLength: 40, verbose: 'Address-2'}),
+        city: new Fields.Char({null: true, maxLength: 40, verbose: 'City'}),
+        postcode: new Fields.Char({null: true, maxLength: 10, verbose: 'Postal Code'}),
+        region: new Fields.Char({null: true, maxLength: 5, verbose: 'Region'}),
+
+        email: new Fields.Char({null: true, maxLength: 50, isEmail: true, verbose: 'Primary Email'}),
+        email2: new Fields.Char({null: true, maxLength: 50, isEmail: true, verbose: 'Secondary Email'}),
+        phone: new Fields.Char({null: true, maxLength: 15, verbose: 'Primary Email'}),
+
         fullname: new Fields.Derived({defn: 'concat("first",\' \',"last")', verbose: 'Contact Name'}) 
       },
       

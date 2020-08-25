@@ -13,8 +13,8 @@ Router.add(new RouterMessage({
   app,
   subapp,
   version,
-  path: '/loginpage', 
-  rewrite: true,
+  path: '/', 
+  //rewrite: true,
   id: 'loginpage',
   level: OPEN,
   fn: async function(req) {
@@ -34,7 +34,7 @@ Router.add(new RouterMessage({
   subapp,
   version,
   path: '/basic',
-  rewrite: true,
+  //rewrite: true,
   id: 'basic',
   level: OPEN,
   fn: async function(req) {

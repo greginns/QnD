@@ -18,10 +18,11 @@ module.exports = {
     urlParts.shift();  // get rid of ""
     urlParts.shift();  // get rid of app (static)  
     urlParts.shift();  // get rid of version
+    urlParts.shift();  // get rid of subapp
 
     url = urlParts.join('/');
     ft = req.params.fn.split('.').pop();  // pop off ft
-    
+
     try {
       tm.data = await fs.readFile(root + '/' + url);  
       tm.type = ft;

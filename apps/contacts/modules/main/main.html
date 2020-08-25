@@ -45,9 +45,12 @@
           </div>
           
           <div class='card-body'>
+            
+            <fieldset class="border p-2">
+              <legend class="w-auto">Name</legend>
             <div class='row'>
               <div class='col-12 col-lg-6 mb-2'>
-                {{ fields.Text(type='text', mvc_attr='{"ctrycode": "ctrycode"}', id=contact.first.id, maxlength=contact.first.maxLength, mvc_value='contact.first', label=contact.first.verbose) }}
+                {{ fields.Char(type='text', id=contact.first.id, maxlength=contact.first.maxLength, mvc_value='contact.first', label=contact.first.verbose) }}
               </div>
               <div class='col-12 col-lg-6 mb-2'>
                 {{ fields.Char(type='text', id=contact.last.id, maxlength=contact.last.maxLength, mvc_value='contact.last', label=contact.last.verbose) }}
@@ -62,6 +65,8 @@
                 {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact.email', label=contact.email.verbose) }}
               </div>
             </div>
+          </fieldset>
+          
           </div>
           
           <div class='card-footer'>

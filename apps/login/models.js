@@ -19,14 +19,41 @@ const User =  class extends Model {
         name: new Fields.Char({notNull: true, maxLength: 30, verbose: 'User Name'}),
         email: new Fields.Char({notNull: true, maxLength: 50, isEmail: true, verbose: 'Email Address'}),
         password: new Fields.Password({notNull: true, minLength: 8, maxLength: 128, verbose: 'Password'}),
+        group: new Fields.Char({null: true, verbose: 'Group Code'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),     
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [{name: 'group', columns: ['group'], app, table: Group, tableColumns: ['code'], onDelete: 'NO ACTION'}],
+      },
+      
+      hidden: ['password'],
+      
+      orderBy: ['name'],
+      
+      dbschema: 'tenant',
+      app
+    }
+  }
+};
+
+const Group =  class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 10, verbose: 'Group Code'}),
+        name: new Fields.Char({notNull: true, maxLength: 30, verbose: 'Group Name'}),
         active: new Fields.Boolean({default: true, verbose: 'Active'}),     
       },
       
       constraints: {
         pk: ['code'],
       },
-      
-      hidden: ['password'],
       
       orderBy: ['name'],
       
@@ -62,4 +89,4 @@ const CSRF = class extends Model {
   }
 };
 
-module.exports = {User, CSRF};
+module.exports = {User, Group, CSRF};

@@ -8,7 +8,7 @@ const loginServices = require(root + '/apps/login/services.js');
 const services = require(root + '/apps/contacts/services.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const app = getAppName(__dirname);
-const subapp = 'contact';
+const subapp = 'modules';
 const path = 'routelets';
 
 for (let file of fs.readdirSync(`${__dirname}/${path}`)) {
@@ -21,9 +21,10 @@ Router.add(new RouterMessage({
   app,
   subapp,
   version: 'v1',
+  //path: ['/main', '/main/:etc'], 
   path: ['/contactpage', '/contactpage/:etc'], 
   rewrite: true,
-  id: 'contactpage',
+  id: 'contacts',
   level: ACCESS,
   desc: 'Contact Page',
   inAPI: false,
@@ -34,8 +35,8 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      {session: {allowAnon: false, needCSRF: false, redirect: '/loginpage'}},
-      {basic: {allowAnon: false, needCSRF: false, redirect: '/loginpage'}},
+      {session: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+      {basic: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
     ],
   }
 }));

@@ -1,20 +1,13 @@
 const root = process.cwd();
 const services = require(root + '/apps/static/services.js');
 const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
+const {Shortcut} = require(root + '/lib/server/utils/rewrite.js');
+const config = require(root + '/config.json');
 const app = 'static';
 const subapp = 'static';
 const version = 'v1';
 
-const allowedSubdirs = [
-  '/apps/test/views/js/:fn', 
-  '/apps/admin/views/js/:fn', 
-  '/apps/contacts/views/js/:fn', 
-  '/lib/client/widgets/js/:fn',
-  '/lib/client/core/:fn', 
-  '/project/mixins/:fn', 
-  '/lib/mobiscroll/js/:fn', 
-  '/lib/mobiscroll/css/:fn', 
-]
+Shortcut.add('~static', 'static/v1/static');
 
 // Pages
 Router.add(new RouterMessage({
@@ -75,7 +68,7 @@ Router.add(new RouterMessage({
   app,
   subapp,
   version,
-  path: allowedSubdirs,
+  path: config.staticFolders,
   id: 'subdirs',
   fn: async function(req) {
     var tm = await services.getResource(req);
