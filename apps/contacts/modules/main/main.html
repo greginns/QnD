@@ -33,42 +33,245 @@
           </div>
         </div>
       </div>
-      
-      <div class='col-12 col-md-6 col-lg-6 col-xl-6'>
+
+      <div class='col-12 col-md-6 col-lg-6 col-xl-9'>
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6 col-lg-6'>
+              <div class='col-5'>
                 {{ fields.Char(type='text', id=contact.id.id, maxlength=contact.id.maxLength, mvc_value='contact.id', mvc_event_type='blur', mvc_disabled='existingEntry', label=contact.id.verbose) }}
+              </div>
+              <div class='col-5'>
+                Entered:
+                <span mvc-text='contact.doe' mvc-filter='date'></span>
+              </div>
+              <div class='col-2'>
+                <div class='d-block d-sm-none'>XS</div>
+                <div class='d-none d-sm-block d-md-none'>SM</div>
+                <div class='d-none d-md-block d-lg-none'>MD</div>
+                <div class='d-none d-lg-block d-xl-none'>LG</div>
+                <div class='d-none d-xl-block'>XL</div>
               </div>
             </div>          
           </div>
           
           <div class='card-body'>
-            
-            <fieldset class="border p-2">
-              <legend class="w-auto">Name</legend>
             <div class='row'>
-              <div class='col-12 col-lg-6 mb-2'>
-                {{ fields.Char(type='text', id=contact.first.id, maxlength=contact.first.maxLength, mvc_value='contact.first', label=contact.first.verbose) }}
+              <div class='col-12 col-xl-6'>
+                <fieldset class="border p-2">
+                  <legend class="w-auto">Name</legend>
+                  <div class='row'>
+                    <div class='col-12 col-md-6 mb-3'>
+                      {{ fields.SelectMVC(id=contact.title.id, size='1', mvc_value='contact.title', mvc_each='titles', valueField='id', textField='title', label='Title') }}
+                    </div>
+                  </div>
+                  
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.first.id, maxlength=contact.first.maxLength, mvc_value='contact.first', label=contact.first.verbose) }}
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.last.id, maxlength=contact.last.maxLength, mvc_value='contact.last', label=contact.last.verbose) }}
+                    </div>
+                  </div>
+                  
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.group.id, maxlength=contact.group.maxLength, mvc_value='contact.group', label=contact.group.verbose) }}
+                    </div>
+                  </div>
+                </fieldset>
               </div>
-              <div class='col-12 col-lg-6 mb-2'>
-                {{ fields.Char(type='text', id=contact.last.id, maxlength=contact.last.maxLength, mvc_value='contact.last', label=contact.last.verbose) }}
+    
+              <div class='col-12 col-xl-6'>
+                <fieldset class="border p-2">
+                  <legend class="w-auto">Address</legend>
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.address1.id, maxlength=contact.address1.maxLength, mvc_value='contact.address1', label=contact.address1.verbose) }}
+                    </div>
+                  </div>
+    
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.address2.id, maxlength=contact.address2.maxLength, mvc_value='contact.address2', label=contact.address2.verbose) }}
+                    </div>
+                  </div>
+    
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.city.id, maxlength=contact.city.maxLength, mvc_value='contact.city', label=contact.city.verbose) }}
+                    </div>
+                  </div>
+    
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.region.id, maxlength=contact.region.maxLength, mvc_value='contact.region', label=contact.region.verbose) }}
+                    </div>
+                  </div>
+    
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.postcode.id, maxlength=contact.postcode.maxLength, mvc_value='contact.postcode', label=contact.postcode.verbose) }}
+                    </div>
+                  </div>                            
+                </fieldset> 
               </div>
+
+              <div class='col-12 col-xl-6'>
+                <fieldset class="border p-2">
+                  <legend class="w-auto">Contact Info</legend>
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact.email', label=contact.email.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.email2.id, maxlength=contact.email2.maxLength, mvc_value='contact.email2', label=contact.email2.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-7 mb-3'>
+                      {{ fields.Char(type='text', id=contact.phone.id, maxlength=contact.phone.maxLength, mvc_value='contact.phone', label=contact.phone.verbose) }}
+                    </div>
+
+                    <div class='col-12 col-lg-5 mb-3'>
+                      {{ fields.Switch(id=contact.iscell.id, mvc_checked='contact.iscell', label=contact.iscell.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-7 mb-3'>
+                      {{ fields.Char(type='text', id=contact.phone2.id, maxlength=contact.phone2.maxLength, mvc_value='contact.phone2', label=contact.phone2.verbose) }}
+                    </div>
+
+                    <div class='col-12 col-lg-5 mb-3'>
+                      {{ fields.Switch(id=contact.iscell2.id, mvc_checked='contact.iscell2', label=contact.iscell2.verbose) }}
+                    </div>
+                  </div>
+                </fieldset>                
+              </div>  
+
+              <div class='col-12 col-xl-6'>
+                <fieldset class="border p-2">
+                  <legend class="w-auto">Emergency Contact</legend>
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.emgname.id, maxlength=contact.emgname.maxLength, mvc_value='contact.emgname', label=contact.emgname.verbose) }}
+                    </div>
+                  </div>           
+                  
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.emgphone.id, maxlength=contact.emgphone.maxLength, mvc_value='contact.emgphone', label=contact.emgphone.verbose) }}
+                    </div>
+                  </div>           
+                  
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.emgrelation.id, maxlength=contact.emgrelation.maxLength, mvc_value='contact.emgrelation', label=contact.emgrelation.verbose) }}
+                    </div>
+                  </div>           
+                </fieldset>                
+              </div>  
+
+              <div class='col-12 col-xl-6'>
+                <fieldset class="border p-2">
+                  <legend class="w-auto">Miscellaneous</legend>
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Date(id=contact.dob.id, maxlength=contact.dob.maxLength, mvc_value='contact.dob', label=contact.dob.verbose) }}
+                    </div>
+                  </div>           
+
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      <label class='label-color'>Gender</label>
+                      
+                      <div class="toggle-radio" data-color='blue'>
+                        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='Male', value='M') }}
+                        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='Female', value='F') }}
+                        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='N/A', value='U') }}
+                      </div>
+                    </div>
+                  </div>           
+
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.occupation.id, maxlength=contact.occupation.maxLength, mvc_value='contact.occupation', label=contact.occupation.verbose) }}
+                    </div>
+                  </div>                         
+
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.taxno.id, maxlength=contact.taxno.maxLength, mvc_value='contact.taxno', label=contact.taxno.verbose) }}
+                    </div>
+                  </div>                         
+                </fieldset>                
+              </div>  
+              
+              <div class='col-12 col-xl-6'>
+                <fieldset class="border p-2">
+                  <legend class="w-auto">Categorization</legend>
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.grptype.id, maxlength=contact.grptype.maxLength, mvc_value='contact.grptype', label=contact.grptype.verbose) }}
+                    </div>
+                  </div>           
+
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.cat.id, maxlength=contact.cat.maxLength, mvc_value='contact.cat', label=contact.cat.verbose) }}
+                    </div>
+                  </div>                         
+
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Char(type='text', id=contact.tags.id, maxlength=contact.tags.maxLength, mvc_value='contact.tags', label=contact.tags.verbose) }}
+                    </div>
+                  </div>                                       
+                </fieldset>                
+              </div>  
+              
+              <div class='col-12 col-xl-6'>
+                <fieldset class="border p-2">
+                  <legend class="w-auto">Flags</legend>
+                  <div class='row'>
+                    <div class='col-6 col-lg-6 mb-3'>
+                      {{ fields.Switch(id=contact.masssms.id, mvc_checked='contact.masssms', label=contact.masssms.verbose) }}
+                    </div>
+                    <div class='col-6 col-lg-6 mb-3'>
+                      {{ fields.Switch(id=contact.allowrsv.id, mvc_checked='contact.allowrsv', label=contact.allowrsv.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-6 col-lg-6 mb-3'>
+                      {{ fields.Switch(id=contact.massemail.id, mvc_checked='contact.massemail', label=contact.massemail.verbose) }}
+                    </div>
+                    <div class='col-6 col-lg-6 mb-3'>
+                      {{ fields.Switch(id=contact.allowfup.id, mvc_checked='contact.allowfup', label=contact.allowfup.verbose) }}
+                    </div>
+                  </div>           
+
+                  <div class='row'>
+                    <div class='col-6 col-lg-6 mb-3'>
+                      {{ fields.Switch(id=contact.massmail.id, mvc_checked='contact.massmail', label=contact.massmail.verbose) }}
+                    </div>                    
+                    <div class='col-6 col-lg-6 mb-3'>
+                      {{ fields.Switch(id=contact.allowbill.id, mvc_checked='contact.allowbill', label=contact.allowbill.verbose) }}
+                    </div>
+                  </div>                         
+                </fieldset>
+              </div>                
             </div>
-            
-            <div class='row'>
-              <div class='col-12 col-lg-6 mb-2'>
-                {{ fields.Char(type='text', id=contact.group.id, maxlength=contact.group.maxLength, mvc_value='contact.group', label=contact.group.verbose) }}
-              </div>
-              <div class='col-12 col-lg-6'>
-                {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact.email', label=contact.email.verbose) }}
-              </div>
-            </div>
-          </fieldset>
-          
           </div>
-          
+
           <div class='card-footer'>
             <div class='row' mvc-show='badMessage'>
               <div class='col-12'>
@@ -81,26 +284,18 @@
             <div class='row'>
               <div class='col-12'>
                 <span mvc-hide='existingEntry'>
-                  {{ buttons.btn(class='primary mb-2 mb-lg-0', mvc_click='save', text='Add Contact') }}
+                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save', text='Add Contact') }}
                 </span>
                 <span mvc-show='existingEntry'>
-                  {{ buttons.btn(class='primary mb-2 mb-lg-0', mvc_click='save', text='Update Contact') }}
-                  {{ buttons.btn(class='danger mb-2 mb-lg-0', mvc_click='delete', text='Delete Contact') }}
+                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save', text='Update Contact') }}
+                  {{ buttons.btn(class='danger mb-3 mb-lg-0', mvc_click='delete', text='Delete Contact') }}
                 </span>
-                {{ buttons.btn(class='warning mb-2 mb-lg-0', mvc_click='clear', text='Clear') }}
+                {{ buttons.btn(class='warning mb-3 mb-lg-0', mvc_click='clear', text='Clear') }}
               </div>
             </div>            
           </div>
         </div>
-        <div class='row'>
-          <div class='col-12'>
-            <div class='d-block d-sm-none'>XS</div>
-            <div class='d-none d-sm-block d-md-none'>SM</div>
-            <div class='d-none d-md-block d-lg-none'>MD</div>
-            <div class='d-none d-lg-block d-xl-none'>LG</div>
-            <div class='d-none d-xl-block'>XL</div>
-          </div>
-        </div>
+
       </div>
     </div>
   </section>

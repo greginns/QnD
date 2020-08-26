@@ -5,7 +5,7 @@ const uuidv1 = require('uuid/v1');
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {CSRF} = require(root + '/apps/login/models.js');
-const {Contact} = require(root + '/apps/contacts/models.js');
+const {Contact, Title} = require(root + '/apps/contacts/models.js');
 
 const path = 'servelets';
 const services = {};
@@ -45,6 +45,7 @@ services.output = {
 
       ctx.CSRFToken = await makeCSRF(req.TID, req.user.code);
       ctx.contact = Contact.getColumnDefns();
+      ctx.title = Title.getColumnDefns();
       //ctx.contactSearch = Contact.getColumnDefns(rando1);
       //ctx.contactCreate = Contact.getColumnDefns(rando2);
       //ctx.contactUpdate = Contact.getColumnDefns(rando3);

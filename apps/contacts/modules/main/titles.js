@@ -7,36 +7,34 @@ import {TableView} from '/static/v1/static/lib/client/core/data.js';
 import '/static/v1/static/project/mixins/overlay.js';
 //import moment from 'moment';
 
-class Contact extends MVC {
+class title extends MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.contact = {};
+    this.model.title = {};
     this.model.existingEntry = false;
-    this.model.contacts = [];
     this.model.titles = [];
     this.model.badMessage = '';
     this.model.errors = {
-      contact: {},
+      title: {},
       message: ''
     };
-    this.model.ctrycode = 'CA';
-    this.model.contact.doe = moment()
 
-    this.$addWatched('contact.id', this.contactEntered.bind(this));
+    this.$addWatched('title.id', this.titleEntered.bind(this));
         
-    this.contactOrig = {};
-    this.defaults = {doe: window.moment()};
-    this.contactListEl = document.getElementById('contactList');
+    this.titleOrig = {};
+    this.defaults = {};
+    this.titleListEl = document.getElementById('titleList');
 
     // fired when module gets common data
     document.addEventListener('tablestoreready', async function() {
-      QnD.tableStores.contact.addView(new TableView({proxy: this.model.contacts}));
-      QnD.tableStores.title.addView(new TableView({proxy: this.model.titles}));
+      let titles = new TableView({proxy: this.model.titles});
+
+      QnD.tableStores.title.addView(titles);
     
-      this.defaults.contact = await QnD.tableStores.contact.getDefault();      
+      this.defaults.title = await QnD.tableStores.title.getDefault();      
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router
@@ -49,44 +47,25 @@ class Contact extends MVC {
   }
   
   inView() {
-    //document.getElementById('admin-manage-navbar-contacts').classList.add('active');
-    //document.getElementById('admin-manage-navbar-contacts').classList.add('disabled');
+    //document.getElementById('admin-manage-navbar-titles').classList.add('active');
+    //document.getElementById('admin-manage-navbar-titles').classList.add('disabled');
   }
 
   outView() {
-    //document.getElementById('admin-manage-navbar-contacts').classList.remove('active');
-    //document.getElementById('admin-manage-navbar-contacts').classList.remove('disabled');
+    //document.getElementById('admin-manage-navbar-titles').classList.remove('active');
+    //document.getElementById('admin-manage-navbar-titles').classList.remove('disabled');
 
     return true;  
   }
 
-  async test () {
-    var title = 'test'
-    var groups = [
-      { 
-        label: 'Group 1', 
-        items: [{text: 'Item 1.1', value: '11'}, {text: 'Item 1.2', value: '12'}],
-      },
-      {
-        label: 'Group 2',
-        items: [{text: 'Item 2.1', value: '21'}, {text: 'Item 2.2', value: '22'}]
-      }
-    ];
-
-    var value = '12';
-
-    let res = await QnD.widgets.singlesel.select(title, groups, value);
-    console.log(res)
-  }
-
   async save(ev) {
-    var contact = this.model.contact.toJSON();
+    var title = this.model.title.toJSON();
     var diffs;
 
     this.clearErrors();
           
     if (this.model.existingEntry) {
-      diffs = utils.object.diff(this.contactOrig, contact);
+      diffs = utils.object.diff(this.titleOrig, title);
       
       if (Object.keys(diffs).length == 0) {
         this.model.badMessage = 'No Changes to Update';
@@ -103,12 +82,12 @@ class Contact extends MVC {
     MVC.$overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await QnD.tableStores.contact.update(contact.id, {contact: diffs}) : await QnD.tableStores.contact.insert({contact});
+    let res = (this.model.existingEntry) ? await QnD.tableStores.title.update(title.id, {title: diffs}) : await QnD.tableStores.title.insert({title});
 
     if (res.status == 200) {
-      MVC.$toast('CONTACT',(this.model.existingEntry) ? contact.fullname + ' Updated' : 'Created', 2000);
+      MVC.$toast('title',(this.model.existingEntry) ? title.fullname + ' Updated' : 'Created', 2000);
    
-      this.contactOrig = this.model.contact.toJSON();
+      this.titleOrig = this.model.title.toJSON();
 
       this.clearIt();
     }
@@ -123,7 +102,7 @@ class Contact extends MVC {
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
-    let contact = this.model.contact.toJSON();
+    let title = this.model.title.toJSON();
     let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?');
 
     if (!ret) return;
@@ -133,10 +112,10 @@ class Contact extends MVC {
 
     this.clearErrors();
     
-    let res = await QnD.tableStores.contact.delete(contact.id);
+    let res = await QnD.tableStores.title.delete(title.id);
 
     if (res.status == 200) {
-      MVC.$toast('CONTACT', 'Contact Removed', 1000);
+      MVC.$toast('title', 'title Removed', 1000);
 
       this.clearIt();
     }
@@ -155,9 +134,9 @@ class Contact extends MVC {
   }
 
   async canClear(ev) {
-    let contact = this.model.contact.toJSON();
-    let orig = this.contactOrig;
-    let diffs = utils.object.diff(orig, contact);
+    let title = this.model.title.toJSON();
+    let orig = this.titleOrig;
+    let diffs = utils.object.diff(orig, title);
     let ret = true;
 
     if (Object.keys(diffs).length > 0) {
@@ -176,66 +155,66 @@ class Contact extends MVC {
     window.scrollTo(0,0);
   }
 
-  newContact() {
-    this.$focus('contact.id');
+  newTitle() {
+    this.$focus('title.id');
     window.scrollTo(0,document.body.scrollHeight);
   }
   
   listClicked(ev) {
-    // Contact selected from list
+    // title selected from list
     let el = ev.target.closest('button');
     if (!el) return;
 
     let id = el.getAttribute('data-pk');
-    if (id) this.model.contact.id = id;
+    if (id) this.model.title.id = id;
 
     window.scrollTo(0,document.body.scrollHeight);
   }
 
-  async contactEntered(nv) {
-    // Contact ID entered
+  async titleEntered(nv) {
+    // title ID entered
     if (!nv) return;
 
-    let ret = await this.getContactFromList(nv);
+    let ret = await this.getTitleFromList(nv);
 
-    if (ret.id) this.setContact(ret.id);
+    if (ret.id) this.setTitle(ret.id);
   }
 
-  async getContactFromList(pk) {
-    return (pk) ? await QnD.tableStores.contact.getOne(pk) : {};
+  async getTitleFromList(pk) {
+    return (pk) ? await QnD.tableStores.title.getOne(pk) : {};
   }
   
-  async setContact(pk) {
+  async setTitle(pk) {
     this.clearErrors();
 
     this.model.existingEntry = true;
-    this.model.contact = await this.getContactFromList(pk);
-    this.contactOrig = this.model.contact.toJSON();
+    this.model.title = await this.getTitleFromList(pk);
+    this.titleOrig = this.model.title.toJSON();
 
     this.highlightList(pk);
   }
 
   highlightList(pk) {
-    // highlight chosen contact in list
-    let btn = this.contactListEl.querySelector(`button[data-pk="${pk}"]`);
+    // highlight chosen title in list
+    let btn = this.titleListEl.querySelector(`button[data-pk="${pk}"]`);
     
     if (btn) btn.classList.add('active');
   }
 
   clearList() {
     // clear list of active entry
-    let btn = this.contactListEl.querySelector('button.active');
+    let btn = this.titleListEl.querySelector('button.active');
 
     if (btn) btn.classList.remove('active');
   }
   
   setDefaults() {
-    // set contact to default value
-    for (let k in this.defaults.contact) {
-      this.model.contact[k] = this.defaults.contact[k];
+    // set title to default value
+    for (let k in this.defaults.title) {
+      this.model.title[k] = this.defaults.title[k];
     }
 
-    this.contactOrig = this.model.contact.toJSON();
+    this.titleOrig = this.model.title.toJSON();
   }
   
   displayErrors(res) {
@@ -278,9 +257,9 @@ class Contact extends MVC {
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-main');   // page html
-let mvc = new Contact('contacts-main-section');
+let el = document.getElementById('contacts-titles');   // page html
+let mvc = new title('contacts-titles-section');
 let section1 = new Section({mvc});
-let page = new Page({el, path: '/main', title: 'Contacts', sections: [section1]});
+let page = new Page({el, path: '/titles', title: 'Contact Titles', sections: [section1]});
     
 QnD.pages.push(page);

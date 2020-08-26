@@ -97,20 +97,27 @@
 
 {% macro Switch(id='', mvc_checked='', name='', label='', mvc_enabled='', mvc_disabled='') %}
   <label class="switch">
-    <input type="checkbox" mvc-checked="{{mvc-checked}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}'>
+    <input type="checkbox" mvc-checked="{{mvc_checked}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}'>
     <span class="slider round"></span>
   </label>
   <span class='label-color'>{{label}}</span>
 {% endmacro %}
 
-{% macro Radio(id='', mvc_checked='', name='', label='', mvc_enabled='', mvc_disabled='') %}
+{% macro Radio(id='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
 <div class='radio-container'>
   <label class="radio-label">
     <span class='label-color'>{{label}}</span>
-    <input type="radio" mvc-checked="{{mvc-checked}}" name="{{name}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}'>
+    <input type="radio" mvc-checked="{{mvc-checked}}" name="{{name}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}">
     <span class="radiomark"></span>
   </label>
 </div>
+{% endmacro %}
+
+{% macro Segment(id='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
+<!--div class="toggle-radio" data-color='blue'-->
+  <input type="radio" name="{{name}}" id="{{id}}-{{value}}" mvc-checked='{{mvc-checked}}' value="{{value}}">
+  <label for="{{id}}-{{value}}">{{label}}</label>
+<!--/div-->
 {% endmacro %}
 
 {% macro Integer(id='', min='1', max='999', step='1', mvc_value='', mvc_edit='integer', label='') %}
@@ -185,7 +192,7 @@
 {% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', valueField='', textField='', label='') %}
 <div class="form-label-group">
   <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' placeholder='{{label}}' class="form-control">
-    <option mvc-option='{value: "{{mvc_each}}[$index].{{valueField}}", text: "{{mvc_each}}[$index].{{textField}}"}'></option>
+    <option mvc-option='{value: "{{mvc_each}}.$index.{{valueField}}", text: "{{mvc_each}}.$index.{{textField}}"}'></option>
   </select>
   <label>{{label}}</label>
 </div>
