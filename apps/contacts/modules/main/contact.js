@@ -3,11 +3,8 @@ import {MVC} from '/~static/lib/client/core/mvc.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/router.js';
 import {TableView} from '/~static/lib/client/core/data.js';
-import {io} from '/~static/lib/client/core/io.js';
 
 import '/~static/project/mixins/overlay.js';
-//import { stringify } from 'uuid';
-//import moment from 'moment';
 
 class Contact extends MVC {
   constructor(element) {
@@ -33,10 +30,10 @@ class Contact extends MVC {
     //this.model.contact.doe = moment()
 
     this.$addWatched('contact.country', this.countryChanged.bind(this));
-    //this.$addWatched('contact.postcode', this.postcodeChanged.bind(this));
     this.$addWatched('contact.id', this.contactEntered.bind(this));
         
     this.contactOrig = {};
+    this.chosenPostcode = {};
     this.defaults = {doe: window.moment()};
     this.contactListEl = document.getElementById('contactList');
 
@@ -47,7 +44,7 @@ class Contact extends MVC {
       QnD.tableStores.group.addView(new TableView({proxy: this.model.groups}));
       QnD.tableStores.country.addView(new TableView({proxy: this.model.countries}));
     
-      this.defaults.contact = await QnD.tableStores.contact.getDefault();
+      this.defaults.contact = await QnD.data.contact.getDefault();
       this.setDefaults();      
     }.bind(this), {once: true})    
 
@@ -282,13 +279,14 @@ class Contact extends MVC {
     }
 
     this.model.badMessage = '';
+    this.chosenPostcode = {};
   }
 
   setBadMessage(msg) {
     this.model.badMessage = msg;
   }
 
-  // ADDRESSES
+  // ADDRESS
   async countryChanged(nv, ov) {
     if (!nv) return;
 
@@ -306,8 +304,29 @@ class Contact extends MVC {
     this.handlePostcodes();
   }
 
+  cityChanged() {
+    let city = this.model.contact.city;
+
+    // save postal code.  Post or Put?
+    if ('id' in this.chosenPostcode) {
+      this.chosenPostcode.city = city;
+
+      QnD.data.postcode.update(this.chosenPostcode.id, this.chosenPostcode)
+    }
+    else {
+      let rec = {};
+
+      rec.country = this.model.contact.country;
+      rec.city = city;
+      rec.region = this.model.contact.region;
+      rec.postcode = this.model.contact.postcode;
+
+      QnD.data.postcode.insert(rec)
+    }
+  }
+
   async getRegions(country) {
-    let res = await io.get({filters: {country}}, '/contacts/v1/region');
+    let res = await QnD.data.region.getMany({filters: {country}});
 
     if (res.status == 200) {
       this.model.regions = res.data;
@@ -316,11 +335,53 @@ class Contact extends MVC {
 
   async getPostcodes(postcode) {
     let country = this.model.contact.country;
-    let res = await io.get({filters: {country, postcode}}, '/contacts/v1/postcode');
+    let res = await QnD.data.postcode.getMany({filters: {country, postcode}});
 
     if (res.status == 200) {
       this.model.postcodes = res.data;
     }
+  }
+
+  handlePostcodes() {
+    let pcs = this.model.postcodes;
+
+    this.chosenPostcode = {};
+
+    if (pcs.length == 0) {
+      this.model.contact.city = '';
+    }
+
+    if (pcs.length == 1) {
+      this.model.contact.city = pcs[0].city;
+      this.chosenPostcode = pcs[0];
+      return;
+    }
+
+    if (pcs.length >= 1) {
+      this.postcodeModalOpen();
+    }
+  }
+
+  postcodeSelected(ev) {
+    let pcs = this.model.postcodes;
+    let idx = ev.target.closest('li').getAttribute('data-index');
+
+    this.model.contact.city = pcs[idx].city;
+    this.chosenPostcode = pcs[idx];
+
+    this.postcodeModalClose();
+  }
+
+  postcodeNotSelected() {
+    this.postcodeModalClose();
+  }
+
+  postcodeModalOpen() {
+    $('#contact-modal-postcode').modal('show');
+  }
+
+  postcodeModalClose() {
+    $('#contact-modal-postcode').modal('hide');
   }
 
   formatPostcode(pc) {
@@ -408,41 +469,6 @@ class Contact extends MVC {
     pc = formatIt(pc, formats);
 
     return pc;
-  }
-
-  handlePostcodes() {
-    let pcs = this.model.postcodes;
-
-    if (pcs.length == 1) {
-      this.model.contact.city = pcs[0].city;
-      return;
-    }
-
-    if (pcs.length >= 1) {
-      this.postcodeModalOpen();
-    }
-  }
-
-  postcodeSelected(ev) {
-    let pcs = this.model.postcodes;
-    let idx = ev.target.closest('li').getAttribute('data-index');
-
-    this.model.contact.city = pcs[idx].city;
-    this.postcodeModalClose();
-
-    this.$display(this.model.contact)
-  }
-
-  postcodeNotSelected() {
-    this.postcodeModalClose();
-  }
-
-  postcodeModalOpen() {
-    $('#contact-modal-postcode').modal('show');
-  }
-
-  postcodeModalClose() {
-    $('#contact-modal-postcode').modal('hide');
   }
 }
 

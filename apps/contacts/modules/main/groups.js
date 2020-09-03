@@ -34,7 +34,7 @@ class group extends MVC {
 
       QnD.tableStores.group.addView(groups);
     
-      this.defaults.group = await QnD.tableStores.group.getDefault();      
+      this.defaults.group = await QnD.data.group.getDefault();      
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router

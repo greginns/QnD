@@ -22,7 +22,7 @@ const Contact = class extends Model {
         address1: new Fields.Char({null: true, maxLength: 40, verbose: 'Address-1'}),
         address2: new Fields.Char({null: true, maxLength: 40, verbose: 'Address-2'}),
         city: new Fields.Char({null: true, maxLength: 40, verbose: 'City'}),
-        region: new Fields.Char({null: true, maxLength: 6, verbose: 'Region'}),
+        region: new Fields.Char({null: true, maxLength: 10, verbose: 'Region'}),
         country: new Fields.Char({null: true, maxLength: 2, verbose: 'Country'}),
         postcode: new Fields.Char({null: true, maxLength: 10, verbose: 'Postal Code'}),
 
@@ -168,7 +168,7 @@ const Region = class extends Model {
   static definition() {
     return {
       schema: {
-        id: new Fields.Char({notNull: true, maxLength: 6, verbose: 'ID'}),  // cc-rrr  country-region
+        id: new Fields.Char({notNull: true, maxLength: 10, verbose: 'ID'}),  // cc-rrr  country-region
         country: new Fields.Char({notNull: true, maxLength: 2, verbose: 'Country ID'}),
         region: new Fields.Char({notNull: true, maxLength: 3, verbose: 'Region Code'}),
         name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
@@ -201,7 +201,7 @@ const Postcode = class extends Model {
         id: new Fields.Serial({verbose: 'ID'}),
         country: new Fields.Char({notNull: true, maxLength: 2, verbose: 'Country ID'}),
         postcode: new Fields.Char({null: true, maxLength: 10, verbose: 'Postal Code'}),
-        region: new Fields.Char({null: true, maxLength: 6, verbose: 'Region Code'}),
+        region: new Fields.Char({null: true, maxLength: 10, verbose: 'Region Code'}),
         city: new Fields.Char({notNull: true, maxLength: 100, verbose: 'City'}),
       },
 

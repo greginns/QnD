@@ -34,7 +34,7 @@ class title extends MVC {
 
       QnD.tableStores.title.addView(titles);
     
-      this.defaults.title = await QnD.tableStores.title.getDefault();      
+      this.defaults.title = await QnD.data.title.getDefault();      
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router

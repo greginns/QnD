@@ -1,6 +1,6 @@
 // main
 import {QnD} from '/~static/lib/client/core/qnd.js';
-import {WSDataComm, TableStore} from '/~static/lib/client/core/data.js';
+import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
 import {Pages} from '/~static/lib/client/core/router.js';
 
 // js for pages
@@ -16,56 +16,52 @@ import '/~static/lib/client/widgets/js/singlesel.js';
 
 let moduleStart = function() {
   let connectToData = function() {
-    // setup data access
-    const app = 'contacts';                           // app name
-    const version = 'v1';                             // version
-    const data = new WSDataComm(app);                 // WS instances for this app
+    // setup data table access
+    QnD.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
+    QnD.data.title = new TableAccess({modelName: 'title', url: `/contacts/v1/title`});
+    QnD.data.group = new TableAccess({modelName: 'contact', url: `/contacts/v1/group`});
+    QnD.data.country = new TableAccess({modelName: 'country', url: `/contacts/v1/country`});
+    QnD.data.region = new TableAccess({modelName: 'region', url: `/contacts/v1/region`});
+    QnD.data.postcode = new TableAccess({modelName: 'postcode', url: `/contacts/v1/postcode`});
+
+    const data = new WSDataComm('contacts');                 // WS instances for this app
     const safemode = false;
-    let subapp, model, wmodel;
+    let wmodel;
 
-    // Contact table
-    subapp = 'contact';                         // subapp (or model)
-    model = `/${app}/${version}/${subapp}`;     // url of interest to access data
-    wmodel = `/${app}/${subapp}`;               // url-like of interest to follow model changes
+    // Contact table ---
+    wmodel = `/contacts/contact`;                   // url-like of interest to follow model changes
 
-    data.addModel(wmodel);                          // WS data change notifications.
-                                                    // store model name to follow.  first path must be the same as app
+    data.addModel(wmodel);                          // WS data change notifications.  Store model name to follow.  First path segment must be the same as app
 
     // HTTP data access
-    QnD.tableStores.contact = new TableStore({model, wmodel, safemode});  // setup a table store in QnD so all pages can access
+    QnD.tableStores.contact = new TableStore({accessor:QnD.data.contact , wmodel, safemode});  // setup a table store in QnD so all pages can access
     QnD.tableStores.contact.getAll();               // seed the table store
 
-    // Title table
-    subapp = 'title';                           
-    model = `/${app}/${version}/${subapp}`;     
-    wmodel = `/${app}/${subapp}`;               
+    // Title table ---
+    wmodel = `/contacts/title`;               
 
     data.addModel(wmodel);                          
 
-    QnD.tableStores.title = new TableStore({model, wmodel, safemode});  // setup a table store in QnD so all pages can access
+    QnD.tableStores.title = new TableStore({accessor: QnD.data.title, wmodel, safemode});  // setup a table store in QnD so all pages can access
     QnD.tableStores.title.getAll();      
 
-    // Group table
-    subapp = 'group';                           
-    model = `/${app}/${version}/${subapp}`;     
-    wmodel = `/${app}/${subapp}`;               
+    // Group table ---
+    wmodel = `/contacts/group`;               
 
     data.addModel(wmodel);                          
 
-    QnD.tableStores.group = new TableStore({model, wmodel, safemode});  // setup a table store in QnD so all pages can access
+    QnD.tableStores.group = new TableStore({accessor: QnD.data.group, wmodel, safemode});  // setup a table store in QnD so all pages can access
     QnD.tableStores.group.getAll();      
 
-    // Country table
-    subapp = 'country';                           
-    model = `/${app}/${version}/${subapp}`;     
-    wmodel = `/${app}/${subapp}`;               
+    // Country table ---
+    wmodel = `/contacts/country`;               
 
     data.addModel(wmodel);                          
 
-    QnD.tableStores.country = new TableStore({model, wmodel, safemode});  // setup a table store in QnD so all pages can access
+    QnD.tableStores.country = new TableStore({accessor: QnD.data.country, wmodel, safemode});  // setup a table store in QnD so all pages can access
     QnD.tableStores.country.getAll();      
 
-    // start following via WS ------
+    // start following via WS ---
     data.start();
 
     // tell everybody that data is ready
