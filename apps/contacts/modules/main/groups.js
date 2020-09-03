@@ -7,34 +7,34 @@ import {TableView} from '/~static/lib/client/core/data.js';
 import '/~static/project/mixins/overlay.js';
 //import moment from 'moment';
 
-class title extends MVC {
+class group extends MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.title = {};
+    this.model.group = {};
     this.model.existingEntry = false;
-    this.model.titles = [];
+    this.model.groups = [];
     this.model.badMessage = '';
     this.model.errors = {
-      title: {},
+      group: {},
       message: ''
     };
 
-    this.$addWatched('title.id', this.titleEntered.bind(this));
+    this.$addWatched('group.id', this.groupEntered.bind(this));
         
-    this.titleOrig = {};
+    this.groupOrig = {};
     this.defaults = {};
-    this.titleListEl = document.getElementById('titleList');
+    this.groupListEl = document.getElementById('groupList');
 
     // fired when module gets common data
     document.addEventListener('tablestoreready', async function() {
-      let titles = new TableView({proxy: this.model.titles});
+      let groups = new TableView({proxy: this.model.groups});
 
-      QnD.tableStores.title.addView(titles);
+      QnD.tableStores.group.addView(groups);
     
-      this.defaults.title = await QnD.tableStores.title.getDefault();      
+      this.defaults.group = await QnD.tableStores.group.getDefault();      
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router
@@ -47,25 +47,25 @@ class title extends MVC {
   }
   
   inView() {
-    //document.getElementById('admin-manage-navbar-titles').classList.add('active');
-    //document.getElementById('admin-manage-navbar-titles').classList.add('disabled');
+    //document.getElementById('admin-manage-navbar-groups').classList.add('active');
+    //document.getElementById('admin-manage-navbar-groups').classList.add('disabled');
   }
 
   outView() {
-    //document.getElementById('admin-manage-navbar-titles').classList.remove('active');
-    //document.getElementById('admin-manage-navbar-titles').classList.remove('disabled');
+    //document.getElementById('admin-manage-navbar-groups').classList.remove('active');
+    //document.getElementById('admin-manage-navbar-groups').classList.remove('disabled');
 
     return true;  
   }
 
   async save(ev) {
-    var title = this.model.title.toJSON();
+    var group = this.model.group.toJSON();
     var diffs;
 
     this.clearErrors();
           
     if (this.model.existingEntry) {
-      diffs = utils.object.diff(this.titleOrig, title);
+      diffs = utils.object.diff(this.groupOrig, group);
       
       if (Object.keys(diffs).length == 0) {
         this.model.badMessage = 'No Changes to Update';
@@ -82,12 +82,12 @@ class title extends MVC {
     MVC.$overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await QnD.tableStores.title.update(title.id, {title: diffs}) : await QnD.tableStores.title.insert({title});
+    let res = (this.model.existingEntry) ? await QnD.tableStores.group.update(group.id, {group: diffs}) : await QnD.tableStores.group.insert({group});
 
     if (res.status == 200) {
-      MVC.$toast('title',(this.model.existingEntry) ? title.fullname + ' Updated' : 'Created', 2000);
+      MVC.$toast('group',(this.model.existingEntry) ? group.fullname + ' Updated' : 'Created', 2000);
    
-      this.titleOrig = this.model.title.toJSON();
+      this.groupOrig = this.model.group.toJSON();
 
       this.clearIt();
     }
@@ -102,7 +102,7 @@ class title extends MVC {
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
-    let title = this.model.title.toJSON();
+    let group = this.model.group.toJSON();
     let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?');
 
     if (!ret) return;
@@ -112,10 +112,10 @@ class title extends MVC {
 
     this.clearErrors();
     
-    let res = await QnD.tableStores.title.delete(title.id);
+    let res = await QnD.tableStores.group.delete(group.id);
 
     if (res.status == 200) {
-      MVC.$toast('title', 'title Removed', 1000);
+      MVC.$toast('group', 'group Removed', 1000);
 
       this.clearIt();
     }
@@ -134,9 +134,9 @@ class title extends MVC {
   }
 
   async canClear(ev) {
-    let title = this.model.title.toJSON();
-    let orig = this.titleOrig;
-    let diffs = utils.object.diff(orig, title);
+    let group = this.model.group.toJSON();
+    let orig = this.groupOrig;
+    let diffs = utils.object.diff(orig, group);
     let ret = true;
 
     if (Object.keys(diffs).length > 0) {
@@ -155,66 +155,66 @@ class title extends MVC {
     window.scrollTo(0,0);
   }
 
-  newTitle() {
-    this.$focus('title.id');
+  newgroup() {
+    this.$focus('group.id');
     window.scrollTo(0,document.body.scrollHeight);
   }
   
   listClicked(ev) {
-    // title selected from list
+    // group selected from list
     let el = ev.target.closest('button');
     if (!el) return;
 
     let id = el.getAttribute('data-pk');
-    if (id) this.model.title.id = id;
+    if (id) this.model.group.id = id;
 
     window.scrollTo(0,document.body.scrollHeight);
   }
 
-  async titleEntered(nv) {
-    // title ID entered
+  async groupEntered(nv) {
+    // group ID entered
     if (!nv) return;
 
-    let ret = await this.getTitleFromList(nv);
+    let ret = await this.getgroupFromList(nv);
 
-    if (ret.id) this.setTitle(ret.id);
+    if (ret.id) this.setgroup(ret.id);
   }
 
-  async getTitleFromList(pk) {
-    return (pk) ? await QnD.tableStores.title.getOne(pk) : {};
+  async getgroupFromList(pk) {
+    return (pk) ? await QnD.tableStores.group.getOne(pk) : {};
   }
   
-  async setTitle(pk) {
+  async setgroup(pk) {
     this.clearErrors();
 
     this.model.existingEntry = true;
-    this.model.title = await this.getTitleFromList(pk);
-    this.titleOrig = this.model.title.toJSON();
+    this.model.group = await this.getgroupFromList(pk);
+    this.groupOrig = this.model.group.toJSON();
 
     this.highlightList(pk);
   }
 
   highlightList(pk) {
-    // highlight chosen title in list
-    let btn = this.titleListEl.querySelector(`button[data-pk="${pk}"]`);
+    // highlight chosen group in list
+    let btn = this.groupListEl.querySelector(`button[data-pk="${pk}"]`);
     
     if (btn) btn.classList.add('active');
   }
 
   clearList() {
     // clear list of active entry
-    let btn = this.titleListEl.querySelector('button.active');
+    let btn = this.groupListEl.querySelector('button.active');
 
     if (btn) btn.classList.remove('active');
   }
   
   setDefaults() {
-    // set title to default value
-    for (let k in this.defaults.title) {
-      this.model.title[k] = this.defaults.title[k];
+    // set group to default value
+    for (let k in this.defaults.group) {
+      this.model.group[k] = this.defaults.group[k];
     }
 
-    this.titleOrig = this.model.title.toJSON();
+    this.groupOrig = this.model.group.toJSON();
   }
   
   displayErrors(res) {
@@ -257,9 +257,9 @@ class title extends MVC {
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-titles');   // page html
-let mvc = new title('contacts-titles-section');
+let el = document.getElementById('contacts-groups');   // page html
+let mvc = new group('contacts-groups-section');
 let section1 = new Section({mvc});
-let page = new Page({el, path: '/titles', title: 'Contact Titles', sections: [section1]});
+let page = new Page({el, path: '/groups', group: 'Contact groups', sections: [section1]});
     
 QnD.pages.push(page);

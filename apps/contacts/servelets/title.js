@@ -2,6 +2,7 @@ const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {zapPubsub} = require(root + '/lib/server/utils/pubsubs.js');
 const {getAppName, getSubappName} = require(root + '/lib/server/utils/utils.js');
+const {modelQueryParse} = require(root + '/lib/server/utils/url.js');
 
 const app = getAppName(__dirname);
 const subapp = getSubappName(__dirname);
@@ -11,20 +12,7 @@ const { Title } = require(root + `/apps/${app}/models.js`);
 module.exports = {
   getMany: async function({pgschema = '', query = {}} = {}) {
     // get one or more Title rows
-    let cols = ['*'], rec = {};
-
-    if ('fields' in query) {
-      cols = query.fields.split(',');
-    }
-
-    if ('filters' in query) {
-      let fldVals = query.filters.split(',');
-
-      for (let fldVal in fldVals) {
-        let pair = fldVal.split('|');
-        rec[pair[0]] = pair[1];
-      }
-    }
+    let {rec, cols} = modelQueryParse(query);
 
     return await Title.select({pgschema, rec, cols, options: query});    
   },

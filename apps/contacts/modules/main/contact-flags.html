@@ -1,0 +1,29 @@
+<fieldset class="border p-2">
+  <legend class="w-auto">Flags</legend>
+  <div class='row'>
+    <div class='col-6 col-lg-6 mb-3'>
+      {{ fields.Switch(id=contact.masssms.id, mvc_checked='contact.masssms', label=contact.masssms.verbose) }}
+    </div>
+    <div class='col-6 col-lg-6 mb-3'>
+      {{ fields.Switch(id=contact.allowrsv.id, mvc_checked='contact.allowrsv', label=contact.allowrsv.verbose) }}
+    </div>
+  </div>
+
+  <div class='row'>
+    <div class='col-6 col-lg-6 mb-3'>
+      {{ fields.Switch(id=contact.massemail.id, mvc_checked='contact.massemail', label=contact.massemail.verbose) }}
+    </div>
+    <div class='col-6 col-lg-6 mb-3'>
+      {{ fields.Switch(id=contact.allowfup.id, mvc_checked='contact.allowfup', label=contact.allowfup.verbose) }}
+    </div>
+  </div>           
+
+  <div class='row'>
+    <div class='col-6 col-lg-6 mb-3'>
+      {{ fields.Switch(id=contact.massmail.id, mvc_checked='contact.massmail', label=contact.massmail.verbose) }}
+    </div>                    
+    <div class='col-6 col-lg-6 mb-3'>
+      {{ fields.Switch(id=contact.allowbill.id, mvc_checked='contact.allowbill', label=contact.allowbill.verbose) }}
+    </div>
+  </div>                         
+</fieldset>

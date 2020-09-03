@@ -1,0 +1,25 @@
+<fieldset class="border p-2">
+  <legend class="w-auto">Name</legend>
+  <div class='row'>
+    <div class='col-12 col-md-6 mb-3'>
+      {{ fields.SelectMVC(id=contact.title.id, size='1', mvc_value='contact.title', mvc_each='titles', valueField='id', textField='title', label='Title') }}
+    </div>
+  </div>
+  
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.first.id, maxlength=contact.first.maxLength, mvc_value='contact.first', label=contact.first.verbose) }}
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.last.id, maxlength=contact.last.maxLength, mvc_value='contact.last', label=contact.last.verbose) }}
+    </div>
+  </div>
+  
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.group.id, maxlength=contact.group.maxLength, mvc_value='contact.group', label=contact.group.verbose) }}
+    </div>
+  </div>
+</fieldset>

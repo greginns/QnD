@@ -1,0 +1,34 @@
+<fieldset class="border p-2">
+  <legend class="w-auto">Contact Info</legend>
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact.email', label=contact.email.verbose) }}
+    </div>
+  </div>
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.email2.id, maxlength=contact.email2.maxLength, mvc_value='contact.email2', label=contact.email2.verbose) }}
+    </div>
+  </div>
+
+  <div class='row'>
+    <div class='col-12 col-lg-7 mb-3'>
+      {{ fields.Phone(type='text', id=contact.phone.id, maxlength=contact.phone.maxLength, mvc_value='contact.phone', mvc_attr='{"ctrycode": "ctrycode"}', label=contact.phone.verbose) }}
+    </div>
+
+    <div class='col-12 col-lg-5 mb-3'>
+      {{ fields.Switch(id=contact.iscell.id, mvc_checked='contact.iscell', label=contact.iscell.verbose) }}
+    </div>
+  </div>
+
+  <div class='row'>
+    <div class='col-12 col-lg-7 mb-3'>
+      {{ fields.Phone(type='text', id=contact.phone2.id, maxlength=contact.phone2.maxLength, mvc_value='contact.phone2', mvc_attr='{"ctrycode": "ctrycode"}', label=contact.phone2.verbose) }}
+    </div>
+
+    <div class='col-12 col-lg-5 mb-3'>
+      {{ fields.Switch(id=contact.iscell2.id, mvc_checked='contact.iscell2', label=contact.iscell2.verbose) }}
+    </div>
+  </div>
+</fieldset>                

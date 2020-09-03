@@ -1,0 +1,30 @@
+<fieldset class="border p-2">
+  <legend class="w-auto">Categorization</legend>
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.SelectMVC(id=contact.grptype.id, size='1', mvc_value='contact.grptype', mvc_each='groups', valueField='id', textField='type', label='Group Type') }}
+    </div>
+  </div>           
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      <label class='label-color'>Category</label>
+
+      <div class="toggle-radio" data-color='blue'>
+        {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Family', value='F') }}
+        {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Non-Profit', value='G') }}
+        {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Corp', value='C') }}
+      </div>
+
+      <div mvc-show='errors.contact.cat'>
+        <small class='text-danger' mvc-text='errors.contact.cat'></small>
+      </div>
+    </div>
+  </div>                         
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.tags.id, maxlength=contact.tags.maxLength, mvc_value='contact.tags', label=contact.tags.verbose) }}
+    </div>
+  </div>                                       
+</fieldset>                

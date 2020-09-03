@@ -1,6 +1,6 @@
-{% macro Char(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_edit='', placeholder='') %}
+{% macro Char(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='', mvc_filter='', mvc_role='', placeholder='') %}
 <div class="form-label-group">
-  <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-edit='{{mvc_edit}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
+  <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
   <label>{{label}}</label>
 </div>
 
@@ -107,7 +107,7 @@
 <div class='radio-container'>
   <label class="radio-label">
     <span class='label-color'>{{label}}</span>
-    <input type="radio" mvc-checked="{{mvc-checked}}" name="{{name}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}">
+    <input type="radio" mvc-checked="{{mvc_checked}}" name="{{name}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}">
     <span class="radiomark"></span>
   </label>
 </div>
@@ -115,7 +115,7 @@
 
 {% macro Segment(id='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
 <!--div class="toggle-radio" data-color='blue'-->
-  <input type="radio" name="{{name}}" id="{{id}}-{{value}}" mvc-checked='{{mvc-checked}}' value="{{value}}">
+  <input type="radio" name="{{name}}" id="{{id}}-{{value}}" mvc-checked='{{mvc_checked}}' value="{{value}}">
   <label for="{{id}}-{{value}}">{{label}}</label>
 <!--/div-->
 {% endmacro %}
@@ -180,7 +180,7 @@
 
 {% macro Phone(type='text', id='', maxlength='', mvc_value='', label='', mvc_attr='{"ctrycode": ""}', mvc_enabled='', mvc_disabled='', mvc_event_type='input', placeholder='') %}
 <div class="form-label-group">
-  <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-attr="{{mvc_attr}}" mvc-event-type='{{mvc_event_type}}' mvc-role='phone' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
+  <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-attr="{{mvc_attr}}" mvc-event-type='{{mvc_event_type}}' mvc-filter='phone' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
   <label>{{label}}</label>
 </div>
 

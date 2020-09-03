@@ -1,0 +1,36 @@
+<fieldset class="border p-2">
+  <legend class="w-auto">Miscellaneous</legend>
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Date(id=contact.dob.id, maxlength=contact.dob.maxLength, mvc_value='contact.dob', label=contact.dob.verbose) }}
+    </div>
+  </div>           
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      <label class='label-color'>Gender</label>      
+
+      <div class="toggle-radio" data-color='blue'>
+        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='Male', value='M') }}
+        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='Female', value='F') }}
+        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='N/A', value='U') }}
+      </div>
+
+      <div mvc-show='errors.contact.gender'>
+        <small class='text-danger' mvc-text='errors.contact.gender'></small>
+      </div>
+    </div>
+  </div>           
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.occupation.id, maxlength=contact.occupation.maxLength, mvc_value='contact.occupation', label=contact.occupation.verbose) }}
+    </div>
+  </div>                         
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.taxno.id, maxlength=contact.taxno.maxLength, mvc_value='contact.taxno', label=contact.taxno.verbose) }}
+    </div>
+  </div>                         
+</fieldset>                

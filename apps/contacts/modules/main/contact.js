@@ -1,10 +1,12 @@
-import {QnD} from '/static/v1/static/lib/client/core/qnd.js';
-import {MVC} from '/static/v1/static/lib/client/core/mvc.js';
-import {utils} from '/static/v1/static/lib/client/core/utils.js';
-import {Page, Section} from '/static/v1/static/lib/client/core/router.js';
-import {TableView} from '/static/v1/static/lib/client/core/data.js';
+import {QnD} from '/~static/lib/client/core/qnd.js';
+import {MVC} from '/~static/lib/client/core/mvc.js';
+import {utils} from '/~static/lib/client/core/utils.js';
+import {Page, Section} from '/~static/lib/client/core/router.js';
+import {TableView} from '/~static/lib/client/core/data.js';
+import {io} from '/~static/lib/client/core/io.js';
 
-import '/static/v1/static/project/mixins/overlay.js';
+import '/~static/project/mixins/overlay.js';
+//import { stringify } from 'uuid';
 //import moment from 'moment';
 
 class Contact extends MVC {
@@ -14,17 +16,24 @@ class Contact extends MVC {
 
   createModel() {
     this.model.contact = {};
-    this.model.existingEntry = false;
     this.model.contacts = [];
     this.model.titles = [];
+    this.model.groups = [];
+    this.model.countries = [];
+    this.model.regions = [];
+    this.model.postcodes = [];
+
+    this.model.existingEntry = false;
     this.model.badMessage = '';
     this.model.errors = {
       contact: {},
       message: ''
     };
     this.model.ctrycode = 'CA';
-    this.model.contact.doe = moment()
+    //this.model.contact.doe = moment()
 
+    this.$addWatched('contact.country', this.countryChanged.bind(this));
+    //this.$addWatched('contact.postcode', this.postcodeChanged.bind(this));
     this.$addWatched('contact.id', this.contactEntered.bind(this));
         
     this.contactOrig = {};
@@ -35,8 +44,11 @@ class Contact extends MVC {
     document.addEventListener('tablestoreready', async function() {
       QnD.tableStores.contact.addView(new TableView({proxy: this.model.contacts}));
       QnD.tableStores.title.addView(new TableView({proxy: this.model.titles}));
+      QnD.tableStores.group.addView(new TableView({proxy: this.model.groups}));
+      QnD.tableStores.country.addView(new TableView({proxy: this.model.countries}));
     
-      this.defaults.contact = await QnD.tableStores.contact.getDefault();      
+      this.defaults.contact = await QnD.tableStores.contact.getDefault();
+      this.setDefaults();      
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router
@@ -275,12 +287,169 @@ class Contact extends MVC {
   setBadMessage(msg) {
     this.model.badMessage = msg;
   }
+
+  // ADDRESSES
+  async countryChanged(nv, ov) {
+    if (!nv) return;
+
+    await this.getRegions(nv);
+  }
+
+  async postcodeChanged() {
+    let nv = this.model.contact.postcode;
+    if (!nv) return;
+
+    let pc = this.formatPostcode(nv);
+    this.model.contact.postcode = pc;
+    
+    await this.getPostcodes(pc);
+    this.handlePostcodes();
+  }
+
+  async getRegions(country) {
+    let res = await io.get({filters: {country}}, '/contacts/v1/region');
+
+    if (res.status == 200) {
+      this.model.regions = res.data;
+    }
+  }
+
+  async getPostcodes(postcode) {
+    let country = this.model.contact.country;
+    let res = await io.get({filters: {country, postcode}}, '/contacts/v1/postcode');
+
+    if (res.status == 200) {
+      this.model.postcodes = res.data;
+    }
+  }
+
+  formatPostcode(pc) {
+    // CC - country code.
+    // A - alpha
+    // N - numeric
+    // rest is literal
+    const country = this.model.contact.country;
+    let formats;
+
+    function getFormats(countries) {
+      for (let ctry of countries) {
+        if (ctry.id == country) {
+          return ctry.format.split(',');
+        }
+      }
+
+      return [];
+    };
+
+    function cleanupPostcode(npc) {
+      return npc.toUpperCase().replace(/\s/g, "");
+    }
+
+    function formatIt(pc, formats) {
+      const alphas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const numbers = '0123456789';
+      const max = 15;
+      let antiloop = 0;
+
+      for (let format of formats) {
+        let pcw = pc, pcf = '', pidx=-1, fidx=-1;
+
+        if (format.substr(0,2) == 'CC' && pcw.substr(0,2) != country) pcw = country + pcw;
+
+        while(true) {
+          fidx++;
+          pidx++;
+          antiloop++;
+          if (antiloop > max) break;
+
+          if (pidx >= pcw.length) break;
+
+          let p = pcw.substr(pidx,1);
+          let f = format.substr(fidx,1) || '';
+
+          switch (f) {
+            case 'A':
+              // valid alpha?
+              if (alphas.indexOf(p) == -1) continue;  // invalid character, skip it
+              pcf += p;
+              break;
+
+            case 'N':
+              // valid numeric?
+              if (numbers.indexOf(p) == -1) continue;  // invalid character, skip it
+              pcf += p;
+              break;
+
+            case 'C':
+              // country character?
+              pcf += p;
+              break;
+              
+            default:
+              // literal
+              pcf += f;
+              pidx--;
+              break;
+          }
+        }
+
+        if (pcf.length == format.length) {
+          return pcf;
+        }
+      }
+
+      return pc;
+    }
+    
+    formats = getFormats(this.model.countries);
+    if (!formats[0]) return pc;
+
+    pc = cleanupPostcode(pc);
+    pc = formatIt(pc, formats);
+
+    return pc;
+  }
+
+  handlePostcodes() {
+    let pcs = this.model.postcodes;
+
+    if (pcs.length == 1) {
+      this.model.contact.city = pcs[0].city;
+      return;
+    }
+
+    if (pcs.length >= 1) {
+      this.postcodeModalOpen();
+    }
+  }
+
+  postcodeSelected(ev) {
+    let pcs = this.model.postcodes;
+    let idx = ev.target.closest('li').getAttribute('data-index');
+
+    this.model.contact.city = pcs[idx].city;
+    this.postcodeModalClose();
+
+    this.$display(this.model.contact)
+  }
+
+  postcodeNotSelected() {
+    this.postcodeModalClose();
+  }
+
+  postcodeModalOpen() {
+    $('#contact-modal-postcode').modal('show');
+  }
+
+  postcodeModalClose() {
+    $('#contact-modal-postcode').modal('hide');
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-main');   // page html
-let mvc = new Contact('contacts-main-section');
+let el = document.getElementById('contacts-contact');   // page html
+let mvc = new Contact('contacts-contact-section');
 let section1 = new Section({mvc});
-let page = new Page({el, path: '/main', title: 'Contacts', sections: [section1]});
+let page = new Page({el, path: '/contact', title: 'Contacts', sections: [section1]});
     
 QnD.pages.push(page);

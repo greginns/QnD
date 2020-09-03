@@ -1,0 +1,38 @@
+<fieldset class="border p-2">
+  <legend class="w-auto">Address</legend>
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.address1.id, maxlength=contact.address1.maxLength, mvc_value='contact.address1', label=contact.address1.verbose) }}
+    </div>
+  </div>
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.address2.id, maxlength=contact.address2.maxLength, mvc_value='contact.address2', label=contact.address2.verbose) }}
+    </div>
+  </div>
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.SelectMVC(id=contact.country.id, size='1', mvc_value='contact.country', mvc_each='countries', valueField='id', textField='name', label='Country') }}
+    </div>
+  </div>           
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.postcode.id, maxlength=contact.postcode.maxLength, mvc_value='contact.postcode', mvc_on='{"blur": "postcodeChanged"}', mvc_event_type='input', mvc_edit='upper', label=contact.postcode.verbose) }}
+    </div>
+  </div>           
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.SelectMVC(id=contact.region.id, size='1', mvc_value='contact.region', mvc_each='regions', valueField='id', textField='name', label='Region') }}
+    </div>
+  </div>
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.city.id, maxlength=contact.city.maxLength, mvc_value='contact.city', label=contact.city.verbose) }}
+    </div>
+  </div>
+</fieldset> 

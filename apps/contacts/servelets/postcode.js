@@ -7,33 +7,33 @@ const {modelQueryParse} = require(root + '/lib/server/utils/url.js');
 const app = getAppName(__dirname);
 const subapp = getSubappName(__dirname);
 
-const { {{name}} } = require(root + `/apps/${app}/models.js`);
+const { Postcode } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
   getMany: async function({pgschema = '', query = {}} = {}) {
-    // get one or more {{name}} rows
+    // get one or more Postcode rows
     let {rec, cols} = modelQueryParse(query);
-    
-    return await {{name}}.select({pgschema, rec, cols, options: query});    
+
+    return await Postcode.select({pgschema, rec, cols, options: query});    
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {
-    // get specific {{name}} row
+    // get specific Postcode row
     if ('id' in rec && rec.id == '_default') {
       let tm = new TravelMessage();
 
-      tm.data = {{name}}.getColumnDefaults();
+      tm.data = Postcode.getColumnDefaults();
       tm.type = 'json';
 
       return tm;
     }
      
-    return await {{name}}.selectOne({pgschema, pks: [rec.{{pk}}] });
+    return await Postcode.selectOne({pgschema, pks: [rec.id] });
   },
     
   create: async function({pgschema = '', rec = {}} = {}) {
-    // insert {{name}} row
-    let tobj = new {{name}}(rec);
+    // insert Postcode row
+    let tobj = new Postcode(rec);
     let tm = await tobj.insertOne({pgschema});
 
     //if (tm.isGood()) {
@@ -43,11 +43,11 @@ module.exports = {
     return tm;    
   },
   
-  update: async function({pgschema = '', {{pk}} = '', rec= {}} = {}) {
-    // Update {{name}} row
-    rec.{{pk}} = {{pk}};
+  update: async function({pgschema = '', id = '', rec= {}} = {}) {
+    // Update Postcode row
+    rec.id = id;
 
-    let tobj = new {{name}}(rec);
+    let tobj = new Postcode(rec);
     let tm = await tobj.updateOne({pgschema});
 
     //if (tm.isGood()) {
@@ -57,9 +57,9 @@ module.exports = {
     return tm;
   },
   
-  delete: async function({pgschema = '', {{pk}} = ''} = {}) {
-    // delete {{name}} row
-    let tobj = new {{name}}({ {{pk}} });
+  delete: async function({pgschema = '', id = ''} = {}) {
+    // delete Postcode row
+    let tobj = new Postcode({ id });
     let tm = await tobj.deleteOne({pgschema});
 
     //if (tm.isGood()) {

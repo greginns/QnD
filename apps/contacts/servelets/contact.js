@@ -2,6 +2,7 @@ const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {zapPubsub} = require(root + '/lib/server/utils/pubsubs.js');
 const {getAppName, getSubappName} = require(root + '/lib/server/utils/utils.js');
+const {modelQueryParse} = require(root + '/lib/server/utils/url.js');
 
 const { Contact } = require(root + '/apps/contacts/models.js');
 
@@ -11,20 +12,7 @@ const subapp = getSubappName(__filename);
 module.exports = {
   getMany: async function({pgschema = '', query = {}} = {}) {
     // get one or more Contacts
-    let cols = ['*'], rec = {};
-
-    if ('fields' in query) {
-      cols = query.fields.split(',');
-    }
-
-    if ('filters' in query) {
-      let fldVals = query.filters.split(',');
-
-      for (let fldVal in fldVals) {
-        let pair = fldVal.split('|');
-        rec[pair[0]] = pair[1];
-      }
-    }
+    let {rec, cols} = modelQueryParse(query);
 
     return await Contact.select({pgschema, rec, cols, options: query});
   },
@@ -36,6 +24,9 @@ module.exports = {
 
       tm.data = Contact.getColumnDefaults();
       tm.type = 'json';
+
+      tm.data.country = 'CA';
+      tm.data.region = 'CA-NS';
 
       return tm;
     }
