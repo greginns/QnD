@@ -62,7 +62,7 @@
             <div class='row'>
               <div class='col-12 col-xl-6'>
                 <div class='row'>
-                  <div class='col-12 mb-3'>
+                  <div class='col-12'>
                     {{ fields.SelectChoices(id=egroup.freq.id, size='1', mvc_value='egroup.freq', choices=egroup.freq.choices, label=egroup.freq.verbose) }}
                   </div>
                 </div>
@@ -82,13 +82,13 @@
             <div class='row'>
               <div class='col-12'>
                 <span mvc-hide='existingEntry'>
-                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save', text='Add Group') }}
+                  {{ buttons.btn(class='primary', mvc_click='save', text='Add Group') }}
                 </span>
                 <span mvc-show='existingEntry'>
                   {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save', text='Update Group') }}
                   {{ buttons.btn(class='danger mb-3 mb-lg-0', mvc_click='delete', text='Delete Group') }}
                 </span>
-                {{ buttons.btn(class='warning mb-3 mb-lg-0', mvc_click='clear', text='Clear') }}
+                {{ buttons.btn(class='warning', mvc_click='clear', text='Clear') }}
               </div>
             </div>            
           </div>

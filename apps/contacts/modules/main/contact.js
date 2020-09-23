@@ -15,6 +15,9 @@ class Contact extends MVC {
     this.model.contacts = [];
     this.model.titles = [];
     this.model.groups = [];
+    this.model.egroups = [];
+    this.model.tagcats = [];
+    this.model.tags = [];
     this.model.countries = [];
     this.model.regions = [];
     this.model.postcodes = [];
@@ -46,9 +49,13 @@ class Contact extends MVC {
       Module.tableStores.contact.addView(new TableView({proxy: this.model.contacts}));
       Module.tableStores.title.addView(new TableView({proxy: this.model.titles, filterFunc}));
       Module.tableStores.group.addView(new TableView({proxy: this.model.groups, filterFunc}));
+      Module.tableStores.egroup.addView(new TableView({proxy: this.model.egroups, filterFunc}));
+      Module.tableStores.tagcat.addView(new TableView({proxy: this.model.tagcats}));
+      Module.tableStores.tag.addView(new TableView({proxy: this.model.tags}));
       Module.tableStores.country.addView(new TableView({proxy: this.model.countries}));
     
       this.defaults.contact = await Module.data.contact.getDefault();
+      this.reorgTags();
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router
@@ -254,6 +261,14 @@ class Contact extends MVC {
   }
 
   // Tags
+  tagFormat() {
+    
+  }
+
+  reorgTags() {
+    // organize into A-objects for quick retrieval and B-multisel display
+  }
+
   async addTag() {
     let tags = this.model.contact.tags;
 

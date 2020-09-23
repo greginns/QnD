@@ -12,6 +12,7 @@ class group extends MVC {
     super(element);
   }
 
+  // Lifecycle
   createModel() {
     this.model.group = {};
     this.model.existingEntry = false;
@@ -22,9 +23,9 @@ class group extends MVC {
       message: ''
     };
 
-    this.$addWatched('group.id', this.groupEntered.bind(this));
+    this.$addWatched('group.id', this.idEntered.bind(this));
         
-    this.groupOrig = {};
+    this.originalEntry = {};
     this.defaults = {};
     this.groupListEl = document.getElementById('groupList');
 
@@ -46,26 +47,25 @@ class group extends MVC {
     })          
   }
   
-  inView() {
-    //document.getElementById('admin-manage-navbar-groups').classList.add('active');
-    //document.getElementById('admin-manage-navbar-groups').classList.add('disabled');
+  inView(params) {
+    if ('id' in params && params.id) {
+      this.idEntered(params.id);
+    }
   }
 
   outView() {
-    //document.getElementById('admin-manage-navbar-groups').classList.remove('active');
-    //document.getElementById('admin-manage-navbar-groups').classList.remove('disabled');
-
     return true;  
   }
 
+  // IO
   async save(ev) {
-    var group = this.model.group.toJSON();
-    var diffs;
+    let group = this.model.group.toJSON();
+    let diffs;
 
     this.clearErrors();
           
     if (this.model.existingEntry) {
-      diffs = utils.object.diff(this.groupOrig, group);
+      diffs = utils.object.diff(this.originalEntry, group);
       
       if (Object.keys(diffs).length == 0) {
         this.model.badMessage = 'No Changes to Update';
@@ -87,7 +87,7 @@ class group extends MVC {
     if (res.status == 200) {
       MVC.$toast('group',(this.model.existingEntry) ? group.type + ' Updated' : 'Created', 2000);
    
-      this.groupOrig = this.model.group.toJSON();
+      this.originalEntry = this.model.group.toJSON();
 
       this.clearIt();
     }
@@ -115,7 +115,7 @@ class group extends MVC {
     let res = await Module.tableStores.group.delete(group.id);
 
     if (res.status == 200) {
-      MVC.$toast('group', 'group Removed', 1000);
+      MVC.$toast('Group', 'Group Removed', 1000);
 
       this.clearIt();
     }
@@ -127,6 +127,7 @@ class group extends MVC {
     MVC.$buttonSpinner(ev.target, false, spinner);
   }
   
+  // Clearing
   async clear(ev) {
     if (await this.canClear(ev)) {
       this.clearIt();
@@ -135,7 +136,7 @@ class group extends MVC {
 
   async canClear(ev) {
     let group = this.model.group.toJSON();
-    let orig = this.groupOrig;
+    let orig = this.originalEntry;
     let diffs = utils.object.diff(orig, group);
     let ret = true;
 
@@ -152,46 +153,64 @@ class group extends MVC {
     this.clearList();
 
     this.model.existingEntry = false;
+
+    Module.pager.clearQuery();
     window.scrollTo(0,0);
   }
 
-  newgroup() {
+  // DB Entry routines
+  newEntry() {
     this.$focus('group.id');
+
     window.scrollTo(0,document.body.scrollHeight);
   }
   
+  async idEntered(id) {
+    // ID entered
+    if (!id) return;
+
+    let ret = await this.getEntryFromList(id);
+
+    if (ret.id) this.setEntry(ret.id);
+
+    Module.pager.replaceQuery('ID=' + id);
+  }
+
+  async getEntryFromList(pk) {
+    return (pk) ? await Module.tableStores.group.getOne(pk) : {};
+  }
+  
+  async setEntry(pk) {
+    this.clearErrors();
+
+    this.model.existingEntry = true;
+    this.model.group = await this.getEntryFromList(pk);
+    this.originalEntry = this.model.group.toJSON();
+
+    this.highlightList(pk);
+  }
+
+  setDefaults() {
+    // set entry to default value
+    for (let k in this.defaults.group) {
+      this.model.group[k] = this.defaults.group[k];
+    }
+
+    this.originalEntry = this.model.group.toJSON();
+  }
+  
+  // List routines
   listClicked(ev) {
-    // group selected from list
+    // entry selected from list
     let el = ev.target.closest('button');
     if (!el) return;
 
     let id = el.getAttribute('data-pk');
     if (id) this.model.group.id = id;
 
+    Module.pager.replaceQuery('ID=' + id);
+    
     window.scrollTo(0,document.body.scrollHeight);
-  }
-
-  async groupEntered(nv) {
-    // group ID entered
-    if (!nv) return;
-
-    let ret = await this.getgroupFromList(nv);
-
-    if (ret.id) this.setgroup(ret.id);
-  }
-
-  async getgroupFromList(pk) {
-    return (pk) ? await Module.tableStores.group.getOne(pk) : {};
-  }
-  
-  async setgroup(pk) {
-    this.clearErrors();
-
-    this.model.existingEntry = true;
-    this.model.group = await this.getgroupFromList(pk);
-    this.groupOrig = this.model.group.toJSON();
-
-    this.highlightList(pk);
   }
 
   highlightList(pk) {
@@ -208,15 +227,7 @@ class group extends MVC {
     if (btn) btn.classList.remove('active');
   }
   
-  setDefaults() {
-    // set group to default value
-    for (let k in this.defaults.group) {
-      this.model.group[k] = this.defaults.group[k];
-    }
-
-    this.groupOrig = this.model.group.toJSON();
-  }
-  
+  // Error rtns
   displayErrors(res) {
     if ('data' in res && 'errors' in res.data) {
       for (let key of Object.keys(res.data.errors)) {

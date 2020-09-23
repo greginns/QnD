@@ -86,7 +86,7 @@ class tagcat extends MVC {
     let res = (this.model.existingEntry) ? await Module.tableStores.tagcat.update(tagcat.id, diffs) : await Module.tableStores.tagcat.insert(tagcat);
 
     if (res.status == 200) {
-      MVC.$toast('tagcat',(this.model.existingEntry) ? tagcat.desc + ' Updated' : 'Created', 2000);
+      MVC.$toast('Category',(this.model.existingEntry) ? tagcat.desc + ' Updated' : 'Created', 2000);
    
       this.tagcatOrig = this.model.tagcat.toJSON();
 

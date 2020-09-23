@@ -14,7 +14,7 @@
               <div class='col-6'>
                 <div class='d-md-none'>
                   <span mvc-hide='existingEntry'>
-                    {{ buttons.btn(class='success', mvc_click='newCat', text='+ E-Group') }}
+                    {{ buttons.btn(class='success', mvc_click='newTag', text='+ Tag') }}
                   </span>
                 </div>
               </div>
@@ -62,7 +62,7 @@
             <div class='row'>
               <div class='col-12 col-xl-6'>
                 <div class='row'>
-                  <div class='col-12 mb-3'>
+                  <div class='col-12'>
                     {{ fields.SelectMVC(id=tag.cat.id, size='1', mvc_value='tag.cat', mvc_each='tagcats', valueField='id', textField='desc', label=tag.cat.verbose) }}
                   </div>
                 </div>
@@ -82,13 +82,13 @@
             <div class='row'>
               <div class='col-12'>
                 <span mvc-hide='existingEntry'>
-                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save', text='Add Category') }}
+                  {{ buttons.btn(class='success', mvc_click='save', text='Create Tag') }}
                 </span>
                 <span mvc-show='existingEntry'>
-                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save', text='Update Category') }}
-                  {{ buttons.btn(class='danger mb-3 mb-lg-0', mvc_click='delete', text='Delete Category') }}
+                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save', text='Update Tag') }}
+                  {{ buttons.btn(class='danger', mvc_click='delete', text='Delete Tag') }}
                 </span>
-                {{ buttons.btn(class='warning mb-3 mb-lg-0', mvc_click='clear', text='Clear') }}
+                {{ buttons.btn(class='warning', mvc_click='clear', text='Clear') }}
               </div>
             </div>            
           </div>

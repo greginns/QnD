@@ -94,7 +94,7 @@ class tag extends MVC {
     let res = (this.model.existingEntry) ? await Module.tableStores.tag.update(tag.id, diffs) : await Module.tableStores.tag.insert(tag);
 
     if (res.status == 200) {
-      MVC.$toast('tag',(this.model.existingEntry) ? tag.desc + ' Updated' : 'Created', 2000);
+      MVC.$toast('Tag',(this.model.existingEntry) ? tag.desc + ' Updated' : 'Created', 2000);
    
       this.tagOrig = this.model.tag.toJSON();
 
@@ -164,7 +164,7 @@ class tag extends MVC {
     window.scrollTo(0,0);
   }
 
-  newCat() {
+  newTag() {
     this.$focus('tag.id');
     window.scrollTo(0,document.body.scrollHeight);
   }

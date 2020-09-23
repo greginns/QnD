@@ -86,6 +86,8 @@ class Contact extends MVC {
 
   saveAccount() {}
 
+  addTag() {}
+
   // ADDRESS
   async countryChanged(nv, ov) {
     if (!nv) return;
