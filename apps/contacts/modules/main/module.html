@@ -9,6 +9,23 @@
   label.mbsc-mobiscroll.mbsc-input {
     margin: 1.5em 1em .1em 1em !important;
   }
+
+  div#qndPages {
+    padding-top: 60px;
+  }
+
+  @media (min-width: 575px) {
+    div.bottom-spacer {
+      padding-bottom: 90px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    div.bottom-spacer {
+      padding-bottom: 60px;
+    }
+  }  
+
 </style>
 {% endblock %}
 
@@ -23,15 +40,23 @@
 {% block body %}
   <div class="container-fluid">
     {% include "./navbar.html" %}
-    <div id='qndPages' style='padding-top: 60px'>
-      {% include "./contact.html" %}
+      <div id='qndPages'>
+      {% include "./contact-create.html" %}
+      {% include "./contact-update.html" %}
+      {% include "./contact-search.html" %}
+      {% include "./contact-results.html" %}
       {% include "./titles.html" %}
       {% include "./groups.html" %}
+      {% include "./egroups.html" %}
+      {% include "./tagcats.html" %}
+      {% include "./tags.html" %}
     </div>
   </div>
   
+  {% include "../../utils/address.html" %}
   {% include "lib/client/widgets/mdate.html" %}
   {% include "lib/client/widgets/mtime.html" %}
+  {#% include "lib/client/widgets/modal.html" %#}
   {% include "lib/client/widgets/multisel.html" %}
   {% include "lib/client/widgets/singlesel.html" %}
 

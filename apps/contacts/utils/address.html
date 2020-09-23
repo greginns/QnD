@@ -1,0 +1,53 @@
+<template id='contacts-address-modal'>
+  <section>
+    <!-- City choices Modal -->
+    <div class="modal fade contact-address-modal-city" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="contact-modal-city-label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">City Selection</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group" mvc-each='postcodes' mvc-click='citySelected'>
+              <li class='list-group-item' data-index='$index'>
+                <span mvc-text='postcodes.$index.postcode'></span>
+                <span mvc-text='postcodes.$index.city'></span>
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" mvc-click='cityNotSelected'>Exit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Postcode choices Modal -->
+    <div class="modal fade contact-address-modal-postcode" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="contact-modal-postcode-label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Postal Code Selection</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group" mvc-each='postcodes' mvc-click='postcodeSelected'>
+              <li class='list-group-item' data-index='$index'>
+                <span mvc-text='postcodes.$index.postcode'></span>
+                <span mvc-text='postcodes.$index.city'></span>
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" mvc-click='postcodeNotSelected'>Exit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>

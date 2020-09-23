@@ -7,34 +7,33 @@ const {modelQueryParse} = require(root + '/lib/server/utils/url.js');
 const app = getAppName(__dirname);
 const subapp = getSubappName(__dirname);
 
-const { Region } = require(root + `/apps/${app}/models.js`);
+const { Egroup } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
   getMany: async function({pgschema = '', query = {}} = {}) {
-    // get one or more Region rows
-console.log('region', query)    
+    // get one or more Egroup rows
     let {rec, cols} = modelQueryParse(query);
-
-    return await Region.select({pgschema, rec, cols, options: query});    
+    
+    return await Egroup.select({pgschema, rec, cols, options: query});    
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {
-    // get specific Region row
+    // get specific Egroup row
     if ('id' in rec && rec.id == '_default') {
       let tm = new TravelMessage();
 
-      tm.data = Region.getColumnDefaults();
+      tm.data = Egroup.getColumnDefaults();
       tm.type = 'json';
 
       return tm;
     }
      
-    return await Region.selectOne({pgschema, pks: [rec.id] });
+    return await Egroup.selectOne({pgschema, pks: [rec.id] });
   },
     
   create: async function({pgschema = '', rec = {}} = {}) {
-    // insert Region row
-    let tobj = new Region(rec);
+    // insert Egroup row
+    let tobj = new Egroup(rec);
     let tm = await tobj.insertOne({pgschema});
 
     //if (tm.isGood()) {
@@ -45,10 +44,10 @@ console.log('region', query)
   },
   
   update: async function({pgschema = '', id = '', rec= {}} = {}) {
-    // Update Region row
+    // Update Egroup row
     rec.id = id;
 
-    let tobj = new Region(rec);
+    let tobj = new Egroup(rec);
     let tm = await tobj.updateOne({pgschema});
 
     //if (tm.isGood()) {
@@ -59,8 +58,8 @@ console.log('region', query)
   },
   
   delete: async function({pgschema = '', id = ''} = {}) {
-    // delete Region row
-    let tobj = new Region({ id });
+    // delete Egroup row
+    let tobj = new Egroup({ id });
     let tm = await tobj.deleteOne({pgschema});
 
     //if (tm.isGood()) {

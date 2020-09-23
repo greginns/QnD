@@ -1,0 +1,71 @@
+<page id='contacts-contact-search' style='display: none;'>
+  <section id='contacts-contact-search-section'>
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-5'>
+                {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='search', text='Search') }}
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-12'>
+                {{ fields.Char(type='text', id=contact.id.id, maxlength=contact.id.maxLength, mvc_value='contact.id', mvc_event_type='blur', mvc_disabled='existingEntry', label=contact.id.verbose) }}
+              </div>
+
+              <div class='col-12 col-lg-6 col-xl-4'>
+                {% include "./contact-name.html" %}
+              </div>
+    
+              <div class='col-12 col-lg-6 col-xl-4'>
+                {% include "./contact-address-update.html" %}
+              </div>
+
+              <div class='col-12 col-lg-6 col-xl-4'>
+                {% include "./contact-contact.html" %}
+              </div>  
+
+              <div class='col-12 col-lg-6 col-xl-4'>
+                {% include "./contact-emergency.html" %}
+              </div>  
+
+              <div class='col-12 col-lg-6 col-xl-4'>
+                {% include "./contact-misc.html" %}
+              </div>  
+              
+              <div class='col-12 col-lg-6 col-xl-4'>
+                {% include "./contact-cat.html" %}
+              </div>  
+              
+              <div class='col-12 col-lg-6 col-xl-4'>
+                {% include "./contact-flags.html" %}
+              </div>                
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='search', text='Search') }}
+              </div>
+            </div>            
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+</page>

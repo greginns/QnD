@@ -1,28 +1,50 @@
 // main
-import {QnD} from '/~static/lib/client/core/qnd.js';
+import {Module} from '/~static/lib/client/core/module.js';
 import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
 import {Pages} from '/~static/lib/client/core/router.js';
 
 // js for pages
+import '/~static/apps/contacts/modules/main/navbar.js';
 import '/~static/apps/contacts/modules/main/contact.js';
+import '/~static/apps/contacts/modules/main/contact-search.js';
+import '/~static/apps/contacts/modules/main/contact-results.js';
 import '/~static/apps/contacts/modules/main/titles.js';
 import '/~static/apps/contacts/modules/main/groups.js';
+import '/~static/apps/contacts/modules/main/egroups.js';
+import '/~static/apps/contacts/modules/main/tagcats.js';
+import '/~static/apps/contacts/modules/main/tags.js';
+
+import '/~static/project/mixins/overlay.js';
+import '/~static/project/mixins/mvc_ext.js';
 
 // js for widgets
-import '/~static/lib/client/widgets/js/mtime.js';
-import '/~static/lib/client/widgets/js/mdate.js';
-import '/~static/lib/client/widgets/js/multisel.js';
-import '/~static/lib/client/widgets/js/singlesel.js';
+import {Address} from '/~static/apps/contacts/utils/address.js'
+//import {MDate} from '/~static/lib/client/widgets/mdate.js';
+//import {MTime} from '/~static/lib/client/widgets/mtime.js';
+//import {Multisel} from '/~static/lib/client/widgets/multisel.js';
+//import {Singlesel} from '/~static/lib/client/widgets/singlesel.js';
 
 let moduleStart = function() {
+  let widgetSetup = function() {
+    Module.widgets.address = new Address();
+    //Module.widgets.mdate = new MDate();
+    //Module.widgets.mtime = new MTime();
+    //Module.widgets.multisel = new Multisel();
+    //Module.widgets.singlesel = new Singlesel();
+
+  }
+
   let connectToData = function() {
     // setup data table access
-    QnD.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
-    QnD.data.title = new TableAccess({modelName: 'title', url: `/contacts/v1/title`});
-    QnD.data.group = new TableAccess({modelName: 'contact', url: `/contacts/v1/group`});
-    QnD.data.country = new TableAccess({modelName: 'country', url: `/contacts/v1/country`});
-    QnD.data.region = new TableAccess({modelName: 'region', url: `/contacts/v1/region`});
-    QnD.data.postcode = new TableAccess({modelName: 'postcode', url: `/contacts/v1/postcode`});
+    Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
+    Module.data.title = new TableAccess({modelName: 'title', url: `/contacts/v1/title`});
+    Module.data.group = new TableAccess({modelName: 'group', url: `/contacts/v1/group`});
+    Module.data.egroup = new TableAccess({modelName: 'egroup', url: `/contacts/v1/egroup`});
+    Module.data.tagcat = new TableAccess({modelName: 'tagcat', url: `/contacts/v1/tagcat`});
+    Module.data.tag = new TableAccess({modelName: 'tag', url: `/contacts/v1/tag`});
+    Module.data.country = new TableAccess({modelName: 'country', url: `/contacts/v1/country`});
+    Module.data.region = new TableAccess({modelName: 'region', url: `/contacts/v1/region`});
+    Module.data.postcode = new TableAccess({modelName: 'postcode', url: `/contacts/v1/postcode`});
 
     const data = new WSDataComm('contacts');                 // WS instances for this app
     const safemode = false;
@@ -34,51 +56,75 @@ let moduleStart = function() {
     data.addModel(wmodel);                          // WS data change notifications.  Store model name to follow.  First path segment must be the same as app
 
     // HTTP data access
-    QnD.tableStores.contact = new TableStore({accessor:QnD.data.contact , wmodel, safemode});  // setup a table store in QnD so all pages can access
-    QnD.tableStores.contact.getAll();               // seed the table store
+    Module.tableStores.contact = new TableStore({accessor:Module.data.contact , wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.contact.getAll();               // seed the table store
 
     // Title table ---
     wmodel = `/contacts/title`;               
 
     data.addModel(wmodel);                          
 
-    QnD.tableStores.title = new TableStore({accessor: QnD.data.title, wmodel, safemode});  // setup a table store in QnD so all pages can access
-    QnD.tableStores.title.getAll();      
+    Module.tableStores.title = new TableStore({accessor: Module.data.title, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.title.getAll();      
 
     // Group table ---
     wmodel = `/contacts/group`;               
 
     data.addModel(wmodel);                          
 
-    QnD.tableStores.group = new TableStore({accessor: QnD.data.group, wmodel, safemode});  // setup a table store in QnD so all pages can access
-    QnD.tableStores.group.getAll();      
+    Module.tableStores.group = new TableStore({accessor: Module.data.group, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.group.getAll();      
+
+    // Egroup table ---
+    wmodel = `/contacts/egroup`;               
+
+    data.addModel(wmodel);                          
+
+    Module.tableStores.egroup = new TableStore({accessor: Module.data.egroup, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.egroup.getAll();      
+
+    // Tagcat table ---
+    wmodel = `/contacts/tagcat`;               
+
+    data.addModel(wmodel);                          
+
+    Module.tableStores.tagcat = new TableStore({accessor: Module.data.tagcat, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.tagcat.getAll();      
+
+    // Tag table ---
+    wmodel = `/contacts/tag`;
+
+    data.addModel(wmodel);                          
+
+    Module.tableStores.tag = new TableStore({accessor: Module.data.tag, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.tag.getAll();      
 
     // Country table ---
     wmodel = `/contacts/country`;               
 
     data.addModel(wmodel);                          
 
-    QnD.tableStores.country = new TableStore({accessor: QnD.data.country, wmodel, safemode});  // setup a table store in QnD so all pages can access
-    QnD.tableStores.country.getAll();      
+    Module.tableStores.country = new TableStore({accessor: Module.data.country, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.country.getAll();      
 
     // start following via WS ---
     data.start();
 
     // tell everybody that data is ready
-    document.dispatchEvent(new CustomEvent('tablestoreready', {bubbles: false}));  // getElementById('qndPages').
+    document.dispatchEvent(new CustomEvent('tablestoreready', {bubbles: false}));  // getElementById('ModulePages').
   }
 
   let startPages = async function() {
     // page URL data  
     const module = location.pathname.split('/')[1];  // 'contactpage'
-    const startPage = 'contact';
+    const startPage = 'contact/create';
 
-    // Start up pages.  QnD.pages saved up all page references
-    const pages = new Pages({root: `/${module}`, pages: QnD.pages});
+    // Start up pages.  Module.pages saved up all page references
+    const pager = new Pages({root: `/${module}`, pages: Module.pages});
 
     try {
       // fire off init method in each section of each page.
-      await pages.ready(startPage);   // default page
+      await pager.ready(startPage);   // default page
     }
     catch(e) {
       console.log('FAILURE TO LAUNCH');
@@ -86,6 +132,7 @@ let moduleStart = function() {
     }
   }
 
+  widgetSetup();
   connectToData();
   startPages();
 }

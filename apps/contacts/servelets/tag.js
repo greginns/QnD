@@ -7,34 +7,33 @@ const {modelQueryParse} = require(root + '/lib/server/utils/url.js');
 const app = getAppName(__dirname);
 const subapp = getSubappName(__dirname);
 
-const { Region } = require(root + `/apps/${app}/models.js`);
+const { Tag } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
   getMany: async function({pgschema = '', query = {}} = {}) {
-    // get one or more Region rows
-console.log('region', query)    
+    // get one or more Tag rows
     let {rec, cols} = modelQueryParse(query);
-
-    return await Region.select({pgschema, rec, cols, options: query});    
+    
+    return await Tag.select({pgschema, rec, cols, options: query});    
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {
-    // get specific Region row
+    // get specific Tag row
     if ('id' in rec && rec.id == '_default') {
       let tm = new TravelMessage();
 
-      tm.data = Region.getColumnDefaults();
+      tm.data = Tag.getColumnDefaults();
       tm.type = 'json';
 
       return tm;
     }
      
-    return await Region.selectOne({pgschema, pks: [rec.id] });
+    return await Tag.selectOne({pgschema, pks: [rec.id] });
   },
     
   create: async function({pgschema = '', rec = {}} = {}) {
-    // insert Region row
-    let tobj = new Region(rec);
+    // insert Tag row
+    let tobj = new Tag(rec);
     let tm = await tobj.insertOne({pgschema});
 
     //if (tm.isGood()) {
@@ -45,10 +44,10 @@ console.log('region', query)
   },
   
   update: async function({pgschema = '', id = '', rec= {}} = {}) {
-    // Update Region row
+    // Update Tag row
     rec.id = id;
 
-    let tobj = new Region(rec);
+    let tobj = new Tag(rec);
     let tm = await tobj.updateOne({pgschema});
 
     //if (tm.isGood()) {
@@ -59,8 +58,8 @@ console.log('region', query)
   },
   
   delete: async function({pgschema = '', id = ''} = {}) {
-    // delete Region row
-    let tobj = new Region({ id });
+    // delete Tag row
+    let tobj = new Tag({ id });
     let tm = await tobj.deleteOne({pgschema});
 
     //if (tm.isGood()) {

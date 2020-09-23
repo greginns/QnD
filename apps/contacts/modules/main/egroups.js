@@ -7,34 +7,35 @@ import {TableView} from '/~static/lib/client/core/data.js';
 import '/~static/project/mixins/overlay.js';
 //import moment from 'moment';
 
-class group extends MVC {
+class egroup extends MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.group = {};
+    this.model.egroup = {};
     this.model.existingEntry = false;
-    this.model.groups = [];
+    this.model.egroups = [];
     this.model.badMessage = '';
     this.model.errors = {
-      group: {},
+      egroup: {},
       message: ''
     };
 
-    this.$addWatched('group.id', this.groupEntered.bind(this));
+    this.$addWatched('egroup.id', this.groupEntered.bind(this));
         
-    this.groupOrig = {};
+    this.egroupOrig = {};
     this.defaults = {};
-    this.groupListEl = document.getElementById('groupList');
+    this.egroupListEl = document.getElementById('egroupList');
 
     // fired when module gets common data
     document.addEventListener('tablestoreready', async function() {
-      let groups = new TableView({proxy: this.model.groups});
+      let egroups = new TableView({proxy: this.model.egroups});
 
-      Module.tableStores.group.addView(groups);
+      Module.tableStores.egroup.addView(egroups);
     
-      this.defaults.group = await Module.data.group.getDefault();      
+      this.defaults.egroup = await Module.data.egroup.getDefault();   
+      this.setDefaults();   
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router
@@ -59,13 +60,13 @@ class group extends MVC {
   }
 
   async save(ev) {
-    var group = this.model.group.toJSON();
+    var egroup = this.model.egroup.toJSON();
     var diffs;
 
     this.clearErrors();
           
     if (this.model.existingEntry) {
-      diffs = utils.object.diff(this.groupOrig, group);
+      diffs = utils.object.diff(this.egroupOrig, egroup);
       
       if (Object.keys(diffs).length == 0) {
         this.model.badMessage = 'No Changes to Update';
@@ -82,12 +83,12 @@ class group extends MVC {
     MVC.$overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.group.update(group.id, diffs) : await Module.tableStores.group.insert(group);
+    let res = (this.model.existingEntry) ? await Module.tableStores.egroup.update(egroup.id, diffs) : await Module.tableStores.egroup.insert(egroup);
 
     if (res.status == 200) {
-      MVC.$toast('group',(this.model.existingEntry) ? group.type + ' Updated' : 'Created', 2000);
+      MVC.$toast('group',(this.model.existingEntry) ? egroup.desc + ' Updated' : 'Created', 2000);
    
-      this.groupOrig = this.model.group.toJSON();
+      this.egroupOrig = this.model.egroup.toJSON();
 
       this.clearIt();
     }
@@ -102,7 +103,7 @@ class group extends MVC {
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
-    let group = this.model.group.toJSON();
+    let egroup = this.model.egroup.toJSON();
     let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?');
 
     if (!ret) return;
@@ -112,10 +113,10 @@ class group extends MVC {
 
     this.clearErrors();
     
-    let res = await Module.tableStores.group.delete(group.id);
+    let res = await Module.tableStores.egroup.delete(egroup.id);
 
     if (res.status == 200) {
-      MVC.$toast('group', 'group Removed', 1000);
+      MVC.$toast('egroup', 'Egroup Removed', 1000);
 
       this.clearIt();
     }
@@ -134,9 +135,9 @@ class group extends MVC {
   }
 
   async canClear(ev) {
-    let group = this.model.group.toJSON();
-    let orig = this.groupOrig;
-    let diffs = utils.object.diff(orig, group);
+    let egroup = this.model.egroup.toJSON();
+    let orig = this.egroupOrig;
+    let diffs = utils.object.diff(orig, egroup);
     let ret = true;
 
     if (Object.keys(diffs).length > 0) {
@@ -156,7 +157,7 @@ class group extends MVC {
   }
 
   newgroup() {
-    this.$focus('group.id');
+    this.$focus('egroup.id');
     window.scrollTo(0,document.body.scrollHeight);
   }
   
@@ -166,7 +167,7 @@ class group extends MVC {
     if (!el) return;
 
     let id = el.getAttribute('data-pk');
-    if (id) this.model.group.id = id;
+    if (id) this.model.egroup.id = id;
 
     window.scrollTo(0,document.body.scrollHeight);
   }
@@ -175,46 +176,46 @@ class group extends MVC {
     // group ID entered
     if (!nv) return;
 
-    let ret = await this.getgroupFromList(nv);
+    let ret = await this.getEgroupFromList(nv);
 
-    if (ret.id) this.setgroup(ret.id);
+    if (ret.id) this.setEgroup(ret.id);
   }
 
-  async getgroupFromList(pk) {
-    return (pk) ? await Module.tableStores.group.getOne(pk) : {};
+  async getEgroupFromList(pk) {
+    return (pk) ? await Module.tableStores.egroup.getOne(pk) : {};
   }
   
-  async setgroup(pk) {
+  async setEgroup(pk) {
     this.clearErrors();
 
     this.model.existingEntry = true;
-    this.model.group = await this.getgroupFromList(pk);
-    this.groupOrig = this.model.group.toJSON();
+    this.model.egroup = await this.getEgroupFromList(pk);
+    this.egroupOrig = this.model.egroup.toJSON();
 
     this.highlightList(pk);
   }
 
   highlightList(pk) {
     // highlight chosen group in list
-    let btn = this.groupListEl.querySelector(`button[data-pk="${pk}"]`);
+    let btn = this.egroupListEl.querySelector(`button[data-pk="${pk}"]`);
     
     if (btn) btn.classList.add('active');
   }
 
   clearList() {
     // clear list of active entry
-    let btn = this.groupListEl.querySelector('button.active');
+    let btn = this.egroupListEl.querySelector('button.active');
 
     if (btn) btn.classList.remove('active');
   }
   
   setDefaults() {
     // set group to default value
-    for (let k in this.defaults.group) {
-      this.model.group[k] = this.defaults.group[k];
+    for (let k in this.defaults.egroup) {
+      this.model.egroup[k] = this.defaults.egroup[k];
     }
 
-    this.groupOrig = this.model.group.toJSON();
+    this.egroupOrig = this.model.egroup.toJSON();
   }
   
   displayErrors(res) {
@@ -257,9 +258,9 @@ class group extends MVC {
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-groups');   // page html
-let mvc = new group('contacts-groups-section');
+let el = document.getElementById('contacts-egroups');   // page html
+let mvc = new egroup('contacts-egroups-section');
 let section1 = new Section({mvc});
-let page = new Page({el, path: '/groups', group: 'Contact groups', sections: [section1]});
+let page = new Page({el, path: '/egroups', egroup: 'Contact Egroups', sections: [section1]});
     
 Module.pages.push(page);

@@ -7,34 +7,43 @@ import {TableView} from '/~static/lib/client/core/data.js';
 import '/~static/project/mixins/overlay.js';
 //import moment from 'moment';
 
-class group extends MVC {
+class tag extends MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.group = {};
+    this.model.tag = {};
     this.model.existingEntry = false;
-    this.model.groups = [];
+    this.model.tags = [];
+    this.model.tagcats = [];
     this.model.badMessage = '';
     this.model.errors = {
-      group: {},
+      tag: {},
       message: ''
     };
 
-    this.$addWatched('group.id', this.groupEntered.bind(this));
+    this.$addWatched('tag.id', this.catEntered.bind(this));
         
-    this.groupOrig = {};
+    this.tagOrig = {};
     this.defaults = {};
-    this.groupListEl = document.getElementById('groupList');
+    this.tagListEl = document.getElementById('tagList');
+    
+    let filterFunc = function(x) {
+      // only show active=true
+      return x.active;
+    }
 
     // fired when module gets common data
     document.addEventListener('tablestoreready', async function() {
-      let groups = new TableView({proxy: this.model.groups});
+      let tags = new TableView({proxy: this.model.tags});
+      let tagcats = new TableView({proxy: this.model.tagcats, filterFunc});
 
-      Module.tableStores.group.addView(groups);
+      Module.tableStores.tag.addView(tags);
+      Module.tableStores.tagcat.addView(tagcats);
     
-      this.defaults.group = await Module.data.group.getDefault();      
+      this.defaults.tag = await Module.data.tag.getDefault();   
+      this.setDefaults();   
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router
@@ -59,13 +68,13 @@ class group extends MVC {
   }
 
   async save(ev) {
-    var group = this.model.group.toJSON();
+    var tag = this.model.tag.toJSON();
     var diffs;
 
     this.clearErrors();
           
     if (this.model.existingEntry) {
-      diffs = utils.object.diff(this.groupOrig, group);
+      diffs = utils.object.diff(this.tagOrig, tag);
       
       if (Object.keys(diffs).length == 0) {
         this.model.badMessage = 'No Changes to Update';
@@ -82,12 +91,12 @@ class group extends MVC {
     MVC.$overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.group.update(group.id, diffs) : await Module.tableStores.group.insert(group);
+    let res = (this.model.existingEntry) ? await Module.tableStores.tag.update(tag.id, diffs) : await Module.tableStores.tag.insert(tag);
 
     if (res.status == 200) {
-      MVC.$toast('group',(this.model.existingEntry) ? group.type + ' Updated' : 'Created', 2000);
+      MVC.$toast('tag',(this.model.existingEntry) ? tag.desc + ' Updated' : 'Created', 2000);
    
-      this.groupOrig = this.model.group.toJSON();
+      this.tagOrig = this.model.tag.toJSON();
 
       this.clearIt();
     }
@@ -102,7 +111,7 @@ class group extends MVC {
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
-    let group = this.model.group.toJSON();
+    let tag = this.model.tag.toJSON();
     let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?');
 
     if (!ret) return;
@@ -112,10 +121,10 @@ class group extends MVC {
 
     this.clearErrors();
     
-    let res = await Module.tableStores.group.delete(group.id);
+    let res = await Module.tableStores.tag.delete(tag.id);
 
     if (res.status == 200) {
-      MVC.$toast('group', 'group Removed', 1000);
+      MVC.$toast('tag', 'tag Removed', 1000);
 
       this.clearIt();
     }
@@ -134,9 +143,9 @@ class group extends MVC {
   }
 
   async canClear(ev) {
-    let group = this.model.group.toJSON();
-    let orig = this.groupOrig;
-    let diffs = utils.object.diff(orig, group);
+    let tag = this.model.tag.toJSON();
+    let orig = this.tagOrig;
+    let diffs = utils.object.diff(orig, tag);
     let ret = true;
 
     if (Object.keys(diffs).length > 0) {
@@ -155,66 +164,66 @@ class group extends MVC {
     window.scrollTo(0,0);
   }
 
-  newgroup() {
-    this.$focus('group.id');
+  newCat() {
+    this.$focus('tag.id');
     window.scrollTo(0,document.body.scrollHeight);
   }
   
   listClicked(ev) {
-    // group selected from list
+    // cat selected from list
     let el = ev.target.closest('button');
     if (!el) return;
 
     let id = el.getAttribute('data-pk');
-    if (id) this.model.group.id = id;
+    if (id) this.model.tag.id = id;
 
     window.scrollTo(0,document.body.scrollHeight);
   }
 
-  async groupEntered(nv) {
-    // group ID entered
+  async catEntered(nv) {
+    // tag ID entered
     if (!nv) return;
 
-    let ret = await this.getgroupFromList(nv);
+    let ret = await this.gettagFromList(nv);
 
-    if (ret.id) this.setgroup(ret.id);
+    if (ret.id) this.settag(ret.id);
   }
 
-  async getgroupFromList(pk) {
-    return (pk) ? await Module.tableStores.group.getOne(pk) : {};
+  async gettagFromList(pk) {
+    return (pk) ? await Module.tableStores.tag.getOne(pk) : {};
   }
   
-  async setgroup(pk) {
+  async settag(pk) {
     this.clearErrors();
 
     this.model.existingEntry = true;
-    this.model.group = await this.getgroupFromList(pk);
-    this.groupOrig = this.model.group.toJSON();
+    this.model.tag = await this.gettagFromList(pk);
+    this.tagOrig = this.model.tag.toJSON();
 
     this.highlightList(pk);
   }
 
   highlightList(pk) {
-    // highlight chosen group in list
-    let btn = this.groupListEl.querySelector(`button[data-pk="${pk}"]`);
+    // highlight chosen cat in list
+    let btn = this.tagListEl.querySelector(`button[data-pk="${pk}"]`);
     
     if (btn) btn.classList.add('active');
   }
 
   clearList() {
     // clear list of active entry
-    let btn = this.groupListEl.querySelector('button.active');
+    let btn = this.tagListEl.querySelector('button.active');
 
     if (btn) btn.classList.remove('active');
   }
   
   setDefaults() {
-    // set group to default value
-    for (let k in this.defaults.group) {
-      this.model.group[k] = this.defaults.group[k];
+    // set cat to default value
+    for (let k in this.defaults.tag) {
+      this.model.tag[k] = this.defaults.tag[k];
     }
 
-    this.groupOrig = this.model.group.toJSON();
+    this.tagOrig = this.model.tag.toJSON();
   }
   
   displayErrors(res) {
@@ -257,9 +266,9 @@ class group extends MVC {
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-groups');   // page html
-let mvc = new group('contacts-groups-section');
+let el = document.getElementById('contacts-tags');   // page html
+let mvc = new tag('contacts-tags-section');
 let section1 = new Section({mvc});
-let page = new Page({el, path: '/groups', group: 'Contact groups', sections: [section1]});
+let page = new Page({el, path: '/tags', title: 'Contact Tags', sections: [section1]});
     
 Module.pages.push(page);

@@ -14,15 +14,9 @@
 
   <div class='row'>
     <div class='col-12 mb-3'>
-      {{ fields.SelectMVC(id=contact.country.id, size='1', mvc_value='contact.country', mvc_each='countries', valueField='id', textField='name', label='Country') }}
+      {{ fields.Char(type='text', id=contact.city.id, maxlength=contact.city.maxLength, mvc_value='contact.city', mvc_on='{"blur": "cityChanged"}', label=contact.city.verbose) }}
     </div>
-  </div>           
-
-  <div class='row'>
-    <div class='col-12 mb-3'>
-      {{ fields.Char(type='text', id=contact.postcode.id, maxlength=contact.postcode.maxLength, mvc_value='contact.postcode', mvc_on='{"blur": "postcodeChanged"}', mvc_event_type='input', mvc_edit='upper', label=contact.postcode.verbose) }}
-    </div>
-  </div>           
+  </div>
 
   <div class='row'>
     <div class='col-12 mb-3'>
@@ -32,7 +26,13 @@
 
   <div class='row'>
     <div class='col-12 mb-3'>
-      {{ fields.Char(type='text', id=contact.city.id, maxlength=contact.city.maxLength, mvc_value='contact.city', mvc_on='{"blur": "cityChanged"}', label=contact.city.verbose) }}
+      {{ fields.SelectMVC(id=contact.country.id, size='1', mvc_value='contact.country', mvc_each='countries', valueField='id', textField='name', label='Country') }}
     </div>
-  </div>
+  </div>           
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.Char(type='text', id=contact.postcode.id, maxlength=contact.postcode.maxLength, mvc_value='contact.postcode', mvc_on='{"blur": "postcodeChanged"}', mvc_event_type='input', mvc_edit='upper', label=contact.postcode.verbose) }}
+    </div>
+  </div>           
 </fieldset> 

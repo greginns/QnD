@@ -7,34 +7,35 @@ import {TableView} from '/~static/lib/client/core/data.js';
 import '/~static/project/mixins/overlay.js';
 //import moment from 'moment';
 
-class group extends MVC {
+class tagcat extends MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.group = {};
+    this.model.tagcat = {};
     this.model.existingEntry = false;
-    this.model.groups = [];
+    this.model.tagcats = [];
     this.model.badMessage = '';
     this.model.errors = {
-      group: {},
+      tagcat: {},
       message: ''
     };
 
-    this.$addWatched('group.id', this.groupEntered.bind(this));
+    this.$addWatched('tagcat.id', this.catEntered.bind(this));
         
-    this.groupOrig = {};
+    this.tagcatOrig = {};
     this.defaults = {};
-    this.groupListEl = document.getElementById('groupList');
+    this.tagcatListEl = document.getElementById('tagcatList');
 
     // fired when module gets common data
     document.addEventListener('tablestoreready', async function() {
-      let groups = new TableView({proxy: this.model.groups});
+      let tagcats = new TableView({proxy: this.model.tagcats});
 
-      Module.tableStores.group.addView(groups);
+      Module.tableStores.tagcat.addView(tagcats);
     
-      this.defaults.group = await Module.data.group.getDefault();      
+      this.defaults.tagcat = await Module.data.tagcat.getDefault();   
+      this.setDefaults();   
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router
@@ -59,13 +60,13 @@ class group extends MVC {
   }
 
   async save(ev) {
-    var group = this.model.group.toJSON();
+    var tagcat = this.model.tagcat.toJSON();
     var diffs;
 
     this.clearErrors();
           
     if (this.model.existingEntry) {
-      diffs = utils.object.diff(this.groupOrig, group);
+      diffs = utils.object.diff(this.tagcatOrig, tagcat);
       
       if (Object.keys(diffs).length == 0) {
         this.model.badMessage = 'No Changes to Update';
@@ -82,12 +83,12 @@ class group extends MVC {
     MVC.$overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.group.update(group.id, diffs) : await Module.tableStores.group.insert(group);
+    let res = (this.model.existingEntry) ? await Module.tableStores.tagcat.update(tagcat.id, diffs) : await Module.tableStores.tagcat.insert(tagcat);
 
     if (res.status == 200) {
-      MVC.$toast('group',(this.model.existingEntry) ? group.type + ' Updated' : 'Created', 2000);
+      MVC.$toast('tagcat',(this.model.existingEntry) ? tagcat.desc + ' Updated' : 'Created', 2000);
    
-      this.groupOrig = this.model.group.toJSON();
+      this.tagcatOrig = this.model.tagcat.toJSON();
 
       this.clearIt();
     }
@@ -102,7 +103,7 @@ class group extends MVC {
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
-    let group = this.model.group.toJSON();
+    let tagcat = this.model.tagcat.toJSON();
     let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?');
 
     if (!ret) return;
@@ -112,10 +113,10 @@ class group extends MVC {
 
     this.clearErrors();
     
-    let res = await Module.tableStores.group.delete(group.id);
+    let res = await Module.tableStores.tagcat.delete(tagcat.id);
 
     if (res.status == 200) {
-      MVC.$toast('group', 'group Removed', 1000);
+      MVC.$toast('tagcat', 'tagcat Removed', 1000);
 
       this.clearIt();
     }
@@ -134,9 +135,9 @@ class group extends MVC {
   }
 
   async canClear(ev) {
-    let group = this.model.group.toJSON();
-    let orig = this.groupOrig;
-    let diffs = utils.object.diff(orig, group);
+    let tagcat = this.model.tagcat.toJSON();
+    let orig = this.tagcatOrig;
+    let diffs = utils.object.diff(orig, tagcat);
     let ret = true;
 
     if (Object.keys(diffs).length > 0) {
@@ -155,66 +156,66 @@ class group extends MVC {
     window.scrollTo(0,0);
   }
 
-  newgroup() {
-    this.$focus('group.id');
+  newCat() {
+    this.$focus('tagcat.id');
     window.scrollTo(0,document.body.scrollHeight);
   }
   
   listClicked(ev) {
-    // group selected from list
+    // cat selected from list
     let el = ev.target.closest('button');
     if (!el) return;
 
     let id = el.getAttribute('data-pk');
-    if (id) this.model.group.id = id;
+    if (id) this.model.tagcat.id = id;
 
     window.scrollTo(0,document.body.scrollHeight);
   }
 
-  async groupEntered(nv) {
-    // group ID entered
+  async catEntered(nv) {
+    // tagcat ID entered
     if (!nv) return;
 
-    let ret = await this.getgroupFromList(nv);
+    let ret = await this.getTagcatFromList(nv);
 
-    if (ret.id) this.setgroup(ret.id);
+    if (ret.id) this.setTagcat(ret.id);
   }
 
-  async getgroupFromList(pk) {
-    return (pk) ? await Module.tableStores.group.getOne(pk) : {};
+  async getTagcatFromList(pk) {
+    return (pk) ? await Module.tableStores.tagcat.getOne(pk) : {};
   }
   
-  async setgroup(pk) {
+  async setTagcat(pk) {
     this.clearErrors();
 
     this.model.existingEntry = true;
-    this.model.group = await this.getgroupFromList(pk);
-    this.groupOrig = this.model.group.toJSON();
+    this.model.tagcat = await this.getTagcatFromList(pk);
+    this.tagcatOrig = this.model.tagcat.toJSON();
 
     this.highlightList(pk);
   }
 
   highlightList(pk) {
-    // highlight chosen group in list
-    let btn = this.groupListEl.querySelector(`button[data-pk="${pk}"]`);
+    // highlight chosen cat in list
+    let btn = this.tagcatListEl.querySelector(`button[data-pk="${pk}"]`);
     
     if (btn) btn.classList.add('active');
   }
 
   clearList() {
     // clear list of active entry
-    let btn = this.groupListEl.querySelector('button.active');
+    let btn = this.tagcatListEl.querySelector('button.active');
 
     if (btn) btn.classList.remove('active');
   }
   
   setDefaults() {
-    // set group to default value
-    for (let k in this.defaults.group) {
-      this.model.group[k] = this.defaults.group[k];
+    // set cat to default value
+    for (let k in this.defaults.tagcat) {
+      this.model.tagcat[k] = this.defaults.tagcat[k];
     }
 
-    this.groupOrig = this.model.group.toJSON();
+    this.tagcatOrig = this.model.tagcat.toJSON();
   }
   
   displayErrors(res) {
@@ -257,9 +258,9 @@ class group extends MVC {
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-groups');   // page html
-let mvc = new group('contacts-groups-section');
+let el = document.getElementById('contacts-tagcats');   // page html
+let mvc = new tagcat('contacts-tagcats-section');
 let section1 = new Section({mvc});
-let page = new Page({el, path: '/groups', group: 'Contact groups', sections: [section1]});
+let page = new Page({el, path: '/tagcats', title: 'Contact tagcats', sections: [section1]});
     
 Module.pages.push(page);

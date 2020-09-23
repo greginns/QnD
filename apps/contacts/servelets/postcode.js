@@ -14,7 +14,24 @@ module.exports = {
     // get one or more Postcode rows
     let {rec, cols} = modelQueryParse(query);
 
-    return await Postcode.select({pgschema, rec, cols, options: query});    
+    // build query rather than a plain select
+    let where = [], values = [], idx = 0;
+
+    for (let field in rec) {
+      idx++;
+      values.push(rec[field]);
+
+      if (field == 'city') {
+        where.push(`"${field}" ILIKE $${idx} || '%'`);  // ILIKE and Starts with  ||'%'
+      }
+      else {
+        where.push(`"${field}" = $${idx}`);
+      }
+    }
+
+    where = where.join(' AND ');
+
+    return await Postcode.query({pgschema, where, values, cols});    
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

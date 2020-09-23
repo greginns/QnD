@@ -22,7 +22,7 @@ Router.add(new RouterMessage({
   subapp,
   version: 'v1',
   //path: ['/main', '/main/:etc'], 
-  path: ['/contactpage', '/contactpage/:etc'], 
+  path: ['/contactpage', '/contactpage/:etc', '/contactpage/:etc/:etc', '/contactpage/:etc/:etc/:etc'], 
   rewrite: true,
   id: 'contacts',
   level: ACCESS,

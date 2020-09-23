@@ -8,13 +8,64 @@ const { Contact } = require(root + '/apps/contacts/models.js');
 
 const app = getAppName(__dirname);
 const subapp = getSubappName(__filename);
+const ilikes = [
+  'first',
+  'last',
+  'group',
+  'address1',
+  'address2',
+  'city',
+  'email',
+  'email2',
+  'emgname',
+  'emgrelation',
+  'occupation',
+];
+
+const json = ['tags'];
 
 module.exports = {
   getMany: async function({pgschema = '', query = {}} = {}) {
     // get one or more Contacts
-    let {rec, cols} = modelQueryParse(query);
+    let {rec, cols, where, values} = modelQueryParse(query);
 
-    return await Contact.select({pgschema, rec, cols, options: query});
+    if (where) {
+      return await Contact.query({pgschema, where, values, cols});    
+    }
+    
+    // build query rather than a plain select
+    let idx = 0;
+
+    where = [];
+    values = [];
+
+    for (let field in rec) {
+      idx++;
+
+      if (ilikes.indexOf(field) > -1) {
+        where.push(`"${field}" ILIKE $${idx} || '%'`);  // ILIKE and Starts with  ||'%'
+        values.push(rec[field]);
+      }
+      else if (json.indexOf(field) > -1) {
+        if (rec[field].indexOf(',') > -1) {
+          // array
+          where.push(`"${field}"::jsonb ?& $${idx}`);  // "field"::jsonb ?& ['1','2']  do all elements exist?
+          values.push(rec[field].split(','));
+        }
+        else {
+          where.push(`"${field}"::jsonb ? $${idx}`);  // "field"::jsonb ? '1'  does element exist?
+          values.push(rec[field]);  
+        }
+      }
+      else {
+        where.push(`"${field}" = $${idx}`);
+        values.push(rec[field]);
+      }
+    }
+
+    where = where.join(' AND ');
+
+    return await Contact.query({pgschema, where, values, cols});    
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

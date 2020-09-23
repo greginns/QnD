@@ -4,6 +4,13 @@ const Fields = require(root + '/lib/server/model/modelFields');
 const Model = require(root + '/lib/server/model/modelRun.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const app = getAppName(__dirname);
+const egroupChoices = [
+  {value: 'D', text: 'Daily'},
+  {value: 'W', text: 'Weekly'},
+  {value: 'M', text: 'Monthly'},
+  {value: 'O', text: 'Once'},
+  {value: '', text: 'Manual'}
+]
 
 const Contact = class extends Model {
   constructor(obj, opts) {
@@ -42,6 +49,14 @@ const Contact = class extends Model {
         occupation: new Fields.Char({null: true, maxLength: 40, verbose: 'Occupation'}),
         taxno: new Fields.Char({null: true, maxLength: 40, verbose: 'Tax#'}),
         doe: new Fields.Date({null: true, verbose: 'Date Entered'}),
+        agentno:  new Fields.Char({null: true, maxLength: 10, verbose: 'Agent ID'}),
+        agentper:  new Fields.Decimal({null: true, maxLength: 5, digits: 4, decimals: 2, verbose: 'Agent Percent'}),
+
+        acct: new Fields.Boolean({default: false, verbose: 'Has Account'}),
+        acctlim:  new Fields.Decimal({null: true, maxLength: 8, digits: 5, decimals: 0, verbose: 'Account Limit'}),
+        acctcard: new Fields.Char({null: true, maxLength: 20, verbose: 'Card#'}), 
+        acctexp: new Fields.Char({null: true, maxLength: 5, verbose: 'Card Expiration'}), 
+        acctver: new Fields.Date({null: true, verbose: 'Date Card Last Verified'}),
 
         grptype: new Fields.Char({null: true, maxLength: 4, verbose: 'Group Type'}),
         cat: new Fields.Char({null: true, default: 'F', maxLength: 1, verbose: 'Category'}),
@@ -64,6 +79,7 @@ const Contact = class extends Model {
           {name: 'grptype', columns: ['grptype'], app, table: Group, tableColumns: ['id'], onDelete: 'NO ACTION'},
           {name: 'region', columns: ['region'], app, table: Region, tableColumns: ['id'], onDelete: 'NO ACTION'},
           {name: 'country', columns: ['country'], app, table: Country, tableColumns: ['id'], onDelete: 'NO ACTION'},
+          {name: 'agentno', columns: ['agentno'], app, table: Contact, tableColumns: ['id'], onDelete: 'NO ACTION'},
         ],
       },
       
@@ -88,6 +104,7 @@ const Title = class extends Model {
       schema: {
         id: new Fields.Char({notNull: true, maxLength: 4, verbose: 'ID'}),
         title: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Title'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active?'})
       },
 
       constraints: {
@@ -115,6 +132,7 @@ const Group = class extends Model {
       schema: {
         id: new Fields.Char({notNull: true, maxLength: 4, verbose: 'ID'}),
         type: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Type'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active?'})
       },
 
       constraints: {
@@ -225,4 +243,93 @@ const Postcode = class extends Model {
   }
 };
 
-module.exports = {Contact, Title, Group, Country, Region, Postcode};
+const Egroup = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.Char({notNull: true, maxLength: 4, verbose: 'ID'}),
+        desc: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Description'}),
+        freq: new Fields.Char({null: true, maxLength: 2, default: '', choices: egroupChoices, verbose: 'Frequency'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active?'})
+      },
+
+      constraints: {
+        pk: ['id'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['desc'],
+      
+      dbschema: 'tenant',
+      app,
+      desc: 'Email Groups'
+    }
+  }
+};
+
+const Tagcat = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.Char({notNull: true, maxLength: 8, verbose: 'ID'}),
+        desc: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Description'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active?'})
+      },
+
+      constraints: {
+        pk: ['id'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['desc'],
+      
+      dbschema: 'tenant',
+      app,
+      desc: 'Tag categories'
+    }
+  }
+};
+
+const Tag = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.Char({notNull: true, maxLength: 8, verbose: 'ID'}),
+        desc: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Description'}),
+        cat: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Category'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active?'})
+      },
+
+      constraints: {
+        pk: ['id'],
+        fk: [
+          {name: 'cat', columns: ['cat'], app, table: Tagcat, tableColumns: ['id'], onDelete: 'NO ACTION'}
+        ]
+      },
+      
+      hidden: [],
+      
+      orderBy: ['desc'],
+      
+      dbschema: 'tenant',
+      app,
+      desc: 'Tags'
+    }
+  }
+};
+
+module.exports = {Contact, Title, Group, Country, Region, Postcode, Egroup, Tagcat, Tag};

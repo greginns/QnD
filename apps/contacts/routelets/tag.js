@@ -9,7 +9,7 @@ const app = getAppName(__dirname);
 const subapp = getSubappName(__filename);
 const version = 'v1';
 
-const { Region } = require(root + `/apps/${app}/models.js`);
+const { Tag } = require(root + `/apps/${app}/models.js`);
 const services = require(root + `/apps/${app}/services.js`);
 
 Router.add(new RouterMessage({
@@ -20,9 +20,8 @@ Router.add(new RouterMessage({
   path: `/`, 
   id: 'getMany',
   level: VIEW,
-  resp: {type: 'json', schema: [Region]},
+  resp: {type: 'json', schema: [Tag]},
   fn: async function(req) {
-console.log('region-route', req.query)    
     let tm = await services[subapp].getMany({pgschema: req.TID, query: req.query});
 
     return tm.toResponse();
@@ -43,7 +42,7 @@ Router.add(new RouterMessage({
   path: `/:id`, 
   id: 'getOne',
   level: VIEW,
-  resp: {type: 'json', schema: Region},
+  resp: {type: 'json', schema: Tag},
   fn: async function(req) {
     let id = req.params.id;
     let tm;
@@ -75,7 +74,7 @@ Router.add(new RouterMessage({
   path: `/`, 
   id: 'create',
   level: CREATE,
-  resp: {type: 'json', schema: Region},
+  resp: {type: 'json', schema: Tag},
   fn: async function(req) {
     let tm = await services[subapp].create({pgschema: req.TID, rec: req.body[subapp] || {} });
 
@@ -97,7 +96,7 @@ Router.add(new RouterMessage({
   path: `/:id`, 
   id: 'update',
   level: UPDATE,
-  resp: {type: 'json', schema: Region},
+  resp: {type: 'json', schema: Tag},
   fn: async function(req) {
     let id = req.params.id;
     let tm;
@@ -129,7 +128,7 @@ Router.add(new RouterMessage({
   path: `/:id`, 
   id: 'delete',
   level: DELETE,
-  resp: {type: 'json', schema: Region},
+  resp: {type: 'json', schema: Tag},
   fn: async function(req) {
     let id = req.params.id;
     let tm;

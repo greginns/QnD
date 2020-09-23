@@ -1,4 +1,4 @@
-<fieldset class="border p-2">
+<fieldset class="border p-2 contact-contact">
   <legend class="w-auto">Contact Info</legend>
   <div class='row'>
     <div class='col-12 mb-3'>
@@ -14,7 +14,7 @@
 
   <div class='row'>
     <div class='col-12 col-lg-7 mb-3'>
-      {{ fields.Phone(type='text', id=contact.phone.id, maxlength=contact.phone.maxLength, mvc_value='contact.phone', mvc_attr='{"ctrycode": "ctrycode"}', label=contact.phone.verbose) }}
+      {{ fields.Phone(type='text', id=contact.phone.id, maxlength=contact.phone.maxLength, mvc_value='contact.phone', mvc_attr='{"ctrycode": "contact.country"}', label=contact.phone.verbose) }}
     </div>
 
     <div class='col-12 col-lg-5 mb-3'>

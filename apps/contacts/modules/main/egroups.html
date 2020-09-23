@@ -1,5 +1,5 @@
-<page id='contacts-groups' style='display: none;'>
-  <section id='contacts-groups-section'>
+<page id='contacts-egroups' style='display: none;'>
+  <section id='contacts-egroups-section'>
     <div class='row justify-content-center'>
       
       <div class='col-12 col-md-6 col-lg-4 col-xl-3'>
@@ -8,13 +8,13 @@
             <div class='row'>
               <div class='col-6'>
                 <h4>
-                  Groups
+                  Egroups
                 </h4>
               </div>
               <div class='col-6'>
                 <div class='d-md-none'>
                   <span mvc-hide='existingEntry'>
-                    {{ buttons.btn(class='success', mvc_click='newgroup', text='+ Group') }}
+                    {{ buttons.btn(class='success', mvc_click='newgroup', text='+ E-Group') }}
                   </span>
                 </div>
               </div>
@@ -23,10 +23,10 @@
           
           <div class='card-body' style='padding: 0px'>
             <div style='height: calc(100vh - 130px); overflow-y: auto'>
-              <ul class="list-group list-group-flush" mvc-each='groups' mvc-click='listClicked' id='groupList'>
-                <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" mvc-attr='{"data-pk": "groups.$index.id"}' mvc-disabled='group.id'>
-                  <span mvc-text='groups.$index.type'></span>
-                  <span mvc-text='groups.$index.id'></span>
+              <ul class="list-group list-group-flush" mvc-each='egroups' mvc-click='listClicked' id='egroupList'>
+                <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" mvc-attr='{"data-pk": "egroups.$index.id"}' mvc-disabled='egroup.id'>
+                  <span mvc-text='egroups.$index.desc'></span>
+                  <span mvc-text='egroups.$index.id'></span>
                 </button>
               </ul>
             </div>
@@ -39,11 +39,11 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-5'>
-                {{ fields.Char(type='text', id=group.id.id, maxlength=group.id.maxLength, mvc_value='group.id', mvc_event_type='blur', mvc_disabled='existingEntry', mvc_edit='upper', label=group.id.verbose) }}
+                {{ fields.Char(type='text', id=egroup.id.id, maxlength=egroup.id.maxLength, mvc_value='egroup.id', mvc_event_type='blur', mvc_disabled='existingEntry', mvc_edit='upper', label=egroup.id.verbose) }}
               </div>
               <div class='col-2'></div>
               <div class='col-5'>
-                {{ fields.Switch(id=group.active.id, mvc_checked='group.active', label=group.active.verbose) }}
+                {{ fields.Switch(id=egroup.active.id, mvc_checked='egroup.active', label=egroup.active.verbose) }}
               </div>
             </div>          
           </div>
@@ -53,7 +53,17 @@
               <div class='col-12 col-xl-6'>
                 <div class='row'>
                   <div class='col-12 mb-3'>
-                    {{ fields.Char(type='text', id=group.type.id, maxlength=group.type.maxLength, mvc_value='group.type', label=group.type.verbose) }}
+                    {{ fields.Char(type='text', id=egroup.desc.id, maxlength=egroup.desc.maxLength, mvc_value='egroup.desc', label=egroup.desc.verbose) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-xl-6'>
+                <div class='row'>
+                  <div class='col-12 mb-3'>
+                    {{ fields.SelectChoices(id=egroup.freq.id, size='1', mvc_value='egroup.freq', choices=egroup.freq.choices, label=egroup.freq.verbose) }}
                   </div>
                 </div>
               </div>

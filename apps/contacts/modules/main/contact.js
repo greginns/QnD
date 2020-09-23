@@ -1,10 +1,9 @@
-import {QnD} from '/~static/lib/client/core/qnd.js';
+import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/router.js';
 import {TableView} from '/~static/lib/client/core/data.js';
-
-import '/~static/project/mixins/overlay.js';
+import {Multisel} from '/~static/lib/client/widgets/multisel.js';
 
 class Contact extends MVC {
   constructor(element) {
@@ -19,6 +18,7 @@ class Contact extends MVC {
     this.model.countries = [];
     this.model.regions = [];
     this.model.postcodes = [];
+    this.model.tag='';
 
     this.model.existingEntry = false;
     this.model.badMessage = '';
@@ -26,38 +26,61 @@ class Contact extends MVC {
       contact: {},
       message: ''
     };
-    this.model.ctrycode = 'CA';
+
     //this.model.contact.doe = moment()
 
     this.$addWatched('contact.country', this.countryChanged.bind(this));
-    this.$addWatched('contact.id', this.contactEntered.bind(this));
         
     this.contactOrig = {};
-    this.chosenPostcode = {};
     this.defaults = {doe: window.moment()};
     this.contactListEl = document.getElementById('contactList');
 
+    let filterFunc = function(x) {
+      // only show active=true
+      return x.active;
+    }
+
     // fired when module gets common data
     document.addEventListener('tablestoreready', async function() {
-      QnD.tableStores.contact.addView(new TableView({proxy: this.model.contacts}));
-      QnD.tableStores.title.addView(new TableView({proxy: this.model.titles}));
-      QnD.tableStores.group.addView(new TableView({proxy: this.model.groups}));
-      QnD.tableStores.country.addView(new TableView({proxy: this.model.countries}));
+      // fill up on data
+      Module.tableStores.contact.addView(new TableView({proxy: this.model.contacts}));
+      Module.tableStores.title.addView(new TableView({proxy: this.model.titles, filterFunc}));
+      Module.tableStores.group.addView(new TableView({proxy: this.model.groups, filterFunc}));
+      Module.tableStores.country.addView(new TableView({proxy: this.model.countries}));
     
-      this.defaults.contact = await QnD.data.contact.getDefault();
-      this.setDefaults();      
+      this.defaults.contact = await Module.data.contact.getDefault();
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router
   }
 
   ready() {
+    var self = this;
+
     return new Promise(function(resolve) {
       resolve();
     })          
   }
   
-  inView() {
+  async inView(params) {
+    if ('id' in params) {
+      // update 
+      let res = await Module.tableStores.contact.getOne(params.id);
+      
+      if (Object.keys(res).length > 0) {
+        this.setContact(res);
+      }
+      else {
+        alert('Missing Contact');
+        Module.pager.go('/contact/search');
+      }
+    }
+    else {
+      // create
+      this.clearIt();
+      this.setDefaults();
+    }
+
     //document.getElementById('admin-manage-navbar-contacts').classList.add('active');
     //document.getElementById('admin-manage-navbar-contacts').classList.add('disabled');
   }
@@ -69,25 +92,7 @@ class Contact extends MVC {
     return true;  
   }
 
-  async test () {
-    var title = 'test'
-    var groups = [
-      { 
-        label: 'Group 1', 
-        items: [{text: 'Item 1.1', value: '11'}, {text: 'Item 1.2', value: '12'}],
-      },
-      {
-        label: 'Group 2',
-        items: [{text: 'Item 2.1', value: '21'}, {text: 'Item 2.2', value: '22'}]
-      }
-    ];
-
-    var value = '12';
-
-    let res = await QnD.widgets.singlesel.select(title, groups, value);
-    console.log(res)
-  }
-
+  // IO
   async save(ev) {
     var contact = this.model.contact.toJSON();
     var diffs;
@@ -112,7 +117,7 @@ class Contact extends MVC {
     MVC.$overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await QnD.tableStores.contact.update(contact.id, {contact: diffs}) : await QnD.tableStores.contact.insert({contact});
+    let res = (this.model.existingEntry) ? await Module.tableStores.contact.update(contact.id, diffs) : await Module.tableStores.contact.insert(contact);
 
     if (res.status == 200) {
       MVC.$toast('CONTACT',(this.model.existingEntry) ? contact.fullname + ' Updated' : 'Created', 2000);
@@ -142,7 +147,7 @@ class Contact extends MVC {
 
     this.clearErrors();
     
-    let res = await QnD.tableStores.contact.delete(contact.id);
+    let res = await Module.tableStores.contact.delete(contact.id);
 
     if (res.status == 200) {
       MVC.$toast('CONTACT', 'Contact Removed', 1000);
@@ -157,6 +162,7 @@ class Contact extends MVC {
     MVC.$buttonSpinner(ev.target, false, spinner);
   }
   
+  // Screen handling
   async clear(ev) {
     if (await this.canClear(ev)) {
       this.clearIt();
@@ -179,63 +185,16 @@ class Contact extends MVC {
   clearIt() {
     this.clearErrors();
     this.setDefaults();
-    this.clearList();
 
     this.model.existingEntry = false;
-    window.scrollTo(0,0);
-  }
-
-  newContact() {
-    this.$focus('contact.id');
-    window.scrollTo(0,document.body.scrollHeight);
   }
   
-  listClicked(ev) {
-    // Contact selected from list
-    let el = ev.target.closest('button');
-    if (!el) return;
-
-    let id = el.getAttribute('data-pk');
-    if (id) this.model.contact.id = id;
-
-    window.scrollTo(0,document.body.scrollHeight);
-  }
-
-  async contactEntered(nv) {
-    // Contact ID entered
-    if (!nv) return;
-
-    let ret = await this.getContactFromList(nv);
-
-    if (ret.id) this.setContact(ret.id);
-  }
-
-  async getContactFromList(pk) {
-    return (pk) ? await QnD.tableStores.contact.getOne(pk) : {};
-  }
-  
-  async setContact(pk) {
+  async setContact(contact) {
     this.clearErrors();
 
     this.model.existingEntry = true;
-    this.model.contact = await this.getContactFromList(pk);
+    this.model.contact = contact;
     this.contactOrig = this.model.contact.toJSON();
-
-    this.highlightList(pk);
-  }
-
-  highlightList(pk) {
-    // highlight chosen contact in list
-    let btn = this.contactListEl.querySelector(`button[data-pk="${pk}"]`);
-    
-    if (btn) btn.classList.add('active');
-  }
-
-  clearList() {
-    // clear list of active entry
-    let btn = this.contactListEl.querySelector('button.active');
-
-    if (btn) btn.classList.remove('active');
   }
   
   setDefaults() {
@@ -279,203 +238,144 @@ class Contact extends MVC {
     }
 
     this.model.badMessage = '';
-    this.chosenPostcode = {};
   }
 
   setBadMessage(msg) {
     this.model.badMessage = msg;
   }
 
+  // Account
+  accessAccount() {
+    $(this._section.querySelectorAll('div.contacts-contact-account')[0]).modal('show');
+  }
+
+  saveAccount() {
+    $(this._section.querySelectorAll('div.contacts-contact-account')[0]).modal('hide');
+  }
+
+  // Tags
+  async addTag() {
+    let tags = this.model.contact.tags;
+
+   var groups = [
+     { 
+       label: 'Group 1', 
+       items: [{text: 'Item 1.1', value: '11'}, {text: 'Item 1.2', value: '12'}],
+     },
+     {
+       label: 'Group 2',
+       items: [{text: 'Item 2.1', value: '21'}, {text: 'Item 2.2', value: '22'}]
+     }
+   ];
+
+    let ms = new Multisel('Tags', groups, []);
+    let res = await ms.select();
+    let dt = (new Date).toJSON();
+
+    for (let tag of res) {
+      tags.push({tag, 'date': dt});
+    }
+
+    ms = undefined;
+    this.model.contact.tags = tags;
+  }
+
+  delTag(ev) {
+    let tags = this.model.contact.tags;
+    let tag = ev.target.closest('span.tag').getAttribute('data-tag');
+
+    for (let x=0; x<tags.length; x++) {
+      if (tags[x].tag == tag) {
+        tags.splice(x,1);
+        break;
+      }
+    }
+
+    this.model.contact.tags = tags;
+  }
+
   // ADDRESS
   async countryChanged(nv, ov) {
     if (!nv) return;
 
-    await this.getRegions(nv);
+    this.model.regions = await Module.widgets.address.getRegions(nv);
   }
 
   async postcodeChanged() {
-    let nv = this.model.contact.postcode;
-    if (!nv) return;
+    let self = this;
+    this.model.errors.contact.postcode = '';
 
-    let pc = this.formatPostcode(nv);
-    this.model.contact.postcode = pc;
-    
-    await this.getPostcodes(pc);
-    this.handlePostcodes();
-  }
+    let postcode = this.model.contact.postcode;
+    if (!postcode) return;
 
-  cityChanged() {
-    let city = this.model.contact.city;
-
-    // save postal code.  Post or Put?
-    if ('id' in this.chosenPostcode) {
-      this.chosenPostcode.city = city;
-
-      QnD.data.postcode.update(this.chosenPostcode.id, this.chosenPostcode)
-    }
-    else {
-      let rec = {};
-
-      rec.country = this.model.contact.country;
-      rec.city = city;
-      rec.region = this.model.contact.region;
-      rec.postcode = this.model.contact.postcode;
-
-      QnD.data.postcode.insert(rec)
-    }
-  }
-
-  async getRegions(country) {
-    let res = await QnD.data.region.getMany({filters: {country}});
-
-    if (res.status == 200) {
-      this.model.regions = res.data;
-    }
-  }
-
-  async getPostcodes(postcode) {
     let country = this.model.contact.country;
-    let res = await QnD.data.postcode.getMany({filters: {country, postcode}});
+    let formattedPostcode = Module.widgets.address.formatPostcode(postcode, country);
 
-    if (res.status == 200) {
-      this.model.postcodes = res.data;
-    }
-  }
-
-  handlePostcodes() {
-    let pcs = this.model.postcodes;
-
-    this.chosenPostcode = {};
-
-    if (pcs.length == 0) {
-      this.model.contact.city = '';
-    }
-
-    if (pcs.length == 1) {
-      this.model.contact.city = pcs[0].city;
-      this.chosenPostcode = pcs[0];
+    if (formattedPostcode == false) {
+      this.model.errors.contact.postcode = 'Invalid Postal Code ' + postcode;
+      this.model.contact.postcode = '';
       return;
     }
 
-    if (pcs.length >= 1) {
-      this.postcodeModalOpen();
-    }
-  }
-
-  postcodeSelected(ev) {
-    let pcs = this.model.postcodes;
-    let idx = ev.target.closest('li').getAttribute('data-index');
-
-    this.model.contact.city = pcs[idx].city;
-    this.chosenPostcode = pcs[idx];
-
-    this.postcodeModalClose();
-  }
-
-  postcodeNotSelected() {
-    this.postcodeModalClose();
-  }
-
-  postcodeModalOpen() {
-    $('#contact-modal-postcode').modal('show');
-  }
-
-  postcodeModalClose() {
-    $('#contact-modal-postcode').modal('hide');
-  }
-
-  formatPostcode(pc) {
-    // CC - country code.
-    // A - alpha
-    // N - numeric
-    // rest is literal
-    const country = this.model.contact.country;
-    let formats;
-
-    function getFormats(countries) {
-      for (let ctry of countries) {
-        if (ctry.id == country) {
-          return ctry.format.split(',');
-        }
-      }
-
-      return [];
-    };
-
-    function cleanupPostcode(npc) {
-      return npc.toUpperCase().replace(/\s/g, "");
-    }
-
-    function formatIt(pc, formats) {
-      const alphas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      const numbers = '0123456789';
-      const max = 15;
-      let antiloop = 0;
-
-      for (let format of formats) {
-        let pcw = pc, pcf = '', pidx=-1, fidx=-1;
-
-        if (format.substr(0,2) == 'CC' && pcw.substr(0,2) != country) pcw = country + pcw;
-
-        while(true) {
-          fidx++;
-          pidx++;
-          antiloop++;
-          if (antiloop > max) break;
-
-          if (pidx >= pcw.length) break;
-
-          let p = pcw.substr(pidx,1);
-          let f = format.substr(fidx,1) || '';
-
-          switch (f) {
-            case 'A':
-              // valid alpha?
-              if (alphas.indexOf(p) == -1) continue;  // invalid character, skip it
-              pcf += p;
-              break;
-
-            case 'N':
-              // valid numeric?
-              if (numbers.indexOf(p) == -1) continue;  // invalid character, skip it
-              pcf += p;
-              break;
-
-            case 'C':
-              // country character?
-              pcf += p;
-              break;
-              
-            default:
-              // literal
-              pcf += f;
-              pidx--;
-              break;
-          }
-        }
-
-        if (pcf.length == format.length) {
-          return pcf;
-        }
-      }
-
-      return pc;
-    }
+    this.model.contact.postcode = formattedPostcode;
     
-    formats = getFormats(this.model.countries);
-    if (!formats[0]) return pc;
-
-    pc = cleanupPostcode(pc);
-    pc = formatIt(pc, formats);
-
-    return pc;
+    Module.widgets.address.getACity(country, formattedPostcode, function(city, region) {
+      if (city) self.model.contact.city = city;
+      if (region) self.model.contact.region = region;
+    });
   }
+
+  async cityChanged() {
+    let self = this;
+    let city = this.model.contact.city;
+    let region = this.model.contact.region;
+    let country = this.model.contact.country;
+    let postcode = this.model.contact.postcode;
+
+    if (!city) return;
+
+    if (!postcode) {
+      Module.widgets.address.getAPostcode(city, region, country, function(postcode, city, region) {
+        if (postcode) self.model.contact.postcode = postcode;
+        if (city) self.model.contact.city = city;
+        if (region) self.model.contact.region = region;
+      })
+    }
+    else {
+      this.savePostalcode();
+    }
+  }
+
+  savePostalcode() {
+    // save postal code. 
+    let city = this.model.contact.city;
+    let region = this.model.contact.region;
+    let country = this.model.contact.country;
+    let postcode = this.model.contact.postcode;
+
+    Module.widgets.address.savePostcode(city, region, country, postcode);
+  }
+
+  // GOTOs
+  goto(ev) {
+    let to = ev.target.getAttribute('to');
+    let y = utils.findYPosition(this._section.getElementsByClassName(to)[0]);
+
+    window.scrollTo({left: 0, top: y-40, behavior: 'smooth'});
+  }
+
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-contact');   // page html
-let mvc = new Contact('contacts-contact-section');
-let section1 = new Section({mvc});
-let page = new Page({el, path: '/contact', title: 'Contacts', sections: [section1]});
-    
-QnD.pages.push(page);
+let el1 = document.getElementById('contacts-contact-create');   // page html
+let mvc1 = new Contact('contacts-contact-create-section');
+let section1 = new Section({mvc: mvc1});
+let page1 = new Page({el: el1, path: '/contact/create', title: 'Contact Create', sections: [section1]});
+
+let el2 = document.getElementById('contacts-contact-update');   // page html
+let mvc2 = new Contact('contacts-contact-update-section');
+let section2 = new Section({mvc: mvc2});
+let page2 = new Page({el: el2, path: '/contact/update/:id', title: 'Contact Update', sections: [section2]});
+
+Module.pages.push(page1);
+Module.pages.push(page2);

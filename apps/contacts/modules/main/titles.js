@@ -1,4 +1,4 @@
-import {QnD} from '/~static/lib/client/core/qnd.js';
+import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/router.js';
@@ -32,9 +32,9 @@ class title extends MVC {
     document.addEventListener('tablestoreready', async function() {
       let titles = new TableView({proxy: this.model.titles});
 
-      QnD.tableStores.title.addView(titles);
+      Module.tableStores.title.addView(titles);
     
-      this.defaults.title = await QnD.data.title.getDefault();      
+      this.defaults.title = await Module.data.title.getDefault();      
     }.bind(this), {once: true})    
 
     //this.ready(); //  use if not in router
@@ -82,10 +82,10 @@ class title extends MVC {
     MVC.$overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await QnD.tableStores.title.update(title.id, {title: diffs}) : await QnD.tableStores.title.insert({title});
+    let res = (this.model.existingEntry) ? await Module.tableStores.title.update(title.id, diffs) : await Module.tableStores.title.insert(title);
 
     if (res.status == 200) {
-      MVC.$toast('title',(this.model.existingEntry) ? title.fullname + ' Updated' : 'Created', 2000);
+      MVC.$toast('title',(this.model.existingEntry) ? title.title + ' Updated' : 'Created', 2000);
    
       this.titleOrig = this.model.title.toJSON();
 
@@ -112,7 +112,7 @@ class title extends MVC {
 
     this.clearErrors();
     
-    let res = await QnD.tableStores.title.delete(title.id);
+    let res = await Module.tableStores.title.delete(title.id);
 
     if (res.status == 200) {
       MVC.$toast('title', 'title Removed', 1000);
@@ -168,7 +168,7 @@ class title extends MVC {
     let id = el.getAttribute('data-pk');
     if (id) this.model.title.id = id;
 
-    window.scrollTo(0,document.body.scrollHeight);
+    //window.scrollTo(0,document.body.scrollHeight);
   }
 
   async titleEntered(nv) {
@@ -181,7 +181,7 @@ class title extends MVC {
   }
 
   async getTitleFromList(pk) {
-    return (pk) ? await QnD.tableStores.title.getOne(pk) : {};
+    return (pk) ? await Module.tableStores.title.getOne(pk) : {};
   }
   
   async setTitle(pk) {
@@ -262,4 +262,4 @@ let mvc = new title('contacts-titles-section');
 let section1 = new Section({mvc});
 let page = new Page({el, path: '/titles', title: 'Contact Titles', sections: [section1]});
     
-QnD.pages.push(page);
+Module.pages.push(page);

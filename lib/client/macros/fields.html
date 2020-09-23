@@ -95,7 +95,7 @@
 </div>
 {% endmacro %}
 
-{% macro Switch(id='', mvc_checked='', name='', label='', mvc_enabled='', mvc_disabled='') %}
+{% macro Switch(id='', mvc_checked='', label='', mvc_enabled='', mvc_disabled='') %}
   <label class="switch">
     <input type="checkbox" mvc-checked="{{mvc_checked}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}'>
     <span class="slider round"></span>
@@ -160,7 +160,7 @@
   </div>
 
   <div class="form-label-group form-label-group-double">
-    <input type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' placeholder='{{label}}' class="form-control mvc-boot-input-right" />
+    <input type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' size='10' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' placeholder='{{label}}' class="form-control mvc-boot-input-right" />
     <label>{{label}}</label>
   </div>
 

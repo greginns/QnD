@@ -41,6 +41,10 @@
               <div class='col-5'>
                 {{ fields.Char(type='text', id=title.id.id, maxlength=title.id.maxLength, mvc_value='title.id', mvc_event_type='blur', mvc_disabled='existingEntry', mvc_edit='upper', label=title.id.verbose) }}
               </div>
+              <div class='col-2'></div>
+              <div class='col-5'>
+                {{ fields.Switch(id=title.active.id, mvc_checked='title.active', label=title.active.verbose) }}
+              </div>
             </div>          
           </div>
           
