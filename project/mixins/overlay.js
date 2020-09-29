@@ -124,7 +124,7 @@ Object.assign(MVC, {
     toaster.prepend(toast);
 
     // show, hide
-    $(toast).toast('show');
+    new bootstrap.Toast(toast);
 
     toast.addEventListener('hidden.bs.toast', function () {
       toast.remove();

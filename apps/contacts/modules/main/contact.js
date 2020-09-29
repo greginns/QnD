@@ -238,11 +238,12 @@ class Contact extends MVC {
 
   // Account
   accessAccount() {
-    $(this._section.querySelectorAll('div.contacts-contact-account')[0]).modal('show');
+    this.accessModal = new bootstrap.Modal(this._section.querySelectorAll('div.contacts-contact-account')[0]);
+    this.accessModal.show();
   }
 
   saveAccount() {
-    $(this._section.querySelectorAll('div.contacts-contact-account')[0]).modal('hide');
+    this.accessModal.hide();
   }
 
   // Tags
@@ -250,7 +251,7 @@ class Contact extends MVC {
     let span = document.createElement('span');
     let textspan = document.createElement('span');
     let xspan = document.createElement('span');
-    let dt = moment(entry.date);
+    let dt = dayjs(entry.date);
     let dtx = dt.format(App.dateFormat);
     let tmx = dt.format(App.timeFormat);
 
@@ -269,7 +270,8 @@ class Contact extends MVC {
     span.setAttribute('data-placement', 'top');
     span.appendChild(textspan);
     span.appendChild(xspan);
-    $(span).tooltip('enable');
+
+    (new bootstrap.Tooltip(span)).enable();
 
     return span;
   }
@@ -350,7 +352,7 @@ class Contact extends MVC {
     let span = ev.target.closest('span.tag')
     let tag = span.getAttribute('data-tag');
 
-    $(span).tooltip('dispose');
+    (bootstrap.Tooltip.getInstance(span)).displose();
 
     for (let x=0; x<tags.length; x++) {
       if (tags[x].tag == tag) {

@@ -55,13 +55,19 @@ import {QnD} from '/static/v1/static/lib/client/core/qnd.js';
 import {io} from "/static/v1/static/lib/client/core/io.js";
 
 (function() {  
-  var opts;
-  var modalEl = '#tenant-relogin';
+  let opts;
+  let modalEl = new bootstrap.Modal(document.getElementById('tenant-relogin'), {backdrop: 'static', keyboard: false});
 
-  $('#tenant').on('keyup', key13);
-  $('#tenant-relogin-username').on('keyup', key13);
-  $('#tenant-relogin-password').on('keyup', key13);
-  $('#tenant-relogin-button').on('click', login);
+  let tenantEl = document.getElementById('tenant');
+  let usernameEl = document.getElementById('tenant-relogin-username');
+  let passwordEl = document.getElementById('tenant-relogin-password');
+  let loginBtnEl = document.getElementById('tenant-relogin-button');
+  let errMsgEl = document.getElementById('tenant-login-error');
+
+  tenantEl.addEventListener('keyup', key13);
+  usernameEl.addEventListener('keyup', key13);
+  passwordEl.addEventListener('keyup', key13);
+  loginBtnEl.addEventListener('click', login);
 
   function key13(ev) {
     if (ev.which == 13) {
@@ -70,18 +76,19 @@ import {io} from "/static/v1/static/lib/client/core/io.js";
   };
 
   function login() {
-    var username = $('#tenant-relogin-username').val();
-    var password = $('#tenant-relogin-password').val();
-
-    $('#tenant-login-error').text('');
+    let tenant = tenantEl.value;
+    let username = usernameEl.value;
+    let password = passwordEl.value;    
+    
+    errMsgEl.innerText = '';
 
     if (!username) {
-      $('#tenant-login-error').text('Username is required');
+      errMsgEl.innerText = 'Username is required';
       return;
     }
     
     if (!password) {
-      $('#tenant-login-error').text('Password is required');
+      errMsgEl.innerText = 'Password is required';
       return;
     }
 
@@ -92,7 +99,7 @@ import {io} from "/static/v1/static/lib/client/core/io.js";
         close();
       }
       else {
-        $('#tenant-login-error').text(res.data.errors.message);
+        errMsgEl.innerText = res.data.errors.message;
       }
     })
     .catch(function(err) {
@@ -101,11 +108,11 @@ import {io} from "/static/v1/static/lib/client/core/io.js";
   }
 
   function open() {
-    $(modalEl).modal({backdrop: 'static', keyboard: false, show: true});
+    modalEl.show();
   }
 
   function close() {
-    $(modalEl).modal('hide');
+    modalEl.hide();
   }
 
   function popup(popts) {

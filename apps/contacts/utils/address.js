@@ -18,8 +18,8 @@ class Address extends MVC{
     this.chosenPostcode;
     this.model.postcodes = [];
 
-    this.cityModal = this._section.getElementsByClassName('contact-address-modal-city');
-    this.pcModal = this._section.getElementsByClassName('contact-address-modal-postcode');
+    this.cityModal = new bootstrap.Modal(this._section.getElementsByClassName('contact-address-modal-city')[0]);
+    this.pcModal = new bootstrap.Modal(this._section.getElementsByClassName('contact-address-modal-postcode')[0]);
 
     document.addEventListener('tablestoreready', async function() {
       // fill up on data
@@ -105,11 +105,11 @@ class Address extends MVC{
   }
 
   cityModalOpen() {
-    $(this.cityModal).modal('show');
+    this.cityModal.show();
   }
 
   cityModalClose() {
-    $(this.cityModal).modal('hide');
+    this.cityModal.hide();
   }
 
   postcodeSelected(ev) {
@@ -131,11 +131,11 @@ class Address extends MVC{
   }
 
   postcodeModalOpen() {
-    $(this.pcModal).modal('show');
+    this.pcModal.show();
   }
 
   postcodeModalClose() {
-    $(this.pcModal).modal('hide');
+    this.pcModal.hide();
   }
 
   async getRegions(country) {
