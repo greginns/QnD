@@ -1,7 +1,7 @@
 import {QnD} from '/static/lib/client/core/qnd.js';
 import {MVC} from '/static/lib/client/core/mvc.js';
 import {utils} from '/static/lib/client/core/utils.js';
-import {Page, Section} from '/static/lib/client/core/router.js';
+import {Page, Section} from '/static/lib/client/core/paging.js';
 import {TableView} from '/static/lib/client/core/data.js';
 
 class Contact extends MVC {

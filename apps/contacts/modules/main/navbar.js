@@ -1,6 +1,6 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
-import {Section} from '/~static/lib/client/core/router.js';
+import {Section} from '/~static/lib/client/core/paging.js';
 
 class Navbar extends MVC {
   constructor(element) {

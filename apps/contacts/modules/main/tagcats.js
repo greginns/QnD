@@ -1,7 +1,7 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 import {utils} from '/~static/lib/client/core/utils.js';
-import {Page, Section} from '/~static/lib/client/core/router.js';
+import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 
 import '/~static/project/mixins/overlay.js';
@@ -22,39 +22,35 @@ class tagcat extends MVC {
       message: ''
     };
 
-    this.$addWatched('tagcat.id', this.catEntered.bind(this));
+    this.$addWatched('tagcat.id', this.idEntered.bind(this));
         
     this.tagcatOrig = {};
     this.defaults = {};
     this.tagcatListEl = document.getElementById('tagcatList');
 
-    // fired when module gets common data
-    document.addEventListener('tablestoreready', async function() {
+    //this.ready(); //  use if not in router
+  }
+
+  async ready() {
+    return new Promise(async function(resolve) {
       let tagcats = new TableView({proxy: this.model.tagcats});
 
       Module.tableStores.tagcat.addView(tagcats);
     
       this.defaults.tagcat = await Module.data.tagcat.getDefault();   
       this.setDefaults();   
-    }.bind(this), {once: true})    
 
-    //this.ready(); //  use if not in router
-  }
-
-  ready() {
-    return new Promise(function(resolve) {
       resolve();
-    })          
+    }.bind(this));
   }
   
-  inView() {
-    //document.getElementById('admin-manage-navbar-groups').classList.add('active');
-    //document.getElementById('admin-manage-navbar-groups').classList.add('disabled');
+  inView(params) {
+    if ('id' in params && params.id) {
+      this.idEntered(params.id);
+    }
   }
 
   outView() {
-    //document.getElementById('admin-manage-navbar-groups').classList.remove('active');
-    //document.getElementById('admin-manage-navbar-groups').classList.remove('disabled');
 
     return true;  
   }
@@ -153,6 +149,9 @@ class tagcat extends MVC {
     this.clearList();
 
     this.model.existingEntry = false;
+
+    Module.pager.clearQuery();
+
     window.scrollTo(0,0);
   }
 
@@ -169,16 +168,20 @@ class tagcat extends MVC {
     let id = el.getAttribute('data-pk');
     if (id) this.model.tagcat.id = id;
 
+    Module.pager.replaceQuery('id=' + id);
+
     window.scrollTo(0,document.body.scrollHeight);
   }
 
-  async catEntered(nv) {
+  async idEntered(id) {
     // tagcat ID entered
-    if (!nv) return;
+    if (!id) return;
 
-    let ret = await this.getTagcatFromList(nv);
+    let ret = await this.getTagcatFromList(id);
 
     if (ret.id) this.setTagcat(ret.id);
+
+    Module.pager.replaceQuery('id=' + id);
   }
 
   async getTagcatFromList(pk) {

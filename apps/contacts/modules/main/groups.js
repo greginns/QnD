@@ -1,7 +1,7 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 import {utils} from '/~static/lib/client/core/utils.js';
-import {Page, Section} from '/~static/lib/client/core/router.js';
+import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 
 import '/~static/project/mixins/overlay.js';
@@ -29,22 +29,20 @@ class group extends MVC {
     this.defaults = {};
     this.groupListEl = document.getElementById('groupList');
 
-    // fired when module gets common data
-    document.addEventListener('tablestoreready', async function() {
+    //this.ready(); //  use if not in router
+  }
+
+  async ready() {
+    return new Promise(async function(resolve) {
       let groups = new TableView({proxy: this.model.groups});
 
       Module.tableStores.group.addView(groups);
     
       this.defaults.group = await Module.data.group.getDefault();      
-    }.bind(this), {once: true})    
 
-    //this.ready(); //  use if not in router
-  }
-
-  ready() {
-    return new Promise(function(resolve) {
       resolve();
-    })          
+
+    }.bind(this));
   }
   
   inView(params) {
@@ -173,7 +171,7 @@ class group extends MVC {
 
     if (ret.id) this.setEntry(ret.id);
 
-    Module.pager.replaceQuery('ID=' + id);
+    Module.pager.replaceQuery('id=' + id);
   }
 
   async getEntryFromList(pk) {
@@ -208,7 +206,7 @@ class group extends MVC {
     let id = el.getAttribute('data-pk');
     if (id) this.model.group.id = id;
 
-    Module.pager.replaceQuery('ID=' + id);
+    Module.pager.replaceQuery('id=' + id);
     
     window.scrollTo(0,document.body.scrollHeight);
   }

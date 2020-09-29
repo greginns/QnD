@@ -1,7 +1,7 @@
 // main
 import {QnD} from '/static/v1/static/lib/client/core/qnd.js';
 import {WSDataComm, TableStore} from '/static/v1/static/lib/client/core/data.js';
-import {Pages} from '/static/v1/static/lib/client/core/router.js';
+import {Pages} from '/static/v1/static/lib/client/core/paging.js';
 
 import '/static/v1/static/apps/admin/views/js/admin-manage-tenants.js';
 import '/static/v1/static/apps/admin/views/js/admin-manage-users.js';

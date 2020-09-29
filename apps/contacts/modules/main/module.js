@@ -1,12 +1,12 @@
 // main
 import {Module} from '/~static/lib/client/core/module.js';
 import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
-import {Pages} from '/~static/lib/client/core/router.js';
+import {Pages} from '/~static/lib/client/core/paging.js';
 
 // js for pages
 import '/~static/apps/contacts/modules/main/navbar.js';
 import '/~static/apps/contacts/modules/main/contact.js';
-import '/~static/apps/contacts/modules/main/contact-search.js';
+//import '/~static/apps/contacts/modules/main/contact-search.js';
 import '/~static/apps/contacts/modules/main/contact-results.js';
 import '/~static/apps/contacts/modules/main/titles.js';
 import '/~static/apps/contacts/modules/main/groups.js';
@@ -19,22 +19,22 @@ import '/~static/project/mixins/mvc_ext.js';
 
 // js for widgets
 import {Address} from '/~static/apps/contacts/utils/address.js'
-//import {MDate} from '/~static/lib/client/widgets/mdate.js';
-//import {MTime} from '/~static/lib/client/widgets/mtime.js';
+import {MDate} from '/~static/lib/client/widgets/mdate.js';
+import {MTime} from '/~static/lib/client/widgets/mtime.js';
 //import {Multisel} from '/~static/lib/client/widgets/multisel.js';
 //import {Singlesel} from '/~static/lib/client/widgets/singlesel.js';
 
 let moduleStart = function() {
   let widgetSetup = function() {
     Module.widgets.address = new Address();
-    //Module.widgets.mdate = new MDate();
-    //Module.widgets.mtime = new MTime();
+    Module.widgets.mdate = new MDate();
+    Module.widgets.mtime = new MTime();
     //Module.widgets.multisel = new Multisel();
     //Module.widgets.singlesel = new Singlesel();
 
   }
 
-  let connectToData = function() {
+  let connectToData = async function() {
     // setup data table access
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
     Module.data.title = new TableAccess({modelName: 'title', url: `/contacts/v1/title`});
@@ -48,7 +48,7 @@ let moduleStart = function() {
 
     const data = new WSDataComm('contacts');                 // WS instances for this app
     const safemode = false;
-    let wmodel;
+    let wmodel, getAllPromises = [];
 
     // Contact table ---
     wmodel = `/contacts/contact`;                   // url-like of interest to follow model changes
@@ -57,7 +57,7 @@ let moduleStart = function() {
 
     // HTTP data access
     Module.tableStores.contact = new TableStore({accessor:Module.data.contact , wmodel, safemode});  // setup a table store in Module so all pages can access
-    Module.tableStores.contact.getAll();               // seed the table store
+    getAllPromises.push(Module.tableStores.contact.getAll());               // seed the table store
 
     // Title table ---
     wmodel = `/contacts/title`;               
@@ -65,7 +65,7 @@ let moduleStart = function() {
     data.addModel(wmodel);                          
 
     Module.tableStores.title = new TableStore({accessor: Module.data.title, wmodel, safemode});  // setup a table store in Module so all pages can access
-    Module.tableStores.title.getAll();      
+    getAllPromises.push(Module.tableStores.title.getAll());
 
     // Group table ---
     wmodel = `/contacts/group`;               
@@ -73,7 +73,7 @@ let moduleStart = function() {
     data.addModel(wmodel);                          
 
     Module.tableStores.group = new TableStore({accessor: Module.data.group, wmodel, safemode});  // setup a table store in Module so all pages can access
-    Module.tableStores.group.getAll();      
+    getAllPromises.push(Module.tableStores.group.getAll());
 
     // Egroup table ---
     wmodel = `/contacts/egroup`;               
@@ -81,7 +81,7 @@ let moduleStart = function() {
     data.addModel(wmodel);                          
 
     Module.tableStores.egroup = new TableStore({accessor: Module.data.egroup, wmodel, safemode});  // setup a table store in Module so all pages can access
-    Module.tableStores.egroup.getAll();      
+    getAllPromises.push(Module.tableStores.egroup.getAll());      
 
     // Tagcat table ---
     wmodel = `/contacts/tagcat`;               
@@ -89,7 +89,7 @@ let moduleStart = function() {
     data.addModel(wmodel);                          
 
     Module.tableStores.tagcat = new TableStore({accessor: Module.data.tagcat, wmodel, safemode});  // setup a table store in Module so all pages can access
-    Module.tableStores.tagcat.getAll();      
+    getAllPromises.push(Module.tableStores.tagcat.getAll());      
 
     // Tag table ---
     wmodel = `/contacts/tag`;
@@ -97,7 +97,7 @@ let moduleStart = function() {
     data.addModel(wmodel);                          
 
     Module.tableStores.tag = new TableStore({accessor: Module.data.tag, wmodel, safemode});  // setup a table store in Module so all pages can access
-    Module.tableStores.tag.getAll();      
+    getAllPromises.push(Module.tableStores.tag.getAll());
 
     // Country table ---
     wmodel = `/contacts/country`;               
@@ -105,13 +105,16 @@ let moduleStart = function() {
     data.addModel(wmodel);                          
 
     Module.tableStores.country = new TableStore({accessor: Module.data.country, wmodel, safemode});  // setup a table store in Module so all pages can access
-    Module.tableStores.country.getAll();      
+    getAllPromises.push(Module.tableStores.country.getAll());
 
     // start following via WS ---
     data.start();
 
-    // tell everybody that data is ready
-    document.dispatchEvent(new CustomEvent('tablestoreready', {bubbles: false}));  // getElementById('ModulePages').
+    Promise.all(getAllPromises)
+    .then(function() {
+      // tell everybody that data is ready
+      document.dispatchEvent(new CustomEvent('tablestoreready', {bubbles: false}));
+    })    
   }
 
   let startPages = async function() {
@@ -132,9 +135,12 @@ let moduleStart = function() {
     }
   }
 
+  document.addEventListener('tablestoreready', async function() {
+    startPages();
+  }.bind(this), {once: true});
+
   widgetSetup();
   connectToData();
-  startPages();
 }
 
 moduleStart();

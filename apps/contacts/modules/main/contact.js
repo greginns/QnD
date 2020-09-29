@@ -1,7 +1,8 @@
+import {App} from '/~static/lib/client/core/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 import {utils} from '/~static/lib/client/core/utils.js';
-import {Page, Section} from '/~static/lib/client/core/router.js';
+import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 import {Multisel} from '/~static/lib/client/widgets/multisel.js';
 
@@ -30,21 +31,20 @@ class Contact extends MVC {
       message: ''
     };
 
-    //this.model.contact.doe = moment()
-
     this.$addWatched('contact.country', this.countryChanged.bind(this));
         
     this.contactOrig = {};
-    this.defaults = {doe: window.moment()};
+    this.defaults = {doe: window.dayjs()};
     this.contactListEl = document.getElementById('contactList');
+  }
 
+  async ready() {
     let filterFunc = function(x) {
       // only show active=true
       return x.active;
     }
 
-    // fired when module gets common data
-    document.addEventListener('tablestoreready', async function() {
+    return new Promise(async function(resolve) {
       // fill up on data
       Module.tableStores.contact.addView(new TableView({proxy: this.model.contacts}));
       Module.tableStores.title.addView(new TableView({proxy: this.model.titles, filterFunc}));
@@ -55,18 +55,9 @@ class Contact extends MVC {
       Module.tableStores.country.addView(new TableView({proxy: this.model.countries}));
     
       this.defaults.contact = await Module.data.contact.getDefault();
-      this.reorgTags();
-    }.bind(this), {once: true})    
 
-    //this.ready(); //  use if not in router
-  }
-
-  ready() {
-    var self = this;
-
-    return new Promise(function(resolve) {
       resolve();
-    })          
+    }.bind(this));
   }
   
   async inView(params) {
@@ -87,15 +78,9 @@ class Contact extends MVC {
       this.clearIt();
       this.setDefaults();
     }
-
-    //document.getElementById('admin-manage-navbar-contacts').classList.add('active');
-    //document.getElementById('admin-manage-navbar-contacts').classList.add('disabled');
   }
 
   outView() {
-    //document.getElementById('admin-manage-navbar-contacts').classList.remove('active');
-    //document.getElementById('admin-manage-navbar-contacts').classList.remove('disabled');
-
     return true;  
   }
 
@@ -261,19 +246,61 @@ class Contact extends MVC {
   }
 
   // Tags
-  tagFormat() {
-    
+  formatTag(entry) {
+    let span = document.createElement('span');
+    let textspan = document.createElement('span');
+    let xspan = document.createElement('span');
+    let dt = moment(entry.date);
+    let dtx = dt.format(App.dateFormat);
+    let tmx = dt.format(App.timeFormat);
+
+    xspan.classList.add('tagx');
+    xspan.innerHTML = '&times;';
+    xspan.addEventListener('click', this.delTag.bind(this));
+
+    textspan.classList.add('tagtext');
+    textspan.innerText = this.getTagDesc(entry.tag);
+
+    span.classList.add('tag');
+    span.classList.add('mb-2');
+    span.title = dtx + ' ' + tmx;
+    span.setAttribute('data-tag', entry.tag);
+    span.setAttribute('data-toggle', 'tooltip');
+    span.setAttribute('data-placement', 'top');
+    span.appendChild(textspan);
+    span.appendChild(xspan);
+    $(span).tooltip('enable');
+
+    return span;
+  }
+
+  getTagDesc(tag) {
+    let desc = '';
+    let cat = '';
+
+    for (let t=0; t<this.model.tags.length; t++) {
+      if (this.model.tags[t].id == tag) {
+        desc += this.model.tags[t].desc;
+        cat = this.model.tags[t].cat;
+        break;
+      }
+    }
+
+    if (cat) {
+      for (let c=0; c<this.model.tagcats.length; c++) {
+        if (this.model.tagcats[c].id == cat) {
+          desc += '[' + this.model.tagcats[c].desc + ']';
+          break;
+        }
+      }
+    }
+
+    return desc;
   }
 
   reorgTags() {
-    // organize into A-objects for quick retrieval and B-multisel display
-  }
-
-  async addTag() {
-    let tags = this.model.contact.tags;
-
-   var groups = [
-     { 
+    // organize for multisel display
+     /*{ 
        label: 'Group 1', 
        items: [{text: 'Item 1.1', value: '11'}, {text: 'Item 1.2', value: '12'}],
      },
@@ -281,8 +308,31 @@ class Contact extends MVC {
        label: 'Group 2',
        items: [{text: 'Item 2.1', value: '21'}, {text: 'Item 2.2', value: '22'}]
      }
-   ];
+   ];*/    
+    let groups = [];
 
+    for (let c=0; c<this.model.tagcats.length; c++) {
+      if (this.model.tagcats[c].active) {
+        groups.push({id: this.model.tagcats[c].id, label: this.model.tagcats[c].desc, items:[]});
+      }
+    }
+
+    for (let t=0; t<this.model.tags.length; t++) {
+      if (this.model.tags[t].active) {
+        for (let g of groups) {
+          if (g.id == this.model.tags[t].cat) {
+            g.items.push({text: this.model.tags[t].desc, value: this.model.tags[t].id});
+          }
+        }
+      }
+    }
+
+    return groups;
+  }
+
+  async addTag() {
+    let tags = this.model.contact.tags;
+    let groups = this.reorgTags();
     let ms = new Multisel('Tags', groups, []);
     let res = await ms.select();
     let dt = (new Date).toJSON();
@@ -297,7 +347,10 @@ class Contact extends MVC {
 
   delTag(ev) {
     let tags = this.model.contact.tags;
-    let tag = ev.target.closest('span.tag').getAttribute('data-tag');
+    let span = ev.target.closest('span.tag')
+    let tag = span.getAttribute('data-tag');
+
+    $(span).tooltip('dispose');
 
     for (let x=0; x<tags.length; x++) {
       if (tags[x].tag == tag) {

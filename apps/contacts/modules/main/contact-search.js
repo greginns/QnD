@@ -1,6 +1,6 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
-import {Page, Section} from '/~static/lib/client/core/router.js';
+import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 
 import '/~static/project/mixins/overlay.js';
@@ -30,28 +30,23 @@ class Contact extends MVC {
         
     this.contactOrig = {};
 
+    //this.ready(); //  use if not in router
+  }
+
+  async ready() {
     let filterFunc = function(x) {
       // only show active=true
       return x.active;
     }
 
-    // fired when module gets common data
-    document.addEventListener('tablestoreready', async function() {
+    return new Promise(async function(resolve) {
       // fill up on data
       Module.tableStores.title.addView(new TableView({proxy: this.model.titles, filterFunc}));
       Module.tableStores.group.addView(new TableView({proxy: this.model.groups, filterFunc}));
       Module.tableStores.country.addView(new TableView({proxy: this.model.countries}));
-    }.bind(this), {once: true})    
 
-    //this.ready(); //  use if not in router
-  }
-
-  ready() {
-    var self = this;
-
-    return new Promise(function(resolve) {
       resolve();
-    })          
+    }.bind(this));
   }
   
   inView() {
@@ -87,6 +82,8 @@ class Contact extends MVC {
   saveAccount() {}
 
   addTag() {}
+
+  formatTag() {}
 
   // ADDRESS
   async countryChanged(nv, ov) {

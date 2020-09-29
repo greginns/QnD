@@ -1,6 +1,6 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
-import {Page, Section} from '/~static/lib/client/core/router.js';
+import {Page, Section} from '/~static/lib/client/core/paging.js';
 //import {TableView} from '/~static/lib/client/core/data.js';
 
 import '/~static/project/mixins/overlay.js';
@@ -20,12 +20,13 @@ class Searchresults extends MVC {
       ['address1', 'Street Address']
     ]
 
+    return new Promise(function(resolve) {
+      resolve();
+    })          
     //this.ready(); //  use if not in router
   }
 
   ready() {
-    var self = this;
-
     return new Promise(function(resolve) {
       resolve();
     })          
