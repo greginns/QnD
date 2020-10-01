@@ -24,31 +24,35 @@
           
           <div class='card-body'>
             <div class='row'>
-              <div class='col-12 col-xl-6'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
                 {% include "./contact-name.html" %}
               </div>
     
-              <div class='col-12 col-xl-6'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
                 {% include "./contact-address-update.html" %}
               </div>
 
-              <div class='col-12 col-xl-6'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
                 {% include "./contact-contact.html" %}
               </div>  
 
-              <div class='col-12 col-xl-6'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
+                {% include "./contact-notes.html" %}
+              </div>  
+              
+              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
                 {% include "./contact-emergency.html" %}
               </div>  
 
-              <div class='col-12 col-xl-6'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
                 {% include "./contact-misc.html" %}
               </div>  
               
-              <div class='col-12 col-xl-6'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
                 {% include "./contact-flags.html" %}
               </div>                
               
-              <div class='col-12 col-xl-6'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
                 {% include "./contact-cat.html" %}
               </div>  
 
@@ -93,6 +97,7 @@
         <div class="nav-link pointer" mvc-click='goto' to='contact-name'>Name</div>
         <div class="nav-link" mvc-click='goto' to='contact-address'>Address</div>
         <div class="nav-link" mvc-click='goto' to='contact-contact'>Contact</div>
+        <div class="nav-link" mvc-click='goto' to='contact-notes'>Notes</div>
         <div class="nav-link" mvc-click='goto' to='contact-emergency'>Emergency</div>
         <div class="nav-link" mvc-click='goto' to='contact-misc'>Misc</div>
         <div class="nav-link" mvc-click='goto' to='contact-cat'>Category</div>

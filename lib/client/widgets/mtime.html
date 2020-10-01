@@ -11,7 +11,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <span mvc-text='timeInWords'></span>
-            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" mvc-on='{click: "timeClose"}'>
+            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" mvc-on='{click: "abort"}'>
             </button>
           </div>
 
@@ -19,33 +19,33 @@
             <table class='table table-bordered table-sm widget-mtime-table'>
               <tbody mvc-on='{click: "hourClicked"}' style='cursor: pointer'>
                 <tr>
-                  <td data-hour='12AM' mvc-class='hourClasses.0'>12</td>
-                  <td data-hour='01AM' mvc-class='hourClasses.1'>1</td>
-                  <td data-hour='02AM' mvc-class='hourClasses.2'>2</td>
-                  <td data-hour='03AM' mvc-class='hourClasses.3'>3</td>
-                  <td data-hour='04AM' mvc-class='hourClasses.4'>4</td>
-                  <td data-hour='05AM' mvc-class='hourClasses.5'>5</td>
-                  <td data-hour='06AM' mvc-class='hourClasses.6'>6</td>
-                  <td data-hour='07AM' mvc-class='hourClasses.7'>7</td>
-                  <td data-hour='08AM' mvc-class='hourClasses.8'>8</td>
-                  <td data-hour='09AM' mvc-class='hourClasses.9'>9</td>
-                  <td data-hour='10AM' mvc-class='hourClasses.10'>10</td>
-                  <td data-hour='11AM' mvc-class='hourClasses.11'>11</td>
+                  <td data-hour='0' mvc-class='hourClasses.0'>12</td>
+                  <td data-hour='1' mvc-class='hourClasses.1'>1</td>
+                  <td data-hour='2' mvc-class='hourClasses.2'>2</td>
+                  <td data-hour='3' mvc-class='hourClasses.3'>3</td>
+                  <td data-hour='4' mvc-class='hourClasses.4'>4</td>
+                  <td data-hour='5' mvc-class='hourClasses.5'>5</td>
+                  <td data-hour='6' mvc-class='hourClasses.6'>6</td>
+                  <td data-hour='7' mvc-class='hourClasses.7'>7</td>
+                  <td data-hour='8' mvc-class='hourClasses.8'>8</td>
+                  <td data-hour='9' mvc-class='hourClasses.9'>9</td>
+                  <td data-hour='10' mvc-class='hourClasses.10'>10</td>
+                  <td data-hour='11' mvc-class='hourClasses.11'>11</td>
                   <th>AM</th>
                 </tr>
                 <tr>
-                  <td data-hour='12PM' mvc-class='hourClasses.12'>12</td>
-                  <td data-hour='01PM' mvc-class='hourClasses.13'>1</td>
-                  <td data-hour='02PM' mvc-class='hourClasses.14'>2</td>
-                  <td data-hour='03PM' mvc-class='hourClasses.15'>3</td>
-                  <td data-hour='04PM' mvc-class='hourClasses.16'>4</td>
-                  <td data-hour='05PM' mvc-class='hourClasses.17'>5</td>
-                  <td data-hour='06PM' mvc-class='hourClasses.18'>6</td>
-                  <td data-hour='07PM' mvc-class='hourClasses.19'>7</td>
-                  <td data-hour='08PM' mvc-class='hourClasses.20'>8</td>
-                  <td data-hour='09PM' mvc-class='hourClasses.21'>9</td>
-                  <td data-hour='10PM' mvc-class='hourClasses.22'>10</td>
-                  <td data-hour='11PM' mvc-class='hourClasses.23'>11</td>
+                  <td data-hour='12' mvc-class='hourClasses.12'>12</td>
+                  <td data-hour='13' mvc-class='hourClasses.13'>1</td>
+                  <td data-hour='14' mvc-class='hourClasses.14'>2</td>
+                  <td data-hour='15' mvc-class='hourClasses.15'>3</td>
+                  <td data-hour='16' mvc-class='hourClasses.16'>4</td>
+                  <td data-hour='17' mvc-class='hourClasses.17'>5</td>
+                  <td data-hour='18' mvc-class='hourClasses.18'>6</td>
+                  <td data-hour='19' mvc-class='hourClasses.19'>7</td>
+                  <td data-hour='20' mvc-class='hourClasses.20'>8</td>
+                  <td data-hour='21' mvc-class='hourClasses.21'>9</td>
+                  <td data-hour='22' mvc-class='hourClasses.22'>10</td>
+                  <td data-hour='23' mvc-class='hourClasses.23'>11</td>
                   <th>PM</th>
                 </tr>
               </tbody>
@@ -128,7 +128,7 @@
               </tbody>
             </table>
 
-            <div class='row form-group'>
+            <div class='row mb-3'>
               <div class='col-sm-12'>
                 <button class='btn btn-primary' mvc-on='{click: "accept"}'>
                   Accept

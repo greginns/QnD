@@ -1,11 +1,10 @@
 import {Module} from '/~static/lib/client/core/module.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
+import {Address} from '/~static/apps/contacts/utils/address.js'
+import {ContactWithAddress} from '/~static/project/subclasses/simple-entry.js';
 
-import '/~static/project/mixins/overlay.js';
-
-class Contact extends MVC {
+class Contact extends ContactWithAddress {
   constructor(element) {
     super(element);
   }
@@ -29,6 +28,7 @@ class Contact extends MVC {
     this.$addWatched('contact.country', this.countryChanged.bind(this));
         
     this.contactOrig = {};
+    this.address = new Address();
 
     //this.ready(); //  use if not in router
   }
@@ -69,14 +69,14 @@ class Contact extends MVC {
     }
 
     if (Object.keys(contact).length == 0) {
-      MVC.$alert('No Search Criteria entered');
+      utils.modals.alert('No Search Criteria entered');
       return;
     }
 
     Module.pager.go('/contact/results', 'filters=' + JSON.stringify(contact));
   }
 
-  // Account
+  // ghost classes
   accessAccount() {}  
 
   saveAccount() {}
@@ -85,67 +85,7 @@ class Contact extends MVC {
 
   formatTag() {}
 
-  // ADDRESS
-  async countryChanged(nv, ov) {
-    if (!nv) return;
-
-    this.model.regions = await Module.widgets.address.getRegions(nv);
-  }
-
-  async postcodeChanged() {
-    let self = this;
-    this.model.errors.contact.postcode = '';
-
-    let postcode = this.model.contact.postcode;
-    if (!postcode) return;
-
-    let country = this.model.contact.country;
-    let formattedPostcode = Module.widgets.address.formatPostcode(postcode, country);
-
-    if (formattedPostcode == false) {
-      this.model.errors.contact.postcode = 'Invalid Postal Code ' + postcode;
-      this.model.contact.postcode = '';
-      return;
-    }
-
-    this.model.contact.postcode = formattedPostcode;
-    
-    Module.widgets.address.getACity(country, formattedPostcode, function(city, region) {
-      if (city) self.model.contact.city = city;
-      if (region) self.model.contact.region = region;
-    });
-  }
-
-  async cityChanged() {
-    let self = this;
-    let city = this.model.contact.city;
-    let region = this.model.contact.region;
-    let country = this.model.contact.country;
-    let postcode = this.model.contact.postcode;
-
-    if (!city) return;
-
-    if (!postcode) {
-      Module.widgets.address.getAPostcode(city, region, country, function(postcode, city, region) {
-        if (postcode) self.model.contact.postcode = postcode;
-        if (city) self.model.contact.city = city;
-        if (region) self.model.contact.region = region;
-      })
-    }
-    else {
-      this.savePostalcode();
-    }
-  }
-
-  savePostalcode() {
-    // save postal code. 
-    let city = this.model.contact.city;
-    let region = this.model.contact.region;
-    let country = this.model.contact.country;
-    let postcode = this.model.contact.postcode;
-
-    Module.widgets.address.savePostcode(city, region, country, postcode);
-  }
+  clearList() {}
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

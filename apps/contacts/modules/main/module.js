@@ -6,7 +6,7 @@ import {Pages} from '/~static/lib/client/core/paging.js';
 // js for pages
 import '/~static/apps/contacts/modules/main/navbar.js';
 import '/~static/apps/contacts/modules/main/contact.js';
-//import '/~static/apps/contacts/modules/main/contact-search.js';
+import '/~static/apps/contacts/modules/main/contact-search.js';
 import '/~static/apps/contacts/modules/main/contact-results.js';
 import '/~static/apps/contacts/modules/main/titles.js';
 import '/~static/apps/contacts/modules/main/groups.js';
@@ -14,24 +14,10 @@ import '/~static/apps/contacts/modules/main/egroups.js';
 import '/~static/apps/contacts/modules/main/tagcats.js';
 import '/~static/apps/contacts/modules/main/tags.js';
 
-import '/~static/project/mixins/overlay.js';
 import '/~static/project/mixins/mvc_ext.js';
-
-// js for widgets
-import {Address} from '/~static/apps/contacts/utils/address.js'
-import {MDate} from '/~static/lib/client/widgets/mdate.js';
-import {MTime} from '/~static/lib/client/widgets/mtime.js';
-//import {Multisel} from '/~static/lib/client/widgets/multisel.js';
-//import {Singlesel} from '/~static/lib/client/widgets/singlesel.js';
 
 let moduleStart = function() {
   let widgetSetup = function() {
-    Module.widgets.address = new Address();
-    Module.widgets.mdate = new MDate();
-    Module.widgets.mtime = new MTime();
-    //Module.widgets.multisel = new Multisel();
-    //Module.widgets.singlesel = new Singlesel();
-
   }
 
   let connectToData = async function() {

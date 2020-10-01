@@ -21,21 +21,19 @@
 {% endmacro %}
 
 {% macro Password(type='password', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
-<div class='input-group'>
-  <div class="form-label-group">
+<div class="form-label-group">
+  <div class='input-group'>
     <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
-    <label>{{label}}</label>
-  </div>
-  <div class='input-group-append' mvc-role='passwordtoggle'>
-    <div class="input-group-text">
+    <span class="input-group-text" mvc-role='passwordtoggle'>
       <span class='eye' style='display: none'>
         <i class="far fa-eye"></i>
       </span>
       <span class='eye-slash' style='display: none'>
         <i class="far fa-eye-slash"></i>
       </span>
-    </div>
+    </span>
   </div>
+  <label>{{label}}</label>
 </div>
 
 <div mvc-show='errors.{{mvc_value}}'>
@@ -44,19 +42,12 @@
 {% endmacro %}
 
 {% macro Date(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
-<div class='input-group'>
-  <div class="form-label-group">
+<div class="form-label-group">
+  <div class='input-group'>
     <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="date" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
-    <label>{{label}}</label>
+    <span class="input-group-text" mvc-click='date:boot'><i class="far fa-calendar-alt"></i></span>
   </div>
-
-  <div class='input-group-append' mvc-click='date:boot'>
-    <div class="input-group-text" style='padding-left: 8px; padding-right: 8px; padding-bottom: 5px; cursor: pointer;'>
-      <div style='font-size: 24px; line-height: 24px'>
-        <i class="far fa-calendar-alt"></i>
-      </div>
-    </div>
-  </div>
+  <label>{{label}}</label>
 </div>
 
 <div mvc-show='errors.{{mvc_value}}'>
@@ -65,19 +56,12 @@
 {% endmacro %}
 
 {% macro Time(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
-<div class='input-group'>
-  <div class="form-label-group">
+<div class="form-label-group">
+  <div class='input-group'>
     <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="time" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
-    <label>{{label}}</label>
+    <span class="input-group-text" mvc-click='time:boot'><i class="far fa-clock"></i></span>
   </div>
-
-  <div class='input-group-append' mvc-click='time:boot'>
-    <div class="input-group-text" style='padding-left: 8px; padding-right: 8px; padding-bottom: 5px; cursor: pointer;'>
-    <div style='font-size: 24px; line-height: 24px'>
-      <i class="far fa-clock"></i>
-    </div>  
-    </div>
-  </div>
+  <label>{{label}}</label>
 </div>
 
 <div mvc-show='errors.{{mvc_value}}'>
@@ -121,27 +105,20 @@
 {% endmacro %}
 
 {% macro Integer(id='', min='1', max='999', step='1', mvc_value='', mvc_edit='integer', label='') %}
-<div class='input-group'>
-  <div class='input-group-prepend' mvc-role='stepperadj' dir='-' style='user-select: none;'>
-    <div class="input-group-text" style='padding-top: 4px; padding-left: 8px; padding-right: 8px; cursor: pointer;'>
-      <div style='font-size: 24px; line-height: 24px;'>
-        <i class="fas fa-minus"></i>
-      </div>
-    </div>
+<div class="form-label-group">
+  <div class='input-group'>
+    <span style='font-size: 24px; line-height: 24px; user-select: none;' mvc-role='stepperadj' dir='-' class="input-group-text">
+      <i class="fas fa-minus"></i>
+    </span>
+
+    <input type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' placeholder='{{label}}' class="form-control" />
+
+    <span style='font-size: 24px; line-height: 24px; user-select: none;' mvc-role='stepperadj' dir='+' class="input-group-text">
+      <i class="fas fa-plus"></i>
+    </span>
   </div>
 
-  <div class="form-label-group form-label-group-double">
-    <input type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' placeholder='{{label}}' class="form-control mvc-boot-input-right" />
-    <label>{{label}}</label>
-  </div>
-
-  <div class='input-group-append' mvc-role='stepperadj' dir='+' style='user-select: none;'>
-    <div class="input-group-text" style='padding-top: 4px; padding-left: 8px; padding-right: 8px; cursor: pointer;'>
-      <div style='font-size: 24px; line-height: 24px;'>
-        <i class="fas fa-plus"></i>
-      </div>
-    </div>
-  </div>
+  <label style='left: 50px'>{{label}}</label>
 </div>
 
 <div mvc-show='errors.{{mvc_value}}'>
@@ -150,27 +127,20 @@
 {% endmacro %}
 
 {% macro Float(id='', min='1', max='99999.99', step='1', mvc_value='', mvc_edit='float', label='') %}
-<div class='input-group'>
-  <div class='input-group-prepend' mvc-role='stepperadj' dir='-' style='user-select: none;'>
-    <div class="input-group-text" style='padding-top: 4px; padding-left: 8px; padding-right: 8px; cursor: pointer;'>
-      <div style='font-size: 24px; line-height: 24px;'>
-        <i class="fas fa-minus"></i>
-      </div>
-    </div>
+<div class="form-label-group">
+  <div class='input-group'>
+    <span style='font-size: 24px; line-height: 24px; user-select: none;' mvc-role='stepperadj' dir='-' class="input-group-text">
+      <i class="fas fa-minus"></i>
+    </span>
+
+    <input type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' placeholder='{{label}}' class="form-control" />
+
+    <span style='font-size: 24px; line-height: 24px; user-select: none;' mvc-role='stepperadj' dir='+' class="input-group-text">
+      <i class="fas fa-plus"></i>
+    </span>
   </div>
 
-  <div class="form-label-group form-label-group-double">
-    <input type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' size='10' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' placeholder='{{label}}' class="form-control mvc-boot-input-right" />
-    <label>{{label}}</label>
-  </div>
-
-  <div class='input-group-append' mvc-role='stepperadj' dir='+' style='user-select: none;'>
-    <div class="input-group-text" style='padding-top: 4px; padding-left: 8px; padding-right: 8px; cursor: pointer;'>
-      <div style='font-size: 24px; line-height: 24px;'>
-        <i class="fas fa-plus"></i>
-      </div>
-    </div>
-  </div>
+  <label style='left: 50px'>{{label}}</label>
 </div>
 
 <div mvc-show='errors.{{mvc_value}}'>
@@ -191,7 +161,7 @@
 
 {% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', valueField='', textField='', label='') %}
 <div class="form-label-group">
-  <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' placeholder='{{label}}' class="form-control">
+  <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' placeholder='{{label}}' class="form-select">
     <option mvc-option='{value: "{{mvc_each}}.$index.{{valueField}}", text: "{{mvc_each}}.$index.{{textField}}"}'></option>
   </select>
   <label>{{label}}</label>
@@ -204,7 +174,7 @@
 
 {% macro SelectChoices(id='', size='10', mvc_value='', choices=[], label='') %}
 <div class="form-label-group">
-  <select xid="{{id}}" mvc-value="{{mvc_value}}" placeholder='{{label}}' class="form-control">
+  <select xid="{{id}}" mvc-value="{{mvc_value}}" placeholder='{{label}}' class="form-select">
     {% for choice in choices %}
     <option value='{{choice.value}}'>{{choice.text}}</option>
     {% endfor %}

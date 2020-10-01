@@ -1,12 +1,13 @@
 import {App} from '/~static/lib/client/core/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 import {Multisel} from '/~static/lib/client/widgets/multisel.js';
+import {Address} from '/~static/apps/contacts/utils/address.js'
+import {ContactWithAddress} from '/~static/project/subclasses/simple-entry.js';
 
-class Contact extends MVC {
+class Contact extends ContactWithAddress {
   constructor(element) {
     super(element);
   }
@@ -36,6 +37,7 @@ class Contact extends MVC {
     this.contactOrig = {};
     this.defaults = {doe: window.dayjs()};
     this.contactListEl = document.getElementById('contactList');
+    this.address = new Address();
   }
 
   async ready() {
@@ -105,14 +107,14 @@ class Contact extends MVC {
       }
     }      
 
-    let spinner = MVC.$buttonSpinner(ev.target, true);
-    MVC.$overlay(true);
+    let spinner = utils.modals.buttonSpinner(ev.target, true);
+    utils.modals.overlay(true);
 
     // new (post) or old (put)?
     let res = (this.model.existingEntry) ? await Module.tableStores.contact.update(contact.id, diffs) : await Module.tableStores.contact.insert(contact);
 
     if (res.status == 200) {
-      MVC.$toast('CONTACT',(this.model.existingEntry) ? contact.fullname + ' Updated' : 'Created', 2000);
+      utils.modals.toast('CONTACT',(this.model.existingEntry) ? contact.fullname + ' Updated' : 'Created', 2000);
    
       this.contactOrig = this.model.contact.toJSON();
 
@@ -122,27 +124,27 @@ class Contact extends MVC {
       this.displayErrors(res);
     }
     
-    MVC.$overlay(false);
-    MVC.$buttonSpinner(ev.target, false, spinner);
+    utils.modals.overlay(false);
+    utils.modals.buttonSpinner(ev.target, false, spinner);
   }
   
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
     let contact = this.model.contact.toJSON();
-    let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?');
+    let ret = await utils.modals.reConfirm(ev.target, 'Confirm Deletion?');
 
     if (!ret) return;
 
-    let spinner = MVC.$buttonSpinner(ev.target, true);
-    MVC.$overlay(true);
+    let spinner = utils.modals.buttonSpinner(ev.target, true);
+    utils.modals.overlay(true);
 
     this.clearErrors();
     
     let res = await Module.tableStores.contact.delete(contact.id);
 
     if (res.status == 200) {
-      MVC.$toast('CONTACT', 'Contact Removed', 1000);
+      utils.modals.toast('CONTACT', 'Contact Removed', 1000);
 
       this.clearIt();
     }
@@ -150,17 +152,11 @@ class Contact extends MVC {
       this.displayErrors(res);
     }
 
-    MVC.$overlay(false);
-    MVC.$buttonSpinner(ev.target, false, spinner);
+    utils.modals.overlay(false);
+    utils.modals.buttonSpinner(ev.target, false, spinner);
   }
   
   // Screen handling
-  async clear(ev) {
-    if (await this.canClear(ev)) {
-      this.clearIt();
-    }
-  }
-
   async canClear(ev) {
     let contact = this.model.contact.toJSON();
     let orig = this.contactOrig;
@@ -168,17 +164,10 @@ class Contact extends MVC {
     let ret = true;
 
     if (Object.keys(diffs).length > 0) {
-      ret = await MVC.$reConfirm(ev.target, 'Abandon changes?');
+      ret = await utils.modals.reConfirm(ev.target, 'Abandon changes?');
     }
 
     return ret;
-  }
-  
-  clearIt() {
-    this.clearErrors();
-    this.setDefaults();
-
-    this.model.existingEntry = false;
   }
   
   async setContact(contact) {
@@ -196,44 +185,6 @@ class Contact extends MVC {
     }
 
     this.contactOrig = this.model.contact.toJSON();
-  }
-  
-  displayErrors(res) {
-    if ('data' in res && 'errors' in res.data) {
-      for (let key of Object.keys(res.data.errors)) {
-        if (key == 'message') {
-          this.setBadMessage(res.data.errors.message);  
-        }
-        else {
-          if (!res.data.errors.message) this.model.badMessage = 'Please Correct any entry errors';
-
-          for (let k in res.data.errors[key]) {
-            this.model.errors[key][k] = res.data.errors[key][k];
-          };  
-        }
-      }
-    }
-    
-    this.model.errors._verify = res.data.errors._verify;
-  }
-  
-  clearErrors() {
-    for (let key of Object.keys(this.model.errors)) {
-      if (this.model.errors[key] instanceof Object) {
-        for (let key2 of Object.keys(this.model.errors[key])) {
-          this.model.errors[key][key2] = '';
-        }
-      }
-      else {
-        this.model.errors[key] = '';
-      }
-    }
-
-    this.model.badMessage = '';
-  }
-
-  setBadMessage(msg) {
-    this.model.badMessage = msg;
   }
 
   // Account
@@ -364,68 +315,6 @@ class Contact extends MVC {
     this.model.contact.tags = tags;
   }
 
-  // ADDRESS
-  async countryChanged(nv, ov) {
-    if (!nv) return;
-
-    this.model.regions = await Module.widgets.address.getRegions(nv);
-  }
-
-  async postcodeChanged() {
-    let self = this;
-    this.model.errors.contact.postcode = '';
-
-    let postcode = this.model.contact.postcode;
-    if (!postcode) return;
-
-    let country = this.model.contact.country;
-    let formattedPostcode = Module.widgets.address.formatPostcode(postcode, country);
-
-    if (formattedPostcode == false) {
-      this.model.errors.contact.postcode = 'Invalid Postal Code ' + postcode;
-      this.model.contact.postcode = '';
-      return;
-    }
-
-    this.model.contact.postcode = formattedPostcode;
-    
-    Module.widgets.address.getACity(country, formattedPostcode, function(city, region) {
-      if (city) self.model.contact.city = city;
-      if (region) self.model.contact.region = region;
-    });
-  }
-
-  async cityChanged() {
-    let self = this;
-    let city = this.model.contact.city;
-    let region = this.model.contact.region;
-    let country = this.model.contact.country;
-    let postcode = this.model.contact.postcode;
-
-    if (!city) return;
-
-    if (!postcode) {
-      Module.widgets.address.getAPostcode(city, region, country, function(postcode, city, region) {
-        if (postcode) self.model.contact.postcode = postcode;
-        if (city) self.model.contact.city = city;
-        if (region) self.model.contact.region = region;
-      })
-    }
-    else {
-      this.savePostalcode();
-    }
-  }
-
-  savePostalcode() {
-    // save postal code. 
-    let city = this.model.contact.city;
-    let region = this.model.contact.region;
-    let country = this.model.contact.country;
-    let postcode = this.model.contact.postcode;
-
-    Module.widgets.address.savePostcode(city, region, country, postcode);
-  }
-
   // GOTOs
   goto(ev) {
     let to = ev.target.getAttribute('to');
@@ -434,6 +323,8 @@ class Contact extends MVC {
     window.scrollTo({left: 0, top: y-40, behavior: 'smooth'});
   }
 
+  // ghost classes
+  clearList() {}
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

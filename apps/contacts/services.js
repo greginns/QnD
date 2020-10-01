@@ -47,7 +47,7 @@ services.output = {
       ctx.egroup = Egroup.getColumnDefns();
       ctx.tag = Tag.getColumnDefns();
       ctx.tagcat = Tagcat.getColumnDefns();
-console.log(ctx.egroup)
+
       ctx.dateFormat = dateFormat;
       ctx.timeFormat = timeFormat;
       ctx.TID = req.TID;    

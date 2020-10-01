@@ -1,38 +1,4 @@
-<style>
-  .div-label {
-    position: absolute;
-    top: -6px;
-    left: 20px;
-    color: #007bff;
-    background-color: #FFFFFF;
-    padding-left: 3px;
-    padding-right: 3px;
-    line-height: 12px;
-  }
-
-  .tag {
-    background-color: #007bff;
-    border: 0px;
-    border-radius: 5px;
-    margin-right: 5px;
-    padding: 2px 5px 2px 5px;
-    display: inline-block;
-    line-height: 20px;
-  }
-
-  .tag .tagtext {
-    color: white;
-    padding-right: 10px;
-  }
-
-  .tag .tagx {
-    color: red;
-    cursor: pointer;
-    font-size: 24px;
-  }  
-</style>
-
-<fieldset class="border p-2 contact-cat">
+<fieldset class="border px-2 contact-cat">
   <legend class="w-auto">Categorization</legend>
   <div class='row'>
     <div class='col-12 mb-3'>
@@ -87,10 +53,10 @@
   </div>           
 
   <div class='row'>
-    <div class='col-8 col-md-6 col-lg-3 mb-3'>
+    <div class='col-8 col-md-6 col-lg-6  mb-3'>
       {{ fields.Switch(id=contact.acct.id, mvc_checked='contact.acct', label=contact.acct.verbose) }}
     </div>
-    <div class='col-4 col-md-6 col-lg-3 mb-3' mvc-show='contact.acct'>
+    <div class='col-4 col-md-6 col-lg-5 mb-3' mvc-show='contact.acct'>
       <button class='btn btn-outline-primary btn-sm btn-outline' mvc-click='accessAccount'>
         Account
       </button>

@@ -9,21 +9,21 @@
 
       <div class="modal-body">
         <div class="container-fluid">
-          <div class='row form-group'>
+          <div class='row mb-3'>
             <div class='col-12 text-center'>
               <span mvc-html='opts.text'>
               </span>
             </div>
           </div>
 
-          <div class='row form-group' mvc-show='isPrompt'>
+          <div class='row mb-3' mvc-show='isPrompt'>
             <div class='col-12'>
               <input type='text' mvc-value='opts.value' class='form-control'>
             </div>
           </div>
         </div>
 
-        <div class='row form-group'>
+        <div class='row mb-3'>
           <div class='col-12' mvc-each='opts.buttons' id='mvc-alert-button-container'>
             <button class='btn btn-sm m-1' mvc-class='opts.buttons.$index.class' data-index='$index' mvc-on='{click: "clicked"}'>
               <span mvc-text='opts.buttons.$index.text'></span>

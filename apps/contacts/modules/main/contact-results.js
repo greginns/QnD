@@ -3,8 +3,6 @@ import {MVC} from '/~static/lib/client/core/mvc.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 //import {TableView} from '/~static/lib/client/core/data.js';
 
-import '/~static/project/mixins/overlay.js';
-
 class Searchresults extends MVC {
   constructor(element) {
     super(element);

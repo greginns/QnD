@@ -1,13 +1,10 @@
 import {Module} from '/~static/lib/client/core/module.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
+import {Verror} from '/~static/project/subclasses/simple-entry.js';
 
-import '/~static/project/mixins/overlay.js';
-//import moment from 'moment';
-
-class title extends MVC {
+class title extends Verror {
   constructor(element) {
     super(element);
   }
@@ -74,14 +71,14 @@ class title extends MVC {
       }
     }      
 
-    let spinner = MVC.$buttonSpinner(ev.target, true);
-    MVC.$overlay(true);
+    let spinner = utils.modals.buttonSpinner(ev.target, true);
+    utils.modals.overlay(true);
 
     // new (post) or old (put)?
     let res = (this.model.existingEntry) ? await Module.tableStores.title.update(title.id, diffs) : await Module.tableStores.title.insert(title);
 
     if (res.status == 200) {
-      MVC.$toast('title',(this.model.existingEntry) ? title.title + ' Updated' : 'Created', 2000);
+      utils.modals.toast('title',(this.model.existingEntry) ? title.title + ' Updated' : 'Created', 2000);
    
       this.titleOrig = this.model.title.toJSON();
 
@@ -91,27 +88,27 @@ class title extends MVC {
       this.displayErrors(res);
     }
     
-    MVC.$overlay(false);
-    MVC.$buttonSpinner(ev.target, false, spinner);
+    utils.modals.overlay(false);
+    utils.modals.buttonSpinner(ev.target, false, spinner);
   }
   
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
     let title = this.model.title.toJSON();
-    let ret = await MVC.$reConfirm(ev.target, 'Confirm Deletion?');
+    let ret = await utils.modals.reConfirm(ev.target, 'Confirm Deletion?');
 
     if (!ret) return;
 
-    let spinner = MVC.$buttonSpinner(ev.target, true);
-    MVC.$overlay(true);
+    let spinner = utils.modals.buttonSpinner(ev.target, true);
+    utils.modals.overlay(true);
 
     this.clearErrors();
     
     let res = await Module.tableStores.title.delete(title.id);
 
     if (res.status == 200) {
-      MVC.$toast('title', 'title Removed', 1000);
+      utils.modals.toast('title', 'title Removed', 1000);
 
       this.clearIt();
     }
@@ -119,14 +116,8 @@ class title extends MVC {
       this.displayErrors(res);
     }
 
-    MVC.$overlay(false);
-    MVC.$buttonSpinner(ev.target, false, spinner);
-  }
-  
-  async clear(ev) {
-    if (await this.canClear(ev)) {
-      this.clearIt();
-    }
+    utils.modals.overlay(false);
+    utils.modals.buttonSpinner(ev.target, false, spinner);
   }
 
   async canClear(ev) {
@@ -136,21 +127,10 @@ class title extends MVC {
     let ret = true;
 
     if (Object.keys(diffs).length > 0) {
-      ret = await MVC.$reConfirm(ev.target, 'Abandon changes?');
+      ret = await utils.modals.reConfirm(ev.target, 'Abandon changes?');
     }
 
     return ret;
-  }
-  
-  clearIt() {
-    this.clearErrors();
-    this.setDefaults();
-    this.clearList();
-
-    this.model.existingEntry = false;
-
-    Module.pager.clearQuery();
-    window.scrollTo(0,0);
   }
 
   newTitle() {
@@ -216,44 +196,6 @@ class title extends MVC {
     }
 
     this.titleOrig = this.model.title.toJSON();
-  }
-  
-  displayErrors(res) {
-    if ('data' in res && 'errors' in res.data) {
-      for (let key of Object.keys(res.data.errors)) {
-        if (key == 'message') {
-          this.setBadMessage(res.data.errors.message);  
-        }
-        else {
-          if (!res.data.errors.message) this.model.badMessage = 'Please Correct any entry errors';
-
-          for (let k in res.data.errors[key]) {
-            this.model.errors[key][k] = res.data.errors[key][k];
-          };  
-        }
-      }
-    }
-    
-    this.model.errors._verify = res.data.errors._verify;
-  }
-  
-  clearErrors() {
-    for (let key of Object.keys(this.model.errors)) {
-      if (this.model.errors[key] instanceof Object) {
-        for (let key2 of Object.keys(this.model.errors[key])) {
-          this.model.errors[key][key2] = '';
-        }
-      }
-      else {
-        this.model.errors[key] = '';
-      }
-    }
-
-    this.model.badMessage = '';
-  }
-
-  setBadMessage(msg) {
-    this.model.badMessage = msg;
   }
 }
 
