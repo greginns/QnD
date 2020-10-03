@@ -166,8 +166,6 @@ class tag extends Verror {
     let ret = await this.gettagFromList(id);
 
     if (ret.id) this.settag(ret.id);
-
-    Module.pager.replaceQuery('id=' + id);
   }
 
   async gettagFromList(pk) {
@@ -182,6 +180,8 @@ class tag extends Verror {
     this.tagOrig = this.model.tag.toJSON();
 
     this.highlightList(pk);
+
+    Module.pager.replaceQuery('id=' + pk);
   }
 
   highlightList(pk) {

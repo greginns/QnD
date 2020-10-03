@@ -1,5 +1,5 @@
 <fieldset class="border px-2 contact-cat">
-  <legend class="w-auto">Categorization</legend>
+  <legend class="w-auto fieldset-legend">Categorization</legend>
   <div class='row'>
     <div class='col-12 mb-3'>
       <label class='label-color'>Category</label>
@@ -24,7 +24,7 @@
 
   <div class='row'>
     <div class='col-12 mb-3'>
-      <div style='height: auto; padding: 12px 5px 5px 5px' class="form-control">
+      <div style='height: auto;' class="form-control">
         <div class='div-label'>Tags</div>
         <div class='mb-2'>
           <span mvc-dhtml='contact.tags' mvc-filter='tag' mvc-tag-format='formatTag'></span>  
@@ -37,31 +37,18 @@
   </div>
 
   <div class='row'>
-    <div class='col-12 col-md-6 mb-3'>
-      {{ fields.Char(type='text', id=contact.agentno.id, maxlength=contact.agentno.maxLength, mvc_value='contact.agentno', label=contact.agentno.verbose) }}
-    </div>
-
-    <div class='col-12 col-md-6 mb-3'>
-      {{ fields.Float(type='text', min='0', max='99.99', step='1', id=contact.agentper.id, maxlength=contact.agentper.maxLength, mvc_value='contact.agentper', label=contact.agentper.verbose) }}
-    </div>
-  </div>                                       
-
-  <div class='row'>
     <div class='col-12 mb-3'>
-      <span mvc-text='agent.fullname'></span>
+      <div style='height: auto;' class="form-control">
+        <div class='div-label'>E-Groups</div>
+        <div class='mb-2'>
+          <span mvc-dhtml='contact.egroups' mvc-filter='tag' mvc-tag-format='formatEgroup'></span>  
+        </div>
+        <button class='btn btn-sm btn-success' mvc-click='addEgroup'>
+          Add
+        </button>
+      </div>
     </div>
-  </div>           
-
-  <div class='row'>
-    <div class='col-8 col-md-6 col-lg-6  mb-3'>
-      {{ fields.Switch(id=contact.acct.id, mvc_checked='contact.acct', label=contact.acct.verbose) }}
-    </div>
-    <div class='col-4 col-md-6 col-lg-5 mb-3' mvc-show='contact.acct'>
-      <button class='btn btn-outline-primary btn-sm btn-outline' mvc-click='accessAccount'>
-        Account
-      </button>
-    </div>
-  </div>
+  </div>  
 </fieldset>
 
 {% include "./contact-account.html" %}

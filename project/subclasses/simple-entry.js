@@ -2,6 +2,7 @@ import {MVC} from '/~static/lib/client/core/mvc.js';
 import {Module} from '/~static/lib/client/core/module.js';
 
 class Verror extends MVC {
+  // Basic errors/clearing
   async clear(ev) {
     if (await this.canClear(ev)) {
       this.clearIt();
@@ -10,8 +11,8 @@ class Verror extends MVC {
 
   clearIt() {
     this.clearErrors();
-    this.setDefaults();
-    this.clearList();
+    this.setDefaults();   // in super
+    this.clearList();     // in super
 
     this.model.existingEntry = false;
 
@@ -60,8 +61,6 @@ class Verror extends MVC {
 }
 
 class ContactWithAddress extends Verror {
-  
-  // ADDRESS
   async countryChanged(nv, ov) {
     if (!nv) return;
 
@@ -125,4 +124,3 @@ class ContactWithAddress extends Verror {
 }
 
 export {Verror, ContactWithAddress}
-

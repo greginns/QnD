@@ -161,8 +161,6 @@ class egroup extends Verror {
     let ret = await this.getEgroupFromList(id);
 
     if (ret.id) this.setEgroup(ret.id);
-
-    Module.pager.replaceQuery('id=' + id);
   }
 
   async getEgroupFromList(pk) {
@@ -177,6 +175,8 @@ class egroup extends Verror {
     this.egroupOrig = this.model.egroup.toJSON();
 
     this.highlightList(pk);
+
+    Module.pager.replaceQuery('id=' + pk);
   }
 
   highlightList(pk) {

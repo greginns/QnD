@@ -1,0 +1,54 @@
+<template id='widget-notes'>
+  <section>
+    <div class="modal fade widget-notes-modal" role="dialog" style='z-index: 2100'>
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style='background-color: rgba(0,0,0,.03);'>
+            <div class='row'>
+              <div class='col-12'>
+                <div mvc-text='datetime' mvc-filter='datetime'></div>
+                <div mvc-text='operator'></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-body">
+            <div class='row'>
+              <div class='col-12 col-lg-6 mb-3'>
+                {{ fields.SelectMVC(id='topic', size='1', mvc_value='topic', mvc_each='topics', valueField='value', textField='text', label='Topic') }}
+              </div>
+
+              <div class='col-12 col-lg-6 mb-3'>
+                {{ fields.Char(type='text', id='subject', maxlength='60', mvc_value='subject', label='Subject') }}
+              </div>
+            </div>
+
+            <div class='row' style='min-height: 200px'>
+              <div class='col-12'>
+                <div class='notesEditor'>
+                </div>
+              </div>
+            </div>
+
+            <div class='row mb-5'>
+            </div>
+          </div>
+
+          <div class='modal-footer' style='background-color: rgba(0,0,0,.03);'>
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save'>
+                  Save
+                </button>
+                <button class='btn btn-success' mvc-click='abort'>
+                  Abort
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</template>

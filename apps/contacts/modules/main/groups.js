@@ -150,8 +150,6 @@ class group extends Verror {
     let ret = await this.getEntryFromList(id);
 
     if (ret.id) this.setEntry(ret.id);
-
-    Module.pager.replaceQuery('id=' + id);
   }
 
   async getEntryFromList(pk) {
@@ -166,6 +164,8 @@ class group extends Verror {
     this.originalEntry = this.model.group.toJSON();
 
     this.highlightList(pk);
+
+    Module.pager.replaceQuery('id=' + pk);    
   }
 
   setDefaults() {

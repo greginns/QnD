@@ -157,8 +157,6 @@ class title extends Verror {
     let ret = await this.getTitleFromList(id);
 
     if (ret.id) this.setTitle(ret.id);
-
-    Module.pager.replaceQuery('id=' + id);
   }
 
   async getTitleFromList(pk) {
@@ -173,6 +171,8 @@ class title extends Verror {
     this.titleOrig = this.model.title.toJSON();
 
     this.highlightList(pk);
+
+    Module.pager.replaceQuery('id=' + pk);    
   }
 
   highlightList(pk) {

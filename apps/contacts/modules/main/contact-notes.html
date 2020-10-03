@@ -1,8 +1,24 @@
 <fieldset class="border px-2 contact-misc">
-  <legend class="w-auto">Notes</legend>
+  <legend class="w-auto fieldset-legend">Notes</legend>
   <div class='row'>
     <div class='col-12 mb-3'>
-      {{ fields.Integer(type='text', id=contact.emgname.id, maxlength=contact.emgname.maxLength, mvc_value='contact.emgname', label=contact.emgname.verbose) }}
+      <table class='table table-sm'>
+        <tbody mvc-each='contact.notes' mvc-click='notesEdit'>
+          <tr data-index='$index'>
+            <td><span mvc-text='contact.notes.$index.topicDesc'></span></td>
+            <td><span mvc-text='contact.notes.$index.subject'></span></td>
+            <td><span mvc-text='contact.notes.$index.datetime' mvc-filter='datetime'></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      <button class='btn btn-sm btn-success' mvc-click='notesAdd'>
+        Add 
+      </button>
     </div>
   </div>           
 </fieldset>                

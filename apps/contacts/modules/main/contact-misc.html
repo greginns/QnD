@@ -1,5 +1,5 @@
 <fieldset class="border px-2 contact-misc">
-  <legend class="w-auto">Miscellaneous</legend>
+  <legend class="w-auto fieldset-legend">Miscellaneous</legend>
   <div class='row'>
     <div class='col-12 col-md-8 col-lg-6 mb-3'>
       {{ fields.Date(id=contact.dob.id, maxlength=contact.dob.maxLength, mvc_value='contact.dob', label=contact.dob.verbose) }}
@@ -32,5 +32,32 @@
     <div class='col-12 mb-3'>
       {{ fields.Char(type='text', id=contact.taxno.id, maxlength=contact.taxno.maxLength, mvc_value='contact.taxno', label=contact.taxno.verbose) }}
     </div>
-  </div>                         
+  </div>
+
+  <div class='row'>
+    <div class='col-12 col-md-6 mb-3'>
+      {{ fields.Char(type='text', id=contact.agentno.id, maxlength=contact.agentno.maxLength, mvc_value='contact.agentno', label=contact.agentno.verbose) }}
+    </div>
+
+    <div class='col-12 col-md-6 mb-3'>
+      {{ fields.Float(type='text', min='0', max='99.99', step='1', id=contact.agentper.id, maxlength=contact.agentper.maxLength, mvc_value='contact.agentper', label=contact.agentper.verbose) }}
+    </div>
+  </div>                                       
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      <span mvc-text='agent.fullname'></span>
+    </div>
+  </div>           
+
+  <div class='row'>
+    <div class='col-8 col-md-6 col-lg-6  mb-3'>
+      {{ fields.Switch(id=contact.acct.id, mvc_checked='contact.acct', label=contact.acct.verbose) }}
+    </div>
+    <div class='col-4 col-md-6 col-lg-5 mb-3' mvc-show='contact.acct'>
+      <button class='btn btn-outline-primary btn-sm btn-outline' mvc-click='accessAccount'>
+        Account
+      </button>
+    </div>
+  </div>
 </fieldset>                

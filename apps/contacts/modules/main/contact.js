@@ -4,6 +4,7 @@ import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 import {Multisel} from '/~static/lib/client/widgets/multisel.js';
+import {Notes} from '/~static/lib/client/widgets/notes.js';
 import {Address} from '/~static/apps/contacts/utils/address.js'
 import {ContactWithAddress} from '/~static/project/subclasses/simple-entry.js';
 
@@ -284,7 +285,7 @@ class Contact extends ContactWithAddress {
   }
 
   async addTag() {
-    let tags = this.model.contact.tags;
+    let tags = this.model.contact.tags || [];
     let groups = this.reorgTags();
     let ms = new Multisel('Tags', groups, []);
     let res = await ms.select();
@@ -303,7 +304,7 @@ class Contact extends ContactWithAddress {
     let span = ev.target.closest('span.tag')
     let tag = span.getAttribute('data-tag');
 
-    (bootstrap.Tooltip.getInstance(span)).displose();
+    (bootstrap.Tooltip.getInstance(span)).dispose();
 
     for (let x=0; x<tags.length; x++) {
       if (tags[x].tag == tag) {
@@ -314,13 +315,143 @@ class Contact extends ContactWithAddress {
 
     this.model.contact.tags = tags;
   }
+  
+  // Egroups
+  formatEgroup(entry) {
+    let span = document.createElement('span');
+    let textspan = document.createElement('span');
+    let xspan = document.createElement('span');
+    let dt = dayjs(entry.date);
+    let dtx = dt.format(App.dateFormat);
+    let tmx = dt.format(App.timeFormat);
+
+    xspan.classList.add('tagx');
+    xspan.innerHTML = '&times;';
+    xspan.addEventListener('click', this.delEgroup.bind(this));
+
+    textspan.classList.add('tagtext');
+    textspan.innerText = this.getEgroupDesc(entry.egroup);
+
+    span.classList.add('tag');
+    span.classList.add('mb-2');
+    span.title = dtx + ' ' + tmx;
+    span.setAttribute('data-egroup', entry.egroup);
+    span.setAttribute('data-toggle', 'tooltip');
+    span.setAttribute('data-placement', 'top');
+    span.appendChild(textspan);
+    span.appendChild(xspan);
+
+    (new bootstrap.Tooltip(span)).enable();
+
+    return span;
+  }
+
+  getEgroupDesc(egroup) {
+    let desc = '';
+
+    for (let t=0; t<this.model.egroups.length; t++) {
+      if (this.model.egroups[t].id == egroup) {
+        desc = this.model.egroups[t].desc;
+        break;
+      }
+    }
+
+    return desc;
+  }
+
+  async addEgroup() {
+    /*
+    { 
+      label: 'Group 1', 
+      items: [{text: 'Item 1.1', value: '11'}, {text: 'Item 1.2', value: '12'}],
+    },
+    */
+
+    let egroups = this.model.contact.egroups || [];
+    let items = [];
+    let groups = [];
+
+    for (let t=0; t<this.model.egroups.length; t++) {
+      items.push({text: this.model.egroups[t].desc, value: this.model.egroups[t].id});
+    }
+
+    groups.push({label: 'All Groups', items});
+
+    let ms = new Multisel('E-Groups', groups, []);
+    let res = await ms.select();
+    let dt = (new Date).toJSON();
+
+    for (let egrp of res) {
+      egroups.push({'egroup': egrp, 'date': dt});
+    }
+
+    ms = undefined;
+    this.model.contact.egroups = egroups;
+  }
+
+  delEgroup(ev) {
+    let egroups = this.model.contact.egroups;
+    let span = ev.target.closest('span.tag')
+    let egrp = span.getAttribute('data-egroup');
+
+    (bootstrap.Tooltip.getInstance(span)).dispose();
+
+    for (let x=0; x<egroups.length; x++) {
+      if (egroups[x].egroup == egrp) {
+        egroups.splice(x,1);
+        break;
+      }
+    }
+
+    this.model.contact.egroups = egroups;
+  }
+
+  async notesEdit(ev) {
+    let notes = this.model.contact.notes || [];
+    let notesInst = new Notes();
+    let idx = ev.target.closest('tr').getAttribute('data-index');
+    let note = notes[idx];
+    let topics = [{text: 'Allergies', value: 'A1'}, {text: 'Family', value: 'F'}];
+
+    try {
+      let ret = await notesInst.edit(topics, note.topic, note.subject, note.operator, note.datetime, note.text);
+
+      notes[idx] = {topic: ret.topic, topicDesc: ret.topicDesc, subject: ret.subject, operator: ret.operator, datetime: ret.datetime || (new Date()).toJSON(), text: ret.text};
+      this.model.contact.notes = notes;
+    }
+    catch(e) {
+      console.log(e);
+    }
+  }
+
+  async notesAdd() {
+    let notes = this.model.contact.notes || [];
+    let notesInst = new Notes();
+    let topics = [{text: 'Allergies', value: 'A1'}, {text: 'Family', value: 'F'}];
+    let topic = '';
+    let subject = '';
+    let operator = 'Greg';
+    let datetime = (new Date()).toJSON();
+    let text = '';
+
+    try {
+      let ret = await notesInst.edit(topics, topic, subject, operator, datetime, text);
+
+      notes.push({topic: ret.topic, topicDesc: ret.topicDesc, subject: ret.subject, operator: ret.operator, datetime: ret.datetime || (new Date()).toJSON(), text: ret.text});
+      
+      this.model.contact.notes = notes;
+    }
+    catch(e) {
+      console.log(e);
+    }
+  }
 
   // GOTOs
   goto(ev) {
     let to = ev.target.getAttribute('to');
     let y = utils.findYPosition(this._section.getElementsByClassName(to)[0]);
 
-    window.scrollTo({left: 0, top: y-40, behavior: 'smooth'});
+    window.scrollTo({left: 0, top: y-60, behavior: 'smooth'});
   }
 
   // ghost classes

@@ -159,8 +159,6 @@ class tagcat extends Verror {
     let ret = await this.getTagcatFromList(id);
 
     if (ret.id) this.setTagcat(ret.id);
-
-    Module.pager.replaceQuery('id=' + id);
   }
 
   async getTagcatFromList(pk) {
@@ -175,6 +173,8 @@ class tagcat extends Verror {
     this.tagcatOrig = this.model.tagcat.toJSON();
 
     this.highlightList(pk);
+
+    Module.pager.replaceQuery('id=' + pk);
   }
 
   highlightList(pk) {
