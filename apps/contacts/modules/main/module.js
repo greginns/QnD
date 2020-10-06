@@ -13,6 +13,7 @@ import '/~static/apps/contacts/modules/main/groups.js';
 import '/~static/apps/contacts/modules/main/egroups.js';
 import '/~static/apps/contacts/modules/main/tagcats.js';
 import '/~static/apps/contacts/modules/main/tags.js';
+import '/~static/apps/contacts/modules/main/notecats.js';
 
 import '/~static/project/mixins/mvc_ext.js';
 
@@ -31,6 +32,7 @@ let moduleStart = function() {
     Module.data.country = new TableAccess({modelName: 'country', url: `/contacts/v1/country`});
     Module.data.region = new TableAccess({modelName: 'region', url: `/contacts/v1/region`});
     Module.data.postcode = new TableAccess({modelName: 'postcode', url: `/contacts/v1/postcode`});
+    Module.data.config = new TableAccess({modelName: 'config', url: `/contacts/v1/config`});
 
     const data = new WSDataComm('contacts');                 // WS instances for this app
     const safemode = false;
@@ -92,6 +94,14 @@ let moduleStart = function() {
 
     Module.tableStores.country = new TableStore({accessor: Module.data.country, wmodel, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.country.getAll());
+
+    // Config table ---
+    wmodel = `/contacts/config`;
+
+    data.addModel(wmodel);                          
+
+    Module.tableStores.config = new TableStore({accessor: Module.data.config, wmodel, safemode});  // setup a table store in Module so all pages can access
+    getAllPromises.push(Module.tableStores.config.getAll());
 
     // start following via WS ---
     data.start();

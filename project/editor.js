@@ -1,22 +1,25 @@
 class Editor {
-  constructor(editorEl) {
-    this.editorEl = editorEl;
+  constructor(editorEl, toolbarEl) {
+    //let Delta = Quill.import('delta');
+    this.originalText = '';
     
-    this.Delta = Quill.import('delta');
-
-    this.quill = new Quill(this.editorEl, {
-      theme: 'snow',
-      toolbar: true,
+    this.quill = new Quill(editorEl, {
+      modules: {
+        toolbar: toolbarEl
+      },
+      theme: 'snow'
     });
 
-    this.changes = new this.Delta();
+    //this.changes = new Delta();
 
-    this.quill.on('text-change', function(delta) {
-      this.changes = this.changes.compose(delta);
-    }.bind(this));
+    //this.quill.on('text-change', function(delta) {
+    //  this.changes = this.changes.compose(delta);
+    //}.bind(this));
   }
 
   setText(text) {
+    this.originalText = text;
+
     return this.quill.setText(text);
   }
 
@@ -25,7 +28,8 @@ class Editor {
   }
 
   anyChanges() {
-    return this.changes.length() > 0;
+    return this.getText().trim() != this.originalText.trim();    
+    //return this.changes.length() > 0;
   }
 }
 

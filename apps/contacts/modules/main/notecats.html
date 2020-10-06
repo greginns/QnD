@@ -1,0 +1,45 @@
+<page id='contacts-notecats' style='display: none;'>
+  <section id='contacts-notecats-section'>
+    <div class='row justify-content-center'>
+
+      <div class='col-12 col-md-6 col-lg-6 col-xl-9'>
+        <div class='card'>
+          <div class='card-header'>
+            <h4>Note Categories</h4>
+          </div>
+          
+          <div class='card-body'>
+            <div class='row mb-3'>
+              <div class='col-12'>
+                <textarea mvc-value='notecats' rows='10' cols='40' class='form-control'>
+                </textarea>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-12'>
+                <small>Enter each category on a separate line</small>
+              </div>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                {{ buttons.btn(class='success', mvc_click='save', text='Save Entries') }}
+              </div>
+            </div>            
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</page>

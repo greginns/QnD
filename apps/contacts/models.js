@@ -333,4 +333,31 @@ const Tag = class extends Model {
   }
 };
 
-module.exports = {Contact, Title, Group, Country, Region, Postcode, Egroup, Tagcat, Tag};
+const Config = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.Char({notNull: true, maxLength: 50, verbose: 'ID'}),
+        data: new Fields.Json({verbose: 'Data'}),
+      },
+
+      constraints: {
+        pk: ['id'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['id'],
+      
+      dbschema: 'tenant',
+      app,
+      desc: 'Contact Config Info'
+    }
+  }
+};
+
+module.exports = {Contact, Title, Group, Country, Region, Postcode, Egroup, Tagcat, Tag, Config};

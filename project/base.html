@@ -30,7 +30,8 @@
 
     <script type="text/javascript">
       window.name = (new Date()).valueOf();
-      window.QnD_CSRF = '{{CSRF_Token}}';
+      window.QnD_CSRF = '{{CSRFToken}}';
+      window.USER = JSON.parse('{{USER|safe}}');
     </script>
 
     {% block script %}

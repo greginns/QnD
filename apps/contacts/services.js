@@ -51,6 +51,7 @@ services.output = {
       ctx.dateFormat = dateFormat;
       ctx.timeFormat = timeFormat;
       ctx.TID = req.TID;    
+      ctx.USER = JSON.stringify(req.user);
 
       try {
         tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});

@@ -24,6 +24,7 @@ class Contact extends ContactWithAddress {
     this.model.countries = [];
     this.model.regions = [];
     this.model.postcodes = [];
+    this.model.config = [];
     this.model.tag='';
 
     this.model.existingEntry = false;
@@ -39,13 +40,30 @@ class Contact extends ContactWithAddress {
     this.defaults = {doe: window.dayjs()};
     this.contactListEl = document.getElementById('contactList');
     this.address = new Address();
+    this.notesInst = new Notes();
   }
 
   async ready() {
+    let self = this;
+
     let filterFunc = function(x) {
       // only show active=true
       return x.active;
     }
+
+    let getNoteCats = async function() {
+      // get the note categories
+      let topics = [];
+
+      let rec = await Module.tableStores.config.getOne('notecats');
+      let data = rec.data || [];
+
+      for (let cat of data) {
+        topics.push({desc: cat});
+      }
+
+      self.notesInst.setTopics(topics);
+    };
 
     return new Promise(async function(resolve) {
       // fill up on data
@@ -56,8 +74,11 @@ class Contact extends ContactWithAddress {
       Module.tableStores.tagcat.addView(new TableView({proxy: this.model.tagcats}));
       Module.tableStores.tag.addView(new TableView({proxy: this.model.tags}));
       Module.tableStores.country.addView(new TableView({proxy: this.model.countries}));
-    
+
       this.defaults.contact = await Module.data.contact.getDefault();
+
+      Module.tableStores.config.addWatchedRecord('notecats', getNoteCats);
+      getNoteCats();
 
       resolve();
     }.bind(this));
@@ -408,41 +429,35 @@ class Contact extends ContactWithAddress {
 
   async notesEdit(ev) {
     let notes = this.model.contact.notes || [];
-    let notesInst = new Notes();
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let note = notes[idx];
-    let topics = [{text: 'Allergies', value: 'A1'}, {text: 'Family', value: 'F'}];
 
     try {
-      let ret = await notesInst.edit(topics, note.topic, note.subject, note.operator, note.datetime, note.text);
+      let ret = await this.notesInst.edit(note.topic, note.subject, note.operator, note.datetime, note.text);
 
-      notes[idx] = {topic: ret.topic, topicDesc: ret.topicDesc, subject: ret.subject, operator: ret.operator, datetime: ret.datetime || (new Date()).toJSON(), text: ret.text};
+      notes[idx] = {topic: ret.topic, subject: ret.subject, operator: note.operator, datetime: ret.datetime || (new Date()).toJSON(), text: ret.text};
       this.model.contact.notes = notes;
     }
     catch(e) {
-      console.log(e);
     }
   }
 
   async notesAdd() {
     let notes = this.model.contact.notes || [];
-    let notesInst = new Notes();
-    let topics = [{text: 'Allergies', value: 'A1'}, {text: 'Family', value: 'F'}];
     let topic = '';
     let subject = '';
-    let operator = 'Greg';
+    let operator = window.USER.code;
     let datetime = (new Date()).toJSON();
     let text = '';
 
     try {
-      let ret = await notesInst.edit(topics, topic, subject, operator, datetime, text);
+      let ret = await this.notesInst.edit(topic, subject, operator, datetime, text);
 
-      notes.push({topic: ret.topic, topicDesc: ret.topicDesc, subject: ret.subject, operator: ret.operator, datetime: ret.datetime || (new Date()).toJSON(), text: ret.text});
+      notes.push({topic: ret.topic, subject: ret.subject, operator, datetime: ret.datetime || (new Date()).toJSON(), text: ret.text});
       
       this.model.contact.notes = notes;
     }
     catch(e) {
-      console.log(e);
     }
   }
 
