@@ -446,7 +446,7 @@ class Contact extends ContactWithAddress {
     let notes = this.model.contact.notes || [];
     let topic = '';
     let subject = '';
-    let operator = window.USER.code;
+    let operator = App.USER.code;
     let datetime = (new Date()).toJSON();
     let text = '';
 

@@ -31,6 +31,7 @@ MVC._addInterface('date:boot', async function(ev) {
   try {
     let ret = await m.calendar(mdt);
     this.$updateModel(path, ret.toJSON());
+    m = undefined;
   }
   catch(e) {
   }
@@ -48,6 +49,7 @@ MVC._addInterface('time:boot', async function(ev) {
   try {
     let ret = await t.time(mdt);
     this.$updateModel(path, ret.toJSON());
+    m = undefined;
   }
   catch(e) {
   }

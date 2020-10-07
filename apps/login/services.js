@@ -11,22 +11,21 @@ const config = require(root + '/config.json');
 
 async function verifySession(req) {
   // verify session strategy
-  var sessID = req.cookies.tenant_session || '';
-  var tenant = null, user = null, tm;
+  let sessID = req.cookies.tenant_session || '';
+  let tenant = null, user = null, tmt, tmu, sess;
 
   if (sessID) {
     sess = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
 
-    if (!sess.err) {
-      tm = await Tenant.selectOne({pgschema, cols: '*', pks: sess.data.tenant});
+    if (sess.status == 200) {
+      tmt = await Tenant.selectOne({pgschema, cols: '*', pks: sess.data.tenant});
 
-      if (tm.isGood()) {
-        let xtenant = tm.data;
+      if (tmt.isGood()) {
+        tmu = await User.selectOne({pgschema: tmt.data.code, cols: '*', pks: sess.data.user});
 
-        tm = await User.selectOne({pgschema: xtenant.code, cols: '*', pks: sess.data.user});
-        if (tm.isGood() && tm.data.active) {
-          tenant = xtenant;
-          user = tm.data;
+        if (tmu.isGood() && tmu.data.active) {
+          tenant = tmt.data;
+          user = tmu.data;
         }
       }
     }
@@ -37,9 +36,9 @@ async function verifySession(req) {
 
 async function verifyBasic(req) {
   // verify basic strategy
-  var tenant = null, user = null, tm;
-  var tup, tu, pswd, x, xtenant, xuser;
-  var authHdr = req.headers.authorization || null;
+  let tenant = null, user = null, tm;
+  let tup, tu, pswd, x, xtenant, xuser;
+  let authHdr = req.headers.authorization || null;
 
   if (!authHdr) return [tenant, user];
 
@@ -67,15 +66,15 @@ async function verifyBasic(req) {
   return [tenant, user];
 }
 
-async function verifyAnonAndCSRF(req, user, strategy) {
+async function verifyAnonAndCSRF(req, user, tenant, strategy) {
   // can we have an Anonymous user?
-  var status = 401;
+  let status = 401;
 
   if (user.code != 'Anonymous' || (user.code == 'Anonymous' && strategy.allowAnon)) {
     let res = true;
 
     if (strategy.needCSRF) { // must we have a valid CSRF token?
-      res = await verifyCSRF(user, req.CSRFToken || null);
+      res = await verifyCSRF(user, tenant, req.CSRFToken || null);
     }
 
     if (res) status = 200;
@@ -84,13 +83,11 @@ async function verifyAnonAndCSRF(req, user, strategy) {
   return status;
 }
 
-async function verifyCSRF(user, token) {
+async function verifyCSRF(user, tenant, token) {
   // get token, check if user matches
-  var tm;
-
   if (!token) return false;
 
-  tm = await CSRF.selectOne({pgschema, pks: token})
+  let tm = await CSRF.selectOne({pgschema: tenant.code, pks: token})
 
   if (tm.isBad()) return false;
 
@@ -126,15 +123,16 @@ module.exports = {
         test Anonymous
         test CSRF
       */
-      var status = 401;
-      var [tenant, user] = await verifySession(req);
+      let status = 401;
+      let [tenant, user] = await verifySession(req);
 
       if (tenant && user) {
-        status = verifyAnonAndCSRF(req, user, strategy);
+        status = await verifyAnonAndCSRF(req, user, tenant, strategy);
       }
 
-      if (status == 401) {
+      if (status != 200) {
         if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, message: strategy.redirect});
+
         return new TravelMessage({type: 'text', status: 401});
       }
         
@@ -152,7 +150,7 @@ module.exports = {
       var [tenant, user] = await verifyBasic(req);
 
       if (tenant && user) {
-        status = verifyAnonAndCSRF(req, user, strategy);
+        status = verifyAnonAndCSRF(req, user, tenant, strategy);
       }
 
       if (status == 401) {

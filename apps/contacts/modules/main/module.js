@@ -18,9 +18,6 @@ import '/~static/apps/contacts/modules/main/notecats.js';
 import '/~static/project/mixins/mvc_ext.js';
 
 let moduleStart = function() {
-  let widgetSetup = function() {
-  }
-
   let connectToData = async function() {
     // setup data table access
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
@@ -111,6 +108,9 @@ let moduleStart = function() {
       // tell everybody that data is ready
       document.dispatchEvent(new CustomEvent('tablestoreready', {bubbles: false}));
     })    
+    .catch(function(err) {
+      console.error(err);
+    })
   }
 
   let startPages = async function() {
@@ -135,8 +135,9 @@ let moduleStart = function() {
     startPages();
   }.bind(this), {once: true});
 
-  widgetSetup();
   connectToData();
 }
+
+window.name = 'HUB_contacts'
 
 moduleStart();
