@@ -20,6 +20,7 @@ import '/~static/project/mixins/mvc_ext.js';
 let moduleStart = function() {
   let connectToData = async function() {
     // setup data table access
+    // gets us access to raw data.
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
     Module.data.title = new TableAccess({modelName: 'title', url: `/contacts/v1/title`});
     Module.data.group = new TableAccess({modelName: 'group', url: `/contacts/v1/group`});
@@ -31,78 +32,81 @@ let moduleStart = function() {
     Module.data.postcode = new TableAccess({modelName: 'postcode', url: `/contacts/v1/postcode`});
     Module.data.config = new TableAccess({modelName: 'config', url: `/contacts/v1/config`});
 
-    const data = new WSDataComm('contacts');                 // WS instances for this app
+    const contactData = new WSDataComm('contacts');                 // WS instances for this app
     const safemode = false;
-    let wmodel, getAllPromises = [];
+    let model, getAllPromises = [];
 
     // Contact table ---
-    wmodel = `/contacts/contact`;                   // url-like of interest to follow model changes
+    model = `/contacts/contact`;                      // url-like of interest to follow model changes
 
-    data.addModel(wmodel);                          // WS data change notifications.  Store model name to follow.  First path segment must be the same as app
+    contactData.addModel(model);                      // WS data change notifications.  
+                                                      // Store model name to follow.  
+                                                      // One WSDataComm instance per app.
+                                                      // First path segment must be the same as app
 
-    // HTTP data access
-    Module.tableStores.contact = new TableStore({accessor:Module.data.contact , wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.contact = new TableStore({accessor: Module.data.contact, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.contact.getAll());               // seed the table store
 
     // Title table ---
-    wmodel = `/contacts/title`;               
+    model = `/contacts/title`;               
 
-    data.addModel(wmodel);                          
+    contactData.addModel(model);                          
 
-    Module.tableStores.title = new TableStore({accessor: Module.data.title, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.title = new TableStore({accessor: Module.data.title, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.title.getAll());
 
     // Group table ---
-    wmodel = `/contacts/group`;               
+    model = `/contacts/group`;               
 
-    data.addModel(wmodel);                          
+    contactData.addModel(model);                          
 
-    Module.tableStores.group = new TableStore({accessor: Module.data.group, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.group = new TableStore({accessor: Module.data.group, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.group.getAll());
 
     // Egroup table ---
-    wmodel = `/contacts/egroup`;               
+    model = `/contacts/egroup`;               
 
-    data.addModel(wmodel);                          
+    contactData.addModel(model);                          
 
-    Module.tableStores.egroup = new TableStore({accessor: Module.data.egroup, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.egroup = new TableStore({accessor: Module.data.egroup, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.egroup.getAll());      
 
     // Tagcat table ---
-    wmodel = `/contacts/tagcat`;               
+    model = `/contacts/tagcat`;               
 
-    data.addModel(wmodel);                          
+    contactData.addModel(model);                          
 
-    Module.tableStores.tagcat = new TableStore({accessor: Module.data.tagcat, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.tagcat = new TableStore({accessor: Module.data.tagcat, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.tagcat.getAll());      
 
     // Tag table ---
-    wmodel = `/contacts/tag`;
+    model = `/contacts/tag`;
 
-    data.addModel(wmodel);                          
+    contactData.addModel(model);                          
 
-    Module.tableStores.tag = new TableStore({accessor: Module.data.tag, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.tag = new TableStore({accessor: Module.data.tag, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.tag.getAll());
 
     // Country table ---
-    wmodel = `/contacts/country`;               
+    model = `/contacts/country`;               
 
-    data.addModel(wmodel);                          
+    contactData.addModel(model);                          
 
-    Module.tableStores.country = new TableStore({accessor: Module.data.country, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.country = new TableStore({accessor: Module.data.country, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.country.getAll());
 
     // Config table ---
-    wmodel = `/contacts/config`;
+    model = `/contacts/config`;
 
-    data.addModel(wmodel);                          
+    contactData.addModel(model);                          
 
-    Module.tableStores.config = new TableStore({accessor: Module.data.config, wmodel, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.config = new TableStore({accessor: Module.data.config, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.config.getAll());
 
     // start following via WS ---
-    data.start();
+    contactData.start();
 
+    // fill up on data
     Promise.all(getAllPromises)
     .then(function() {
       // tell everybody that data is ready

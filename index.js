@@ -91,7 +91,7 @@ const sslServerRequest = async function(req, res) {
     console.log(err)      
     rm = (new TravelMessage({status: 500, data: err})).toResponse();
   }
-  
+
   mw.reply.reply(res, rm);
 };
 

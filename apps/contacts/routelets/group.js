@@ -4,6 +4,7 @@ const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {VIEW, CREATE, UPDATE, DELETE} = require(root + '/lib/server/utils/authorization.js');
 const {getAppName, getSubappName} = require(root + '/lib/server/utils/utils.js');
+const {urlQueryParse} = require(root + '/lib/server/utils/url.js');
 
 const app = getAppName(__dirname);
 const subapp = getSubappName(__filename);
@@ -22,7 +23,8 @@ Router.add(new RouterMessage({
   level: VIEW,
   resp: {type: 'json', schema: [Group]},
   fn: async function(req) {
-    let tm = await services[subapp].getMany({pgschema: req.TID, query: req.query});
+    let {rec, cols, limit, offset} = urlQueryParse(req.query);
+    let tm = await services[subapp].getMany({pgschema: req.TID, rec, cols, limit, offset});
 
     return tm.toResponse();
   },

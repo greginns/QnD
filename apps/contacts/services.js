@@ -4,14 +4,16 @@ const uuidv1 = require('uuid/v1');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
+const {jsonQueryExecify} = require(root + '/lib/server/utils/sqlUtil.js');
 const {CSRF} = require(root + '/apps/login/models.js');
 const {Contact, Title, Group, Egroup, Tag, Tagcat} = require(root + '/apps/contacts/models.js');
 
+const app = 'contacts';
 const path = 'servelets';
 const services = {};
 
-const dateFormat = 'MM/DD/YYYY';
-const timeFormat = 'hh:mm A';
+const dateFormat = 'YYYY-MM-DD';
+const timeFormat = 'h:mm A';
 
 const makeCSRF = async function(tenant, user) {
   // tenant and user are their codes
@@ -31,6 +33,10 @@ for (let file of fs.readdirSync(`${__dirname}/${path}`)) {
 }
 
 // Any other needed services
+services.query = function({pgschema = '', query = '', values = []}) {
+  return jsonQueryExecify({query, app, pgschema, values});
+}
+
 services.output = {
   main: async function(req) {
     // main admin manage page.  Needs a user so won't get here without one

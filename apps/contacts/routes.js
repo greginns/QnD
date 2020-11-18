@@ -7,6 +7,7 @@ const {ACCESS} = require(root + '/lib/server/utils/authorization.js');
 const loginServices = require(root + '/apps/login/services.js');
 const services = require(root + '/apps/contacts/services.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
+const {urlQueryParse} = require(root + '/lib/server/utils/url.js');
 const app = getAppName(__dirname);
 const subapp = 'modules';
 const path = 'routelets';
@@ -21,7 +22,6 @@ Router.add(new RouterMessage({
   app,
   subapp,
   version: 'v1',
-  //path: ['/main', '/main/:etc'], 
   path: ['/contactpage', '/contactpage/:etc', '/contactpage/:etc/:etc', '/contactpage/:etc/:etc/:etc'], 
   rewrite: true,
   id: 'contacts',
@@ -37,6 +37,32 @@ Router.add(new RouterMessage({
     strategies: [
       {session: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
       {basic: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+    ],
+  }
+}));
+
+// query route
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'contact',
+  version: 'v1',
+  path: ['/query'], 
+  rewrite: true,
+  id: 'contactsQuery',
+  level: ACCESS,
+  desc: 'Contact Query',
+  inAPI: false,
+  fn: async function(req) {
+    let {query, values} = urlQueryParse(req.query);
+    let tm = await services.query({pgschema: req.TID, query, values});
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: true}},
     ],
   }
 }));

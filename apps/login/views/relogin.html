@@ -51,8 +51,8 @@
 </div>
 
 <script type="module">
-import {QnD} from '/static/v1/static/lib/client/core/qnd.js';
-import {io} from "/static/v1/static/lib/client/core/io.js";
+import {App} from '/~static/lib/client/core/app.js';
+import {io} from '/~static/lib/client/core/io.js';
 
 (function() {  
   let opts;
@@ -120,6 +120,6 @@ import {io} from "/static/v1/static/lib/client/core/io.js";
     open();
   }
 
-  QnD.widgets.login = {open};
+  App.reLogin = open;
 })();
 </script>

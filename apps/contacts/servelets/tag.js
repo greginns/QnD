@@ -2,7 +2,6 @@ const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 //const {zapPubsub} = require(root + '/lib/server/utils/pubsubs.js');
 const {getAppName, getSubappName} = require(root + '/lib/server/utils/utils.js');
-const {modelQueryParse} = require(root + '/lib/server/utils/url.js');
 
 const app = getAppName(__dirname);
 const subapp = getSubappName(__dirname);
@@ -10,11 +9,9 @@ const subapp = getSubappName(__dirname);
 const { Tag } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
-  getMany: async function({pgschema = '', query = {}} = {}) {
+  getMany: async function({pgschema='', rec={}, cols=['*'], limit, offset} = {}) {
     // get one or more Tag rows
-    let {rec, cols} = modelQueryParse(query);
-    
-    return await Tag.select({pgschema, rec, cols, options: query});    
+    return await Tag.select({pgschema, rec, cols, limit, offset});     
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

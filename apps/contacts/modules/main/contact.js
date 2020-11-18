@@ -2,7 +2,7 @@ import {App} from '/~static/lib/client/core/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {TableView} from '/~static/lib/client/core/data.js';
+import {TableView, TableQuery} from '/~static/lib/client/core/data.js';
 import {Multisel} from '/~static/lib/client/widgets/multisel.js';
 import {Notes} from '/~static/lib/client/widgets/notes.js';
 import {Address} from '/~static/apps/contacts/utils/address.js'
@@ -136,11 +136,11 @@ class Contact extends ContactWithAddress {
     let res = (this.model.existingEntry) ? await Module.tableStores.contact.update(contact.id, diffs) : await Module.tableStores.contact.insert(contact);
 
     if (res.status == 200) {
-      utils.modals.toast('CONTACT',(this.model.existingEntry) ? contact.fullname + ' Updated' : 'Created', 2000);
+      utils.modals.toast('CONTACT', (this.model.existingEntry) ? contact.fullname + ' Updated' : 'Created', 2000);
    
       this.contactOrig = this.model.contact.toJSON();
 
-      this.clearIt();
+      if (!this.model.existingEntry) this.clearIt();
     }
     else {
       this.displayErrors(res);
@@ -471,6 +471,26 @@ class Contact extends ContactWithAddress {
 
   // ghost classes
   clearList() {}
+
+  test() {
+    const first = 'Greggie';
+
+    let func = function(rec) {
+      return rec.first == first;
+    }
+
+    let query = {
+      Contact: {
+        columns: ['*'],
+        where: '"contacts_Contact"."first" = $1'
+      }
+    }
+
+    let values = [first];
+    let conditions = {'/contacts/contact': func};
+
+    new TableQuery({accessor: Module.data.contact, query, values, conditions});
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

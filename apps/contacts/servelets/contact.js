@@ -2,7 +2,6 @@ const root = process.cwd();
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {zapPubsub} = require(root + '/lib/server/utils/pubsubs.js');
 const {getAppName, getSubappName} = require(root + '/lib/server/utils/utils.js');
-const {modelQueryParse} = require(root + '/lib/server/utils/url.js');
 
 const { Contact } = require(root + '/apps/contacts/models.js');
 
@@ -25,9 +24,8 @@ const ilikes = [
 const json = ['tags'];
 
 module.exports = {
-  getMany: async function({pgschema = '', query = {}} = {}) {
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[]} = {}) {
     // get one or more Contacts
-    let {rec, cols, where, values} = modelQueryParse(query);
 
     if (where) {
       return await Contact.query({pgschema, where, values, cols});    
