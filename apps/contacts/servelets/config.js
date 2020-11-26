@@ -9,9 +9,11 @@ const subapp = getSubappName(__dirname);
 const { Config } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
-  getMany: async function({pgschema='', rec={}, cols=['*'], limit, offset} = {}) {
-    // get one or more Config rows
-    return await Config.select({pgschema, rec, cols, limit, offset});    
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // get one or more Configs
+    return (where) 
+      ? await Config.where({pgschema, where, values, cols, limit, offset, orderby}) 
+      : await Config.select({pgschema, rec, cols, limit, offset, orderby});
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

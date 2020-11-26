@@ -23,8 +23,8 @@ Router.add(new RouterMessage({
   level: VIEW,
   resp: {type: 'json', schema: [Region]},
   fn: async function(req) {
-    let {rec, cols, limit, offset} = urlQueryParse(req.query);
-    let tm = await services[subapp].getMany({pgschema: req.TID, rec, cols, limit, offset});
+    let {rec, cols, where, values, limit, offset, orderby} = urlQueryParse(req.query);
+    let tm = await services[subapp].getMany({pgschema: req.TID, rec, cols, where, values, limit, offset, orderby});
 
     return tm.toResponse();
   },

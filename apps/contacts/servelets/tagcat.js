@@ -8,9 +8,11 @@ const subapp = getSubappName(__dirname);
 const { Tagcat } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
-  getMany: async function({pgschema='', rec={}, cols=['*'], limit, offset} = {}) {
-    // get one or more Tagcat rows
-    return await Tagcat.select({pgschema, rec, cols, limit, offset});     
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // get one or more Tagcats
+    return (where) 
+      ? await Tagcat.where({pgschema, where, values, cols, limit, offset, orderby}) 
+      : await Tagcat.select({pgschema, rec, cols, limit, offset, orderby});
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

@@ -145,7 +145,23 @@ class Address extends MVC{
   }
 
   async getPostcodes(filters) {
-    let res = await Module.data.postcode.getMany({filters});
+    let where = [], values = [], idx = 0;
+
+    for (let field in filters) {
+      idx++;
+      values.push(filters[field]);
+
+      if (field == 'city') {
+        where.push(`"${field}" ILIKE $${idx} || '%'`);  // ILIKE and Starts with  ||'%'
+      }
+      else {
+        where.push(`"${field}" = $${idx}`);
+      }
+    }
+
+    where = where.join(' AND ');
+
+    let res = await Module.data.postcode.getMany({where, values});
 
     return (res.status == 200) ? res.data : [];
   }

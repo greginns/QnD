@@ -9,27 +9,11 @@ const subapp = getSubappName(__dirname);
 const { Postcode } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
-  getMany: async function({pgschema='', rec={}, cols=['*'], limit, offset} = {}) {
-    // get one or more Postcode rows
-
-    // build query rather than a plain select
-    let where = [], values = [], idx = 0;
-
-    for (let field in rec) {
-      idx++;
-      values.push(rec[field]);
-
-      if (field == 'city') {
-        where.push(`"${field}" ILIKE $${idx} || '%'`);  // ILIKE and Starts with  ||'%'
-      }
-      else {
-        where.push(`"${field}" = $${idx}`);
-      }
-    }
-
-    where = where.join(' AND ');
-
-    return await Postcode.query({pgschema, where, values, cols});    
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // get one or more Postcodes
+    return (where) 
+      ? await Postcode.where({pgschema, where, values, cols, limit, offset, orderby}) 
+      : await Postcode.select({pgschema, rec, cols, limit, offset, orderby});
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

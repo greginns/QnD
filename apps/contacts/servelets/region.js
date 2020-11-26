@@ -9,9 +9,11 @@ const subapp = getSubappName(__dirname);
 const { Region } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
-  getMany: async function({pgschema='', rec={}, cols=['*'], limit, offset} = {}) {
-    // get one or more Region rows
-    return await Region.select({pgschema, rec, cols, limit, offset});    
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // get one or more Regions
+    return (where) 
+      ? await Region.where({pgschema, where, values, cols, limit, offset, orderby}) 
+      : await Region.select({pgschema, rec, cols, limit, offset, orderby});
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

@@ -8,9 +8,11 @@ const subapp = getSubappName(__dirname);
 const { Group } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
-  getMany: async function({pgschema='', rec={}, cols=['*'], limit, offset} = {}) {
-    // get one or more Group rows
-    return await Group.select({pgschema, rec, cols, limit, offset});    
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // get one or more Group
+    return (where) 
+      ? await Group.where({pgschema, where, values, cols, limit, offset, orderby}) 
+      : await Group.select({pgschema, rec, cols, limit, offset, orderby});
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

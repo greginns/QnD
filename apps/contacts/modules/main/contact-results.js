@@ -1,7 +1,7 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-//import {TableView} from '/~static/lib/client/core/data.js';
+import {TableQuery} from '/~static/lib/client/core/data.js';
 
 class Searchresults extends MVC {
   constructor(element) {
@@ -45,7 +45,53 @@ class Searchresults extends MVC {
   }
 
   async search(filters) {
-    let res = await Module.data.contact.getMany({filters});
+    const ilikes = [
+      'first',
+      'last',
+      'group',
+      'address1',
+      'address2',
+      'city',
+      'email',
+      'email2',
+      'emgname',
+      'emgrelation',
+      'occupation',
+    ];
+    
+    const json = ['tags'];
+
+    // build where rather than a plain select
+    let idx = 0;
+    let where = [], values = [];
+
+    for (let field in filters) {
+      idx++;
+
+      if (ilikes.indexOf(field) > -1) {
+        where.push(`"${field}" ILIKE $${idx} || '%'`);  // ILIKE and Starts with  ||'%'
+        values.push(filters[field]);
+      }
+      else if (json.indexOf(field) > -1) {
+        if (filters[field].indexOf(',') > -1) {
+          // array
+          where.push(`"${field}"::jsonb ?& $${idx}`);  // "field"::jsonb ?& ['1','2']  do all elements exist?
+          values.push(filters[field].split(','));
+        }
+        else {
+          where.push(`"${field}"::jsonb ? $${idx}`);  // "field"::jsonb ? '1'  does element exist?
+          values.push(filters[field]);  
+        }
+      }
+      else {
+        where.push(`"${field}" = $${idx}`);
+        values.push(filters[field]);
+      }
+    }
+
+    where = where.join(' AND ');
+
+    let res = await Module.data.contact.getMany({where, values});
 
     if (res.status == 200 && res.data.length > 0) {
       this.display(res.data)

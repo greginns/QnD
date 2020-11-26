@@ -8,9 +8,11 @@ const subapp = getSubappName(__dirname);
 const { Title } = require(root + `/apps/${app}/models.js`);
 
 module.exports = {
-  getMany: async function({pgschema='', rec={}, cols=['*'], limit, offset} = {}) {
-    // get one or more Title rows
-    return await Title.select({pgschema, rec, cols, limit, offset});     
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // get one or more Titles
+    return (where) 
+      ? await Title.where({pgschema, where, values, cols, limit, offset, orderby}) 
+      : await Title.select({pgschema, rec, cols, limit, offset, orderby});
   },
   
   getOne: async function({pgschema = '', rec = {}} = {}) {

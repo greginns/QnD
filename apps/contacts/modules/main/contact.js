@@ -469,7 +469,7 @@ class Contact extends ContactWithAddress {
     window.scrollTo({left: 0, top: y-60, behavior: 'smooth'});
   }
 
-  // ghost classes
+  // ghost methods
   clearList() {}
 
   test() {
