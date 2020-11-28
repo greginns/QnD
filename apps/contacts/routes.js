@@ -1,27 +1,24 @@
 const root = process.cwd();
-const fs = require("fs");
 
-const {Router, RouterMessage} = require(root + '/lib/server/utils/router.js');
+const {Router, RouterMessage, Routes} = require(root + '/lib/server/utils/router.js');
 const {Authentication} = require(root + '/lib/server/utils/authentication.js');
 const {ACCESS} = require(root + '/lib/server/utils/authorization.js');
 const loginServices = require(root + '/apps/login/services.js');
-const services = require(root + '/apps/contacts/services.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {urlQueryParse} = require(root + '/lib/server/utils/url.js');
+
 const app = getAppName(__dirname);
-const subapp = 'modules';
-const path = 'routelets';
+const version = 'v1';
 
-for (let file of fs.readdirSync(`${__dirname}/${path}`)) {
-  require(`./${path}/${file}`);
-}
+const models = require(root + `/apps/${app}/models.js`);
+const services = require(root + `/apps/${app}/services.js`);
 
-// page routes
+// Page route
 Router.add(new RouterMessage({
   method: 'get',
   app,
-  subapp,
-  version: 'v1',
+  subapp: 'modules',
+  version,
   path: ['/contactpage', '/contactpage/:etc', '/contactpage/:etc/:etc', '/contactpage/:etc/:etc/:etc'], 
   rewrite: true,
   id: 'contacts',
@@ -41,12 +38,12 @@ Router.add(new RouterMessage({
   }
 }));
 
-// query route
+// Query route
 Router.add(new RouterMessage({
   method: 'get',
   app,
   subapp: 'contact',
-  version: 'v1',
+  version,
   path: ['/query'], 
   rewrite: true,
   id: 'contactsQuery',
@@ -66,6 +63,18 @@ Router.add(new RouterMessage({
     ],
   }
 }));
+
+// Model Routes
+new Routes({app, subapp: 'config', version, model: models.Config, services});
+new Routes({app, subapp: 'contact', version, model: models.Contact, services});
+new Routes({app, subapp: 'country', version, model: models.Country, services});
+new Routes({app, subapp: 'egroup', version, model: models.Egroup, services});
+new Routes({app, subapp: 'group', version, model: models.Group, services});
+new Routes({app, subapp: 'postcode', version, model: models.Postcode, services});
+new Routes({app, subapp: 'region', version, model: models.Region, services});
+new Routes({app, subapp: 'tag', version, model: models.Tag, services});
+new Routes({app, subapp: 'tagcat', version, model: models.Tagcat, services});
+new Routes({app, subapp: 'title', version, model: models.Title, services});
 
 //strategy rtns
 Authentication.add(app, 'session', async function(req, security, strategy) {

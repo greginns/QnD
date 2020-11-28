@@ -1,16 +1,16 @@
 const root = process.cwd();
-const fs = require("fs");
 const uuidv1 = require('uuid/v1');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {jsonQueryExecify} = require(root + '/lib/server/utils/sqlUtil.js');
+const {modelService} = require(root + '/lib/server/utils/services.js');
 const {CSRF} = require(root + '/apps/login/models.js');
-const {Contact, Title, Group, Egroup, Tag, Tagcat} = require(root + '/apps/contacts/models.js');
 
 const app = 'contacts';
-const path = 'servelets';
 const services = {};
+
+const models = require(root + `/apps/${app}/models.js`);
 
 const dateFormat = 'YYYY-MM-DD';
 const timeFormat = 'h:mm A';
@@ -26,11 +26,17 @@ const makeCSRF = async function(tenant, user) {
   return CSRFToken;
 }
 
-for (let file of fs.readdirSync(`${__dirname}/${path}`)) {
-  let name = file.split('.')[0];
-
-  services[name] = require(`./${path}/${file}`);
-}
+// Model services
+services.config = new modelService({model: models.Config});
+services.contact = new modelService({model: models.Contact});
+services.country = new modelService({model: models.Country});
+services.egroup = new modelService({model: models.Egroup});
+services.group = new modelService({model: models.Group});
+services.postcode = new modelService({model: models.Postcode});
+services.region = new modelService({model: models.Region});
+services.tag = new modelService({model: models.Tag});
+services.tagcat = new modelService({model: models.Tagcat});
+services.title = new modelService({model: models.Title});
 
 // Any other needed services
 services.query = function({pgschema = '', query = '', values = []}) {
@@ -47,12 +53,12 @@ services.output = {
       let tmpl = 'apps/contacts/modules/main/module.html';
 
       ctx.CSRFToken = await makeCSRF(req.TID, req.user.code);
-      ctx.contact = Contact.getColumnDefns();
-      ctx.title = Title.getColumnDefns();
-      ctx.group = Group.getColumnDefns();
-      ctx.egroup = Egroup.getColumnDefns();
-      ctx.tag = Tag.getColumnDefns();
-      ctx.tagcat = Tagcat.getColumnDefns();
+      ctx.contact = models.Contact.getColumnDefns();
+      ctx.title = models.Title.getColumnDefns();
+      ctx.group = models.Group.getColumnDefns();
+      ctx.egroup = models.Egroup.getColumnDefns();
+      ctx.tag = models.Tag.getColumnDefns();
+      ctx.tagcat = models.Tagcat.getColumnDefns();
 
       ctx.dateFormat = dateFormat;
       ctx.timeFormat = timeFormat;
