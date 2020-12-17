@@ -120,7 +120,7 @@ const Session = class extends Model {
       
       orderBy: ['issued'],
       
-      dbschema: 'all',
+      dbschema: '',
       app
     }
   }

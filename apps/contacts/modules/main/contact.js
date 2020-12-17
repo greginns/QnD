@@ -7,6 +7,7 @@ import {Multisel} from '/~static/lib/client/widgets/multisel.js';
 import {Notes} from '/~static/lib/client/widgets/notes.js';
 import {Address} from '/~static/apps/contacts/utils/address.js'
 import {ContactWithAddress} from '/~static/project/subclasses/simple-entry.js';
+import {io} from '/~static/lib/client/core/io.js';
 
 class Contact extends ContactWithAddress {
   constructor(element) {
@@ -473,6 +474,10 @@ class Contact extends ContactWithAddress {
   clearList() {}
 
   test() {
+    io.test()
+  }
+
+  testx() {
     const first = 'Greggie';
 
     let func = function(rec) {

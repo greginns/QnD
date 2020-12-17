@@ -40,7 +40,7 @@ let moduleStart = function() {
     model = `/contacts/contact`;                      // url-like of interest to follow model changes
 
     contactData.addModel(model);                      // WS data change notifications.  
-                                                      // Store model name to follow.  
+                                                      // Store model name to watch/follow.  
                                                       // One WSDataComm instance per app.
                                                       // First path segment must be the same as app
 

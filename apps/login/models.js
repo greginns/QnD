@@ -32,7 +32,7 @@ const User =  class extends Model {
       
       orderBy: ['name'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app
     }
   }
@@ -57,7 +57,7 @@ const Group =  class extends Model {
       
       orderBy: ['name'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app
     }
   }
@@ -83,7 +83,7 @@ const CSRF = class extends Model {
       
       orderBy: ['issued'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app
     }
   }

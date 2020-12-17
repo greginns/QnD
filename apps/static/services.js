@@ -52,7 +52,7 @@ module.exports = {
     let tm = new TravelMessage();
 
     try {
-      tm.data = await fs.readFile(root + '/hub-spoke.png');  
+      tm.data = await fs.readFile(root + '/db.png');  //hub-spoke
       tm.type = 'png';
     }
     catch(err) {

@@ -92,7 +92,7 @@ const sslServerRequest = async function(req, res) {
     rm = (new TravelMessage({status: 500, data: err})).toResponse();
   }
 
-  mw.reply.reply(res, rm);
+  mw.reply.reply(req, res, rm);
 };
 
 const sslServerUpgrade = async function(req, socket, head) {

@@ -19,11 +19,23 @@ Router.add(new RouterMessage({
   app,
   subapp: 'modules',
   version,
-  path: ['/contactpage', '/contactpage/:etc', '/contactpage/:etc/:etc', '/contactpage/:etc/:etc/:etc'], 
+  path: [
+    '/schemabuilder', 
+    '/schemabuilder/:etc', 
+    '/schemabuilder/:etc/:etc', 
+    '/schemabuilder/:etc/:etc/:etc',
+    '/schemabuilder/:etc/:etc/:etc/:etc',
+    '/schemabuilder/:etc/:etc/:etc/:etc/:etc',
+    '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+  ], 
   rewrite: true,
-  id: 'contacts',
+  id: 'schemabuilder',
   level: ACCESS,
-  desc: 'Contact Page',
+  desc: 'Schema Builder',
   inAPI: false,
   fn: async function(req) {
     let tm = await services.output.main(req);
@@ -42,17 +54,17 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app,
-  subapp: 'contact',
+  subapp: 'db4workspace',
   version,
   path: ['/query'], 
   rewrite: true,
-  id: 'contactsQuery',
+  id: 'Db4Query',
   level: ACCESS,
-  desc: 'Contact Query',
+  desc: 'Db4 Query',
   inAPI: false,
   fn: async function(req) {
     let {query, values} = urlQueryParse(req.query);
-    let tm = await services.query({pgschema: req.TID, query, values});
+    let tm = await services.query({pgschema: 'public', query, values});
 
     return tm.toResponse();
   },
@@ -65,16 +77,9 @@ Router.add(new RouterMessage({
 }));
 
 // Model Routes
-new Routes({app, subapp: 'config', version, allowCORS: true, model: models.Config, services});
-new Routes({app, subapp: 'contact', version, allowCORS: true, model: models.Contact, services});
-new Routes({app, subapp: 'country', version, allowCORS: true, model: models.Country, services});
-new Routes({app, subapp: 'egroup', version, allowCORS: true, model: models.Egroup, services});
-new Routes({app, subapp: 'group', version, allowCORS: true, model: models.Group, services});
-new Routes({app, subapp: 'postcode', version, allowCORS: true, model: models.Postcode, services});
-new Routes({app, subapp: 'region', version, allowCORS: true, model: models.Region, services});
-new Routes({app, subapp: 'tag', version, allowCORS: true, model: models.Tag, services});
-new Routes({app, subapp: 'tagcat', version, allowCORS: true, model: models.Tagcat, services});
-new Routes({app, subapp: 'title', version, allowCORS: true, model: models.Title, services});
+new Routes({app, subapp: 'db4workspace', version, allowCORS: true, model: models.Db4workspace, services, pgschema: 'public'});
+new Routes({app, subapp: 'db4app', version, allowCORS: true, model: models.Db4app, services, pgschema: 'public'});
+new Routes({app, subapp: 'db4table', version, allowCORS: true, model: models.Db4table, services, pgschema: 'public'});
 
 //strategy rtns
 Authentication.add(app, 'session', async function(req, security, strategy) {

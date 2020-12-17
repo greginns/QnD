@@ -7,8 +7,8 @@ const {SendMessage} = require(root + '/lib/server/utils/messages.js');
 //var qstr = 'p1=val1&p2=val2&p2=val21';
 //console.log(qParse(qstr));
 
-const tenant = 'gm';
-const migApp = 'contacts';
+const tenant = 'public';
+const migApp = 'schema';
 
 (async function() {
   let res = await migration({tenant, migApp});

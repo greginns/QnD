@@ -176,11 +176,11 @@ module.exports = {
 
       // tenant valid?
       tm = await Tenant.selectOne({pgschema, cols: '', pks: body.tenant});
-      if (tm.err) return new TravelMessage({status: 403});
+      if (tm.status != 200) return new TravelMessage({status: 403});
 
       // user valid?
       tm = await User.selectOne({pgschema: body.tenant, cols: 'password', pks: body.username});
-      if (tm.err) return new TravelMessage({status: 403});
+      if (tm.status != 200) return new TravelMessage({status: 403});
 
       // password valid?
       match = await bcrypt.compare(body.password, tm.data.password);

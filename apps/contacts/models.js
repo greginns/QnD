@@ -88,7 +88,7 @@ const Contact = class extends Model {
       
       orderBy: ['last', 'first'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Contact Master'
     }
@@ -116,7 +116,7 @@ const Title = class extends Model {
       
       orderBy: ['title'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Contact Titles'
     }
@@ -144,7 +144,7 @@ const Group = class extends Model {
       
       orderBy: ['type'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Contact Group Types'
     }
@@ -172,7 +172,7 @@ const Country = class extends Model {
       
       orderBy: ['name'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Countries'
     }
@@ -202,7 +202,7 @@ const Region = class extends Model {
       
       orderBy: ['name'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Regions'
     }
@@ -237,7 +237,7 @@ const Postcode = class extends Model {
       
       orderBy: ['country', 'postcode'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Postal Codes'
     }
@@ -266,7 +266,7 @@ const Egroup = class extends Model {
       
       orderBy: ['desc'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Email Groups'
     }
@@ -294,7 +294,7 @@ const Tagcat = class extends Model {
       
       orderBy: ['desc'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Tag categories'
     }
@@ -326,7 +326,7 @@ const Tag = class extends Model {
       
       orderBy: ['desc'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Tags'
     }
@@ -353,7 +353,7 @@ const Config = class extends Model {
       
       orderBy: ['id'],
       
-      dbschema: 'tenant',
+      dbschema: '',
       app,
       desc: 'Contact Config Info'
     }

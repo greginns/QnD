@@ -58,7 +58,7 @@ import {io} from '/~static/lib/client/core/io.js';
   let opts;
   let modalEl = new bootstrap.Modal(document.getElementById('tenant-relogin'), {backdrop: 'static', keyboard: false});
 
-  let tenantEl = document.getElementById('tenant');
+  let tenantEl = document.getElementById('tenant-relogin-tenant');
   let usernameEl = document.getElementById('tenant-relogin-username');
   let passwordEl = document.getElementById('tenant-relogin-password');
   let loginBtnEl = document.getElementById('tenant-relogin-button');
@@ -120,6 +120,6 @@ import {io} from '/~static/lib/client/core/io.js';
     open();
   }
 
-  App.reLogin = open;
+  App.reLogin = popup;
 })();
 </script>
