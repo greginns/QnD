@@ -2,6 +2,7 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
 import {Pages} from '/~static/lib/client/core/paging.js';
+import {io} from '/~static/lib/client/core/io.js';
 
 // js for pages
 import '/~static/apps/schema/modules/main/navbar.js';
@@ -14,8 +15,26 @@ import '/~static/apps/schema/modules/main/app-create.js';
 import '/~static/apps/schema/modules/main/app-update.js';
 import '/~static/apps/schema/modules/main/app-delete.js';
 import '/~static/apps/schema/modules/main/table-list.js';
+import '/~static/apps/schema/modules/main/table-create.js';
+import '/~static/apps/schema/modules/main/table-update.js';
+import '/~static/apps/schema/modules/main/table-delete.js';
+import '/~static/apps/schema/modules/main/column-list.js';
+import '/~static/apps/schema/modules/main/column-create.js';
 
 import '/~static/project/mixins/mvc_ext.js';
+
+class db4TableAccess extends TableAccess {
+  constructor({modelName, url=''} = {}) {
+    super({modelName, url});
+  }
+
+  async updateColumns(table, colData) {
+    let rec = {};
+    rec['db4table'] = colData;
+
+    return await io.put(rec, `/schema/v1/db4table/${encodeURIComponent(table)}/column`);
+  }
+}
 
 let moduleStart = function() {
   let connectToData = async function() {
@@ -23,16 +42,16 @@ let moduleStart = function() {
     // gets us access to raw data.
     Module.data.db4workspace = new TableAccess({modelName: 'db4workspace', url: `/schema/v1/db4workspace`});
     Module.data.db4app = new TableAccess({modelName: 'db4app', url: `/schema/v1/db4app`});
-    Module.data.db4table = new TableAccess({modelName: 'db4table', url: `/schema/v1/db4table`});
+    Module.data.db4table = new db4TableAccess({modelName: 'db4table', url: `/schema/v1/db4table`});
 
-    const schemaData = new WSDataComm('schema');                 // WS instances for this app
+    const wsDataWatch = new WSDataComm('schema');                 // WS instances for this app
     const safemode = false;
     let model, getAllPromises = [];
     let pgschema = 'public'
 
     model = `/schema/db4workspace`;                    // url-like of interest to follow model changes
 
-    schemaData.addModel(model, pgschema);             // WS data change notifications.  
+    wsDataWatch.addModel(model, pgschema);             // WS data change notifications.  
                                                       // Store model name to watch/follow.  
                                                       // One WSDataComm instance per app.
                                                       // First path segment must be the same as app
@@ -40,11 +59,11 @@ let moduleStart = function() {
     Module.tableStores.db4workspace = new TableStore({accessor: Module.data.db4workspace, model, safemode});  // setup a table store in Module so all pages can access
 
     model = `/schema/db4app`;
-    schemaData.addModel(model, pgschema);
+    wsDataWatch.addModel(model, pgschema);
     Module.tableStores.db4app = new TableStore({accessor: Module.data.db4app, model, safemode});  // setup a table store in Module so all pages can access
 
     model = `/schema/db4table`;
-    schemaData.addModel(model, pgschema);
+    wsDataWatch.addModel(model, pgschema);
     Module.tableStores.db4table = new TableStore({accessor: Module.data.db4table, model, safemode});  // setup a table store in Module so all pages can access
 
     getAllPromises.push(Module.tableStores.db4workspace.getAll());               // seed the table store
@@ -52,7 +71,7 @@ let moduleStart = function() {
     getAllPromises.push(Module.tableStores.db4table.getAll());               // seed the table store
 
     // start following via WS ---
-    schemaData.start();
+    wsDataWatch.start();
 
     // fill up on data
     Promise.all(getAllPromises)

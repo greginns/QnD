@@ -60,6 +60,7 @@ class App_create extends MVC {
       utils.modals.toast('App', 'Created', 2000);
    
       this.model.db4app.name = '';
+      this.model.db4app.desc = '';
       this.gotoList();
     }
     else {

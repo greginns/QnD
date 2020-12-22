@@ -70,7 +70,7 @@ class App_update extends MVC {
     let res = await Module.tableStores.db4app.update(app.id, diffs);
     
     if (res.status == 200) {
-      utils.modals.toast('APP', 'Created', 2000);
+      utils.modals.toast('APP', 'Updated', 2000);
    
       this.model.db4app.name = '';
       this.model.db4app.desc = '';

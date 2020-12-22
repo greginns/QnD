@@ -4,7 +4,6 @@ const uuidv1 = require('uuid/v1');
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {jsonQueryExecify} = require(root + '/lib/server/utils/sqlUtil.js');
-const {modelService} = require(root + '/lib/server/utils/services.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {CSRF} = require(root + '/apps/login/models.js');
 
@@ -27,206 +26,167 @@ const makeCSRF = async function(tenant, user) {
   return CSRFToken;
 }
 
-class Db4workspaceModelService {
-  constructor({model=''} = {}) {
-    this.model = model;
-    this.pgschema = 'public';
-    this.admin = 'b9455c80-757d-4cc8-831f-b7ec4d9c9b01';
+services.db4workspace = {
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.Db4workspace.where({pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.Db4workspace.select({pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
 
-    return this.build();
+      tm.data = models.Db4workspace.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+    
+    return await models.Db4workspace.selectOne({pgschema, pks: [rec.id] });
+  },
+    
+  create: async function({pgschema = '', rec = {}} = {}) {
+    // Insert row
+    let tobj = new models.Db4workspace(rec);
+    let tm = await tobj.insertOne({pgschema});
+
+    return tm;    
+  },
+  
+  update: async function({pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.Db4workspace(rec);
+    let tm = await tobj.updateOne({pgschema});
+    
+    return tm;
+  },
+  
+  delete: async function({pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.Db4workspace({ id });
+    let tm = await tobj.deleteOne({pgschema});
+
+    return tm;
   }
+};
 
-  build() {
-    const services = {
-      getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
-        // Get one or more rows
-        return (where) 
-          ? await this.model.where({pgschema: this.pgschema, where, values, cols, limit, offset, orderby}) 
-          : await this.model.select({pgschema: this.pgschema, rec, cols, limit, offset, orderby});
-      }.bind(this),
-      
-      getOne: async function({pgschema = '', rec = {}} = {}) {
-        // Get specific row
-        if ('id' in rec && rec.id == '_default') {
-          let tm = new TravelMessage();
-    
-          tm.data = this.model.getColumnDefaults();
-          tm.type = 'json';
-    
-          return tm;
-        }
-        
-        return await this.model.selectOne({pgschema: this.pgschema, pks: [rec.id] });
-      }.bind(this),
-        
-      create: async function({pgschema = '', rec = {}} = {}) {
-        // Insert row
-        rec.admin = this.admin;
+services.db4app = {
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.Db4app.where({pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.Db4app.select({pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
 
-        let tobj = new this.model(rec);
-        let tm = await tobj.insertOne({pgschema: this.pgschema});
+      tm.data = models.Db4app.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
     
-        return tm;    
-      }.bind(this),
-      
-      update: async function({pgschema = '', id = '', rec= {}} = {}) {
-        // Update row
-        rec.id = id;
+    return await models.Db4app.selectOne({pgschema, pks: [rec.id] });
+  },
     
-        let tobj = new this.model(rec);
-        let tm = await tobj.updateOne({pgschema: this.pgschema});
-        
-        return tm;
-      }.bind(this),
-      
-      delete: async function({pgschema = '', id = ''} = {}) {
-        // Delete row
-        let tobj = new this.model({ id });
-        let tm = await tobj.deleteOne({pgschema: this.pgschema});
+  create: async function({pgschema = '', rec = {}} = {}) {
+    // Insert row
+    let tobj = new models.Db4app(rec);
+    let tm = await tobj.insertOne({pgschema});
+
+    return tm;    
+  },
+  
+  update: async function({pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.Db4app(rec);
+    let tm = await tobj.updateOne({pgschema});
     
-        return tm;
-      }.bind(this)
+    return tm;
+  },
+  
+  delete: async function({pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.Db4app({ id });
+    let tm = await tobj.deleteOne({pgschema});
+
+    return tm;
+  }
+};
+
+services.db4table = {
+  getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.Db4table.where({pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.Db4table.select({pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
+
+      tm.data = models.Db4table.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+    
+    return await models.Db4table.selectOne({pgschema, pks: [rec.id] });
+  },
+    
+  create: async function({pgschema = '', rec = {}} = {}) {
+    // Insert row
+    let tobj = new models.Db4table(rec);
+    let tm = await tobj.insertOne({pgschema});
+
+    return tm;    
+  },
+  
+  update: async function({pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.Db4table(rec);
+    let tm = await tobj.updateOne({pgschema});
+    
+    return tm;
+  },
+  
+  updateColumns: async function({pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    let res = await models.Db4table.selectOne({pgschema, pks: [id] });
+    let columns;
+
+    if (res.status == 200) {
+      columns = res.data.columns;
+      columns.push(rec.column);
+
+      res = await services.db4table.update({pgschema, id, rec: {columns}});
     }
 
-    return services;
+    return res;
+  },
+  
+  delete: async function({pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.Db4table({ id });
+    let tm = await tobj.deleteOne({pgschema});
+
+    return tm;
   }
-}
-
-
-class Db4appModelService {
-  constructor({model=''} = {}) {
-    this.model = model;
-    this.pgschema = 'public';
-    this.admin = 'b9455c80-757d-4cc8-831f-b7ec4d9c9b01';
-
-    return this.build();
-  }
-
-  build() {
-    const services = {
-      getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
-        // Get one or more rows
-        return (where) 
-          ? await this.model.where({pgschema: this.pgschema, where, values, cols, limit, offset, orderby}) 
-          : await this.model.select({pgschema: this.pgschema, rec, cols, limit, offset, orderby});
-      }.bind(this),
-      
-      getOne: async function({pgschema = '', rec = {}} = {}) {
-        // Get specific row
-        if ('id' in rec && rec.id == '_default') {
-          let tm = new TravelMessage();
-    
-          tm.data = this.model.getColumnDefaults();
-          tm.type = 'json';
-    
-          return tm;
-        }
-        
-        return await this.model.selectOne({pgschema: this.pgschema, pks: [rec.id] });
-      }.bind(this),
-        
-      create: async function({pgschema = '', rec = {}} = {}) {
-        // Insert row
-        rec.admin = this.admin;
-
-        let tobj = new this.model(rec);
-        let tm = await tobj.insertOne({pgschema: this.pgschema});
-    
-        return tm;    
-      }.bind(this),
-      
-      update: async function({pgschema = '', id = '', rec= {}} = {}) {
-        // Update row
-        rec.id = id;
-    
-        let tobj = new this.model(rec);
-        let tm = await tobj.updateOne({pgschema: this.pgschema});
-        
-        return tm;
-      }.bind(this),
-      
-      delete: async function({pgschema = '', id = ''} = {}) {
-        // Delete row
-        let tobj = new this.model({ id });
-        let tm = await tobj.deleteOne({pgschema: this.pgschema});
-    
-        return tm;
-      }.bind(this)
-    }
-
-    return services;
-  }
-}
-
-class Db4tableModelService {
-  constructor({model=''} = {}) {
-    this.model = model;
-    this.pgschema = 'public';
-    this.admin = 'b9455c80-757d-4cc8-831f-b7ec4d9c9b01';
-
-    return this.build();
-  }
-
-  build() {
-    const services = {
-      getMany: async function({pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
-        // Get one or more rows
-        return (where) 
-          ? await this.model.where({pgschema: this.pgschema, where, values, cols, limit, offset, orderby}) 
-          : await this.model.select({pgschema: this.pgschema, rec, cols, limit, offset, orderby});
-      }.bind(this),
-      
-      getOne: async function({pgschema = '', rec = {}} = {}) {
-        // Get specific row
-        if ('id' in rec && rec.id == '_default') {
-          let tm = new TravelMessage();
-    
-          tm.data = this.model.getColumnDefaults();
-          tm.type = 'json';
-    
-          return tm;
-        }
-        
-        return await this.model.selectOne({pgschema: this.pgschema, pks: [rec.id] });
-      }.bind(this),
-        
-      create: async function({pgschema = '', rec = {}} = {}) {
-        // Insert row
-        rec.admin = this.admin;
-
-        let tobj = new this.model(rec);
-        let tm = await tobj.insertOne({pgschema: this.pgschema});
-    
-        return tm;    
-      }.bind(this),
-      
-      update: async function({pgschema = '', id = '', rec= {}} = {}) {
-        // Update row
-        rec.id = id;
-    
-        let tobj = new this.model(rec);
-        let tm = await tobj.updateOne({pgschema: this.pgschema});
-        
-        return tm;
-      }.bind(this),
-      
-      delete: async function({pgschema = '', id = ''} = {}) {
-        // Delete row
-        let tobj = new this.model({ id });
-        let tm = await tobj.deleteOne({pgschema: this.pgschema});
-    
-        return tm;
-      }.bind(this)
-    }
-
-    return services;
-  }
-}
-
-// Model services
-services.db4workspace = new Db4workspaceModelService({model: models.Db4workspace});
-services.db4app = new Db4appModelService({model: models.Db4app});
-services.db4table = new Db4tableModelService({model: models.Db4table});
+};
 
 // Any other needed services
 services.query = function({pgschema = '', query = '', values = []}) {

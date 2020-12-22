@@ -96,11 +96,16 @@
       {% include "./app-update.html" %}
       {% include "./app-delete.html" %}
       {% include "./table-list.html" %}
+      {% include "./table-create.html" %}
+      {% include "./table-update.html" %}
+      {% include "./table-delete.html" %}
+      {% include "./column-list.html" %}
+      {% include "./column-create.html" %}
     </div>
   </div>
   
-  {#% include "lib/client/widgets/mdate.html" %#}
-  {#% include "lib/client/widgets/mtime.html" %#}
+  {% include "lib/client/widgets/mdate.html" %}
+  {% include "lib/client/widgets/mtime.html" %}
   {#% include "lib/client/widgets/multisel.html" %#}
   {#% include "lib/client/widgets/singlesel.html" %#}
 

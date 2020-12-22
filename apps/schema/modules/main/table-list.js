@@ -3,7 +3,7 @@ import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView, TableQuery} from '/~static/lib/client/core/data.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class table_list extends MVC {
+class Table_list extends MVC {
   constructor(element) {
     super(element);
   }
@@ -39,34 +39,38 @@ class table_list extends MVC {
   }
 
   create() {
-    Module.pager.go(`/workspace/${this.model.workspace}/table/create`);
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/create`);
   }
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let uuid = this.model.db4tables[idx].id;
 
-    Module.pager.go(`/workspace/${this.model.workspace}/table/${uuid}/update`);
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let uuid = this.model.db4tables[idx].id;
 
-    Module.pager.go(`/workspace/${this.model.workspace}/table/${uuid}/delete`);
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/delete`);
   }
 
-  tables(ev) {
+  columns(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let uuid = this.model.db4tables[idx].id;
 
-    Module.pager.go(`/workspace/${this.model.workspace}/table/${uuid}/table`);
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/column`);
+  }
+
+  config(ev) {
+    
   }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('schema-table-list');   // page html
-let mvc1 = new table_list('schema-table-list-section');
+let mvc1 = new Table_list('schema-table-list-section');
 let section1 = new Section({mvc: mvc1});
 let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table', title: 'Tables', sections: [section1]});
 

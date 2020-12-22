@@ -159,9 +159,9 @@
 </div>
 {% endmacro %}
 
-{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', valueField='', textField='', label='') %}
+{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', mvc_on='{}', valueField='value', textField='text', label='') %}
 <div class="form-label-group">
-  <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' placeholder='{{label}}' class="form-select">
+  <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' mvc-on='{{mvc_on}}' placeholder='{{label}}' class="form-select">
     <option mvc-option='{value: "{{mvc_each}}.$index.{{valueField}}", text: "{{mvc_each}}.$index.{{textField}}"}'></option>
   </select>
   <label>{{label}}</label>
