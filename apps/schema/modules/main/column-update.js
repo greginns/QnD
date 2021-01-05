@@ -3,7 +3,7 @@ import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Column_create extends MVC {
+class Column_update extends MVC {
   constructor(element) {
     super(element);
   }
@@ -17,6 +17,8 @@ class Column_create extends MVC {
 
     this.model.display = {}
     this.model.values = {};
+
+    this.model.FALSE = false;
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -35,8 +37,10 @@ class Column_create extends MVC {
     this.model.workspace = params.workspace;
     this.model.app = params.app;
     this.model.table = params.table;
+    this.model.columnName = params.name;
 
     this.setDefaults();
+    this.setExisting();
     this.typeChanged();    
   }
 
@@ -46,6 +50,7 @@ class Column_create extends MVC {
 
   async save(ev) {
     let column = this.model.column.toJSON();
+    let res = await Module.tableStores.db4table.getOne(this.model.table);
 
     if (!column.name) {
       this.model.badMessage = 'Please Enter a Column Name';
@@ -57,18 +62,8 @@ class Column_create extends MVC {
       return;
     }
 
-    let res = await Module.tableStores.db4table.getOne(this.model.table);
-    let dupe = false;
-
-    for (let col in res.columns || []) {
-      if (column.name == col.name) {
-        dupe = true;
-        break;
-      }
-    }
-
-    if (!column.name) {
-      this.model.badMessage = 'Duplicate Column Name';
+    if (res.null && !column.null && !column.default) { // changing from Null to Not Null requires a default
+      this.model.badMessage = 'A default value is required';
         
       setTimeout(function() {
         this.model.badMessage = '';
@@ -77,13 +72,36 @@ class Column_create extends MVC {
       return;
     }
 
+    if (this.model.columnName != column.name) {
+      // col name has changed, make sure it doesn't already exists
+      // not allowed yet (field is disabled).  Will break FK/Index defns.
+      let dupe = false;
+
+      for (let col of res.columns || []) {
+        if (column.name == col.name) {
+          dupe = true;
+          break;
+        }
+      }
+
+      if (dupe) {
+        this.model.badMessage = 'Duplicate Column Name';
+          
+        setTimeout(function() {
+          this.model.badMessage = '';
+        }.bind(this), 2500);
+
+        return;
+      }
+    }
+
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    res = await Module.data.db4table.insertColumn(this.model.table, {column});
+    res = await Module.data.db4table.updateColumn(this.model.table, this.model.columnName, {column});
 
     if (res.status == 200) {
-      utils.modals.toast('Column', 'Created', 2000);
+      utils.modals.toast('Column', 'Updated', 2000);
    
       this.model.column = {};
 
@@ -105,7 +123,7 @@ class Column_create extends MVC {
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column`);
   }
 
-  setDefaults() {
+  async setDefaults() {
     this.model.values.columnTypes = [
       {value: 'CC', text: 'Text'},
       {value: 'CT', text: 'Textarea'},
@@ -146,6 +164,16 @@ class Column_create extends MVC {
     this.model.column.start = 0;
     this.model.column.null = true;
     this.model.column.hidden = false;
+  }
+
+  setExisting() {
+    let res = await Module.tableStores.db4table.getOne(this.model.table);
+
+    for (let col of res.columns || []) {
+      if (col.name == this.model.columnName) {
+        this.model.column = col;
+      }
+    }
   }
 
   typeChanged() {
@@ -223,9 +251,9 @@ class Column_create extends MVC {
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('schema-column-create');   // page html
-let mvc1 = new Column_create('schema-column-create-section');
+let el1 = document.getElementById('schema-column-update');   // page html
+let mvc1 = new Column_update('schema-column-update-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/column/create', title: 'Columns - Create', sections: [section1]});
+let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/column/:name/update', title: 'Columns - Update', sections: [section1]});
 
 Module.pages.push(page1);

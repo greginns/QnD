@@ -159,9 +159,9 @@
 </div>
 {% endmacro %}
 
-{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', mvc_on='{}', valueField='value', textField='text', label='') %}
+{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', mvc_on='{}', mvc_enabled='', mvc_disabled='', valueField='value', textField='text', label='', multiple='') %}
 <div class="form-label-group">
-  <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' mvc-on='{{mvc_on}}' placeholder='{{label}}' class="form-select">
+  <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-select" {{multiple}}>
     <option mvc-option='{value: "{{mvc_each}}.$index.{{valueField}}", text: "{{mvc_each}}.$index.{{textField}}"}'></option>
   </select>
   <label>{{label}}</label>
@@ -172,9 +172,9 @@
 </div>
 {% endmacro %}            
 
-{% macro SelectChoices(id='', size='10', mvc_value='', choices=[], label='') %}
+{% macro SelectChoices(id='', size='10', mvc_value='', mvc_enabled='', mvc_disabled='', choices=[], label='', multiple='') %}
 <div class="form-label-group">
-  <select xid="{{id}}" mvc-value="{{mvc_value}}" placeholder='{{label}}' class="form-select">
+  <select xid="{{id}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-select", {{multiple}}>
     {% for choice in choices %}
     <option value='{{choice.value}}'>{{choice.text}}</option>
     {% endfor %}

@@ -49,23 +49,16 @@ class Column_list extends MVC {
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4tables[idx].id;
+    let name = this.model.db4table.columns[idx].name;
 
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/update`);
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4tables[idx].id;
+    let name = this.model.db4table.columns[idx].name;
 
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/delete`);
-  }
-
-  columns(ev) {
-    let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4tables[idx].id;
-
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/column`);
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/delete`);
   }
 }
 

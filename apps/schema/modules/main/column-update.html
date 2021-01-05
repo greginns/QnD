@@ -1,0 +1,155 @@
+<page id='schema-column-update' style='display: none;'>
+  <section id='schema-column-update-section'>
+    <div class='row'>
+      <div class='col-12 mb-2'>
+        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app/${app}' mvc-handle>Apps</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table/${table}' mvc-handle>Tables</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table/${table}/column' mvc-handle>Columns</a>
+      </div>
+    </div>
+
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                <h4>Update New Column</h4>
+              </div>
+              <div class='col-2'>
+                <div class='d-block d-sm-none'>XS</div>
+                <div class='d-none d-sm-block d-md-none'>SM</div>
+                <div class='d-none d-md-block d-lg-none'>MD</div>
+                <div class='d-none d-lg-block d-xl-none'>LG</div>
+                <div class='d-none d-xl-block'>XL</div>
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-2'>
+                {{ fields.Char(type='text', id='column_name', maxlength='40', mvc_value='column.name', mvc_enabled='FALSE', label='Column Name') }}
+              </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.SelectMVC(id='column_type', size='1', mvc_each='values.columnTypes', mvc_value='column.type', mvc_on='{"change": "typeChanged"}', valueField='value', textField='text', label='Column Type')}}
+              </div>  
+            </div>
+
+            <div class='row pt-2' mvc-show='display.maxlength'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.Integer(type='text', id='column_maxlength', min='1', max='100', step='1', mvc_value='column.maxlength', label='Max Length') }}
+              </div>  
+            </div>
+
+            <div class='row pt-2' mvc-show='display.default'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-2'>
+                {{ fields.Char(type='text', id='column_default', maxlength='40', mvc_value='column.default', label='Default Value') }}
+              </div>  
+            </div>
+
+            <div class='row pt-2' mvc-show='display.defaultDD'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.SelectMVC(id='column_defaultDD', size='1', mvc_each='values.date', mvc_value='column.defaultDD', mvc_on='{"change": "ddChanged"}', valueField='value', textField='text', label='Default Date Choices')}}
+              </div>  
+            </div>
+
+            <div class='row pt-2' mvc-show='display.defaultDD2'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.Date(type='text', id='column_defaultDD2', maxlength='10', mvc_value='column.defaultDD2', label='Default Date')}}
+              </div>  
+            </div>
+
+            <div class='row pt-2' mvc-show='display.defaultDT'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.SelectMVC(id='column_defaultDT', size='1', mvc_each='values.time', mvc_value='column.defaultDT', mvc_on='{"change": "dtChanged"}', valueField='value', textField='text', label='Default Time Choices')}}
+              </div>  
+            </div>
+
+            <div class='row pt-2' mvc-show='display.defaultDT2'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.Time(type='text', id='column_defaultDT2', maxlength='10', mvc_value='column.defaultDT2', label='Default Time')}}
+              </div>  
+            </div>
+            
+            <div class='row pt-2' mvc-show='display.defaultDZ'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.SelectMVC(id='column_type', size='1', mvc_each='values.datetime', mvc_value='column.defaultDZ', mvc_on='{"change": "dzChanged"}', valueField='value', textField='text', label='Default DateTime Choices')}}
+              </div>  
+            </div>
+
+            <div class='row pt-2' mvc-show='display.defaultDZ2'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.Time(type='text', id='column_defaultDZ2', maxlength='10', mvc_value='column.defaultDZ2', label='Default DateTime')}}
+              </div>  
+            </div>
+                        
+            <div class='row pt-2' mvc-show='display.digits'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.Integer(type='text', id='column_digits', min='1', max='20', step='1', mvc_value='column.digits', label='Total Digits') }}
+              </div>  
+            </div>
+
+            <div class='row pt-2' mvc-show='display.decimals'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.Integer(type='text', id='column_decimals', min='1', max='10', step='1', mvc_value='column.decimals', label='Decimals') }}
+              </div>  
+            </div>            
+                        
+            <div class='row pt-2' mvc-show='display.start'>
+              <div class='col-12 col-lg-2 col-xl-2 mb-2'>
+                {{ fields.Integer(type='text', id='column_start', min='1', max='200000000', step='1', mvc_value='column.start', label='Starting Value') }}
+              </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-2'>
+                {{ fields.Switch(id='column_null', mvc_checked='column.null', label='Allow No Value') }}
+              </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-2'>
+                {{ fields.Switch(id='column_hidden', mvc_checked='column.hidden', label='Hidden by default') }}
+              </div>  
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-2'>
+                {{ buttons.btn(class='success', mvc_click='save', text='Update Column') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-2'>
+                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
+              </div>  
+            </div>
+
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class='d-block d-md-none' style='padding-top: 70px'>
+      <!-- Spacer XS SM-->
+    </div>
+
+    <div class='d-block d-lg-none' style='padding-top: 30px'>
+      <!-- Spacer XS SM MD -->
+    </div>
+
+    <div class='d-block' style='padding-top: 30px'>
+      <!-- Spacer XS DM MD LG XL -->
+    </div>
+  </section>
+</page>

@@ -64,7 +64,10 @@ class Table_list extends MVC {
   }
 
   config(ev) {
-    
+    let idx = ev.target.closest('tr').getAttribute('data-index');
+    let uuid = this.model.db4tables[idx].id;
+
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/config`);
   }
 }
 

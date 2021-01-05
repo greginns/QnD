@@ -79,7 +79,7 @@ Router.add(new RouterMessage({
 }));
 
 // Model Routes
-let subapp, model, allowCORS = true, inAPI = true, apiInfo = {type: 'json', schema: model};
+let allowCORS = true, inAPI = true;
 let admin = 'b9455c80-757d-4cc8-831f-b7ec4d9c9b01';
 
 //new Routes({app, subapp: 'db4workspace', version, allowCORS: true, model: models.Db4workspace, services, pgschema: 'public'});
@@ -87,24 +87,22 @@ let admin = 'b9455c80-757d-4cc8-831f-b7ec4d9c9b01';
 //new Routes({app, subapp: 'db4table', version, allowCORS: true, model: models.Db4table, services, pgschema: 'public'});
 
 // DB4WORKSPACE
-subapp = 'db4workspace';
-model = models.Db4workspace;
 
 // getMany
 Router.add(new RouterMessage({
   method: 'get',
   app: app,
-  subapp: subapp,
+  subapp: 'db4workspace',
   version: version,
   path: '/', 
   id: 'getMany',
   level: VIEW,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4workspace},
   allowCORS,
   fn: async function(req) {
     let {rec, cols, where, values, limit, offset, orderby} = urlQueryParse(req.query);
-    let tm = await services[subapp].getMany({pgschema, rec, cols, where, values, limit, offset, orderby});
+    let tm = await services['db4workspace'].getMany({pgschema, rec, cols, where, values, limit, offset, orderby});
 
     return tm.toResponse();
   },
@@ -120,13 +118,13 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app: app,
-  subapp: subapp,
+  subapp: 'db4workspace',
   version: version,
   path: '/:id', 
   id: 'getOne',
   level: VIEW,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4workspace},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
@@ -136,7 +134,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services[subapp].getOne({pgschema, rec: {id} });
+      tm = await services['db4workspace'].getOne({pgschema, rec: {id} });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -155,19 +153,19 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app: app,
-  subapp: subapp,
+  subapp: 'db4workspace',
   version: version,
   path: '/', 
   id: 'create',
   level: CREATE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4workspace},
   allowCORS,
   fn: async function(req) {
-    let rec = req.body[subapp] || {};
+    let rec = req.body['db4workspace'] || {};
     rec.admin = admin;
 
-    let tm = await services[subapp].create({pgschema, rec});
+    let tm = await services['db4workspace'].create({pgschema, rec});
 
     return tm.toResponse();
   }, 
@@ -183,13 +181,13 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'put',
   app: app,
-  subapp: subapp,
+  subapp: 'db4workspace',
   version: version,
   path: '/:id', 
   id: 'update',
   level: UPDATE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4workspace},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
@@ -199,7 +197,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services[subapp].update({pgschema, id, rec: req.body[subapp] || {} });
+      tm = await services['db4workspace'].update({pgschema, id, rec: req.body['db4workspace'] || {} });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -218,13 +216,13 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app: app,
-  subapp: subapp,
+  subapp: 'db4workspace',
   version: version,
   path: '/:id', 
   id: 'delete',
   level: DELETE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4workspace},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
@@ -234,7 +232,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services[subapp].delete({pgschema, id});
+      tm = await services['db4workspace'].delete({pgschema, id});
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -250,24 +248,22 @@ Router.add(new RouterMessage({
 }));
 
 // DB4APP
-subapp = 'db4app';
-model = models.Db4app;
 
 // getMany
 Router.add(new RouterMessage({
   method: 'get',
   app: app,
-  subapp: subapp,
+  subapp: 'db4app',
   version: version,
   path: '/', 
   id: 'getMany',
   level: VIEW,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4app},
   allowCORS,
   fn: async function(req) {
     let {rec, cols, where, values, limit, offset, orderby} = urlQueryParse(req.query);
-    let tm = await services[subapp].getMany({pgschema, rec, cols, where, values, limit, offset, orderby});
+    let tm = await services['db4app'].getMany({pgschema, rec, cols, where, values, limit, offset, orderby});
 
     return tm.toResponse();
   },
@@ -283,13 +279,13 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app: app,
-  subapp: subapp,
+  subapp: 'db4app',
   version: version,
   path: '/:id', 
   id: 'getOne',
   level: VIEW,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4app},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
@@ -299,7 +295,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services[subapp].getOne({pgschema, rec: {id} });
+      tm = await services['db4app'].getOne({pgschema, rec: {id} });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -318,19 +314,19 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app: app,
-  subapp: subapp,
+  subapp: 'db4app',
   version: version,
   path: '/', 
   id: 'create',
   level: CREATE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4app},
   allowCORS,
   fn: async function(req) {
-    let rec = req.body[subapp] || {};
+    let rec = req.body['db4app'] || {};
     rec.admin = admin;
 
-    let tm = await services[subapp].create({pgschema, rec});
+    let tm = await services['db4app'].create({pgschema, rec});
 
     return tm.toResponse();
   }, 
@@ -346,13 +342,13 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'put',
   app: app,
-  subapp: subapp,
+  subapp: 'db4app',
   version: version,
   path: '/:id', 
   id: 'update',
   level: UPDATE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4app},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
@@ -362,7 +358,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services[subapp].update({pgschema, id, rec: req.body[subapp] || {} });
+      tm = await services['db4app'].update({pgschema, id, rec: req.body['db4app'] || {} });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -381,13 +377,13 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'delete',
   app: app,
-  subapp: subapp,
+  subapp: 'db4app',
   version: version,
   path: '/:id', 
   id: 'delete',
   level: DELETE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4app},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
@@ -397,7 +393,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services[subapp].delete({pgschema, id});
+      tm = await services['db4app'].delete({pgschema, id});
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -413,24 +409,22 @@ Router.add(new RouterMessage({
 }));
 
 // DB4TABLE
-subapp = 'db4table';
-model = models.Db4table;
 
 // getMany
 Router.add(new RouterMessage({
   method: 'get',
   app: app,
-  subapp: subapp,
+  subapp: 'db4table',
   version: version,
   path: '/', 
   id: 'getMany',
   level: VIEW,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4table},
   allowCORS,
   fn: async function(req) {
     let {rec, cols, where, values, limit, offset, orderby} = urlQueryParse(req.query);
-    let tm = await services[subapp].getMany({pgschema, rec, cols, where, values, limit, offset, orderby});
+    let tm = await services['db4table'].getMany({pgschema, rec, cols, where, values, limit, offset, orderby});
 
     return tm.toResponse();
   },
@@ -446,13 +440,13 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'get',
   app: app,
-  subapp: subapp,
+  subapp: 'db4table',
   version: version,
   path: '/:id', 
   id: 'getOne',
   level: VIEW,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4table},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
@@ -462,7 +456,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services[subapp].getOne({pgschema, rec: {id} });
+      tm = await services['db4table'].getOne({pgschema, rec: {id} });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -481,19 +475,19 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'post',
   app: app,
-  subapp: subapp,
+  subapp: 'db4table',
   version: version,
   path: '/', 
   id: 'create',
   level: CREATE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4table},
   allowCORS,
   fn: async function(req) {
-    let rec = req.body[subapp] || {};
+    let rec = req.body['db4table'] || {};
     rec.admin = admin;
 
-    let tm = await services[subapp].create({pgschema, rec});
+    let tm = await services['db4table'].create({pgschema, rec});
 
     return tm.toResponse();
   }, 
@@ -509,13 +503,13 @@ Router.add(new RouterMessage({
 Router.add(new RouterMessage({
   method: 'put',
   app: app,
-  subapp: subapp,
+  subapp: 'db4table',
   version: version,
   path: '/:id', 
   id: 'update',
   level: UPDATE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4table},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
@@ -525,7 +519,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services[subapp].update({pgschema, id, rec: req.body[subapp] || {} });
+      tm = await services['db4table'].update({pgschema, id, rec: req.body['db4table'] || {} });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -540,27 +534,63 @@ Router.add(new RouterMessage({
   } 
 }));
 
-// update columns
+// insert column
+Router.add(new RouterMessage({
+  method: 'post',
+  app: app,
+  subapp: 'db4table',
+  version: version,
+  path: '/:id/column', 
+  id: 'insertColumn',
+  level: UPDATE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.Db4table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      tm = await services['db4table'].insertColumn({pgschema, id, rec: req.body['db4table'] || {}});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// update column
 Router.add(new RouterMessage({
   method: 'put',
   app: app,
-  subapp: subapp,
+  subapp: 'db4table',
   version: version,
-  path: '/:id/column', 
+  path: '/:id/column/:name', 
   id: 'updateColumn',
   level: UPDATE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4table},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
+    let name = req.params.name;
     let tm;
 
-    if (!id) {
-      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    if (!id || !name) {
+      tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
     }
     else {
-      tm = await services[subapp].updateColumns({pgschema, id, rec: req.body[subapp] || {}});
+      tm = await services['db4table'].updateColumn({pgschema, id, name, rec: req.body['db4table'] || {}});
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -575,18 +605,53 @@ Router.add(new RouterMessage({
   } 
 }));
 
+// delete column
+Router.add(new RouterMessage({
+  method: 'delete',
+  app: app,
+  subapp: 'db4table',
+  version: version,
+  path: '/:id/column/:name', 
+  id: 'deleteColumn',
+  level: DELETE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.Db4table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let name = req.params.name;
+    let tm;
+
+    if (!id || !name) {
+      tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
+    }
+    else {
+      tm = await services['db4table'].deleteColumn({pgschema, id, name});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
 
 // delete
 Router.add(new RouterMessage({
   method: 'delete',
   app: app,
-  subapp: subapp,
+  subapp: 'db4table',
   version: version,
   path: '/:id', 
   id: 'delete',
   level: DELETE,
   inAPI,
-  apiInfo,
+  apiInfo: {type: 'json', schema: models.Db4table},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;
@@ -596,7 +661,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services[subapp].delete({pgschema, id});
+      tm = await services['db4table'].delete({pgschema, id});
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }

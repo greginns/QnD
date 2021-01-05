@@ -1,0 +1,113 @@
+<page id='schema-table-config-fks-delete' style='display: none;'>
+  <section id='schema-table-config-fks-delete-section'>
+    <div class='row'>
+      <div class='col-12 mb-2'>
+        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app/${app}' mvc-handle>Apps</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table' mvc-handle>Tables</a>
+      </div>
+    </div>
+
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                <h4>Foreign Key</h4>
+              </div>
+              <div class='col-2'>
+                <div class='d-block d-sm-none'>XS</div>
+                <div class='d-none d-sm-block d-md-none'>SM</div>
+                <div class='d-none d-md-block d-lg-none'>MD</div>
+                <div class='d-none d-lg-block d-xl-none'>LG</div>
+                <div class='d-none d-xl-block'>XL</div>
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Char(type='text', id='fk_delete_name', maxlength='20', mvc_value='fk.name', mvc_enabled='null', label='Foreign Key Name') }}
+              </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.SelectMVC(id='fk_delete_apps', size='1', mvc_value='fk.app', mvc_each='apps',  valueField='id', textField='name', label='Choose an App', multiple='')}}
+              </div>  
+
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.SelectMVC(id='fk_delete_ftables', size='1', mvc_value='fk.ftable', mvc_each='foreignTables', mvc_enabled='null', valueField='id', textField='name', label='Choose a Foreign Table', multiple='')}}
+              </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-8 mb-4'>
+                <table class='table'>
+                  <thead>
+                    <tr>
+                      <th>Source Column</th>
+                      <th>Foreign Column</th>
+                    </tr>
+                  </thead>
+                  <tbody mvc-each='fk.links'>
+                    <tr data-index='$index'>
+                      <td>
+                        <span mvc-text='fk.links.$index.source'></span>
+                      </td>
+                      <td>
+                        <span mvc-text='fk.links.$index.target'></span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>  
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='danger', mvc_click='delete', text='Delete Foreign Key') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
+              </div>  
+            </div>
+
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row pt-2'>
+              <div class='col-12'>
+                <span style='color: red'>
+                  Deleting a foreign key will affect data integrity.
+                  Think very carefully before deleting a foreign key.
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class='d-block d-md-none' style='padding-top: 70px'>
+      <!-- Spacer XS SM-->
+    </div>
+
+    <div class='d-block d-lg-none' style='padding-top: 30px'>
+      <!-- Spacer XS SM MD -->
+    </div>
+
+    <div class='d-block' style='padding-top: 30px'>
+      <!-- Spacer XS DM MD LG XL -->
+    </div>
+  </section>
+</page>

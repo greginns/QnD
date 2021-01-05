@@ -18,8 +18,19 @@ import '/~static/apps/schema/modules/main/table-list.js';
 import '/~static/apps/schema/modules/main/table-create.js';
 import '/~static/apps/schema/modules/main/table-update.js';
 import '/~static/apps/schema/modules/main/table-delete.js';
+import '/~static/apps/schema/modules/main/table-config.js';
+import '/~static/apps/schema/modules/main/table-config-pk.js';
+import '/~static/apps/schema/modules/main/table-config-orderby.js';
+import '/~static/apps/schema/modules/main/table-config-index-create.js';
+import '/~static/apps/schema/modules/main/table-config-index-update.js';
+import '/~static/apps/schema/modules/main/table-config-index-delete.js';
+import '/~static/apps/schema/modules/main/table-config-fks-create.js';
+import '/~static/apps/schema/modules/main/table-config-fks-update.js';
+import '/~static/apps/schema/modules/main/table-config-fks-delete.js';
 import '/~static/apps/schema/modules/main/column-list.js';
 import '/~static/apps/schema/modules/main/column-create.js';
+import '/~static/apps/schema/modules/main/column-update.js';
+import '/~static/apps/schema/modules/main/column-delete.js';
 
 import '/~static/project/mixins/mvc_ext.js';
 
@@ -28,12 +39,24 @@ class db4TableAccess extends TableAccess {
     super({modelName, url});
   }
 
-  async updateColumns(table, colData) {
+  async insertColumn(table, colData) {
     let rec = {};
     rec['db4table'] = colData;
 
-    return await io.put(rec, `/schema/v1/db4table/${encodeURIComponent(table)}/column`);
+    return await io.post(rec, `/schema/v1/db4table/${encodeURIComponent(table)}/column`);
   }
+
+  async updateColumn(table, name, colData) {
+    let rec = {};
+    rec['db4table'] = colData;
+
+    return await io.put(rec, `/schema/v1/db4table/${encodeURIComponent(table)}/column/${name}`);
+  }
+
+  async deleteColumn(table, name) {
+    return await io.delete({}, `/schema/v1/db4table/${encodeURIComponent(table)}/column/${name}`);
+  }
+
 }
 
 let moduleStart = function() {

@@ -164,14 +164,56 @@ services.db4table = {
     return tm;
   },
   
-  updateColumns: async function({pgschema = '', id = '', rec= {}} = {}) {
-    // Update row
+  insertColumn: async function({pgschema = '', id = '', rec= {}} = {}) {
+    // Insert column in an existing table row
     let res = await models.Db4table.selectOne({pgschema, pks: [id] });
     let columns;
 
     if (res.status == 200) {
       columns = res.data.columns;
       columns.push(rec.column);
+
+      res = await services.db4table.update({pgschema, id, rec: {columns}});
+    }
+
+    return res;
+  },
+  
+  updateColumn: async function({pgschema = '', id = '', name = '', rec= {}} = {}) {
+    // Update column in an existing table row
+    let res = await models.Db4table.selectOne({pgschema, pks: [id] });
+    let columns;
+
+    if (res.status == 200) {
+      columns = res.data.columns || [];
+
+      for (let idx=0; idx<columns.length; idx++) {
+        if (columns[idx].name == name) {
+          columns[idx] = rec.column;
+          break;
+        }
+      }
+
+      res = await services.db4table.update({pgschema, id, rec: {columns}});
+    }
+
+    return res;
+  },
+  
+  deleteColumn: async function({pgschema = '', id = '', name = ''} = {}) {
+    // Delete column in an existing table row
+    let res = await models.Db4table.selectOne({pgschema, pks: [id] });
+    let columns;
+
+    if (res.status == 200) {
+      columns = res.data.columns || [];
+
+      for (let idx=0; idx<columns.length; idx++) {
+        if (columns[idx].name == name) {
+          columns.splice(idx,1);
+          break;
+        }
+      }
 
       res = await services.db4table.update({pgschema, id, rec: {columns}});
     }

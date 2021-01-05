@@ -3,7 +3,7 @@ import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Table_update extends MVC {
+class Table_config_orderby extends MVC {
   constructor(element) {
     super(element);
   }
@@ -12,6 +12,7 @@ class Table_update extends MVC {
     this.model.db4table = {};
     this.model.workspace = '';
     this.model.app = '';
+    this.model.table = '';
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -32,19 +33,7 @@ class Table_update extends MVC {
     this.model.app = params.app;
     this.model.table = params.table;
 
-    if (!this.model.workspace || !this.model.app || !this.model.table) this.gotoList();
-
-    let res = await Module.tableStores.db4table.getOne(this.model.table);
-
-    if (Object.keys(res).length > 0) {
-      this.model.db4table = res;
-      this.origTable = res;
-    }
-    else {
-      alert('Missing Workspace/App/Table');
-
-      this.gotoList();
-    }
+    this.model.db4table = await Module.tableStores.db4table.getOne(this.model.table);
   }
 
   outView() {
@@ -52,9 +41,11 @@ class Table_update extends MVC {
   }
 
   async save(ev) {
-    let table = this.model.db4table.toJSON();
-    let diffs = utils.object.diff(this.origTable, table);
-      
+    let current = await Module.tableStores.db4table.getOne(this.model.table);
+    let diffs = {};
+
+    if (current.orderby != this.model.db4table.orderby) diffs.orderby = this.model.db4table.orderby;
+    
     if (Object.keys(diffs).length == 0) {
       this.model.badMessage = 'No Changes to Update';
       
@@ -64,28 +55,17 @@ class Table_update extends MVC {
 
       return;
     }
-    
-    if (!table.name) {
-      this.model.badMessage = 'Please Enter a Table Name';
-        
-      setTimeout(function() {
-        this.model.badMessage = '';
-      }.bind(this), 2500);
-
-      return;
-    }
-
-    let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
 
-    let res = await Module.tableStores.db4table.update(table.id, diffs);
+    let spinner = utils.modals.buttonSpinner(ev.target, true);
+    let res = await Module.tableStores.db4table.update(this.model.table, diffs);
 
     if (res.status == 200) {
       utils.modals.toast('Table', 'Updated', 2000);
    
-      this.model.db4table.name = '';
-      this.model.db4table.desc = '';
+      this.model.column = {};
+
       this.gotoList();
     }
     else {
@@ -101,15 +81,17 @@ class Table_update extends MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table`);
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config`);
   }
 
+  orderbyChanged(ev) {
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('schema-table-update');   // page html
-let mvc1 = new Table_update('schema-table-update-section');
+let el1 = document.getElementById('schema-table-config-orderby');   // page html
+let mvc1 = new Table_config_orderby('schema-table-config-orderby-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/update', title: 'Table - Update', sections: [section1]});
+let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/config/orderby/update', title: 'Tables - Config Order By', sections: [section1]});
 
 Module.pages.push(page1);
