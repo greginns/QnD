@@ -9,12 +9,12 @@ class Workspace_update extends MVC {
   }
 
   createModel() {
-    this.model.db4workspace = {};
+    this.model.workspace = {};
     this.origWorkspace = {};
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4workspace: {},
+      workspace: {},
       message: ''
     };
 
@@ -31,10 +31,10 @@ class Workspace_update extends MVC {
 
     if (!id) this.gotoList();
 
-    let res = await Module.tableStores.db4workspace.getOne(id);
+    let res = await Module.tableStores.workspace.getOne(id);
 
     if (Object.keys(res).length > 0) {
-      this.model.db4workspace = res;
+      this.model.workspace = res;
       this.origWorkspace = res;
     }
     else {
@@ -49,7 +49,7 @@ class Workspace_update extends MVC {
   }
 
   async save(ev) {
-    let workspace = this.model.db4workspace.toJSON();
+    let workspace = this.model.workspace.toJSON();
     let diffs = utils.object.diff(this.origWorkspace, workspace);
       
     if (Object.keys(diffs).length == 0) {
@@ -66,12 +66,12 @@ class Workspace_update extends MVC {
 
     utils.modals.overlay(true);
 
-    let res = await Module.tableStores.db4workspace.update(workspace.id, diffs);
+    let res = await Module.tableStores.workspace.update(workspace.id, diffs);
     
     if (res.status == 200) {
       utils.modals.toast('WORKSPACE', 'Created', 2000);
    
-      this.model.db4workspace.name = '';
+      this.model.workspace.name = '';
       this.gotoList();
     }
     else {

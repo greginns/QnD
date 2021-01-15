@@ -9,15 +9,15 @@ class Column_config extends MVC {
   }
 
   createModel() {
-    this.model.db4tables = [];
-    this.model.db4table = {};
+    this.model.tables = [];
+    this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
   }
@@ -33,14 +33,14 @@ class Column_config extends MVC {
     this.model.app = params.app;
     this.model.table = params.table;
 
-    this.model.db4tables = await Module.tableStores.db4table.getAll();
-    this.model.db4table = await Module.tableStores.db4table.getOne(this.model.table);
-    if (!this.model.db4table.fks) this.model.db4table.fks = [];
-    if (!this.model.db4table.indexes) this.model.db4table.indexes = [];
+    this.model.tables = await Module.tableStores.table.getAll();
+    this.model.table = await Module.tableStores.table.getOne(this.model.table);
+    if (!this.model.table.fks) this.model.table.fks = [];
+    if (!this.model.table.indexes) this.model.table.indexes = [];
 
     // clean up display
-    for (let fk of this.model.db4table.fks) {
-      for (let tbl of this.model.db4tables) {
+    for (let fk of this.model.table.fks) {
+      for (let tbl of this.model.tables) {
         if (fk.ftable == tbl.id) {
           fk.ftableName = tbl.name;
           break;
@@ -79,14 +79,14 @@ class Column_config extends MVC {
 
   indexEdit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let index = this.model.db4table.indexes[idx];
+    let index = this.model.table.indexes[idx];
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/${index.name}/update`);
   }
 
   indexDelete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let index = this.model.db4table.indexes[idx];
+    let index = this.model.table.indexes[idx];
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/${index.name}/delete`);
   }  
@@ -97,14 +97,14 @@ class Column_config extends MVC {
 
   fkEdit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let fk = this.model.db4table.fks[idx];
+    let fk = this.model.table.fks[idx];
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/${fk.name}/update`);
   }
 
   fkDelete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let fk = this.model.db4table.fks[idx];
+    let fk = this.model.table.fks[idx];
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/${fk.name}/delete`);
   }  

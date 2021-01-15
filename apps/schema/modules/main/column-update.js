@@ -166,7 +166,7 @@ class Column_update extends MVC {
     this.model.column.hidden = false;
   }
 
-  setExisting() {
+  async setExisting() {
     let res = await Module.tableStores.db4table.getOne(this.model.table);
 
     for (let col of res.columns || []) {

@@ -9,7 +9,7 @@ class Table_config_index_create extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
+    this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -17,7 +17,7 @@ class Table_config_index_create extends MVC {
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
 
@@ -34,7 +34,7 @@ class Table_config_index_create extends MVC {
     this.model.app = params.app;
     this.model.table = params.table;
 
-    this.model.db4table = await Module.tableStores.db4table.getOne(this.model.table);
+    this.model.table = await Module.tableStores.table.getOne(this.model.table);
   }
 
   outView() {
@@ -42,7 +42,7 @@ class Table_config_index_create extends MVC {
   }
 
   async save(ev) {
-    let current = await Module.tableStores.db4table.getOne(this.model.table);
+    let current = await Module.tableStores.table.getOne(this.model.table);
     let index = this.model.index.toJSON();
     let indexes = current.indexes || [];
 
@@ -61,7 +61,7 @@ class Table_config_index_create extends MVC {
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.db4table.update(this.model.table, {indexes});
+    let res = await Module.tableStores.table.update(this.model.table, {indexes});
 
     if (res.status == 200) {
       utils.modals.toast('Table', 'Updated', 2000);

@@ -9,12 +9,12 @@ class App_update extends MVC {
   }
 
   createModel() {
-    this.model.db4app = {};
+    this.model.app = {};
     this.model.workspace = '';
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4app: {},
+      app: {},
       message: ''
     };
 
@@ -32,10 +32,10 @@ class App_update extends MVC {
 
     if (!this.model.workspace || !id) this.gotoList();
 
-    let res = await Module.tableStores.db4app.getOne(id);
+    let res = await Module.tableStores.app.getOne(id);
 
     if (Object.keys(res).length > 0) {
-      this.model.db4app = res;
+      this.model.app = res;
       this.origApp = res;
     }
     else {
@@ -50,7 +50,7 @@ class App_update extends MVC {
   }
 
   async save(ev) {
-    let app = this.model.db4app.toJSON();
+    let app = this.model.app.toJSON();
     let diffs = utils.object.diff(this.origApp, app);
       
     if (Object.keys(diffs).length == 0) {
@@ -67,13 +67,13 @@ class App_update extends MVC {
 
     utils.modals.overlay(true);
     
-    let res = await Module.tableStores.db4app.update(app.id, diffs);
+    let res = await Module.tableStores.app.update(app.id, diffs);
     
     if (res.status == 200) {
       utils.modals.toast('APP', 'Updated', 2000);
    
-      this.model.db4app.name = '';
-      this.model.db4app.desc = '';
+      this.model.app.name = '';
+      this.model.app.desc = '';
       this.gotoList();
     }
     else {

@@ -9,13 +9,13 @@ class Table_delete extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
+    this.model.table = {};
     this.model.workspace = '';
     this.origtable = {};
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
 
@@ -35,10 +35,10 @@ class Table_delete extends MVC {
 
     if (!id) this.gotoList();
 
-    let res = await Module.tableStores.db4table.getOne(id);
+    let res = await Module.tableStores.table.getOne(id);
 
     if (Object.keys(res).length > 0) {
-      this.model.db4table = res;
+      this.model.table = res;
     }
     else {
       alert('Missing Table');
@@ -56,14 +56,14 @@ class Table_delete extends MVC {
 
     if (!ret) return;
 
-    let table = this.model.db4table.toJSON();
+    let table = this.model.table.toJSON();
    
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    //let res = await Module.tableStores.db4table.delete(table.id);
+    //let res = await Module.tableStores.table.delete(table.id);
     let res = {status: 200}
     
     if (res.status == 200) {

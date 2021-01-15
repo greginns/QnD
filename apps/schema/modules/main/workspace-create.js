@@ -9,11 +9,11 @@ class Workspace_create extends MVC {
   }
 
   createModel() {
-    this.model.db4workspace = {};
+    this.model.workspace = {};
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4workspace: {},
+      workspace: {},
       message: ''
     };
 
@@ -33,7 +33,7 @@ class Workspace_create extends MVC {
   }
 
   async save(ev) {
-    let workspace = this.model.db4workspace.toJSON();
+    let workspace = this.model.workspace.toJSON();
 
     if (!workspace.name) {
       this.model.badMessage = 'Please Enter a Workspace Name';
@@ -50,12 +50,12 @@ class Workspace_create extends MVC {
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = await Module.tableStores.db4workspace.insert(workspace);
+    let res = await Module.tableStores.workspace.insert(workspace);
 
     if (res.status == 200) {
       utils.modals.toast('WORKSPACE', 'Created', 2000);
    
-      this.model.db4workspace.name = '';
+      this.model.workspace.name = '';
       this.gotoList();
     }
     else {

@@ -31,9 +31,9 @@
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <table class='table table-striped'>
-                  <tbody mvc-each='db4workspaces'>
+                  <tbody mvc-each='workspaces'>
                     <tr data-index='$index'>
-                      <td><span mvc-text='db4workspaces.$index.name'></span></td>
+                      <td><span mvc-text='workspaces.$index.name'></span></td>
                       <td style='cursor: pointer' title='Apps' mvc-click='app'><i class="fal fa-project-diagram"></i></td>
                       <td style='cursor: pointer' title='Edit' mvc-click='edit'><i class="fal fa-edit"></i></td>
                       <td style='cursor: pointer' title='Delete' mvc-click='delete'><i class="fal fa-trash-alt"></i></td>

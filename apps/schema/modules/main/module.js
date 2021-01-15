@@ -43,18 +43,18 @@ class db4TableAccess extends TableAccess {
     let rec = {};
     rec['db4table'] = colData;
 
-    return await io.post(rec, `/schema/v1/db4table/${encodeURIComponent(table)}/column`);
+    return await io.post(rec, `/schema/v1/table/${encodeURIComponent(table)}/column`);
   }
 
   async updateColumn(table, name, colData) {
     let rec = {};
     rec['db4table'] = colData;
 
-    return await io.put(rec, `/schema/v1/db4table/${encodeURIComponent(table)}/column/${name}`);
+    return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/column/${name}`);
   }
 
   async deleteColumn(table, name) {
-    return await io.delete({}, `/schema/v1/db4table/${encodeURIComponent(table)}/column/${name}`);
+    return await io.delete({}, `/schema/v1/table/${encodeURIComponent(table)}/column/${name}`);
   }
 
 }
@@ -63,35 +63,34 @@ let moduleStart = function() {
   let connectToData = async function() {
     // setup data table access
     // gets us access to raw data.
-    Module.data.db4workspace = new TableAccess({modelName: 'db4workspace', url: `/schema/v1/db4workspace`});
-    Module.data.db4app = new TableAccess({modelName: 'db4app', url: `/schema/v1/db4app`});
-    Module.data.db4table = new db4TableAccess({modelName: 'db4table', url: `/schema/v1/db4table`});
+    Module.data.workspace = new db4TableAccess({modelName: 'workspace', url: `/schema/v1/workspace`});
+    Module.data.application = new db4TableAccess({modelName: 'app', url: `/schema/v1/application`});
+    Module.data.table = new db4TableAccess({modelName: 'table', url: `/schema/v1/table`});
 
     const wsDataWatch = new WSDataComm('schema');                 // WS instances for this app
     const safemode = false;
     let model, getAllPromises = [];
-    let pgschema = 'public'
+    
+    model = `/schema/workspace`;                    // url-like of interest to follow model changes
 
-    model = `/schema/db4workspace`;                    // url-like of interest to follow model changes
-
-    wsDataWatch.addModel(model, pgschema);             // WS data change notifications.  
+    wsDataWatch.addModel(model);             // WS data change notifications.  
                                                       // Store model name to watch/follow.  
                                                       // One WSDataComm instance per app.
                                                       // First path segment must be the same as app
 
-    Module.tableStores.db4workspace = new TableStore({accessor: Module.data.db4workspace, model, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.workspace = new TableStore({accessor: Module.data.workspace, model, safemode});  // setup a table store in Module so all pages can access
 
-    model = `/schema/db4app`;
-    wsDataWatch.addModel(model, pgschema);
-    Module.tableStores.db4app = new TableStore({accessor: Module.data.db4app, model, safemode});  // setup a table store in Module so all pages can access
+    model = `/schema/application`;
+    wsDataWatch.addModel(model);
+    Module.tableStores.application = new TableStore({accessor: Module.data.application, model, safemode});  // setup a table store in Module so all pages can access
 
-    model = `/schema/db4table`;
-    wsDataWatch.addModel(model, pgschema);
-    Module.tableStores.db4table = new TableStore({accessor: Module.data.db4table, model, safemode});  // setup a table store in Module so all pages can access
+    model = `/schema/table`;
+    wsDataWatch.addModel(model);
+    Module.tableStores.table = new TableStore({accessor: Module.data.table, model, safemode});  // setup a table store in Module so all pages can access
 
-    getAllPromises.push(Module.tableStores.db4workspace.getAll());               // seed the table store
-    getAllPromises.push(Module.tableStores.db4app.getAll());               // seed the table store
-    getAllPromises.push(Module.tableStores.db4table.getAll());               // seed the table store
+    getAllPromises.push(Module.tableStores.workspace.getAll());                 // seed the workspace store
+    getAllPromises.push(Module.tableStores.application.getAll());               // seed the application store
+    getAllPromises.push(Module.tableStores.table.getAll());                     // seed the table store
 
     // start following via WS ---
     wsDataWatch.start();

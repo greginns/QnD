@@ -47,9 +47,9 @@ process
 });
 
 // SETUP HTTPS/WSS SERVERS
-const wsConnect = function(socket, ws, TID, userID) {
+const wsConnect = function(socket, ws, sessdata) {
   // setup wouter
-  const wouter = new Wouter(ws, TID, userID);
+  const wouter = new Wouter(ws, sessdata);
 
   ws.isAlive = true;
     
@@ -80,7 +80,7 @@ const sslServerRequest = async function(req, res) {
     // process augments req, res 
     await mw.request.process(req, res);
 
-    // Routes - augments res with tenant/user.  tests user authentication/authorization
+    // Routes - augments res with database/pgschema/user.  tests user authentication/authorization
     rm = await mw.security.check(req, res);
 
     if (rm.status == 200) {
@@ -99,15 +99,15 @@ const sslServerUpgrade = async function(req, socket, head) {
   // server upgrading to WS
   await mw.request.processWS(req);
 
-  let {tenant, user} = await mw.security.checkWS(req);
+  let sessdata = await mw.security.checkWS(req);
 
-  if (!user) {
+  if (!sessdata || Object.keys(sessdata).length == 0) {
     socket.destroy();
     return;
   }
 
   wssl.handleUpgrade(req, socket, head, function(ws) {
-    wsConnect(socket, ws, tenant.code, user.code);
+    wsConnect(socket, ws, sessdata);
   });
 };
 

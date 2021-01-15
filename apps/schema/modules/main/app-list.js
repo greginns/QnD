@@ -9,7 +9,7 @@ class App_list extends MVC {
   }
 
   createModel() {
-    this.model.db4apps = [];
+    this.model.apps = [];
     this.workspace = '';
 
     this.model.badMessage = '';
@@ -22,7 +22,7 @@ class App_list extends MVC {
   async ready() {
     return new Promise(async function(resolve) {
       // fill up on data
-      Module.tableStores.db4app.addView(new TableView({proxy: this.model.db4apps}));
+      Module.tableStores.app.addView(new TableView({proxy: this.model.apps}));
 
       resolve();
     }.bind(this));
@@ -42,21 +42,21 @@ class App_list extends MVC {
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4apps[idx].id;
+    let uuid = this.model.apps[idx].id;
 
     Module.pager.go(`/workspace/${this.workspace}/app/${uuid}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4apps[idx].id;
+    let uuid = this.model.apps[idx].id;
 
     Module.pager.go(`/workspace/${this.workspace}/app/${uuid}/delete`);
   }
 
   tables(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4apps[idx].id;
+    let uuid = this.model.apps[idx].id;
 
     Module.pager.go(`/workspace/${this.workspace}/app/${uuid}/table`);
   }

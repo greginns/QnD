@@ -9,7 +9,7 @@ class Table_config_fk_delete extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
+    this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -18,7 +18,7 @@ class Table_config_fk_delete extends MVC {
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
 
@@ -37,9 +37,9 @@ class Table_config_fk_delete extends MVC {
     this.model.name = params.name;
     this.model.fk = {};
 
-    this.model.db4table = await Module.tableStores.db4table.getOne(this.model.table);
+    this.model.table = await Module.tableStores.table.getOne(this.model.table);
 
-    let fks = this.model.db4table.fks || [];
+    let fks = this.model.table.fks || [];
     
     for (let idx of fks) {
       if (idx.name == this.model.name) {
@@ -53,10 +53,10 @@ class Table_config_fk_delete extends MVC {
       this.gotoList();
     }
 
-    this.model.sourceTable = await Module.tableStores.db4table.getOne(this.model.table);
-    this.model.apps = await Module.tableStores.db4app.getAll();
+    this.model.sourceTable = await Module.tableStores.table.getOne(this.model.table);
+    this.model.apps = await Module.tableStores.app.getAll();
 
-    let current = await Module.tableStores.db4table.getOne(this.model.table);
+    let current = await Module.tableStores.table.getOne(this.model.table);
 
     for (let fk of current.fks) {
       if (fk.name == this.model.fkname) {
@@ -76,7 +76,7 @@ class Table_config_fk_delete extends MVC {
     let ret = await utils.modals.reConfirm(ev.target, 'Confirm Deletion?');
     if (!ret) return;
 
-    let current = await Module.tableStores.db4table.getOne(this.model.table);
+    let current = await Module.tableStores.table.getOne(this.model.table);
     let fk = this.model.fk.toJSON();
     let fks = current.fks || [];
 
@@ -90,7 +90,7 @@ class Table_config_fk_delete extends MVC {
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.db4table.update(this.model.table, {fks});
+    let res = await Module.tableStores.table.update(this.model.table, {fks});
 
     if (res.status == 200) {
       utils.modals.toast('FK', 'Deleted', 2000);
@@ -116,13 +116,13 @@ class Table_config_fk_delete extends MVC {
   }
 
   async getForeignTables() {
-    this.model.foreignTables = await Module.tableStores.db4table.getAll();
+    this.model.foreignTables = await Module.tableStores.table.getAll();
   }
 
   async getForeignColumns() {
     let ft = this.model.fk.ftable;
 
-    this.model.foreignTable = await Module.tableStores.db4table.getOne(ft);
+    this.model.foreignTable = await Module.tableStores.table.getOne(ft);
   }  
 }
 

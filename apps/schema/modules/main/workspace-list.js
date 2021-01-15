@@ -9,7 +9,7 @@ class Workspace_list extends MVC {
   }
 
   createModel() {
-    this.model.db4workspaces = [];
+    this.model.workspaces = [];
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -22,7 +22,7 @@ class Workspace_list extends MVC {
   async ready() {
     return new Promise(async function(resolve) {
       // fill up on data
-      Module.tableStores.db4workspace.addView(new TableView({proxy: this.model.db4workspaces}));
+      Module.tableStores.workspace.addView(new TableView({proxy: this.model.workspaces}));
 
       resolve();
     }.bind(this));
@@ -41,21 +41,21 @@ class Workspace_list extends MVC {
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4workspaces[idx].id;
+    let uuid = this.model.workspaces[idx].id;
 
     Module.pager.go(`/workspace/${uuid}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4workspaces[idx].id;
+    let uuid = this.model.workspaces[idx].id;
 
     Module.pager.go(`/workspace/${uuid}/delete`);
   }
 
   app(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4workspaces[idx].id;
+    let uuid = this.model.workspaces[idx].id;
 
     Module.pager.go(`/workspace/${uuid}/app`);
   }

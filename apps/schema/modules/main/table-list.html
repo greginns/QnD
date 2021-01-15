@@ -31,9 +31,9 @@
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <table class='table table-striped'>
-                  <tbody mvc-each='db4tables'>
+                  <tbody mvc-each='tables'>
                     <tr data-index='$index'>
-                      <td><span mvc-text='db4tables.$index.name'></span></td>
+                      <td><span mvc-text='tables.$index.name'></span></td>
                       <td style='cursor: pointer' title='Columns' mvc-click='columns'><i class="fal fa-columns"></i></td>
                       <td style='cursor: pointer' title='Config' mvc-click='config'><i class="fal fa-cog"></i></td>
                       <td style='cursor: pointer' title='Edit' mvc-click='edit'><i class="fal fa-edit"></i></td>

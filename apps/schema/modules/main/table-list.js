@@ -9,7 +9,7 @@ class Table_list extends MVC {
   }
 
   createModel() {
-    this.model.db4tables = [];
+    this.model.tables = [];
     this.model.workspace = '';
     this.model.app = ''
 
@@ -23,7 +23,7 @@ class Table_list extends MVC {
   async ready() {
     return new Promise(async function(resolve) {
       // fill up on data
-      Module.tableStores.db4table.addView(new TableView({proxy: this.model.db4tables}));
+      Module.tableStores.table.addView(new TableView({proxy: this.model.tables}));
 
       resolve();
     }.bind(this));
@@ -44,28 +44,28 @@ class Table_list extends MVC {
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4tables[idx].id;
+    let uuid = this.model.tables[idx].id;
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4tables[idx].id;
+    let uuid = this.model.tables[idx].id;
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/delete`);
   }
 
   columns(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4tables[idx].id;
+    let uuid = this.model.tables[idx].id;
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/column`);
   }
 
   config(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.db4tables[idx].id;
+    let uuid = this.model.tables[idx].id;
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/config`);
   }

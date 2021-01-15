@@ -2,6 +2,7 @@ node_modules/
 *.bak
 tenant-data/neoc/appConfig.json
 config.json
+db.json
 usergroups.json
 private.key
 ca_bundle.crt

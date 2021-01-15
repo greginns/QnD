@@ -9,12 +9,12 @@ class Workspace_delete extends MVC {
   }
 
   createModel() {
-    this.model.db4workspace = {};
+    this.model.workspace = {};
     this.origWorkspace = {};
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4workspace: {},
+      workspace: {},
       message: ''
     };
 
@@ -31,10 +31,10 @@ class Workspace_delete extends MVC {
 
     if (!id) this.gotoList();
 
-    let res = await Module.tableStores.db4workspace.getOne(id);
+    let res = await Module.tableStores.workspace.getOne(id);
 
     if (Object.keys(res).length > 0) {
-      this.model.db4workspace = res;
+      this.model.workspace = res;
       this.origWorkspace = res;
     }
     else {
@@ -53,14 +53,14 @@ class Workspace_delete extends MVC {
 
     if (!ret) return;
 
-    let workspace = this.model.db4workspace.toJSON();
+    let workspace = this.model.workspace.toJSON();
    
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    //let res = await Module.tableStores.db4workspace.delete(workspace.id);
+    //let res = await Module.tableStores.workspace.delete(workspace.id);
     let res = {status: 200}
     
     if (res.status == 200) {

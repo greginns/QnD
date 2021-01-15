@@ -9,13 +9,13 @@ class Table_update extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
+    this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
 
@@ -34,10 +34,10 @@ class Table_update extends MVC {
 
     if (!this.model.workspace || !this.model.app || !this.model.table) this.gotoList();
 
-    let res = await Module.tableStores.db4table.getOne(this.model.table);
+    let res = await Module.tableStores.table.getOne(this.model.table);
 
     if (Object.keys(res).length > 0) {
-      this.model.db4table = res;
+      this.model.table = res;
       this.origTable = res;
     }
     else {
@@ -52,7 +52,7 @@ class Table_update extends MVC {
   }
 
   async save(ev) {
-    let table = this.model.db4table.toJSON();
+    let table = this.model.table.toJSON();
     let diffs = utils.object.diff(this.origTable, table);
       
     if (Object.keys(diffs).length == 0) {
@@ -79,13 +79,13 @@ class Table_update extends MVC {
 
     utils.modals.overlay(true);
 
-    let res = await Module.tableStores.db4table.update(table.id, diffs);
+    let res = await Module.tableStores.table.update(table.id, diffs);
 
     if (res.status == 200) {
       utils.modals.toast('Table', 'Updated', 2000);
    
-      this.model.db4table.name = '';
-      this.model.db4table.desc = '';
+      this.model.table.name = '';
+      this.model.table.desc = '';
       this.gotoList();
     }
     else {

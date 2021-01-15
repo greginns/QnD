@@ -27,14 +27,14 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.SelectMVC(id='db4table_config_orderby', size='10', mvc_value='db4table.orderby', mvc_each='db4table.columns', mvc_on='{"change": "orderbyChanged"}', valueField='name', textField='name', label='Columns', multiple='multiple')}}
+                {{ fields.SelectMVC(id='table_config_orderby', size='10', mvc_value='table.orderby', mvc_each='table.columns', mvc_on='{"change": "orderbyChanged"}', valueField='name', textField='name', label='Columns', multiple='multiple')}}
               </div>  
             </div>
             
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <span class='label-color'>Order By Fields</span>
-                <span mvc-text='db4table.orderby'></span>
+                <span mvc-text='table.orderby'></span>
               </div>  
             </div>
           </div>

@@ -9,14 +9,14 @@ class Table_config_orderby extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
+    this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
 
@@ -33,7 +33,7 @@ class Table_config_orderby extends MVC {
     this.model.app = params.app;
     this.model.table = params.table;
 
-    this.model.db4table = await Module.tableStores.db4table.getOne(this.model.table);
+    this.model.table = await Module.tableStores.table.getOne(this.model.table);
   }
 
   outView() {
@@ -41,10 +41,10 @@ class Table_config_orderby extends MVC {
   }
 
   async save(ev) {
-    let current = await Module.tableStores.db4table.getOne(this.model.table);
+    let current = await Module.tableStores.table.getOne(this.model.table);
     let diffs = {};
 
-    if (current.orderby != this.model.db4table.orderby) diffs.orderby = this.model.db4table.orderby;
+    if (current.orderby != this.model.table.orderby) diffs.orderby = this.model.table.orderby;
     
     if (Object.keys(diffs).length == 0) {
       this.model.badMessage = 'No Changes to Update';
@@ -59,7 +59,7 @@ class Table_config_orderby extends MVC {
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.db4table.update(this.model.table, diffs);
+    let res = await Module.tableStores.table.update(this.model.table, diffs);
 
     if (res.status == 200) {
       utils.modals.toast('Table', 'Updated', 2000);

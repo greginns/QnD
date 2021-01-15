@@ -9,13 +9,13 @@ class Table_create extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
+    this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
 
@@ -37,7 +37,7 @@ class Table_create extends MVC {
   }
 
   async save(ev) {
-    let table = this.model.db4table.toJSON();
+    let table = this.model.table.toJSON();
 
     if (!table.name) {
       this.model.badMessage = 'Please Enter a Table Name';
@@ -57,13 +57,13 @@ class Table_create extends MVC {
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = await Module.tableStores.db4table.insert(table);
+    let res = await Module.tableStores.table.insert(table);
 
     if (res.status == 200) {
       utils.modals.toast('Table', 'Created', 2000);
    
-      this.model.db4table.name = '';
-      this.model.db4table.desc = '';
+      this.model.table.name = '';
+      this.model.table.desc = '';
       this.gotoList();
     }
     else {

@@ -9,12 +9,12 @@ class App_create extends MVC {
   }
 
   createModel() {
-    this.model.db4app = {};
+    this.model.app = {};
     this.model.workspace = '';
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4app: {},
+      app: {},
       message: ''
     };
 
@@ -35,7 +35,7 @@ class App_create extends MVC {
   }
 
   async save(ev) {
-    let app = this.model.db4app.toJSON();
+    let app = this.model.app.toJSON();
 
     if (!app.name) {
       this.model.badMessage = 'Please Enter an App Name';
@@ -54,13 +54,13 @@ class App_create extends MVC {
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = await Module.tableStores.db4app.insert(app);
+    let res = await Module.tableStores.app.insert(app);
 
     if (res.status == 200) {
       utils.modals.toast('App', 'Created', 2000);
    
-      this.model.db4app.name = '';
-      this.model.db4app.desc = '';
+      this.model.app.name = '';
+      this.model.app.desc = '';
       this.gotoList();
     }
     else {
