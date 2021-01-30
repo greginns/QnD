@@ -9,7 +9,7 @@ class Column_delete extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
+    this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -17,7 +17,7 @@ class Column_delete extends MVC {
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
   }
@@ -43,7 +43,7 @@ class Column_delete extends MVC {
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.data.db4table.deleteColumn(this.model.table, this.model.columnName);
+    let res = await Module.data.table.deleteColumn(this.model.table, this.model.columnName);
 
     if (res.status == 200) {
       utils.modals.toast('Column', 'Deleted', 2000);

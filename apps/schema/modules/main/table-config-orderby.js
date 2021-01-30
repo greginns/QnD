@@ -9,7 +9,7 @@ class Table_config_orderby extends MVC {
   }
 
   createModel() {
-    this.model.table = {};
+    this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -33,7 +33,7 @@ class Table_config_orderby extends MVC {
     this.model.app = params.app;
     this.model.table = params.table;
 
-    this.model.table = await Module.tableStores.table.getOne(this.model.table);
+    this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
   }
 
   outView() {
@@ -43,8 +43,8 @@ class Table_config_orderby extends MVC {
   async save(ev) {
     let current = await Module.tableStores.table.getOne(this.model.table);
     let diffs = {};
-
-    if (current.orderby != this.model.table.orderby) diffs.orderby = this.model.table.orderby;
+console.log(current, this.model.tableRec.toJSON())
+    if (current.orderby != this.model.tableRec.orderby) diffs.orderby = this.model.tableRec.orderby;
     
     if (Object.keys(diffs).length == 0) {
       this.model.badMessage = 'No Changes to Update';
@@ -64,7 +64,7 @@ class Table_config_orderby extends MVC {
     if (res.status == 200) {
       utils.modals.toast('Table', 'Updated', 2000);
    
-      this.model.column = {};
+      this.model.tableRec = {};
 
       this.gotoList();
     }

@@ -1,6 +1,7 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {TableView, TableQuery} from '/~static/lib/client/core/data.js';
+import {TableStore, TableView} from '/~static/lib/client/core/data.js';
+import {App} from '/~static/lib/client/core/app.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
 class App_list extends MVC {
@@ -17,19 +18,38 @@ class App_list extends MVC {
       message: ''
     };
 
+    this.appStore;
+    this.appView = new TableView({proxy: this.model.apps});
   }
 
   async ready() {
     return new Promise(async function(resolve) {
-      // fill up on data
-      Module.tableStores.app.addView(new TableView({proxy: this.model.apps}));
 
       resolve();
     }.bind(this));
   }
   
   async inView(params) {
-    this.workspace = params.workspace;
+    let workspace = params.workspace;
+    let model = '/schema/application';
+    let conditions = {};
+
+    this.workspace = workspace;
+
+    let filters = {workspace};
+    
+    conditions[model] = function(rec) {
+      return rec.workspace == workspace;
+    };
+
+    if (this.appStore) {
+      this.appStore.kill();
+    }
+
+    this.appStore = new TableStore({accessor: Module.data.application, filters, conditions});
+    this.appStore.addView(this.appView);
+
+    this.appStore.getMany();
   }
 
   outView() {

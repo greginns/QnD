@@ -1,6 +1,7 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
+import {TableView, TableStore} from '/~static/lib/client/core/data.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
 class Table_config_fks_create extends MVC {
@@ -9,7 +10,7 @@ class Table_config_fks_create extends MVC {
   }
 
   createModel() {
-    this.model.table = {};
+    this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -30,17 +31,37 @@ class Table_config_fks_create extends MVC {
 
   async ready() {
     return new Promise(async function(resolve) {
+      this.appView = new TableView({proxy: this.model.apps});
+      this.appStore = new TableStore({accessor: Module.data.application, filters: {}, conditions: {}});
+      this.appStore.addView(this.appView);
+  
+      this.foreignView = new TableView({proxy: this.model.foreignTables});
+      this.foreignStore = new TableStore({accessor: Module.data.table, filters: {}, conditions: {}});
+      this.foreignStore.addView(this.foreignView);
+  
       resolve();
     }.bind(this));
   }
   
   async inView(params) {
-    this.model.workspace = params.workspace;
+    let workspace = params.workspace;
+    let model = '/schema/application';
+    let conditions = {};
+
+    this.model.workspace = workspace;
     this.model.app = params.app;
     this.model.table = params.table;
 
     this.model.sourceTable = await Module.tableStores.table.getOne(this.model.table);
-    this.model.apps = await Module.tableStores.app.getAll();
+
+    let filters = {workspace};
+    
+    conditions[model] = function(rec) {
+      return rec.workspace == workspace;
+    };
+
+    this.appStore.redo({filters, conditions});
+    this.appStore.getMany();
   }
 
   outView() {
@@ -87,12 +108,28 @@ class Table_config_fks_create extends MVC {
       return;
     }
 
-    fks.push(fk);
+    let ok = true;
+    for (fx of fks) {
+      if (fx.name == fk.name) {
+        ok = false;
+        break;
+      }
+    }
+
+    if (!ok) {
+      this.model.badMessage = 'That foreign key name already exists';
+      
+      setTimeout(function() {
+        this.model.badMessage = '';
+      }.bind(this), 2500);
+
+      return;
+    }
 
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.table.update(this.model.table, {fks});
+    let res = await Module.data.table.insertFK(this.model.table, {fk});
 
     if (res.status == 200) {
       utils.modals.toast('Table', 'Updated', 2000);
@@ -118,7 +155,19 @@ class Table_config_fks_create extends MVC {
   }
 
   async getForeignTables() {
-    this.model.foreignTables = await Module.tableStores.table.getAll();
+    let conditions = {};
+    let model = '/schema/table';
+    let app = this.model.app;
+    let filters = {app};
+    
+    conditions[model] = function(rec) {
+      return rec.app == app;
+    };
+
+    this.foreignStore.redo({filters, conditions});
+    this.foreignStore.addView(this.foreignView);
+
+    this.foreignStore.getMany();
   }
 
   async getForeignColumns() {

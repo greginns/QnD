@@ -9,7 +9,7 @@ class Table_config_pk extends MVC {
   }
 
   createModel() {
-    this.model.table = {};
+    this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -33,7 +33,7 @@ class Table_config_pk extends MVC {
     this.model.app = params.app;
     this.model.table = params.table;
 
-    this.model.table = await Module.tableStores.table.getOne(this.model.table);
+    this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
   }
 
   outView() {
@@ -44,7 +44,7 @@ class Table_config_pk extends MVC {
     let current = await Module.tableStores.table.getOne(this.model.table);
     let diffs = {};
 
-    if (current.pks != this.model.table.pks) diffs.pks = this.model.table.pks;
+    if (current.pk != this.model.tableRec.pk) diffs.pk = this.model.tableRec.pk;
     
     if (Object.keys(diffs).length == 0) {
       this.model.badMessage = 'No Changes to Update';
@@ -59,12 +59,12 @@ class Table_config_pk extends MVC {
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.table.update(this.model.table, diffs);
+    let res = await Module.data.table.updatePK(this.model.table, diffs);
 
     if (res.status == 200) {
       utils.modals.toast('Table', 'Updated', 2000);
    
-      this.model.column = {};
+      this.model.tableRec = {};
 
       this.gotoList();
     }
@@ -85,7 +85,7 @@ class Table_config_pk extends MVC {
   }
 
   pkChanged(ev) {
-    console.log(this.model.table.pks.toJSON())
+    console.log(this.model.tableRec.pk.toJSON())
   }
 }
 

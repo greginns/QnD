@@ -14,6 +14,13 @@ const version = 'v1';
 const models = require(root + `/apps/${app}/models.js`);
 const services = require(root + `/apps/${app}/services.js`);
 
+const getDBAndSchema = function(req) {
+  let database = req.session.data.database;
+  let pgschema = req.session.data.pgschema;
+
+  return {database, pgschema};
+}
+
 // Page route
 Router.add(new RouterMessage({
   method: 'get',
@@ -82,7 +89,6 @@ Router.add(new RouterMessage({
 
 // Model Routes
 let allowCORS = true, inAPI = true;
-let admin = 'b9455c80-757d-4cc8-831f-b7ec4d9c9b01';
 
 // WORKSPACE
 
@@ -100,8 +106,8 @@ Router.add(new RouterMessage({
   allowCORS,
   fn: async function(req) {
     let {rec, cols, where, values, limit, offset, orderby} = urlQueryParse(req.query);
-    let database = req.session.data.database;
-    let pgschema = req.session.data.pgschema;
+    let {database, pgschema} = getDBAndSchema(req);
+
     let tm = await services.workspace.getMany({database, pgschema, rec, cols, where, values, limit, offset, orderby});
 
     return tm.toResponse();
@@ -134,8 +140,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
       tm = await services.workspace.getOne({database, pgschema, rec: {id} });
 
@@ -166,10 +171,7 @@ Router.add(new RouterMessage({
   allowCORS,
   fn: async function(req) {
     let rec = req.body.workspace || {};
-    let database = req.session.data.database;
-    let pgschema = req.session.data.pgschema;
-
-    rec.admin = admin;
+    let {database, pgschema} = getDBAndSchema(req);
 
     let tm = await services.workspace.create({database, pgschema, rec});
 
@@ -203,8 +205,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
       tm = await services.workspace.update({database, pgschema, id, rec: req.body.workspace || {} });
 
@@ -241,8 +242,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
       tm = await services.workspace.delete({database, pgschema, id});
 
@@ -275,8 +275,7 @@ Router.add(new RouterMessage({
   allowCORS,
   fn: async function(req) {
     let {rec, cols, where, values, limit, offset, orderby} = urlQueryParse(req.query);
-    let database = req.session.data.database;
-    let pgschema = req.session.data.pgschema;
+    let {database, pgschema} = getDBAndSchema(req);
 
     let tm = await services.application.getMany({database, pgschema, rec, cols, where, values, limit, offset, orderby});
 
@@ -310,10 +309,9 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      tm = await services.application.getOne({database, pgschema, rec: {id} });
+      let {database, pgschema} = getDBAndSchema(req);
 
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      tm = await services.application.getOne({database, pgschema, rec: {id} });
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -342,10 +340,7 @@ Router.add(new RouterMessage({
   allowCORS,
   fn: async function(req) {
     let rec = req.body.application || {};
-    let database = req.session.data.database;
-    let pgschema = req.session.data.pgschema;
-
-    rec.admin = admin;
+    let {database, pgschema} = getDBAndSchema(req);
 
     let tm = await services.application.create({database, pgschema, rec});
 
@@ -379,8 +374,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
       tm = await services.application.update({database, pgschema, id, rec: req.body.application || {} });
 
@@ -417,8 +411,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
       tm = await services.application.delete({database, pgschema, id});
 
@@ -451,8 +444,8 @@ Router.add(new RouterMessage({
   allowCORS,
   fn: async function(req) {
     let {rec, cols, where, values, limit, offset, orderby} = urlQueryParse(req.query);
-    let database = req.session.data.database;
-    let pgschema = req.session.data.pgschema;
+    let {database, pgschema} = getDBAndSchema(req);
+
     let tm = await services.table.getMany({database, pgschema, rec, cols, where, values, limit, offset, orderby});
 
     return tm.toResponse();
@@ -485,8 +478,7 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
       tm = await services.table.getOne({database, pgschema, rec: {id} });
 
@@ -517,10 +509,7 @@ Router.add(new RouterMessage({
   allowCORS,
   fn: async function(req) {
     let rec = req.body.table || {};
-    let database = req.session.data.database;
-    let pgschema = req.session.data.pgschema;
-
-    rec.admin = admin;
+    let {database, pgschema} = getDBAndSchema(req);
 
     let tm = await services.table.create({database, pgschema, rec});
 
@@ -554,10 +543,46 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
       tm = await services.table.update({database, pgschema, id, rec: req.body.table || {} });
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// delete
+Router.add(new RouterMessage({
+  method: 'delete',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id', 
+  id: 'delete',
+  level: DELETE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.table.delete({database, pgschema, id});
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -592,12 +617,11 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
-      tm = await services.table.insertColumn({database, pgschema, id, rec: req.body.table || {}});
+      tm = await services.column.insert({database, pgschema, id, rec: req.body.table || {}});
 
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+      if (tm.isBad() || tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();
@@ -631,10 +655,9 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
-      tm = await services.table.updateColumn({database, pgschema, id, name, rec: req.body.table || {}});
+      tm = await services.column.update({database, pgschema, id, name, rec: req.body.table || {}});
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -670,10 +693,9 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
-      tm = await services.table.deleteColumn({database, pgschema, id, name});
+      tm = await services.column.delete({database, pgschema, id, name});
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
@@ -688,15 +710,15 @@ Router.add(new RouterMessage({
   } 
 }));
 
-// delete
+// update pk
 Router.add(new RouterMessage({
-  method: 'delete',
+  method: 'put',
   app: app,
   subapp: 'table',
   version: version,
-  path: '/:id', 
-  id: 'delete',
-  level: DELETE,
+  path: '/:id/pk', 
+  id: 'updatePK',
+  level: UPDATE,
   inAPI,
   apiInfo: {type: 'json', schema: models.table},
   allowCORS,
@@ -708,10 +730,272 @@ Router.add(new RouterMessage({
       tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
     }
     else {
-      let database = req.session.data.database;
-      let pgschema = req.session.data.pgschema;
+      let {database, pgschema} = getDBAndSchema(req);
 
-      tm = await services.table.delete({database, pgschema, id});
+      tm = await services.table.updatePK({database, pgschema, id, rec: req.body.table || {}});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// insert fk
+Router.add(new RouterMessage({
+  method: 'post',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id/fk', 
+  id: 'insertFK',
+  level: UPDATE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.table.insertFK({database, pgschema, id, rec: req.body.table || {}});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// update fk
+Router.add(new RouterMessage({
+  method: 'put',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id/fk/:name', 
+  id: 'updatePK',
+  level: UPDATE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let name = req.params.name;
+    let tm;
+
+    if (!id || !name) {
+      tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+      
+      tm = await services.table.updateFK({database, pgschema, id, name, rec: req.body.table || {}});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// delete FK
+Router.add(new RouterMessage({
+  method: 'delete',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id/fk/:name', 
+  id: 'deleteFK',
+  level: DELETE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let name = req.params.name;
+    let tm;
+
+    if (!id || !name) {
+      tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.table.deleteFK({database, pgschema, id, name});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// insert index
+Router.add(new RouterMessage({
+  method: 'post',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id/index', 
+  id: 'insertIndex',
+  level: UPDATE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.table.insertIndex({database, pgschema, id, rec: req.body.table || {}});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// update index
+Router.add(new RouterMessage({
+  method: 'put',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id/index/:name', 
+  id: 'updateIndex',
+  level: UPDATE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let name = req.params.name;
+    let tm;
+
+    if (!id || !name) {
+      tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+      
+      tm = await services.table.updateIndex({database, pgschema, id, name, rec: req.body.table || {}});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// delete Index
+Router.add(new RouterMessage({
+  method: 'delete',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id/index/:name', 
+  id: 'deleteIndex',
+  level: DELETE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let name = req.params.name;
+    let tm;
+
+    if (!id || !name) {
+      tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.table.deleteIndex({database, pgschema, id, name});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// update orderby
+Router.add(new RouterMessage({
+  method: 'put',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id/orderby', 
+  id: 'updateOrderby',
+  level: UPDATE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+      
+      tm = await services.table.updateOrderby({database, pgschema, id, rec: req.body.table || {}});
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }

@@ -15,7 +15,7 @@
                 <h4>Columns</h4>
               </div>
               <div class='col-4'>
-                <button type="button" class="btn btn-outline-success" mvc-click='create'>Add Column</button>
+                <button type="button" class="btn btn-sm btn-success" mvc-click='create' title='Add Column'><i class="fas fa-plus"></i></button>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -31,9 +31,9 @@
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <table class='table table-striped'>
-                  <tbody mvc-each='db4table.columns'>
+                  <tbody mvc-each='tableRec.columns'>
                     <tr data-index='$index'>
-                      <td><span mvc-text='db4table.columns.$index.name'></span></td>
+                      <td><span mvc-text='tableRec.columns.$index.name'></span></td>
                       <td style='cursor: pointer' title='Edit' mvc-click='edit'><i class="fal fa-edit"></i></td>
                       <td style='cursor: pointer' title='Delete' mvc-click='delete'><i class="fal fa-trash-alt"></i></td>
                     </tr>

@@ -63,8 +63,7 @@ class Table_delete extends MVC {
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    //let res = await Module.tableStores.table.delete(table.id);
-    let res = {status: 200}
+    let res = await Module.tableStores.table.delete(table.id);
     
     if (res.status == 200) {
       utils.modals.toast('Table', 'Deleted', 2000);

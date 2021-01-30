@@ -46,8 +46,8 @@
                 <table class='table'>
                   <thead>
                     <tr>
-                      <th>Source Column</th>
-                      <th>Foreign Column</th>
+                      <th>Source Table</th>
+                      <th>Foreign Table</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -72,7 +72,7 @@
                         {{ fields.SelectMVC(id='fk_create_links', size='1', mvc_value='link.source', mvc_each='sourceTable.columns', valueField='name', textField='name', label='Source Table Columns', multiple='')}}
                       </td>
                       <td>
-                        {{ fields.SelectMVC(id='fk_create_links', size='1', mvc_value='link.target', mvc_each='foreignTable.pks', valueField='name', textField='name', label='Foreign Table Columns', multiple='')}}
+                        {{ fields.SelectMVC(id='fk_create_links', size='1', mvc_value='link.target', mvc_each='foreignTable.pk', valueField='', textField='', label='Foreign Table PK Columns', multiple='')}}
                       </td>
                       <td>
                         <button class='btn-sm btn-outline-success' mvc-click='addPair'>

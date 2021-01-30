@@ -9,7 +9,7 @@ class App_update extends MVC {
   }
 
   createModel() {
-    this.model.app = {};
+    this.model.application = {};
     this.model.workspace = '';
 
     this.model.badMessage = '';
@@ -32,10 +32,10 @@ class App_update extends MVC {
 
     if (!this.model.workspace || !id) this.gotoList();
 
-    let res = await Module.tableStores.app.getOne(id);
+    let res = await Module.tableStores.application.getOne(id);
 
     if (Object.keys(res).length > 0) {
-      this.model.app = res;
+      this.model.application = res;
       this.origApp = res;
     }
     else {
@@ -50,7 +50,7 @@ class App_update extends MVC {
   }
 
   async save(ev) {
-    let app = this.model.app.toJSON();
+    let app = this.model.application.toJSON();
     let diffs = utils.object.diff(this.origApp, app);
       
     if (Object.keys(diffs).length == 0) {
@@ -67,13 +67,13 @@ class App_update extends MVC {
 
     utils.modals.overlay(true);
     
-    let res = await Module.tableStores.app.update(app.id, diffs);
+    let res = await Module.tableStores.application.update(app.id, diffs);
     
     if (res.status == 200) {
       utils.modals.toast('APP', 'Updated', 2000);
    
-      this.model.app.name = '';
-      this.model.app.desc = '';
+      this.model.application.name = '';
+      this.model.application.desc = '';
       this.gotoList();
     }
     else {

@@ -9,7 +9,7 @@ class App_create extends MVC {
   }
 
   createModel() {
-    this.model.app = {};
+    this.model.application = {};
     this.model.workspace = '';
 
     this.model.badMessage = '';
@@ -35,9 +35,9 @@ class App_create extends MVC {
   }
 
   async save(ev) {
-    let app = this.model.app.toJSON();
+    let application = this.model.application.toJSON();
 
-    if (!app.name) {
+    if (!application.name) {
       this.model.badMessage = 'Please Enter an App Name';
         
       setTimeout(function() {
@@ -47,20 +47,20 @@ class App_create extends MVC {
       return;
     }
 
-    app.workspace = this.model.workspace;
+    application.workspace = this.model.workspace;
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = await Module.tableStores.app.insert(app);
+    let res = await Module.tableStores.application.insert(application);
 
     if (res.status == 200) {
       utils.modals.toast('App', 'Created', 2000);
    
-      this.model.app.name = '';
-      this.model.app.desc = '';
+      this.model.application.name = '';
+      this.model.application.desc = '';
       this.gotoList();
     }
     else {

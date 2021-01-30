@@ -1,16 +1,39 @@
+/* TO DO
+  Clean up all sql
+    Use transactions to do DDL then saving/deleting
+    More testing on column changes
+*/
 const root = process.cwd();
-const uuidv4 = require('uuid/v4');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
-const {jsonQueryExecify} = require(root + '/lib/server/utils/sqlUtil.js');
+const {jsonQueryExecify, SqlBuilder} = require(root + '/lib/server/utils/sqlUtil.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const loginServices = require(root + '/apps/db4admin/services.js');
+const {exec} = require(root + '/lib/server/utils/db.js');
 
 const app = getAppName(__dirname);
 const services = {};
 
 const models = require(root + `/apps/${app}/models.js`);
+
+const getAWorkspace = async function(database, pgschema, id) {
+  return await models.workspace.selectOne({database, pgschema, pks: id});
+} 
+
+const getAnApp = async function(database, pgschema, id) {
+  return await models.application.selectOne({database, pgschema, pks: id});
+} 
+
+const getATable = async function(database, pgschema, id) {
+  return await models.table.selectOne({database, pgschema, pks: id});
+} 
+
+const updateTable = async function(database, pgschema, rec) {
+  let tobj = new models.table(rec);
+
+  return await tobj.updateOne({database, pgschema});
+}
 
 services.output = {
   main: async function(req) {
@@ -34,7 +57,7 @@ services.output = {
       ctx.app = models.application.getColumnDefns();
       ctx.table = models.table.getColumnDefns();
 
-      ctx.USER = JSON.stringify(req.session.admin);
+      ctx.USER = JSON.stringify(req.session.data.user);
 
       try {
         tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
@@ -53,7 +76,7 @@ services.output = {
     return tm;
   },
 }
-
+/*
 services.database = {
   getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
     // Get one or more rows
@@ -102,6 +125,7 @@ services.database = {
     return tm;
   }
 };
+*/
 
 services.workspace = {
   getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
@@ -130,6 +154,11 @@ services.workspace = {
     let tobj = new models.workspace(rec);
     let tm = await tobj.insertOne({database, pgschema});
 
+    let sql = SqlBuilder.createSchema(rec.name, 'postgres');
+    let tm1 = await exec(database, sql[0]);
+
+    console.log(tm1)
+
     return tm;    
   },
   
@@ -147,6 +176,11 @@ services.workspace = {
     // Delete row
     let tobj = new models.workspace({ id });
     let tm = await tobj.deleteOne({database, pgschema});
+
+    let sql = SqlBuilder.dropSchema(tm.data.name, 'postgres');
+    let tm1 = await exec(database, sql[0]);
+
+    console.log(tm1)
 
     return tm;
   }
@@ -225,77 +259,52 @@ services.table = {
     
   create: async function({database = '', pgschema = '', rec = {}} = {}) {
     // Insert row
+    let app = await getAnApp(database, pgschema, [rec.app]);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+
     let tobj = new models.table(rec);
     let tm = await tobj.insertOne({database, pgschema});
+// *** Reverse this, only create if insert worked.
+// Use a transaction for these.
+    if (tm.status == 200) {
+      let app = await models.application.selectOne({database, pgschema, pks: [rec.app] });
 
+      if (app.status == 200) {
+        let sb = new SqlBuilder(workspace.data.name, 'postgres');
+
+        tm.data.sql = sb.createTable(app.data.name, rec.name);
+      }
+    }
+    
     return tm;    
   },
   
   update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
-    // Update row
+    // Update row, rename table
+    let tm;
     rec.id = id;
+// *** Reverse this, only update if rename worked.
+    let table = await getATable(database, pgschema, [id]);
 
-    let tobj = new models.table(rec);
-    let tm = await tobj.updateOne({database, pgschema});
-    
+    if (table.status == 200) {
+      tm = await updateTable(database, pgschema, rec)
+
+      if (tm.status == 200) {
+        let app = await getAnApp(database, pgschema, [tm.data.app]);
+        let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+
+        if (app.status == 200) {
+          let sb = new SqlBuilder(workspace.data.name, 'postgres');
+
+          tm.data.sql = sb.renameTable(app.data.name, table.data.name, rec.name);
+        }
+      }
+    }
+    else {
+      tm = new TravelMessage({status: 400})
+    }
+
     return tm;
-  },
-  
-  insertColumn: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
-    // Insert column in an existing table row
-    let res = await models.table.selectOne({database, pgschema, pks: [id] });
-    let columns;
-
-    if (res.status == 200) {
-      columns = res.data.columns;
-      columns.push(rec.column);
-
-      res = await services.table.update({database, pgschema, id, rec: {columns}});
-    }
-
-    return res;
-  },
-  
-  updateColumn: async function({database = '', pgschema = '', id = '', name = '', rec= {}} = {}) {
-    // Update column in an existing table row
-    let res = await models.table.selectOne({database, pgschema, pks: [id] });
-    let columns;
-
-    if (res.status == 200) {
-      columns = res.data.columns || [];
-
-      for (let idx=0; idx<columns.length; idx++) {
-        if (columns[idx].name == name) {
-          columns[idx] = rec.column;
-          break;
-        }
-      }
-
-      res = await services.table.update({database, pgschema, id, rec: {columns}});
-    }
-
-    return res;
-  },
-  
-  deleteColumn: async function({database = '', pgschema = '', id = '', name = ''} = {}) {
-    // Delete column in an existing table row
-    let res = await models.table.selectOne({database, pgschema, pks: [id] });
-    let columns;
-
-    if (res.status == 200) {
-      columns = res.data.columns || [];
-
-      for (let idx=0; idx<columns.length; idx++) {
-        if (columns[idx].name == name) {
-          columns.splice(idx,1);
-          break;
-        }
-      }
-
-      res = await services.table.update({database, pgschema, id, rec: {columns}});
-    }
-
-    return res;
   },
   
   delete: async function({database = '', pgschema = '', id = ''} = {}) {
@@ -303,9 +312,370 @@ services.table = {
     let tobj = new models.table({ id });
     let tm = await tobj.deleteOne({database, pgschema});
 
+// *** Reverse this.  Only delete if drop worked.
+    if (tm.status == 200) {
+      let app = await models.application.selectOne({database, pgschema, pks: [tm.data.app] });
+      let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+
+      if (app.status == 200) {
+        let sb = new SqlBuilder(workspace.data.name, 'postgres');
+        tm.data.sql = sb.dropTable(app.data.name, tm.data.name);
+      }
+    }
+
     return tm;
-  }
+  },
+
+  updatePK: async function({database = '', pgschema = '', id = '', rec = {}} = {}) {
+    let table = await getATable(database, pgschema, id);
+    let app = await getAnApp(database, pgschema, table.data.app);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let res;
+
+    if (table.status == 200 && app.status == 200) {
+      rec.id = id;
+      res = await updateTable(database, pgschema, rec);
+
+      let sb = new SqlBuilder(workspace.data.name, 'postgres');
+
+      res.data.sql = sb.createPK(app.data.name, table.data.name, rec.pk);
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;
+  },
+
+  insertFK: async function({database = '', pgschema = '', id = '', rec = {}} = {}) {
+    let table = await getATable(database, pgschema, id);
+    let app = await getAnApp(database, pgschema, table.data.app);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let res;
+
+    if (table.status == 200 && app.status == 200) {
+      let fks = table.fks || [];
+      let ok = true;
+
+      for (let fk of fks) {
+        if (fk.name == rec.table.fk.name) {
+          ok = false;
+          break;
+        }
+      }
+
+      if (ok) {
+        fks.push(rec.fk);
+        res = await updateTable(database, pgschema, {id, fks});
+
+        let sb = new SqlBuilder(workspace.data.name, 'postgres');
+  
+        res.data.sql = sb.createFK(app.data.name, table.data.name, rec.fks)
+
+      }
+      else {
+        res = new TravelMessage({status: 404});  
+      }      
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;    
+  },
+
+  updateFK: async function({database = '', pgschema = '', id = '', name = '', rec = {}} = {}) {
+    let table = await getATable(database, pgschema, id);
+    let app = await getAnApp(database, pgschema, table.data.app);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let res;
+
+    if (table.status == 200 && app.status == 200) {
+      let fks = table.data.fks || [];
+      let ok = false;
+
+      for (let idx=0; idx<fks.length; idx++) {
+        if (fks[idx].name == name) {
+          fks[idx] = rec.fk;
+          ok = true;
+          break;
+        }
+      }
+
+      if (ok) {
+        res = await updateTable(database, pgschema, {id, fks});
+
+        let sb = new SqlBuilder(workspace.data.name, 'postgres');
+  
+        res.data.sql = sb.alterFK(app.data.name, table.data.name, rec.fk)
+
+      }
+      else {
+        res = new TravelMessage({status: 404});  
+      }      
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;    
+  },
+
+  deleteFK: async function({database = '', pgschema = '', id = '', name = ''} = {}) {
+    let table = await getATable(database, pgschema, id);
+    let app = await getAnApp(database, pgschema, table.data.app);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let res, oldFK;
+
+    if (table.status == 200 && app.status == 200) {
+      let fks = table.fks || [];
+      let ok = false;
+
+      for (let idx=0; idx<fks.length; idx++) {
+        if (name == fks[idx].name) {
+          oldFK = fks.splice(idx, 1);
+          ok = true;
+          break;
+        }
+      }
+
+      if (ok) {
+        res = await updateTable(database, pgschema, {id, fks});
+
+        let sb = new SqlBuilder(workspace.data.name, 'postgres');
+  
+        res.data.sql = sb.dropFK(app.data.name, table.data.name, oldFK)
+
+      }
+      else {
+        res = new TravelMessage({status: 404});  
+      }            
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;    
+  },  
+
+  insertIndex: async function({database = '', pgschema = '', id = '', rec = {}} = {}) {
+    let table = await getATable(database, pgschema, id);
+    let app = await getAnApp(database, pgschema, table.data.app);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let res;
+
+    if (table.status == 200 && app.status == 200) {
+      let indexes = table.indexes;
+      let ok = true;
+
+      for (let index of indexes) {
+        if (index.name == rec.index.name) {
+          ok = false;
+          break;
+        }
+      }
+
+      if (ok) {
+        indexes.push(rec.fk);
+        res = await updateTable(database, pgschema, {id, indexes});
+
+        let sb = new SqlBuilder(workspace.data.name, 'postgres');
+  
+        res.data.sql = sb.createFK(app.data.name, table.data.name, rec.index)
+
+      }
+      else {
+        res = new TravelMessage({status: 404});  
+      }      
+      
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;    
+  },
+
+  updateIndex: async function({database = '', pgschema = '', id = '', name = '', rec = {}} = {}) {
+    let table = await getATable(database, pgschema, id);
+    let app = await getAnApp(database, pgschema, table.data.app);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let res;
+
+    if (table.status == 200 && app.status == 200) {
+      let indexes = table.data.indexes;
+      let ok = false;
+
+      for (let idx=0; idx<indexes.length; idx++) {
+        if (indexes[idx].name == name) {
+          indexes[idx] = rec.index;
+          ok = true;
+          break;
+        }
+      }
+
+      if (ok) {
+        res = await updateTable(database, pgschema, {id, indexes});
+
+        let sb = new SqlBuilder(workspace.data.name, 'postgres');
+  
+        res.data.sql = sb.alterFK(app.data.name, table.data.name, rec.index)
+      }
+      else {
+        res = new TravelMessage({status: 404});  
+      }      
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;    
+  },
+
+  deleteIndex: async function({database = '', pgschema = '', id = '', name = ''} = {}) {
+    let table = await getATable(database, pgschema, id);
+    let app = await getAnApp(database, pgschema, table.data.app);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let res, oldIdx;
+
+    if (table.status == 200 && app.status == 200) {
+      let indexes = table.indexes;
+      let ok = false;
+
+      for (let idx=0; idx<indexes.length; idx++) {
+        if (name == indexes[idx].name) {
+          oldIdx = indexes.splice(idx, 1);
+          ok = true;
+          break;
+        }
+      }
+
+      if (ok) {
+        res = await updateTable(database, pgschema, {id, indexes});
+
+        let sb = new SqlBuilder(workspace.data.name, 'postgres');
+  
+        res.data.sql = sb.dropFK(app.data.name, table.data.name, oldIdx)
+
+      }
+      else {
+        res = new TravelMessage({status: 404});  
+      }                  
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;    
+  },
+
+  updateOrderby: async function({database = '', pgschema = '', id = '', rec = {}} = {}) {
+    let table = await getATable(database, pgschema, id);
+    let app = await getAnApp(database, pgschema, table.data.app);
+    let res;
+
+    if (table.status == 200 && app.status == 200) {
+      rec.id = id;
+      res = await updateTable(database, pgschema, rec);
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;    
+  },
 };
+
+services.column = {
+  insert: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
+    // Insert column into an existing table row
+    let table = await getATable(database, pgschema, [id]);
+    let app = await getAnApp(database, pgschema, [table.data.app]);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let columns, res;
+// *** Clean up
+
+    if (table.status == 200 && app.status == 200) {
+      columns = table.data.columns || [];
+      columns.push(rec.column);
+
+      res = await updateTable(database, pgschema, {id, columns});
+
+      let sb = new SqlBuilder(workspace.data.name, 'postgres');
+      res.data.sql = sb.createColumn(app.data.name, table.data.name, rec.column);
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;
+  },
+  
+  update: async function({database = '', pgschema = '', id = '', name = '', rec= {}} = {}) {
+    // Update column in an existing table row
+    let table = await models.table.selectOne({database, pgschema, pks: [id] });
+
+    let app = await models.application.selectOne({database, pgschema, pks: [table.data.app] });
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let columns, res, oldCol;
+
+    if (table.status == 200 && app.status == 200) {
+      columns = table.data.columns || [];
+
+      for (let idx=0; idx<columns.length; idx++) {
+        if (columns[idx].name == name) {
+          oldCol = columns[idx];
+          columns[idx] = rec.column;
+          break;
+        }
+      }
+
+      res = await updateTable(database, pgschema, {id, columns});
+
+      let sb = new SqlBuilder(workspace.data.name, 'postgres');
+      res.data.sql = sb.alterColumn(app.data.name, table.data.name, rec.column, oldCol);
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;
+  },
+  
+  delete: async function({database = '', pgschema = '', id = '', name = ''} = {}) {
+    // Delete column in an existing table row
+    let table = await getATable(database, pgschema, id);
+    let app = await getAnApp(database, pgschema, table.data.app);
+    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
+    let res, columns, delCol;
+
+    if (table.status == 200 && app.status == 200) {
+      columns = table.data.columns || [];
+
+      for (let idx=0; idx<columns.length; idx++) {
+        if (columns[idx].name == name) {
+          delCol = columns.splice(idx,1);
+          break;
+        }
+      }
+
+      if (delCol.length > 0) {
+        res = await updateTable(database, pgschema, {id, columns});
+
+        let sb = new SqlBuilder(workspace.data.name, 'postgres');
+
+        res.data.sql = sb.dropColumn(app.data.name, table.data.name, delCol[0]);
+      }
+    }
+    else {
+      res = new TravelMessage({status: 404});
+    }
+
+    return res;
+  },
+
+
+}
 
 // Any other needed services
 services.query = function({database = '', pgschema = '', query = '', values = []}) {

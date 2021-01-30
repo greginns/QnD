@@ -9,7 +9,7 @@ class App_delete extends MVC {
   }
 
   createModel() {
-    this.model.app = {};
+    this.model.application = {};
     this.model.workspace = '';
     this.origapp = {};
 
@@ -34,10 +34,10 @@ class App_delete extends MVC {
 
     if (!id) this.gotoList();
 
-    let res = await Module.tableStores.app.getOne(id);
+    let res = await Module.tableStores.application.getOne(id);
 
     if (Object.keys(res).length > 0) {
-      this.model.app = res;
+      this.model.application = res;
     }
     else {
       alert('Missing App');
@@ -55,15 +55,14 @@ class App_delete extends MVC {
 
     if (!ret) return;
 
-    let app = this.model.app.toJSON();
+    let app = this.model.application.toJSON();
    
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    //let res = await Module.tableStores.app.delete(app.id);
-    let res = {status: 200}
+    let res = await Module.tableStores.application.delete(app.id);
     
     if (res.status == 200) {
       utils.modals.toast('app', 'Deleted', 2000);

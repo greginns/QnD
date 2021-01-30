@@ -1,6 +1,7 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
+import {TableView, TableStore} from '/~static/lib/client/core/data.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
 class Table_config_fks_update extends MVC {
@@ -9,7 +10,7 @@ class Table_config_fks_update extends MVC {
   }
 
   createModel() {
-    this.model.table = {};
+    this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -30,29 +31,37 @@ class Table_config_fks_update extends MVC {
 
   async ready() {
     return new Promise(async function(resolve) {
+      this.appView = new TableView({proxy: this.model.apps});
+      this.appStore = new TableStore({accessor: Module.data.application, filters: {}, conditions: {}});
+      this.appStore.addView(this.appView);
+  
+      this.foreignView = new TableView({proxy: this.model.foreignTables});
+      this.foreignStore = new TableStore({accessor: Module.data.table, filters: {}, conditions: {}});
+      this.foreignStore.addView(this.foreignView);
+
       resolve();
     }.bind(this));
   }
   
   async inView(params) {
-    this.model.workspace = params.workspace;
+    let workspace = params.workspace;
+    let model = '/schema/application';
+    let conditions = {};
+
+    this.model.workspace = workspace;
     this.model.app = params.app;
     this.model.table = params.table;
-    this.model.fkname = params.name;
 
     this.model.sourceTable = await Module.tableStores.table.getOne(this.model.table);
-    this.model.apps = await Module.tableStores.app.getAll();
 
-    let current = await Module.tableStores.table.getOne(this.model.table);
+    let filters = {workspace};
+    
+    conditions[model] = function(rec) {
+      return rec.workspace == workspace;
+    };
 
-    for (let fk of current.fks) {
-      if (fk.name == this.model.fkname) {
-        this.model.fk = fk;
-      }
-    }
-
-    this.getForeignTables();
-    this.getForeignColumns();
+    this.appStore.redo({filters, conditions});
+    this.appStore.getMany();
   }
 
   outView() {
@@ -85,9 +94,7 @@ class Table_config_fks_update extends MVC {
   }
 
   async save(ev) {
-    let current = await Module.tableStores.table.getOne(this.model.table);
     let fk = this.model.fk.toJSON();
-    let fks = current.fks || [];
 
     if (!fk.name || !fk.links || fk.links.length == 0) {
       this.model.badMessage = 'No Name or Columns';
@@ -99,16 +106,10 @@ class Table_config_fks_update extends MVC {
       return;
     }
 
-    for (let idx=0; idx<fks.length; idx++) {
-      if (fks[idx].name == fk.name) {
-        fks[idx] = fk;
-      }
-    }
-
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.table.update(this.model.table, {fks});
+    let res = await Module.tableStores.table.update(this.model.table, {fk});
 
     if (res.status == 200) {
       utils.modals.toast('Table', 'Updated', 2000);
@@ -134,7 +135,19 @@ class Table_config_fks_update extends MVC {
   }
 
   async getForeignTables() {
-    this.model.foreignTables = await Module.tableStores.table.getAll();
+    let conditions = {};
+    let model = '/schema/table';
+    let app = this.model.app;
+    let filters = {app};
+    
+    conditions[model] = function(rec) {
+      return rec.app == app;
+    };
+
+    this.foreignStore.redo({filters, conditions});
+    this.foreignStore.addView(this.foreignView);
+
+    this.foreignStore.getMany();
   }
 
   async getForeignColumns() {

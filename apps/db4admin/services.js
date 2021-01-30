@@ -1,5 +1,4 @@
 const root = process.cwd();
-const uuidv4 = require('uuid/v4');
 const bcrypt = require('bcrypt');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
@@ -51,7 +50,7 @@ async function verifyCSRF(userID, token, session) {
 
   if (session && session != tm.data.session) return false;
 
-  return tm.data.user == userID;
+  return tm.data.admin == userID;
 }
 
 const services = {
@@ -115,14 +114,14 @@ const services = {
       let status = 200;
       let sessdata = await verifySession(req);
 
-      if (!sessdata) return new TravelMessage({type: 'text', status: 302, message: strategy.redirect});
+      if (!sessdata) return new TravelMessage({type: 'text', status: (strategy.redirect) ? 302 : 401, message: strategy.redirect});
 
       if (sessdata && strategy.needCSRF) {
         status = await verifyCSRF(sessdata.data.user.id, req.CSRFToken || null, req.cookies[cookie] || '')
       }
 
-      if (status != 200) {
-        if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, message: strategy.redirect});
+      if (!status) {
+        if (strategy.redirect) return new TravelMessage({type: 'text', status: (strategy.redirect) ? 302 : 401, message: strategy.redirect});
 
         return new TravelMessage({type: 'text', status: 401});
       }
@@ -141,13 +140,11 @@ const services = {
 
       if (!sessdata) return null;
       
-      let CSRFToken = uuidv4();
-
       // create CSRF record
-      let rec = new CSRF({token: CSRFToken, admin: sessdata.data.user.id, session: sessdata.token});
-      await rec.insertOne({database, pgschema});
-    
-      return CSRFToken;
+      let rec = new CSRF({admin: sessdata.data.user.id, session: sessdata.token});
+      let res = await rec.insertOne({database, pgschema});
+
+      return res.data.token;
     }
   },
 
@@ -170,7 +167,7 @@ const services = {
     
     // create session record
     delete admin.data.password;
-    session = new Session({id: uuidv4(), data: {database: 'db4_' + admin.data.id, pgschema: 'public', 'user': admin.data}});
+    session = new Session({data: {database: 'db4_' + admin.data.id, pgschema: 'public', 'user': admin.data}});
     tm = await session.insertOne({database, pgschema});
 
     if (tm.isBad()) return tm;

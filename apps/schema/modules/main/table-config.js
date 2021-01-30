@@ -1,6 +1,6 @@
 import {Module} from '/~static/lib/client/core/module.js';
-import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
+import {TableView, TableStore} from '/~static/lib/client/core/data.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
 class Column_config extends MVC {
@@ -9,11 +9,12 @@ class Column_config extends MVC {
   }
 
   createModel() {
-    this.model.tables = [];
-    this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
+
+    this.model.tables = [];
+    this.model.tableRec = {};
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -33,13 +34,27 @@ class Column_config extends MVC {
     this.model.app = params.app;
     this.model.table = params.table;
 
-    this.model.tables = await Module.tableStores.table.getAll();
-    this.model.table = await Module.tableStores.table.getOne(this.model.table);
-    if (!this.model.table.fks) this.model.table.fks = [];
-    if (!this.model.table.indexes) this.model.table.indexes = [];
+    let model = '/schema/table';
+    let filters = {'app': params.app};
+    let conditions = {};
+
+    conditions[model] = function(rec) {
+      return rec.application == params.app;
+    };
+
+    let tableStore = new TableStore({accessor: Module.data.table, filters, conditions, safeMode: true});
+    let tableView = new TableView({proxy: this.model.tables});
+
+    tableStore.addView(tableView);
+    tableStore.getMany();
+
+    this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
+
+    if (!this.model.tableRec.fks) this.model.tableRec.fks = [];
+    if (!this.model.tableRec.indexes) this.model.tableRec.indexes = [];
 
     // clean up display
-    for (let fk of this.model.table.fks) {
+    for (let fk of this.model.tableRec.fks) {
       for (let tbl of this.model.tables) {
         if (fk.ftable == tbl.id) {
           fk.ftableName = tbl.name;
@@ -97,14 +112,14 @@ class Column_config extends MVC {
 
   fkEdit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let fk = this.model.table.fks[idx];
+    let fk = this.model.tableRec.fks[idx];
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/${fk.name}/update`);
   }
 
   fkDelete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let fk = this.model.table.fks[idx];
+    let fk = this.model.tableRec.fks[idx];
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/${fk.name}/delete`);
   }  

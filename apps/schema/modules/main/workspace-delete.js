@@ -60,8 +60,7 @@ class Workspace_delete extends MVC {
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    //let res = await Module.tableStores.workspace.delete(workspace.id);
-    let res = {status: 200}
+    let res = await Module.tableStores.workspace.delete(workspace.id);
     
     if (res.status == 200) {
       utils.modals.toast('WORKSPACE', 'Deleted', 2000);

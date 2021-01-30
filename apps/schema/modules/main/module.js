@@ -3,6 +3,7 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
 import {Pages} from '/~static/lib/client/core/paging.js';
 import {io} from '/~static/lib/client/core/io.js';
+import {App} from '/~static/lib/client/core/app.js';
 
 // js for pages
 import '/~static/apps/schema/modules/main/navbar.js';
@@ -41,59 +42,108 @@ class db4TableAccess extends TableAccess {
 
   async insertColumn(table, colData) {
     let rec = {};
-    rec['db4table'] = colData;
+    rec['table'] = colData;
 
     return await io.post(rec, `/schema/v1/table/${encodeURIComponent(table)}/column`);
   }
 
   async updateColumn(table, name, colData) {
     let rec = {};
-    rec['db4table'] = colData;
+    rec['table'] = colData;
 
-    return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/column/${name}`);
+    return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/column/${encodeURIComponent(name)}`);
   }
 
   async deleteColumn(table, name) {
-    return await io.delete({}, `/schema/v1/table/${encodeURIComponent(table)}/column/${name}`);
+    return await io.delete({}, `/schema/v1/table/${encodeURIComponent(table)}/column/${encodeURIComponent(name)}`);
+  }
+
+  async updatePK(table, pkData) {
+    let rec = {};
+    rec['table'] = pkData;
+
+    return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/pk`);
+  }
+
+  async insertFK(table, fkData) {
+    let rec = {};
+    rec['table'] = fkData;
+
+    return await io.post(rec, `/schema/v1/table/${encodeURIComponent(table)}/fk`);    
+  }
+
+  async updateFK(table, fkData) {
+    let rec = {};
+    rec['table'] = fkData;
+
+    return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/fk/${encodeURIComponent(fkData.name)}`);
+  }
+
+  async deleteFK(table, name) {
+    return await io.delete({}, `/schema/v1/table/${encodeURIComponent(table)}/fk/${encodeURIComponent(name)}`);
+  }
+
+  async insertIndex(table, idxData) {
+    let rec = {};
+    rec['table'] = idxData;
+
+    return await io.post(rec, `/schema/v1/table/${encodeURIComponent(table)}/index`);    
+  }
+
+  async updateIndex(table, idxData) {
+    let rec = {};
+    rec['table'] = idxData;
+
+    return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/index/${encodeURIComponent(idxData.name)}`);
+  }
+
+  async deleteIndex(table, name) {
+    return await io.delete({}, `/schema/v1/table/${encodeURIComponent(table)}/index/${encodeURIComponent(name)}`);
+  }
+
+  async updateOrderBy(table, orderData) {
+    let rec = {};
+    rec['table'] = orderData;
+
+    return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/orderby`);
   }
 
 }
 
 let moduleStart = function() {
   let connectToData = async function() {
-    // setup data table access
-    // gets us access to raw data.
-    Module.data.workspace = new db4TableAccess({modelName: 'workspace', url: `/schema/v1/workspace`});
-    Module.data.application = new db4TableAccess({modelName: 'app', url: `/schema/v1/application`});
-    Module.data.table = new db4TableAccess({modelName: 'table', url: `/schema/v1/table`});
-
-    const wsDataWatch = new WSDataComm('schema');                 // WS instances for this app
     const safemode = false;
     let model, getAllPromises = [];
-    
-    model = `/schema/workspace`;                    // url-like of interest to follow model changes
 
-    wsDataWatch.addModel(model);             // WS data change notifications.  
-                                                      // Store model name to watch/follow.  
-                                                      // One WSDataComm instance per app.
-                                                      // First path segment must be the same as app
+    // setup data table access
+    // gets us access to raw data.
+    Module.data.workspace = new TableAccess({modelName: 'workspace', url: `/schema/v1/workspace`});
+    Module.data.application = new TableAccess({modelName: 'application', url: `/schema/v1/application`});
+    Module.data.table = new db4TableAccess({modelName: 'table', url: `/schema/v1/table`});
 
+    // url-like of interest to follow model changes
+    // WS data change notifications.  
+    // Store model name to watch/follow.  
+    // One WSDataComm instance per app.
+    // First path segment must be the same as app
+    App.wsDataWatch = new WSDataComm('schema');                 // WS instances for this app
+
+    model = `/schema/workspace`;                    
+    App.wsDataWatch.addModel(model);             
     Module.tableStores.workspace = new TableStore({accessor: Module.data.workspace, model, safemode});  // setup a table store in Module so all pages can access
 
     model = `/schema/application`;
-    wsDataWatch.addModel(model);
+    App.wsDataWatch.addModel(model);
     Module.tableStores.application = new TableStore({accessor: Module.data.application, model, safemode});  // setup a table store in Module so all pages can access
 
     model = `/schema/table`;
-    wsDataWatch.addModel(model);
+    App.wsDataWatch.addModel(model);
     Module.tableStores.table = new TableStore({accessor: Module.data.table, model, safemode});  // setup a table store in Module so all pages can access
 
     getAllPromises.push(Module.tableStores.workspace.getAll());                 // seed the workspace store
-    getAllPromises.push(Module.tableStores.application.getAll());               // seed the application store
-    getAllPromises.push(Module.tableStores.table.getAll());                     // seed the table store
 
     // start following via WS ---
-    wsDataWatch.start();
+    App.wsDataWatch.start();
 
     // fill up on data
     Promise.all(getAllPromises)

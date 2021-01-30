@@ -9,7 +9,7 @@ class Column_update extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
+    this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -22,7 +22,7 @@ class Column_update extends MVC {
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
   }
@@ -50,7 +50,7 @@ class Column_update extends MVC {
 
   async save(ev) {
     let column = this.model.column.toJSON();
-    let res = await Module.tableStores.db4table.getOne(this.model.table);
+    let res = await Module.tableStores.table.getOne(this.model.table);
 
     if (!column.name) {
       this.model.badMessage = 'Please Enter a Column Name';
@@ -98,7 +98,7 @@ class Column_update extends MVC {
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    res = await Module.data.db4table.updateColumn(this.model.table, this.model.columnName, {column});
+    res = await Module.data.table.updateColumn(this.model.table, this.model.columnName, {column});
 
     if (res.status == 200) {
       utils.modals.toast('Column', 'Updated', 2000);
@@ -167,7 +167,7 @@ class Column_update extends MVC {
   }
 
   async setExisting() {
-    let res = await Module.tableStores.db4table.getOne(this.model.table);
+    let res = await Module.tableStores.table.getOne(this.model.table);
 
     for (let col of res.columns || []) {
       if (col.name == this.model.columnName) {

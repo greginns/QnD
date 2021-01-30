@@ -76,21 +76,12 @@ class Table_config_fk_delete extends MVC {
     let ret = await utils.modals.reConfirm(ev.target, 'Confirm Deletion?');
     if (!ret) return;
 
-    let current = await Module.tableStores.table.getOne(this.model.table);
     let fk = this.model.fk.toJSON();
-    let fks = current.fks || [];
-
-    for (let idx=0; idx<fks.length; idx++) {
-      if (fks[idx].name = fk.name) {
-        fks.splice(idx, 1);
-        break;
-      }
-    }
 
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.table.update(this.model.table, {fks});
+    let res = await Module.tableStores.table.update(this.model.table, {fk});
 
     if (res.status == 200) {
       utils.modals.toast('FK', 'Deleted', 2000);

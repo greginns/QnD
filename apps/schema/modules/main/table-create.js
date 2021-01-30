@@ -51,6 +51,11 @@ class Table_create extends MVC {
 
     table.workspace = this.model.workspace;
     table.app = this.model.app;
+    table.columns = [];
+    table.pk = [];
+    table.fks = [];
+    table.indexes = [];
+    table.orderby = [];
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 

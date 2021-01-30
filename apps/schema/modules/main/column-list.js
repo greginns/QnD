@@ -1,6 +1,5 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {TableView, TableQuery} from '/~static/lib/client/core/data.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
 class Column_list extends MVC {
@@ -9,7 +8,6 @@ class Column_list extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = ''
@@ -25,8 +23,6 @@ class Column_list extends MVC {
   async ready() {
     return new Promise(async function(resolve) {
       // fill up on data
-      //Module.tableStores.db4table.addView(new TableView({proxy: this.model.db4tables}));
-
       resolve();
     }.bind(this));
   }
@@ -36,7 +32,7 @@ class Column_list extends MVC {
     this.model.app = params.app;
     this.model.table = params.table;
 
-    this.model.db4table = await Module.tableStores.db4table.getOne(this.model.table);
+    this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
   }
 
   outView() {
@@ -49,14 +45,14 @@ class Column_list extends MVC {
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let name = this.model.db4table.columns[idx].name;
+    let name = this.model.tableRec.columns[idx].name;
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let name = this.model.db4table.columns[idx].name;
+    let name = this.model.tableRec.columns[idx].name;
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/delete`);
   }

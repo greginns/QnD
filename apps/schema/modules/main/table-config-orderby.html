@@ -12,7 +12,7 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6'>
-                <h4>Primary Key</h4>
+                <h4>Order By</h4>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -27,7 +27,7 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.SelectMVC(id='table_config_orderby', size='10', mvc_value='table.orderby', mvc_each='table.columns', mvc_on='{"change": "orderbyChanged"}', valueField='name', textField='name', label='Columns', multiple='multiple')}}
+                {{ fields.SelectMVC(id='table_config_orderby', size='10', mvc_value='tableRec.orderby', mvc_each='tableRec.columns', mvc_on='{"change": "orderbyChanged"}', valueField='name', textField='name', label='Columns', multiple='multiple')}}
               </div>  
             </div>
             

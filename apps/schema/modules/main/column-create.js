@@ -9,7 +9,6 @@ class Column_create extends MVC {
   }
 
   createModel() {
-    this.model.db4table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -20,7 +19,7 @@ class Column_create extends MVC {
 
     this.model.badMessage = '';
     this.model.errors = {
-      db4table: {},
+      table: {},
       message: ''
     };
   }
@@ -57,7 +56,7 @@ class Column_create extends MVC {
       return;
     }
 
-    let res = await Module.tableStores.db4table.getOne(this.model.table);
+    let res = await Module.tableStores.table.getOne(this.model.table);
     let dupe = false;
 
     for (let col in res.columns || []) {
@@ -80,7 +79,7 @@ class Column_create extends MVC {
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    res = await Module.data.db4table.insertColumn(this.model.table, {column});
+    res = await Module.data.table.insertColumn(this.model.table, {column});
 
     if (res.status == 200) {
       utils.modals.toast('Column', 'Created', 2000);

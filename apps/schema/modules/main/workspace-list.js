@@ -1,6 +1,6 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {TableView, TableQuery} from '/~static/lib/client/core/data.js';
+import {TableView} from '/~static/lib/client/core/data.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
 class Workspace_list extends MVC {

@@ -27,13 +27,13 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.SelectMVC(id='table_config_pk', size='10', mvc_value='table.pks', mvc_each='table.columns', mvc_on='{"change": "pkChanged"}', valueField='name', textField='name', label='Columns', multiple='multiple')}}
+                {{ fields.SelectMVC(id='table_config_pk', size='10', mvc_value='tableRec.pk', mvc_each='tableRec.columns', mvc_on='{"change": "pkChanged"}', valueField='name', textField='name', label='Columns', multiple='multiple')}}
               </div>  
             </div>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <span class='label-color'>Primary Key Fields</span>
-                <span mvc-text='table.pks'></span>
+                <span mvc-text='tableRec.pk'></span>
               </div>  
             </div>
           </div>
