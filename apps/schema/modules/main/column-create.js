@@ -121,16 +121,19 @@ class Column_create extends MVC {
     ];
 
     this.model.values.date = [
+      {value: '', text: 'No Default'},
       {value: 'D', text: 'Current Date'},
       {value: 'U', text: 'Specific Date'}
     ];
 
     this.model.values.time = [
+      {value: '', text: 'No Default'},      
       {value: 'T', text: 'Current Time'},
       {value: 'U', text: 'Specific Time'}
     ];
 
     this.model.values.datetime = [
+      {value: '', text: 'No Default'},
       {value: 'Z', text: 'Current DateTime'},
       {value: 'U', text: 'Specific DateTime'}
     ];

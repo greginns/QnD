@@ -9,12 +9,15 @@ class Table_config_fk_delete extends MVC {
   }
 
   createModel() {
-    this.model.table = {};
+    this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
     this.model.name = '';
     this.model.fk = {};
+    this.model.sourceTable = {};
+    this.model.foreignTable = {};
+    this.model.appRec = {};
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -37,35 +40,25 @@ class Table_config_fk_delete extends MVC {
     this.model.name = params.name;
     this.model.fk = {};
 
-    this.model.table = await Module.tableStores.table.getOne(this.model.table);
+    this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
 
-    let fks = this.model.table.fks || [];
+    let fks = this.model.tableRec.fks || [];
     
-    for (let idx of fks) {
-      if (idx.name == this.model.name) {
-        this.model.fk = idx;
+    for (let fk of fks) {
+      if (fk.name == this.model.name) {
+        this.model.fk = fk;
         break;
       }
     }
 
-    if (!this.model.fk) {
-      alert('Invalid Index Name');
+    if (Object.keys(this.model.fk).length == 0) {
+      alert('Invalid Foreign Key Name');
       this.gotoList();
     }
 
     this.model.sourceTable = await Module.tableStores.table.getOne(this.model.table);
-    this.model.apps = await Module.tableStores.app.getAll();
-
-    let current = await Module.tableStores.table.getOne(this.model.table);
-
-    for (let fk of current.fks) {
-      if (fk.name == this.model.fkname) {
-        this.model.fk = fk;
-      }
-    }
-
-    this.getForeignTables();
-    this.getForeignColumns();
+    this.model.foreignTable = await Module.tableStores.table.getOne(this.model.fk.ftable);
+    this.model.appRec = await Module.tableStores.application.getOne(this.model.fk.app);
   }
 
   outView() {
@@ -81,7 +74,7 @@ class Table_config_fk_delete extends MVC {
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.table.update(this.model.table, {fk});
+    let res = await Module.data.table.deleteFK(this.model.table, fk.name);
 
     if (res.status == 200) {
       utils.modals.toast('FK', 'Deleted', 2000);
@@ -105,16 +98,6 @@ class Table_config_fk_delete extends MVC {
   gotoList() {
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config`);
   }
-
-  async getForeignTables() {
-    this.model.foreignTables = await Module.tableStores.table.getAll();
-  }
-
-  async getForeignColumns() {
-    let ft = this.model.fk.ftable;
-
-    this.model.foreignTable = await Module.tableStores.table.getOne(ft);
-  }  
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

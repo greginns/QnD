@@ -9,7 +9,7 @@ class Table_config_index_delete extends MVC {
   }
 
   createModel() {
-    this.model.table = {};
+    this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -36,9 +36,9 @@ class Table_config_index_delete extends MVC {
     this.model.table = params.table;
     this.model.name = params.name;
 
-    this.model.table = await Module.tableStores.table.getOne(this.model.table);
+    this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
 
-    let indexes = this.model.table.indexes || [];
+    let indexes = this.model.tableRec.indexes || [];
     
     for (let idx of indexes) {
       if (idx.name == this.model.name) {
@@ -47,7 +47,7 @@ class Table_config_index_delete extends MVC {
       }
     }
 
-    if (!this.model.index) {
+    if (Object.keys(this.model.index).length == 0) {
       alert('Invalid Index Name');
       this.gotoList();
     }
@@ -76,7 +76,7 @@ class Table_config_index_delete extends MVC {
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.table.update(this.model.table, {indexes});
+    let res = await Module.data.table.deleteIndex(this.model.table, index.name);
 
     if (res.status == 200) {
       utils.modals.toast('Index', 'Deleted', 2000);

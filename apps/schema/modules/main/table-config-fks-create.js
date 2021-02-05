@@ -157,7 +157,7 @@ class Table_config_fks_create extends MVC {
   async getForeignTables() {
     let conditions = {};
     let model = '/schema/table';
-    let app = this.model.app;
+    let app = this.model.fk.app;
     let filters = {app};
     
     conditions[model] = function(rec) {

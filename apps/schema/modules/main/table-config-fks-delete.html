@@ -27,17 +27,17 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Char(type='text', id='fk_delete_name', maxlength='20', mvc_value='fk.name', mvc_enabled='null', label='Foreign Key Name') }}
+                Name: <span mvc-text='fk.name'></span>
               </div>  
             </div>
 
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.SelectMVC(id='fk_delete_apps', size='1', mvc_value='fk.app', mvc_each='apps',  valueField='id', textField='name', label='Choose an App', multiple='')}}
+                App: <span mvc-text='appRec.name'></span>
               </div>  
 
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.SelectMVC(id='fk_delete_ftables', size='1', mvc_value='fk.ftable', mvc_each='foreignTables', mvc_enabled='null', valueField='id', textField='name', label='Choose a Foreign Table', multiple='')}}
+                Foreign Table: <span mvc-text='foreignTable.name'></span> 
               </div>  
             </div>
 

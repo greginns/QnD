@@ -92,29 +92,15 @@ class Column_config extends MVC {
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/create`);
   }
 
-  indexEdit(ev) {
-    let idx = ev.target.closest('tr').getAttribute('data-index');
-    let index = this.model.table.indexes[idx];
-
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/${index.name}/update`);
-  }
-
   indexDelete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let index = this.model.table.indexes[idx];
+    let index = this.model.tableRec.indexes[idx];
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/${index.name}/delete`);
   }  
 
   fkCreate() {
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/create`);
-  }
-
-  fkEdit(ev) {
-    let idx = ev.target.closest('tr').getAttribute('data-index');
-    let fk = this.model.tableRec.fks[idx];
-
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/${fk.name}/update`);
   }
 
   fkDelete(ev) {

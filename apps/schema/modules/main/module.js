@@ -23,10 +23,8 @@ import '/~static/apps/schema/modules/main/table-config.js';
 import '/~static/apps/schema/modules/main/table-config-pk.js';
 import '/~static/apps/schema/modules/main/table-config-orderby.js';
 import '/~static/apps/schema/modules/main/table-config-index-create.js';
-import '/~static/apps/schema/modules/main/table-config-index-update.js';
 import '/~static/apps/schema/modules/main/table-config-index-delete.js';
 import '/~static/apps/schema/modules/main/table-config-fks-create.js';
-import '/~static/apps/schema/modules/main/table-config-fks-update.js';
 import '/~static/apps/schema/modules/main/table-config-fks-delete.js';
 import '/~static/apps/schema/modules/main/column-list.js';
 import '/~static/apps/schema/modules/main/column-create.js';
@@ -72,13 +70,6 @@ class db4TableAccess extends TableAccess {
     return await io.post(rec, `/schema/v1/table/${encodeURIComponent(table)}/fk`);    
   }
 
-  async updateFK(table, fkData) {
-    let rec = {};
-    rec['table'] = fkData;
-
-    return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/fk/${encodeURIComponent(fkData.name)}`);
-  }
-
   async deleteFK(table, name) {
     return await io.delete({}, `/schema/v1/table/${encodeURIComponent(table)}/fk/${encodeURIComponent(name)}`);
   }
@@ -88,13 +79,6 @@ class db4TableAccess extends TableAccess {
     rec['table'] = idxData;
 
     return await io.post(rec, `/schema/v1/table/${encodeURIComponent(table)}/index`);    
-  }
-
-  async updateIndex(table, idxData) {
-    let rec = {};
-    rec['table'] = idxData;
-
-    return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/index/${encodeURIComponent(idxData.name)}`);
   }
 
   async deleteIndex(table, name) {
@@ -107,7 +91,6 @@ class db4TableAccess extends TableAccess {
 
     return await io.put(rec, `/schema/v1/table/${encodeURIComponent(table)}/orderby`);
   }
-
 }
 
 let moduleStart = function() {
@@ -126,7 +109,7 @@ let moduleStart = function() {
     // Store model name to watch/follow.  
     // One WSDataComm instance per app.
     // First path segment must be the same as app
-    App.wsDataWatch = new WSDataComm('schema');                 // WS instances for this app
+    App.wsDataWatch = new WSDataComm('schema', 'roam3.adventurebooking.com:3011');                 // WS instances for this app
 
     model = `/schema/workspace`;                    
     App.wsDataWatch.addModel(model);             

@@ -784,44 +784,6 @@ Router.add(new RouterMessage({
   } 
 }));
 
-// update fk
-Router.add(new RouterMessage({
-  method: 'put',
-  app: app,
-  subapp: 'table',
-  version: version,
-  path: '/:id/fk/:name', 
-  id: 'updatePK',
-  level: UPDATE,
-  inAPI,
-  apiInfo: {type: 'json', schema: models.table},
-  allowCORS,
-  fn: async function(req) {
-    let id = req.params.id;
-    let name = req.params.name;
-    let tm;
-
-    if (!id || !name) {
-      tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
-    }
-    else {
-      let {database, pgschema} = getDBAndSchema(req);
-      
-      tm = await services.table.updateFK({database, pgschema, id, name, rec: req.body.table || {}});
-
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
-    }
-
-    return tm.toResponse();
-  }, 
-  security: {
-    strategies: [
-      {session: {allowAnon: false, needCSRF: true}},
-      //{basic: {allowAnon: false, needCSRF: false}},
-    ],
-  } 
-}));
-
 // delete FK
 Router.add(new RouterMessage({
   method: 'delete',
@@ -883,44 +845,6 @@ Router.add(new RouterMessage({
       let {database, pgschema} = getDBAndSchema(req);
 
       tm = await services.table.insertIndex({database, pgschema, id, rec: req.body.table || {}});
-
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
-    }
-
-    return tm.toResponse();
-  }, 
-  security: {
-    strategies: [
-      {session: {allowAnon: false, needCSRF: true}},
-      //{basic: {allowAnon: false, needCSRF: false}},
-    ],
-  } 
-}));
-
-// update index
-Router.add(new RouterMessage({
-  method: 'put',
-  app: app,
-  subapp: 'table',
-  version: version,
-  path: '/:id/index/:name', 
-  id: 'updateIndex',
-  level: UPDATE,
-  inAPI,
-  apiInfo: {type: 'json', schema: models.table},
-  allowCORS,
-  fn: async function(req) {
-    let id = req.params.id;
-    let name = req.params.name;
-    let tm;
-
-    if (!id || !name) {
-      tm = new TravelMessage({data: {message: 'Invalid ID/Name'}, status: 400});
-    }
-    else {
-      let {database, pgschema} = getDBAndSchema(req);
-      
-      tm = await services.table.updateIndex({database, pgschema, id, name, rec: req.body.table || {}});
 
       if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }

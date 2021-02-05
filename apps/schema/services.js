@@ -271,8 +271,11 @@ services.table = {
 
       if (app.status == 200) {
         let sb = new SqlBuilder(workspace.data.name, 'postgres');
+        let sql = sb.createTable(app.data.name, rec.name);
 
-        tm.data.sql = sb.createTable(app.data.name, rec.name);
+        let tm1 = await exec(database, sql[0]);
+console.log(tm1)        
+        tm.data.sql = sql;
       }
     }
     
@@ -337,8 +340,10 @@ services.table = {
       res = await updateTable(database, pgschema, rec);
 
       let sb = new SqlBuilder(workspace.data.name, 'postgres');
-
-      res.data.sql = sb.createPK(app.data.name, table.data.name, rec.pk);
+      let sql = sb.createPK(app.data.name, table.data.name, rec.pk);
+      let tm1 = await exec(database, sql[0]);
+console.log(tm1)        
+      res.data.sql = sql;      
     }
     else {
       res = new TravelMessage({status: 404});
@@ -348,8 +353,8 @@ services.table = {
   },
 
   insertFK: async function({database = '', pgschema = '', id = '', rec = {}} = {}) {
-    let table = await getATable(database, pgschema, id);
-    let app = await getAnApp(database, pgschema, table.data.app);
+    let table = await getATable(database, pgschema, [id]);
+    let app = await getAnApp(database, pgschema, [table.data.app]);
     let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
     let res;
 
@@ -365,50 +370,17 @@ services.table = {
       }
 
       if (ok) {
+        let fapp = await getAnApp(database, pgschema, [rec.fk.app]);
+        let ftable = await getATable(database, pgschema, [rec.fk.ftable]);
+
         fks.push(rec.fk);
         res = await updateTable(database, pgschema, {id, fks});
 
         let sb = new SqlBuilder(workspace.data.name, 'postgres');
-  
-        res.data.sql = sb.createFK(app.data.name, table.data.name, rec.fks)
-
-      }
-      else {
-        res = new TravelMessage({status: 404});  
-      }      
-    }
-    else {
-      res = new TravelMessage({status: 404});
-    }
-
-    return res;    
-  },
-
-  updateFK: async function({database = '', pgschema = '', id = '', name = '', rec = {}} = {}) {
-    let table = await getATable(database, pgschema, id);
-    let app = await getAnApp(database, pgschema, table.data.app);
-    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
-    let res;
-
-    if (table.status == 200 && app.status == 200) {
-      let fks = table.data.fks || [];
-      let ok = false;
-
-      for (let idx=0; idx<fks.length; idx++) {
-        if (fks[idx].name == name) {
-          fks[idx] = rec.fk;
-          ok = true;
-          break;
-        }
-      }
-
-      if (ok) {
-        res = await updateTable(database, pgschema, {id, fks});
-
-        let sb = new SqlBuilder(workspace.data.name, 'postgres');
-  
-        res.data.sql = sb.alterFK(app.data.name, table.data.name, rec.fk)
-
+        let sql = sb.createFK(app.data.name, table.data.name, fapp.data.name, ftable.data.name, rec.fk);
+        let tm1 = await exec(database, sql[0]);
+console.log(tm1)        
+        res.data.sql = sql;
       }
       else {
         res = new TravelMessage({status: 404});  
@@ -422,13 +394,13 @@ services.table = {
   },
 
   deleteFK: async function({database = '', pgschema = '', id = '', name = ''} = {}) {
-    let table = await getATable(database, pgschema, id);
-    let app = await getAnApp(database, pgschema, table.data.app);
+    let table = await getATable(database, pgschema, [id]);
+    let app = await getAnApp(database, pgschema, [table.data.app]);
     let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
     let res, oldFK;
 
     if (table.status == 200 && app.status == 200) {
-      let fks = table.fks || [];
+      let fks = table.data.fks || [];
       let ok = false;
 
       for (let idx=0; idx<fks.length; idx++) {
@@ -440,12 +412,15 @@ services.table = {
       }
 
       if (ok) {
+        oldFK = oldFK[0];
+        let fapp = await getAnApp(database, pgschema, [oldFK.app]);
+        let ftable = await getATable(database, pgschema, [oldFK.ftable]);
+
         res = await updateTable(database, pgschema, {id, fks});
 
         let sb = new SqlBuilder(workspace.data.name, 'postgres');
-  
-        res.data.sql = sb.dropFK(app.data.name, table.data.name, oldFK)
 
+        res.data.sql = sb.dropFK(app.data.name, table.data.name, fapp.data.name, ftable.data.name, oldFK)
       }
       else {
         res = new TravelMessage({status: 404});  
@@ -465,7 +440,7 @@ services.table = {
     let res;
 
     if (table.status == 200 && app.status == 200) {
-      let indexes = table.indexes;
+      let indexes = table.indexes || [];
       let ok = true;
 
       for (let index of indexes) {
@@ -476,13 +451,14 @@ services.table = {
       }
 
       if (ok) {
-        indexes.push(rec.fk);
+        indexes.push(rec.index);
         res = await updateTable(database, pgschema, {id, indexes});
 
         let sb = new SqlBuilder(workspace.data.name, 'postgres');
-  
-        res.data.sql = sb.createFK(app.data.name, table.data.name, rec.index)
-
+        let sql = sb.createIndex(app.data.name, table.data.name, rec.index);
+        let tm1 = await exec(database, sql[0]);
+console.log(tm1)        
+        res.data.sql = sql;
       }
       else {
         res = new TravelMessage({status: 404});  
@@ -496,50 +472,14 @@ services.table = {
     return res;    
   },
 
-  updateIndex: async function({database = '', pgschema = '', id = '', name = '', rec = {}} = {}) {
-    let table = await getATable(database, pgschema, id);
-    let app = await getAnApp(database, pgschema, table.data.app);
-    let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
-    let res;
-
-    if (table.status == 200 && app.status == 200) {
-      let indexes = table.data.indexes;
-      let ok = false;
-
-      for (let idx=0; idx<indexes.length; idx++) {
-        if (indexes[idx].name == name) {
-          indexes[idx] = rec.index;
-          ok = true;
-          break;
-        }
-      }
-
-      if (ok) {
-        res = await updateTable(database, pgschema, {id, indexes});
-
-        let sb = new SqlBuilder(workspace.data.name, 'postgres');
-  
-        res.data.sql = sb.alterFK(app.data.name, table.data.name, rec.index)
-      }
-      else {
-        res = new TravelMessage({status: 404});  
-      }      
-    }
-    else {
-      res = new TravelMessage({status: 404});
-    }
-
-    return res;    
-  },
-
   deleteIndex: async function({database = '', pgschema = '', id = '', name = ''} = {}) {
-    let table = await getATable(database, pgschema, id);
-    let app = await getAnApp(database, pgschema, table.data.app);
+    let table = await getATable(database, pgschema, [id]);
+    let app = await getAnApp(database, pgschema, [table.data.app]);
     let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
     let res, oldIdx;
 
     if (table.status == 200 && app.status == 200) {
-      let indexes = table.indexes;
+      let indexes = table.data.indexes;
       let ok = false;
 
       for (let idx=0; idx<indexes.length; idx++) {
@@ -555,7 +495,7 @@ services.table = {
 
         let sb = new SqlBuilder(workspace.data.name, 'postgres');
   
-        res.data.sql = sb.dropFK(app.data.name, table.data.name, oldIdx)
+        res.data.sql = sb.dropIndex(app.data.name, table.data.name, oldIdx[0])
 
       }
       else {
@@ -602,7 +542,13 @@ services.column = {
       res = await updateTable(database, pgschema, {id, columns});
 
       let sb = new SqlBuilder(workspace.data.name, 'postgres');
-      res.data.sql = sb.createColumn(app.data.name, table.data.name, rec.column);
+      let sql = sb.createColumn(app.data.name, table.data.name, rec.column);
+
+      let tm1 = await exec(database, sql[0]);
+      console.log(tm1)        
+
+      res.data.sql = sql;      
+      
     }
     else {
       res = new TravelMessage({status: 404});
@@ -663,8 +609,10 @@ services.column = {
         res = await updateTable(database, pgschema, {id, columns});
 
         let sb = new SqlBuilder(workspace.data.name, 'postgres');
-
-        res.data.sql = sb.dropColumn(app.data.name, table.data.name, delCol[0]);
+        let sql = sb.dropColumn(app.data.name, table.data.name, delCol[0]);
+        let tm1 = await exec(database, sql[0]);
+console.log(tm1)
+        res.data.sql = sql;
       }
     }
     else {
