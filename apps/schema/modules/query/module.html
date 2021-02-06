@@ -1,0 +1,110 @@
+{% extends "project/base.html" %}
+
+{% block title %}
+  Schema Builder
+{% endblock %}
+
+{% block css %}
+
+<style>
+  label.mbsc-mobiscroll.mbsc-input {
+    margin: 1.5em 1em .1em 1em !important;
+  }
+
+  div#qndPages {
+    padding-top: 60px;
+  }
+
+  @media (min-width: 575px) {
+    div.bottom-spacer {
+      padding-bottom: 90px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    div.bottom-spacer {
+      padding-bottom: 60px;
+    }
+  }  
+
+  .div-label {
+    position: relative;
+    top: -20px;
+    left: 0px;
+    color: #007bff;
+    background-color: #FFFFFF;
+    padding-left: 3px;
+    padding-right: 3px;
+    line-height: 12px;
+    display: inline;
+  }
+
+  .tag {
+    background-color: #007bff;
+    border: 0px;
+    border-radius: 5px;
+    margin-right: 5px;
+    padding: 2px 5px 2px 5px;
+    display: inline-block;
+    line-height: 20px;
+  }
+
+  .tag .tagtext {
+    color: white;
+    padding-right: 10px;
+  }
+
+  .tag .tagx {
+    color: red;
+    cursor: pointer;
+    font-size: 24px;
+  }  
+
+  .fieldset-legend {
+    position: relative;
+    top: -22px;
+    background-color: white;
+    margin-bottom: -15px;
+  }
+
+
+</style>
+{% endblock %}
+
+{% block script %}
+  <script type="module">
+    import {App} from '/~static/lib/client/core/app.js';
+
+    App.CSRF = '{{CSRFToken}}';
+    App.USER = JSON.parse('{{USER|safe}}');
+  </script>
+
+  <script type="text/javascript">
+  </script>
+{% endblock %}
+
+{% block body %}
+  <div class="container-fluid">
+    {% include "./navbar.html" %}
+    <div id='qndPages'>
+      {% include "./query-list.html" %}
+      {% include "./query-create.html" %}
+      {% include "./query-update.html" %}
+      {% include "./query-delete.html" %}
+    </div>
+  </div>
+  
+  {% include "lib/client/widgets/mdate.html" %}
+  {% include "lib/client/widgets/mtime.html" %}
+  {#% include "lib/client/widgets/multisel.html" %#}
+  {#% include "lib/client/widgets/singlesel.html" %#}
+
+  {% include "apps/login/views/relogin.html" %}
+{% endblock %}
+
+{% block init %}
+<script type="module" src="/~static/apps/schema/modules/query/module.js"></script>
+
+<script type="text/javascript">
+</script>
+{% endblock %}

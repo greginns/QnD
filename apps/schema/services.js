@@ -36,7 +36,7 @@ const updateTable = async function(database, pgschema, rec) {
 }
 
 services.output = {
-  main: async function(req) {
+  schema: async function(req) {
     // main admin manage page.  Needs a user so won't get here without one
     let tm = new TravelMessage();
     let token = await loginServices.auth.makeCSRF(req);
@@ -50,7 +50,7 @@ services.output = {
 
     try {
       let ctx = {};
-      let tmpl = 'apps/schema/modules/main/module.html';
+      let tmpl = 'apps/schema/modules/schema/module.html';
 
       ctx.CSRFToken = token;
       ctx.workspace = models.workspace.getColumnDefns();
@@ -75,6 +75,46 @@ services.output = {
 
     return tm;
   },
+
+  query: async function(req) {
+    // main admin manage page.  Needs a user so won't get here without one
+    let tm = new TravelMessage();
+    let token = await loginServices.auth.makeCSRF(req);
+
+    if (!token) {
+      tm.status = 500;
+      tm.message = 'CSRF Token Generation failed';
+
+      return tm;
+    }
+
+    try {
+      let ctx = {};
+      let tmpl = 'apps/schema/modules/query/module.html';
+
+      ctx.CSRFToken = token;
+      ctx.workspace = models.workspace.getColumnDefns();
+      ctx.app = models.application.getColumnDefns();
+      ctx.table = models.table.getColumnDefns();
+
+      ctx.USER = JSON.stringify(req.session.data.user);
+
+      try {
+        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+        tm.type = 'html';
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+    }
+    catch(err) {
+      tm.status = 500;
+      tm.message = err.toString();
+    }
+
+    return tm;
+  },  
 }
 /*
 services.database = {
@@ -625,8 +665,67 @@ console.log(tm1)
 
 }
 
+services.query = {
+  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.query.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.query.select({database, pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
+
+      tm.data = models.query.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+    
+    return await models.query.selectOne({database, pgschema, pks: [rec.id] });
+  },
+    
+  create: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Insert row
+    let tobj = new models.query(rec);
+    let tm = await tobj.insertOne({database, pgschema});
+
+    let sql = SqlBuilder.createSchema(rec.name, 'postgres');
+    let tm1 = await exec(database, sql[0]);
+
+    console.log(tm1)
+
+    return tm;    
+  },
+  
+  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.query(rec);
+    let tm = await tobj.updateOne({database, pgschema});
+    
+    return tm;
+  },
+  
+  delete: async function({database = '', pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.query({ id });
+    let tm = await tobj.deleteOne({database, pgschema});
+
+    let sql = SqlBuilder.dropSchema(tm.data.name, 'postgres');
+    let tm1 = await exec(database, sql[0]);
+
+    console.log(tm1)
+
+    return tm;
+  }
+};
+
 // Any other needed services
-services.query = function({database = '', pgschema = '', query = '', values = []}) {
+services.queryExec = function({database = '', pgschema = '', query = '', values = []}) {
   return jsonQueryExecify({query, app, database, pgschema, values});
 }
 

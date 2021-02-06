@@ -160,4 +160,44 @@ const table = class extends Model {
   }
 };
 
-module.exports = {workspace, application, table};
+const query = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Table ID'}),
+        name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Table Name'}),
+        desc: new Fields.Text({null: true, verbose: 'Table Description'}),
+        table: new Fields.SUUID({notNull: true, verbose: 'Table ID'}),        
+        columns: new Fields.Json({verbose: 'Columns'}),
+        where: new Fields.Text({null: true, verbose: 'Where clause'}),
+        limit: new Fields.Integer({null: true, verbose: 'Limit'}),
+        offset: new Fields.Integer({null: true, verbose: 'Offset'}),
+        orderby: new Fields.Json({verbose: 'Orderby'}),
+        created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
+        updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
+      },
+
+      constraints: {
+        pk: ['id'],
+        fk: [
+          {name: 'table', columns: ['table'], app, table: table, tableColumns: ['id'], onDelete: 'NO ACTION'},
+        ],
+        index: [{name: 'querytable', columns: ['table']}]
+      },
+      
+      hidden: [],
+      
+      orderBy: ['table','name'],
+      
+      dbschema: 'public',
+      app,
+      desc: 'Queries'
+    }
+  }
+};
+
+module.exports = {workspace, application, table, query};
