@@ -169,8 +169,8 @@ const query = class extends Model {
     return {
       schema: {
         id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Table ID'}),
-        name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Table Name'}),
-        desc: new Fields.Text({null: true, verbose: 'Table Description'}),
+        name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Query Name'}),
+        desc: new Fields.Text({null: true, verbose: 'Query Description'}),
         table: new Fields.SUUID({notNull: true, verbose: 'Table ID'}),        
         columns: new Fields.Json({verbose: 'Columns'}),
         where: new Fields.Text({null: true, verbose: 'Where clause'}),

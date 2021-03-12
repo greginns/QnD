@@ -88,6 +88,13 @@ class Table_list extends MVC {
 
     Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/config`);
   }
+
+  query(ev) {
+    let idx = ev.target.closest('tr').getAttribute('data-index');
+    let uuid = this.model.tables[idx].id;
+
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/query`);
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

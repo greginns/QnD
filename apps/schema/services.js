@@ -11,6 +11,7 @@ const {jsonQueryExecify, SqlBuilder} = require(root + '/lib/server/utils/sqlUtil
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const loginServices = require(root + '/apps/db4admin/services.js');
 const {exec} = require(root + '/lib/server/utils/db.js');
+const qid = 'gnuJk8HFwvW76L8BgBCcrf';
 
 const app = getAppName(__dirname);
 const services = {};
@@ -56,6 +57,7 @@ services.output = {
       ctx.workspace = models.workspace.getColumnDefns();
       ctx.app = models.application.getColumnDefns();
       ctx.table = models.table.getColumnDefns();
+      ctx.query = models.query.getColumnDefns();
 
       ctx.USER = JSON.stringify(req.session.data.user);
 
@@ -75,47 +77,8 @@ services.output = {
 
     return tm;
   },
-
-  query: async function(req) {
-    // main admin manage page.  Needs a user so won't get here without one
-    let tm = new TravelMessage();
-    let token = await loginServices.auth.makeCSRF(req);
-
-    if (!token) {
-      tm.status = 500;
-      tm.message = 'CSRF Token Generation failed';
-
-      return tm;
-    }
-
-    try {
-      let ctx = {};
-      let tmpl = 'apps/schema/modules/query/module.html';
-
-      ctx.CSRFToken = token;
-      ctx.workspace = models.workspace.getColumnDefns();
-      ctx.app = models.application.getColumnDefns();
-      ctx.table = models.table.getColumnDefns();
-
-      ctx.USER = JSON.stringify(req.session.data.user);
-
-      try {
-        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
-        tm.type = 'html';
-      }
-      catch(err) {
-        tm.status = 500;
-        tm.message = err.toString();
-      }
-    }
-    catch(err) {
-      tm.status = 500;
-      tm.message = err.toString();
-    }
-
-    return tm;
-  },  
 }
+
 /*
 services.database = {
   getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {

@@ -1,0 +1,101 @@
+<page id='schema-query-update' style='display: none;'>
+  <section id='schema-query-update-section'>
+    <div class='row'>
+      <div class='col-12 mb-2'>
+        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app/${app}' mvc-handle>Apps</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table' mvc-handle>Tables</a>
+      </div>
+    </div>
+
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                <h4>Edit Existing Query</h4>
+              </div>
+              <div class='col-2'>
+                <div class='d-block d-sm-none'>XS</div>
+                <div class='d-none d-sm-block d-md-none'>SM</div>
+                <div class='d-none d-md-block d-lg-none'>MD</div>
+                <div class='d-none d-lg-block d-xl-none'>LG</div>
+                <div class='d-none d-xl-block'>XL</div>
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Char(type='text', id=query.name.id, maxlength=query.name.maxLength, mvc_value='query.name', label=query.name.verbose, mvc_disabled='true') }}
+              </div>
+
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Text(id=query.desc.id, mvc_value='query.desc', label=query.desc.verbose) }}
+              </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Text(id=query.columns.id, mvc_value='query.columns', label=query.columns.verbose) }}
+              </div>  
+
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Text(id=query.where.id, mvc_value='query.where', label=query.where.verbose) }}
+              </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Integer(type='text', id=query.limit.id, min='0', max='500', step='1', mvc_value='query.limit', label=query.limit.verbose) }}
+              </div>  
+
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Integer(type='text', id=query.limit.offset, min='0', max='500', step='1', mvc_value='query.offset', label=query.offset.verbose) }}
+              </div>  
+            </div>            
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Text(id=query.orderby.id, mvc_value='query.orderby', label=query.orderby.verbose) }}
+              </div>  
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='success', mvc_click='save', text='Update Query') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
+              </div>  
+            </div>
+
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class='d-block d-md-none' style='padding-top: 70px'>
+      <!-- Spacer XS SM-->
+    </div>
+
+    <div class='d-block d-lg-none' style='padding-top: 30px'>
+      <!-- Spacer XS SM MD -->
+    </div>
+
+    <div class='d-block' style='padding-top: 30px'>
+      <!-- Spacer XS DM MD LG XL -->
+    </div>
+  </section>
+</page>

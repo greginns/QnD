@@ -118,6 +118,8 @@ class Column_create extends MVC {
       {value: 'DZ', text: 'Date and Time'},
       {value: 'MB', text: 'Yes/No'},
       {value: 'MU', text: 'Unique ID'},
+      {value: 'JA', text: 'JSON'},
+      {value: 'JB', text: 'JSON-B'},
     ];
 
     this.model.values.date = [

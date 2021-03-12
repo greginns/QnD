@@ -30,6 +30,10 @@ import '/~static/apps/schema/modules/schema/column-list.js';
 import '/~static/apps/schema/modules/schema/column-create.js';
 import '/~static/apps/schema/modules/schema/column-update.js';
 import '/~static/apps/schema/modules/schema/column-delete.js';
+import '/~static/apps/schema/modules/schema/query-list.js';
+import '/~static/apps/schema/modules/schema/query-create.js';
+import '/~static/apps/schema/modules/schema/query-update.js';
+import '/~static/apps/schema/modules/schema/query-delete.js';
 
 import '/~static/project/mixins/mvc_ext.js';
 
@@ -103,6 +107,7 @@ let moduleStart = function() {
     Module.data.workspace = new TableAccess({modelName: 'workspace', url: `/schema/v1/workspace`});
     Module.data.application = new TableAccess({modelName: 'application', url: `/schema/v1/application`});
     Module.data.table = new db4TableAccess({modelName: 'table', url: `/schema/v1/table`});
+    Module.data.query = new TableAccess({modelName: 'query', url: `/schema/v1/query`});
 
     // url-like of interest to follow model changes
     // WS data change notifications.  
@@ -122,6 +127,10 @@ let moduleStart = function() {
     model = `/schema/table`;
     App.wsDataWatch.addModel(model);
     Module.tableStores.table = new TableStore({accessor: Module.data.table, model, safemode});  // setup a table store in Module so all pages can access
+
+    model = `/schema/query`;
+    App.wsDataWatch.addModel(model);
+    Module.tableStores.query = new TableStore({accessor: Module.data.query, model, safemode});  // setup a table store in Module so all pages can access
 
     getAllPromises.push(Module.tableStores.workspace.getAll());                 // seed the workspace store
 

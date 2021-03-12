@@ -10,6 +10,9 @@ class Query_create extends MVC {
 
   createModel() {
     this.model.query = {};
+    this.model.table = '';
+    this.model.workspace = '';
+    this.model.app = '';
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -26,6 +29,9 @@ class Query_create extends MVC {
   }
   
   async inView(params) {
+    this.model.workspace = params.workspace;
+    this.model.app = params.app;
+    this.model.table = params.table;
   }
 
   outView() {
@@ -45,17 +51,20 @@ class Query_create extends MVC {
       return;
     }
 
+    query.table = this.model.table;
+    query.columns = query.columns.split('\n');
+    query.orderby = query.orderby.split('\n');
+
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
 
-    // new (post) or old (put)?
     let res = await Module.tableStores.query.insert(query);
 
     if (res.status == 200) {
       utils.modals.toast('query', 'Created', 2000);
    
-      this.model.query.name = '';
+      this.model.query = {};
       this.gotoList();
     }
     else {
@@ -64,7 +73,6 @@ class Query_create extends MVC {
     
     utils.modals.overlay(false);
     utils.modals.buttonSpinner(ev.target, false, spinner);
-    
   }
 
   cancel() {
@@ -72,15 +80,14 @@ class Query_create extends MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/query`);
+    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query`);
   }
-
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('schema-query-create');   // page html
 let mvc1 = new Query_create('schema-query-create-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/query/create', title: 'Query - Create', sections: [section1]});
+let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/query/create', title: 'Query - Create', sections: [section1]});
 
 Module.pages.push(page1);

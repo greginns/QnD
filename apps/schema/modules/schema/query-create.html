@@ -1,6 +1,12 @@
 <page id='schema-query-create' style='display: none;'>
   <section id='schema-query-create-section'>
     <div class='row justify-content-center'>
+      <div class='row'>
+        <div class='col-12 mb-2'>
+          <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app/${app}' mvc-handle>Apps</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table' mvc-handle>Tables</a>
+        </div>
+      </div>
+
       <div class='col-12'>
         <div class='card'>
           <div class='card-header'>
@@ -22,17 +28,50 @@
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 {{ fields.Char(type='text', id=query.name.id, maxlength=query.name.maxLength, mvc_value='query.name', label=query.name.verbose) }}
+              </div>
+
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Text(id=query.desc.id, mvc_value='query.desc', label=query.desc.verbose) }}
               </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='success', mvc_click='save', text='Create query') }}
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Text(id=query.columns.id, mvc_value='query.columns', label=query.columns.verbose) }}
               </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
+
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Text(id=query.where.id, mvc_value='query.where', label=query.where.verbose) }}
+              </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Integer(type='text', id=query.limit.id, min='0', max='500', step='1', mvc_value='query.limit', label=query.limit.verbose) }}
+              </div>  
+
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Integer(type='text', id=query.limit.offset, min='0', max='500', step='1', mvc_value='query.offset', label=query.offset.verbose) }}
+              </div>  
+            </div>            
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Text(id=query.orderby.id, mvc_value='query.orderby', label=query.orderby.verbose) }}
               </div>  
             </div>
           </div>
 
           <div class='card-footer'>
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='success', mvc_click='save', text='Create Query') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
+              </div>  
+            </div>
+
             <div class='row' mvc-show='badMessage'>
               <div class='col-12'>
                 <div class="alert alert-danger" role="alert">
