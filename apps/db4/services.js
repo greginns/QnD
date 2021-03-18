@@ -7,6 +7,7 @@ const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {CSRF, Session, Admin} = require(root + '/apps/db4admin/models.js');
 const {exec} = require(root + '/lib/server/utils/db.js');
 const config = require(root + '/config.json');
+const {emailOne, formatEmailObject} = require('./processes.js');
 
 const app = getAppName(__dirname);
 const database = 'db4admin';
@@ -302,7 +303,7 @@ class TableInfo {
 
   makeSelectManySQL(filters, cols) {
     let colList = this.getAllColumns();
-    let where = [], values = [];
+    let text, where = [], values = [];
     let idx = 0;
     let name, type, visible;
     let selCols = [];
@@ -327,7 +328,10 @@ class TableInfo {
 
     selCols = selCols.concat(this.makePKColumns());
 
-    return [`SELECT ${selCols} FROM "${this.schemaName}"."${this.tableName}" WHERE ${where.join(' AND ')};`, values, err];
+    text = `SELECT ${selCols} FROM "${this.schemaName}"."${this.tableName}"`;
+    if (where.length > 0) text += `WHERE ${where.join(' AND ')};`
+
+    return [text, values, err];
   }
 }
 
@@ -447,15 +451,38 @@ const services = {
 
       return tm;
     },
+
+    query: async function(database, pgschema, qid) {
+      let tm;
+      let table = 'eKVExJHhzJCpvxRC7Fsn8W'
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      let filters = {};
+      let columns = ['*'];
+
+      let [text, values, err] = ti.makeSelectManySQL(filters, columns);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+        console.log(tm)
+      }
+
+      return tm;
+    },
+
   },
 
   output: {
-    getapi: async function(req) {
+    getapi1: async function(req) {
       const tm = new TravelMessage();
 
       try {
         let ctx = {};
-        let tmpl = 'apps/db4/api.js';
+        let tmpl = 'apps/db4/api1.js';
 
         try {
           tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
@@ -472,7 +499,72 @@ const services = {
       }
 
       return tm;
-    }    
+    },
+
+    getapi2: async function(req) {
+      const tm = new TravelMessage();
+
+      try {
+        let ctx = {};
+        let tmpl = 'apps/db4/api2.js';
+
+        try {
+          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+          tm.type = 'js';
+        }
+        catch(err) {
+          tm.status = 500;
+          tm.message = err.toString();
+        }
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+
+      return tm;
+    },
+    
+    process: async function(pid) {
+      let data = {
+        "to": ["Test Person <greg@reservation-net.com>"],
+        "sender": "Test Persons Friend <greg@reservation-net.com>",
+        "subject": "Hello Test Person",
+        "text_body": "You're my favorite test person ever",
+        "html_body": "<h1>You're my favorite test person ever</h1>",
+        /*"custom_headers": [
+          {
+            "header": "Reply-To",
+            "value": "Actual Person <test3@example.com>"
+          }
+        ],
+        "attachments": [
+            {
+                "filename": "test.pdf",
+                "fileblob": "--base64-data--",
+                "mimetype": "application/pdf"
+            },
+            {
+                "filename": "test.txt",
+                "fileblob": "--base64-data--",
+                "mimetype": "text/plain"
+            }
+        ]*/
+      };
+
+      data = {
+        from: 'greg@reservation-net.com',
+        fromname: 'Greggie Baby',
+        to: 'greg@reservation-net.com',
+        subject: 'Sweet Ass Translator',
+        html: '<h1>Sweet Ass Translator</h1>',
+        text: 'Sweet Ass Translator'
+      };
+
+      let newData = formatEmailObject(data, 'smtp2go')
+
+      return await emailOne(newData, 'smtp2go');
+    }
   },
 
   auth: {

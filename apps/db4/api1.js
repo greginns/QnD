@@ -111,9 +111,32 @@ const db4GetAllFormData = function(form) {
 }
 
 const db4SetAllFormData = function(form, data) {
+  let field, tagName, type, formVal, dataVal, isMultiple;
+
   for (let idx=0; idx<form.length; idx++) {
-    if (form[idx].name in data) {
-      form[idx].value = data[form[idx].name]
+    field = form[idx];
+
+    if (field.name in data) {
+      tagName = field.tagName;
+      type = field.type; 
+      formVal = field.value;
+      dataVal = data[field.name];
+      isMultiple = (tagName == 'SELECT' && field.hasAttribute('multiple')) ? true : false;
+
+      if (isMultiple) {
+        for (let opt of field.options) {
+          opt.selected = (dataVal && dataVal.indexOf(opt.value) > -1);
+        }
+      }
+      else if (type == 'checkbox') {
+        field.checked = dataVal;
+      }
+      else if (type == 'radio') {
+        field.checked = (dataVal == formVal);
+      }
+      else {
+        field.value = dataVal;
+      }      
     }
   }
 };
@@ -616,7 +639,7 @@ const db4ExpressionParser = async function(expr, opts) {
       'getrow': async function() {
         // getrow(table, key, form-out)
         let char, table, pks, pk, outForm;
-        let result = '', filters = {}, opts = {};
+        let filters = {}, opts = {};
 
         [table, posn] = await parser(expr, posn);
         table = actions.dequote(table);
@@ -870,25 +893,25 @@ const db4ActionHandler = async function(ev) {
   let el = ev.target;
   let form = ev.target.form || null;
   let evType = ev.type;
-  let action = el.getAttribute('db4-' + evType);
+  let action = el.getAttribute('db4-event-' + evType);
 
   options.form = form;
-
+  
   let res = await db4ExpressionParser(action, options);
   return false;
 }
 
 
-for (let el of document.querySelectorAll('[db4-click]')) {
-  el.onclick = db4ActionHandler;
-}
+//for (let el of document.querySelectorAll('[db4-click]')) {
+//  el.onclick = db4ActionHandler;
+//}
 
-let tags = document.evaluate('//*[@*[starts-with(name(), "db4-")]]', document, null, XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
+let tags = document.evaluate('//*[@*[starts-with(name(), "db4-event")]]', document, null, XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
 try {
   var node = tags.iterateNext();
 
   while (node) {
-    console.log(node);
+    node.onclick = db4ActionHandler;
     node = tags.iterateNext()
   }
 }

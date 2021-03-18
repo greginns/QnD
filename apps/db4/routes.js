@@ -27,14 +27,38 @@ Router.add(new RouterMessage({
   app,
   subapp: 'api',
   version,
-  path: ['/'], 
+  path: ['/api1'], 
   rewrite: false,
   id: 'api',
   level: OPEN,
   desc: 'API Code',
   inAPI: false,
   fn: async function(req) {
-    let tm = await services.output.getapi(req);
+    let tm = await services.output.getapi1(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/api2'], 
+  rewrite: false,
+  id: 'api',
+  level: OPEN,
+  desc: 'API Code',
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.output.getapi2(req);
 
     return tm.toResponse();
   },
@@ -168,6 +192,62 @@ Router.add(new RouterMessage({
     let {filters, columns} = urlQueryParse(req.query);
 
     let tm = await services.table.getMany(database, pgschema, req.params.table, filters, columns);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/query/:qid'], 
+  rewrite: false,
+  id: 'query',
+  level: OPEN,
+  desc: 'Run Query',
+  allowCORS: true,
+  inAPI: false,
+  fn: async function(req) {
+    let {database, pgschema} = getDBAndSchema(req);
+    //let {filters, columns} = urlQueryParse(req.query);
+
+    let tm = await services.table.query(database, pgschema, req.params.qid);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/process/:pid'], 
+  rewrite: false,
+  id: 'process',
+  level: OPEN,
+  desc: 'Run Process',
+  allowCORS: true,
+  inAPI: false,
+  fn: async function(req) {
+    //let {database, pgschema} = getDBAndSchema(req);
+    //let {filters, columns} = urlQueryParse(req.query);
+
+    let tm = await services.output.process(req.params.pid);
 
     return tm.toResponse();
   },

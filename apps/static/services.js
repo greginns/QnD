@@ -28,6 +28,7 @@ module.exports = {
       tm.type = ft;
     }
     catch(err) {
+console.log(err)      
       tm.status = 404;
     }
 
