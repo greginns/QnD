@@ -5,11 +5,11 @@ import {Pages} from '/~static/lib/client/core/paging.js';
 import {App} from '/~static/lib/client/core/app.js';
 
 // js for pages
-import '/~static/apps/schema/modules/query/navbar.js';
-import '/~static/apps/schema/modules/query/query-list.js';
-import '/~static/apps/schema/modules/query/query-create.js';
-import '/~static/apps/schema/modules/query/query-update.js';
-import '/~static/apps/schema/modules/query/query-delete.js';
+import '/~static/apps/schema/modules/process/navbar.js';
+import '/~static/apps/schema/modules/process/process-list.js';
+import '/~static/apps/schema/modules/process/process-create.js';
+import '/~static/apps/schema/modules/process/process-update.js';
+import '/~static/apps/schema/modules/process/process-delete.js';
 
 import '/~static/project/mixins/mvc_ext.js';
 
@@ -23,7 +23,7 @@ let moduleStart = function() {
     Module.data.workspace = new TableAccess({modelName: 'workspace', url: `/schema/v1/workspace`});
     Module.data.application = new TableAccess({modelName: 'application', url: `/schema/v1/application`});
     Module.data.table = new TableAccess({modelName: 'table', url: `/schema/v1/table`});
-    Module.data.query = new TableAccess({modelName: 'query', url: `/schema/v1/query`});
+    Module.data.process = new TableAccess({modelName: 'process', url: `/schema/v1/process`});
 
     // url-like of interest to follow model changes
     // WS data change notifications.  
@@ -34,7 +34,7 @@ let moduleStart = function() {
 
     model = `/schema/workspace`;
     App.wsDataWatch.addModel(model);             
-    Module.tableStores.query = new TableStore({accessor: Module.data.workspace, model, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.workspace = new TableStore({accessor: Module.data.workspace, model, safemode});  // setup a table store in Module so all pages can access
 
     model = `/schema/application`;
     App.wsDataWatch.addModel(model);
@@ -44,9 +44,9 @@ let moduleStart = function() {
     App.wsDataWatch.addModel(model);
     Module.tableStores.table = new TableStore({accessor: Module.data.table, model, safemode});  // setup a table store in Module so all pages can access
 
-    model = `/schema/query`;                    
+    model = `/schema/process`;                    
     App.wsDataWatch.addModel(model);             
-    Module.tableStores.query = new TableStore({accessor: Module.data.query, model, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.process = new TableStore({accessor: Module.data.process, model, safemode});  // setup a table store in Module so all pages can access
 
     getAllPromises.push(Module.tableStores.workspace.getAll());                 // seed the workspace store
 
@@ -67,7 +67,7 @@ let moduleStart = function() {
   let startPages = async function() {
     // page URL data  
     const module = location.pathname.split('/')[1]; 
-    const startPage = 'query';
+    const startPage = '';
 
     // Start up pages.  Module.pages saved up all page references
     const pager = new Pages({root: `/${module}`, pages: Module.pages});
@@ -89,6 +89,6 @@ let moduleStart = function() {
   connectToData();
 }
 
-window.name = 'DB4_Query'
+window.name = 'DB4_process'
 
 moduleStart();

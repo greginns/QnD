@@ -1,13 +1,21 @@
 const root = process.cwd();
 const bcrypt = require('bcrypt');
+const config = require(root + '/config.json');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {CSRF, Session, Admin} = require(root + '/apps/db4admin/models.js');
 const {exec} = require(root + '/lib/server/utils/db.js');
-const config = require(root + '/config.json');
-const {emailOne, formatEmailObject} = require('./processes.js');
+const {buildActionData} = require(root + '/lib/server/utils/processes.js');
+
+//const {formatEmailObject, emailOne, mergeDoc} = require('./processes.js');
+const actionMethods = {};
+actionMethods.smtp2go = require('./processes/smtp2go.js');
+actionMethods.elastic = require('./processes/elastic.js');
+actionMethods.mailmerge = require('./processes/mailmerge.js');
+actionMethods.io_int = require('./processes/io_int.js');
+actionMethods.io_ext = require('./processes/io_ext.js');
 
 const app = getAppName(__dirname);
 const database = 'db4admin';
@@ -67,6 +75,10 @@ class TableInfo {
     }
 
     return cols;
+  }
+
+  makeTableName() {
+    return `"${this.schemaName}"."${this.tableName}"`;
   }
 
   makeColumnDefaults() {
@@ -183,7 +195,7 @@ class TableInfo {
       err = `The following fields are mandatory: ${errors.join(', ')}`;
     }
 
-    return [`INSERT INTO "${this.schemaName}"."${this.tableName}" (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING ${allCols.join(',')};`, values, err];
+    return [`INSERT INTO ${this.makeTableName()} (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING ${allCols.join(',')};`, values, err];
   }
 
   makeUpdateOneSQL(data) {
@@ -219,7 +231,7 @@ class TableInfo {
 
     allCols = allCols.concat(this.makePKColumns());
 
-    return [`UPDATE "${this.schemaName}"."${this.tableName}" SET ${set.join(',')} WHERE ${where.join(' AND ')} RETURNING ${allCols};`, values, err];
+    return [`UPDATE ${this.makeTableName()} SET ${set.join(',')} WHERE ${where.join(' AND ')} RETURNING ${allCols};`, values, err];
   }
 
   makeDeleteOneSQL(data) {
@@ -257,7 +269,7 @@ class TableInfo {
       err = `The following fields are mandatory: ${errors.join(', ')}`;
     }
 
-    return [`DELETE FROM "${this.schemaName}"."${this.tableName}" WHERE ${where.join(' AND ')} RETURNING ${allCols};`, values, err];
+    return [`DELETE FROM ${this.makeTableName()} WHERE ${where.join(' AND ')} RETURNING ${allCols};`, values, err];
   }
 
   makeSelectOneSQL(filters, cols) {
@@ -298,7 +310,7 @@ class TableInfo {
       err = `The following fields are mandatory: ${errors.join(', ')}`;
     }
 
-    return [`SELECT ${selCols} FROM "${this.schemaName}"."${this.tableName}" WHERE ${where.join(' AND ')};`, values, err];
+    return [`SELECT ${selCols} FROM ${this.makeTableName()} WHERE ${where.join(' AND ')};`, values, err];
   }
 
   makeSelectManySQL(filters, cols) {
@@ -328,7 +340,7 @@ class TableInfo {
 
     selCols = selCols.concat(this.makePKColumns());
 
-    text = `SELECT ${selCols} FROM "${this.schemaName}"."${this.tableName}"`;
+    text = `SELECT ${selCols} FROM ${this.makeTableName()}`;
     if (where.length > 0) text += `WHERE ${where.join(' AND ')};`
 
     return [text, values, err];
@@ -346,7 +358,7 @@ class TableInfo {
 */
 const services = {
   table: {
-    insert: async function(database, pgschema, table, data) {
+    insert: async function(database, table, data) {
       let tm;
       let ti = new TableInfo(database, table);
       await ti.init();
@@ -363,7 +375,7 @@ const services = {
       return tm;
     },
 
-    update: async function(database, pgschema, table, data) {
+    update: async function(database, table, data) {
       let tm;
       let ti = new TableInfo(database, table);
       await ti.init();
@@ -380,7 +392,7 @@ const services = {
       return tm;
     },
 
-    delete: async function(database, pgschema, table, data) {
+    delete: async function(database, table, data) {
       let tm;
       let ti = new TableInfo(database, table);
       await ti.init();
@@ -398,7 +410,7 @@ const services = {
       return tm;
     },
 
-    getOne: async function(database, pgschema, table, pk, filters, columns) {
+    getOne: async function(database, table, pk, filters, columns) {
       let tm;
       let ti = new TableInfo(database, table);
       await ti.init();
@@ -434,7 +446,11 @@ const services = {
       return tm;
     },
 
-    getMany: async function(database, pgschema, table, filters, columns) {
+    lookup: async function(database, table, pk, filters, columns) {
+      return services.table.getOne(database, table, pk, filters, columns);
+    },
+
+    getMany: async function(database, table, filters, columns) {
       let tm;
       let ti = new TableInfo(database, table);
       await ti.init();
@@ -452,7 +468,7 @@ const services = {
       return tm;
     },
 
-    query: async function(database, pgschema, qid) {
+    query: async function(database, qid) {
       let tm;
       let table = 'eKVExJHhzJCpvxRC7Fsn8W'
       let ti = new TableInfo(database, table);
@@ -525,45 +541,62 @@ const services = {
       return tm;
     },
     
-    process: async function(pid) {
-      let data = {
-        "to": ["Test Person <greg@reservation-net.com>"],
-        "sender": "Test Persons Friend <greg@reservation-net.com>",
-        "subject": "Hello Test Person",
-        "text_body": "You're my favorite test person ever",
-        "html_body": "<h1>You're my favorite test person ever</h1>",
-        /*"custom_headers": [
-          {
-            "header": "Reply-To",
-            "value": "Actual Person <test3@example.com>"
-          }
-        ],
-        "attachments": [
-            {
-                "filename": "test.pdf",
-                "fileblob": "--base64-data--",
-                "mimetype": "application/pdf"
-            },
-            {
-                "filename": "test.txt",
-                "fileblob": "--base64-data--",
-                "mimetype": "text/plain"
-            }
-        ]*/
-      };
+    process: async function(database, pid, body) {
+      let tm = new TravelMessage();
+      let data = {};
+      let security = {
+        'smtp2go': 'api-1F90F3A4875211EBAA9DF23C91C88F4E',
+        'elastic': 'A8DAB667B4A3361FDD237E8316B1A0F56A642CC67100A1956B7D7E9A02180AF44BFF79C04A928F6EF5B07C1B58AAB741'
+      }
 
-      data = {
-        from: 'greg@reservation-net.com',
-        fromname: 'Greggie Baby',
-        to: 'greg@reservation-net.com',
-        subject: 'Sweet Ass Translator',
-        html: '<h1>Sweet Ass Translator</h1>',
-        text: 'Sweet Ass Translator'
-      };
+      // Data from post, event or timer.
+      data.initial = body;
+/*
+      data.user = {
+        id: 'bcsjdhsjd',
+        first: 'Greg',
+        last: 'Miller',
+        email: 'greg@reservation-net.com'
+      }
+*/
+      const steps = [
+        //{id: 'io_ext', action: 'get'},
+        {id: 'io_int', action: 'lookup'},
+        {id: 'mailmerge', action: 'renderString'},
+        {id: 'smtp2go', action: 'sendOne'}
+        //{id: 'elastic', action: 'sendOne'}
+      ]      
 
-      let newData = formatEmailObject(data, 'smtp2go')
+      for (let step of steps) {
+        let id = actionMethods[step.id];
+        let action = step.action;
+        let input = buildActionData(data, id.actionMatch[action], id.actionParams[action]);
 
-      return await emailOne(newData, 'smtp2go');
+        let secVal = security[step.id] || '';  // *** fake
+
+        if (step.id == 'io_int') {
+          let ti = new TableInfo(database, input.table);
+          await ti.init();
+
+          let res1 = await services.table[action](database, input.table, input.pk, input.filters, input.columns);
+
+          if (res1.status != 200) return res1;
+
+          data[ti.tableName] = res1.data;        
+          data.user = res1.data;  // Testing only
+        }
+        else {
+          let res1 = await id.actions[action](input, secVal);
+
+          if (res1.status != 200) return res1;
+
+          data[id.outputName] = res1.data;        
+        }
+      }
+
+      // Send back all data
+      tm.data = data;
+      return tm;      
     }
   },
 

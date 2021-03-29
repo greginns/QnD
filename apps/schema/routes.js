@@ -58,32 +58,32 @@ Router.add(new RouterMessage({
   }
 }));
 
-// Query page
+// Process page
 Router.add(new RouterMessage({
   method: 'get',
   app,
   subapp: 'modules',
   version,
   path: [
-    '/querybuilder', 
-    '/querybuilder/:etc', 
-    '/querybuilder/:etc/:etc', 
-    '/querybuilder/:etc/:etc/:etc',
-    '/querybuilder/:etc/:etc/:etc/:etc',
-    '/querybuilder/:etc/:etc/:etc/:etc/:etc',
-    '/querybuilder/:etc/:etc/:etc/:etc/:etc/:etc',
-    '/querybuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
-    '/querybuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
-    '/querybuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
-    '/querybuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/processbuilder', 
+    '/processbuilder/:etc', 
+    '/processbuilder/:etc/:etc', 
+    '/processbuilder/:etc/:etc/:etc',
+    '/processbuilder/:etc/:etc/:etc/:etc',
+    '/processbuilder/:etc/:etc/:etc/:etc/:etc',
+    '/processbuilder/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/processbuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/processbuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/processbuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/processbuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
   ], 
   rewrite: true,
-  id: 'querybuilder',
+  id: 'processbuilder',
   level: ACCESS,
-  desc: 'Query Builder',
+  desc: 'Process Builder',
   inAPI: false,
   fn: async function(req) {
-    let tm = await services.output.query(req);
+    let tm = await services.output.process(req);
 
     return tm.toResponse();
   },

@@ -18,7 +18,7 @@ const getDBAndSchema = function(req) {
   //let pgschema = req.session.data.pgschema;
 
   //return {database, pgschema};
-  return {database: 'db4_73WakrfVbNJBaAmhQtEeDv', pgschema: 'Workspace1'};
+  return {database: 'db4_73WakrfVbNJBaAmhQtEeDv'};
 }
 
 // API Code route
@@ -83,8 +83,8 @@ Router.add(new RouterMessage({
   allowCORS: true,
   inAPI: false,
   fn: async function(req) {
-    let {database, pgschema} = getDBAndSchema(req);
-    let tm = await services.table.insert(database, pgschema, req.params.table, req.body);
+    let {database} = getDBAndSchema(req);
+    let tm = await services.table.insert(database, req.params.table, req.body);
     
     return tm.toResponse();
   },
@@ -109,8 +109,8 @@ Router.add(new RouterMessage({
   allowCORS: true,
   inAPI: false,
   fn: async function(req) {
-    let {database, pgschema} = getDBAndSchema(req);
-    let tm = await services.table.update(database, pgschema, req.params.table, req.body);
+    let {database} = getDBAndSchema(req);
+    let tm = await services.table.update(database, req.params.table, req.body);
 
     return tm.toResponse();
   },
@@ -135,8 +135,8 @@ Router.add(new RouterMessage({
   allowCORS: true,
   inAPI: false,
   fn: async function(req) {
-    let {database, pgschema} = getDBAndSchema(req);
-    let tm = await services.table.delete(database, pgschema, req.params.table, req.body);
+    let {database} = getDBAndSchema(req);
+    let tm = await services.table.delete(database, req.params.table, req.body);
 
     return tm.toResponse();
   },
@@ -161,9 +161,9 @@ Router.add(new RouterMessage({
   allowCORS: true,
   inAPI: false,
   fn: async function(req) {
-    let {database, pgschema} = getDBAndSchema(req);
+    let {database} = getDBAndSchema(req);
     let {filters, columns} = urlQueryParse(req.query);
-    let tm = await services.table.getOne(database, pgschema, req.params.table, req.params.pk, filters, columns);
+    let tm = await services.table.getOne(database, req.params.table, req.params.pk, filters, columns);
 
     return tm.toResponse();
   },
@@ -188,10 +188,10 @@ Router.add(new RouterMessage({
   allowCORS: true,
   inAPI: false,
   fn: async function(req) {
-    let {database, pgschema} = getDBAndSchema(req);
+    let {database} = getDBAndSchema(req);
     let {filters, columns} = urlQueryParse(req.query);
 
-    let tm = await services.table.getMany(database, pgschema, req.params.table, filters, columns);
+    let tm = await services.table.getMany(database, req.params.table, filters, columns);
 
     return tm.toResponse();
   },
@@ -216,10 +216,10 @@ Router.add(new RouterMessage({
   allowCORS: true,
   inAPI: false,
   fn: async function(req) {
-    let {database, pgschema} = getDBAndSchema(req);
+    let {database} = getDBAndSchema(req);
     //let {filters, columns} = urlQueryParse(req.query);
 
-    let tm = await services.table.query(database, pgschema, req.params.qid);
+    let tm = await services.table.query(database, req.params.qid);
 
     return tm.toResponse();
   },
@@ -232,7 +232,7 @@ Router.add(new RouterMessage({
 }));
 
 Router.add(new RouterMessage({
-  method: 'get',
+  method: 'post',
   app,
   subapp: 'api',
   version,
@@ -244,10 +244,9 @@ Router.add(new RouterMessage({
   allowCORS: true,
   inAPI: false,
   fn: async function(req) {
-    //let {database, pgschema} = getDBAndSchema(req);
-    //let {filters, columns} = urlQueryParse(req.query);
+    let {database} = getDBAndSchema(req);
 
-    let tm = await services.output.process(req.params.pid);
+    let tm = await services.output.process(database, req.params.pid, req.body);
 
     return tm.toResponse();
   },

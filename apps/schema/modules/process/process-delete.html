@@ -1,0 +1,77 @@
+<page id='schema-app-delete' style='display: none;'>
+  <section id='schema-app-delete-section'>
+    <div class='row'>
+      <div class='col-12 mb-2'>
+        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app' mvc-handle>Apps</a>
+      </div>
+    </div>
+
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                <h4>Delete Existing App</h4>
+              </div>
+              <div class='col-2'>
+                <div class='d-block d-sm-none'>XS</div>
+                <div class='d-none d-sm-block d-md-none'>SM</div>
+                <div class='d-none d-md-block d-lg-none'>MD</div>
+                <div class='d-none d-lg-block d-xl-none'>LG</div>
+                <div class='d-none d-xl-block'>XL</div>
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                <span mvc-text='application.name'></span>
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='danger', mvc_click='delete', text='Delete App') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
+              </div>  
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row pt-2'>
+              <div class='col-12'>
+                <span style='color: red'>
+                  Deleting an app will permanently remove any Tables in that App.  
+                  Think very carefully before deleting an App.
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class='d-block d-md-none' style='padding-top: 70px'>
+      <!-- Spacer XS SM-->
+    </div>
+
+    <div class='d-block d-lg-none' style='padding-top: 30px'>
+      <!-- Spacer XS SM MD -->
+    </div>
+
+    <div class='d-block' style='padding-top: 30px'>
+      <!-- Spacer XS DM MD LG XL -->
+    </div>
+  </section>
+</page>

@@ -56,7 +56,7 @@ const user = class extends Model {
   }
 };
 
-const workspace = class extends Model {
+const database = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
   }
@@ -72,6 +72,37 @@ const workspace = class extends Model {
 
       constraints: {
         pk: ['id'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['name'],
+      
+      dbschema: 'public',
+      app,
+      desc: 'Databases'
+    }
+  }
+};
+
+const workspace = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Workspace ID'}),
+        name: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Workspace Name'}),
+        database: new Fields.SUUID({null: true, verbose: 'Workspace ID'}),        
+        created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
+        updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),
+      },
+
+      constraints: {
+        pk: ['id'],
+        fk: [{name: 'database', columns: ['database'], app, table: database, tableColumns: ['id'], onDelete: 'NO ACTION'}],
       },
       
       hidden: [],
@@ -200,4 +231,40 @@ const query = class extends Model {
   }
 };
 
-module.exports = {workspace, application, table, query};
+const bizprocess = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Process ID'}),
+        name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Process Name'}),
+        desc: new Fields.Text({null: true, verbose: 'Process Description'}),
+        trigger: new Fields.Char({notNull: true, maxLength: 1, verbose: 'Trigger Type'}),
+        eventid: new Fields.SUUID({notNull: true, verbose: 'Event ID'}),
+        timer: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Timer Config'}),
+        initdata: new Fields.Json({verbose: 'Initial Dataschema'}),
+        respdata: new Fields.Json({verbose: 'Response Dataschema'}),
+        steps: new Fields.Json({verbose: 'Steps'}),
+        created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
+        updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
+      },
+
+      constraints: {
+        pk: ['id'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['name'],
+      
+      dbschema: 'public',
+      app,
+      desc: 'Processes'
+    }
+  }
+};
+
+module.exports = {database, workspace, application, table, query, bizprocess};
