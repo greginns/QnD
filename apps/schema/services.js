@@ -99,6 +99,7 @@ services.output = {
       ctx.app = models.application.getColumnDefns();
       ctx.table = models.table.getColumnDefns();
       ctx.query = models.query.getColumnDefns();
+      ctx.bizprocess = models.bizprocess.getColumnDefns();
 
       ctx.USER = JSON.stringify(req.session.data.user);
 
@@ -717,6 +718,61 @@ services.query = {
   delete: async function({database = '', pgschema = '', id = ''} = {}) {
     // Delete row
     let tobj = new models.query({ id });
+    let tm = await tobj.deleteOne({database, pgschema});
+
+    let sql = SqlBuilder.dropSchema(tm.data.name, 'postgres');
+    let tm1 = await exec(database, sql[0]);
+
+    console.log(tm1)
+
+    return tm;
+  }
+};
+
+services.bizprocess = {
+  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.bizprocess.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.bizprocess.select({database, pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
+
+      tm.data = models.bizprocess.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+    
+    return await models.bizprocess.selectOne({database, pgschema, pks: [rec.id] });
+  },
+    
+  create: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Insert row
+console.log(rec)    
+    let tobj = new models.bizprocess(rec);
+    let tm = await tobj.insertOne({database, pgschema});
+
+    return tm;    
+  },
+  
+  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.bizprocess(rec);
+    let tm = await tobj.updateOne({database, pgschema});
+    
+    return tm;
+  },
+  
+  delete: async function({database = '', pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.bizprocess({ id });
     let tm = await tobj.deleteOne({database, pgschema});
 
     let sql = SqlBuilder.dropSchema(tm.data.name, 'postgres');

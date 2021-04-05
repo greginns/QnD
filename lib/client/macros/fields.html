@@ -1,6 +1,6 @@
-{% macro Char(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='', mvc_filter='', mvc_role='', placeholder='') %}
+{% macro Char(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_xenabled='', mvc_xdisabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='', mvc_filter='', mvc_role='', placeholder='') %}
 <div class="form-label-group">
-  <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
+  <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' mvc-xenabled='{{mvc_xenabled}}' mvc-xdisabled='{{mvc_xdisabled}}' placeholder='{{placeholder}}' class="form-control" />
   <label>{{label}}</label>
 </div>
 

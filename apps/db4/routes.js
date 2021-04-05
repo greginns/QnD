@@ -246,7 +246,108 @@ Router.add(new RouterMessage({
   fn: async function(req) {
     let {database} = getDBAndSchema(req);
 
-    let tm = await services.output.process(database, req.params.pid, req.body);
+    let tm = await services.process.output(database, req.params.pid, req.body);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/process/groups'], 
+  rewrite: false,
+  id: 'getActions',
+  level: OPEN,
+  desc: 'Get Process Groups',
+  allowCORS: true,
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.process.getGroups();
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/process/actions'], 
+  rewrite: false,
+  id: 'getActions',
+  level: OPEN,
+  desc: 'Get Process Actions',
+  allowCORS: true,
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.process.getActions();
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/process/actions/:id'], 
+  rewrite: false,
+  id: 'getSubActions',
+  level: OPEN,
+  desc: 'Get Process Sub Actions',
+  allowCORS: true,
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.process.getSubActions(req.params.id);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/process/:action/:subaction'], 
+  rewrite: false,
+  id: 'getInputs',
+  level: OPEN,
+  desc: 'Get Process Sub Action Inputs',
+  allowCORS: true,
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.process.getSubActionInputs(req.params.action, req.params.subaction);
 
     return tm.toResponse();
   },

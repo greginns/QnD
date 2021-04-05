@@ -4,13 +4,13 @@ import {TableStore, TableView} from '/~static/lib/client/core/data.js';
 import {App} from '/~static/lib/client/core/app.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class App_list extends MVC {
+class Process_list extends MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.apps = [];
+    this.model.processes = [];
     this.workspace = '';
 
     this.model.badMessage = '';
@@ -18,8 +18,8 @@ class App_list extends MVC {
       message: ''
     };
 
-    this.appStore;
-    this.appView = new TableView({proxy: this.model.apps});
+    this.processStore;
+    this.processView = new TableView({proxy: this.model.processes});
   }
 
   async ready() {
@@ -30,26 +30,23 @@ class App_list extends MVC {
   }
   
   async inView(params) {
-    let workspace = params.workspace;
-    let model = '/schema/application';
+    let model = '/schema/bizprocess';
     let conditions = {};
 
-    this.workspace = workspace;
-
-    let filters = {workspace};
+    let filters = {};
     
     conditions[model] = function(rec) {
-      return rec.workspace == workspace;
+      return true;
     };
 
-    if (this.appStore) {
-      this.appStore.kill();
+    if (this.processStore) {
+      this.processStore.kill();
     }
 
-    this.appStore = new TableStore({accessor: Module.data.application, filters, conditions});
-    this.appStore.addView(this.appView);
+    this.processStore = new TableStore({accessor: Module.data.bizprocess, filters, conditions});
+    this.processStore.addView(this.processView);
 
-    this.appStore.getMany();
+    this.processStore.getMany();
   }
 
   outView() {
@@ -57,35 +54,35 @@ class App_list extends MVC {
   }
 
   create() {
-    Module.pager.go(`/workspace/${this.workspace}/app/create`);
+    Module.pager.go(`/create`);
   }
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.apps[idx].id;
+    let uuid = this.model.processes[idx].id;
 
-    Module.pager.go(`/workspace/${this.workspace}/app/${uuid}/update`);
+    Module.pager.go(`/${uuid}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.apps[idx].id;
+    let uuid = this.model.processes[idx].id;
 
-    Module.pager.go(`/workspace/${this.workspace}/app/${uuid}/delete`);
+    Module.pager.go(`/${uuid}/delete`);
   }
 
-  tables(ev) {
+  steps(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
-    let uuid = this.model.apps[idx].id;
+    let uuid = this.model.processes[idx].id;
 
-    Module.pager.go(`/workspace/${this.workspace}/app/${uuid}/table`);
+    Module.pager.go(`/${uuid}/steps`);
   }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('schema-app-list');   // page html
-let mvc1 = new App_list('schema-app-list-section');
+let el1 = document.getElementById('process-list');   // page html
+let mvc1 = new Process_list('process-list-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '', title: 'Apps', sections: [section1]});
+let page1 = new Page({el: el1, path: '', title: 'Processes', sections: [section1]});
 
 Module.pages.push(page1);

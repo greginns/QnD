@@ -3,13 +3,16 @@ const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 
 const mailmerge = {
-  discover: [
-    {'render': 'Render a document from a template file'},
-    {'renderString': 'Render a document from a template string'},
+  group: 'doc',
+  name: 'Mail Merge',
+
+  actionList: [
+    {value: 'render', text: 'Render document from a template file'},
+    {value: 'renderString', text: 'Render document from a template string'}
   ],
 
   outputName: 'mailmerge',
-  outputSuccess: 'document string',
+  outputSuccess: 'Document string',
 
   actions: {
     render: async function(data) {
@@ -74,7 +77,7 @@ const mailmerge = {
       },
       context: {
         prompt: 'Data Context',
-        type: 'string',
+        type: 'object',
       }
     }
   },

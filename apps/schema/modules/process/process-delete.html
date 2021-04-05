@@ -1,8 +1,8 @@
-<page id='schema-app-delete' style='display: none;'>
-  <section id='schema-app-delete-section'>
+<page id='process-delete' style='display: none;'>
+  <section id='process-delete-section'>
     <div class='row'>
       <div class='col-12 mb-2'>
-        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app' mvc-handle>Apps</a>
+        <a href='/' mvc-nohandle>Home</a>
       </div>
     </div>
 
@@ -12,7 +12,7 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6'>
-                <h4>Delete Existing App</h4>
+                <h4>Delete Existing Process</h4>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -27,10 +27,10 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                <span mvc-text='application.name'></span>
+                <span mvc-text='bizprocess.name'></span>
               </div>  
               <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='danger', mvc_click='delete', text='Delete App') }}
+                {{ buttons.btn(class='danger', mvc_click='delete', text='Delete Process') }}
               </div>  
               <div class='col-6 col-md-2 mb-4'>
                 {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
@@ -50,8 +50,8 @@
             <div class='row pt-2'>
               <div class='col-12'>
                 <span style='color: red'>
-                  Deleting an app will permanently remove any Tables in that App.  
-                  Think very carefully before deleting an App.
+                  Deleting a Process will permanently remove it.  
+                  Think very carefully before deleting a Process.
                 </span>
               </div>
             </div>

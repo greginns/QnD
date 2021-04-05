@@ -9,8 +9,7 @@ class App_delete extends MVC {
   }
 
   createModel() {
-    this.model.application = {};
-    this.model.workspace = '';
+    this.model.bizprocess = {};
     this.origapp = {};
 
     this.model.badMessage = '';
@@ -28,19 +27,17 @@ class App_delete extends MVC {
   }
   
   async inView(params) {
-    this.model.workspace = params.workspace;
-
-    let id = params.app || '';
+    let id = params.id || '';
 
     if (!id) this.gotoList();
 
-    let res = await Module.tableStores.application.getOne(id);
+    let res = await Module.tableStores.bizprocess.getOne(id);
 
     if (Object.keys(res).length > 0) {
-      this.model.application = res;
+      this.model.bizprocess = res;
     }
     else {
-      alert('Missing App');
+      alert('Missing Process');
 
       this.gotoList();
     }
@@ -55,14 +52,14 @@ class App_delete extends MVC {
 
     if (!ret) return;
 
-    let app = this.model.application.toJSON();
+    let bizprocess = this.model.bizprocess.toJSON();
    
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = await Module.tableStores.application.delete(app.id);
+    let res = await Module.tableStores.bizprocess.delete(bizprocess.id);
     
     if (res.status == 200) {
       utils.modals.toast('app', 'Deleted', 2000);
@@ -82,15 +79,15 @@ class App_delete extends MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app`);
+    Module.pager.go(`/`);
   }
 
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('schema-app-delete');   // page html
-let mvc1 = new App_delete('schema-app-delete-section');
+let el1 = document.getElementById('process-delete');   // page html
+let mvc1 = new App_delete('process-delete-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/delete', title: 'Apps - Delete', sections: [section1]});
+let page1 = new Page({el: el1, path: '/:id/delete', title: 'Process - Delete', sections: [section1]});
 
 Module.pages.push(page1);

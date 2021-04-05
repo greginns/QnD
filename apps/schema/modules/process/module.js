@@ -10,6 +10,7 @@ import '/~static/apps/schema/modules/process/process-list.js';
 import '/~static/apps/schema/modules/process/process-create.js';
 import '/~static/apps/schema/modules/process/process-update.js';
 import '/~static/apps/schema/modules/process/process-delete.js';
+import '/~static/apps/schema/modules/process/process-steps.js';
 
 import '/~static/project/mixins/mvc_ext.js';
 
@@ -23,7 +24,7 @@ let moduleStart = function() {
     Module.data.workspace = new TableAccess({modelName: 'workspace', url: `/schema/v1/workspace`});
     Module.data.application = new TableAccess({modelName: 'application', url: `/schema/v1/application`});
     Module.data.table = new TableAccess({modelName: 'table', url: `/schema/v1/table`});
-    Module.data.process = new TableAccess({modelName: 'process', url: `/schema/v1/process`});
+    Module.data.bizprocess = new TableAccess({modelName: 'bizprocess', url: `/schema/v1/bizprocess`});
 
     // url-like of interest to follow model changes
     // WS data change notifications.  
@@ -44,9 +45,9 @@ let moduleStart = function() {
     App.wsDataWatch.addModel(model);
     Module.tableStores.table = new TableStore({accessor: Module.data.table, model, safemode});  // setup a table store in Module so all pages can access
 
-    model = `/schema/process`;                    
+    model = `/schema/bizprocess`;                    
     App.wsDataWatch.addModel(model);             
-    Module.tableStores.process = new TableStore({accessor: Module.data.process, model, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.bizprocess = new TableStore({accessor: Module.data.bizprocess, model, safemode});  // setup a table store in Module so all pages can access
 
     getAllPromises.push(Module.tableStores.workspace.getAll());                 // seed the workspace store
 

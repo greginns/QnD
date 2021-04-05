@@ -1,8 +1,8 @@
-<page id='schema-app-create' style='display: none;'>
-  <section id='schema-app-create-section'>
+<page id='process-create' style='display: none;'>
+  <section id='process-create-section'>
     <div class='row'>
       <div class='col-12 mb-2'>
-        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app' mvc-handle>Apps</a>
+        <a href='/' mvc-nohandle>Home</a> / <a href='/'>Processes</a>
       </div>
     </div>
 
@@ -12,7 +12,7 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6'>
-                <h4>Create New App</h4>
+                <h4>Create New Process</h4>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -27,32 +27,58 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Char(type='text', id=application.name.id, maxlength=application.name.maxLength, mvc_value='application.name', label=application.name.verbose) }}
+                {{ fields.Char(type='text', id=bizprocess.name.id, maxlength=bizprocess.name.maxLength, mvc_value='bizprocess.name', label=bizprocess.name.verbose) }}
               </div>  
             </div>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Text(id=application.desc.id, mvc_value='application.desc', label=application.desc.verbose) }}
+                {{ fields.Text(id=bizprocess.desc.id, mvc_value='bizprocess.desc', label=bizprocess.desc.verbose) }}
               </div>  
             </div>
             <div class='row pt-2'>
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='success', mvc_click='save', text='Create App') }}
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                <label class='label-color'>Trigger</label>
+
+                <div class="toggle-radio" data-color='blue'>
+                  {{ fields.Segment(id='bizprocess-trigger-create-P', mvc_checked='bizprocess.trigger', name='bizprocess-trigger-create', label='Post', value='P') }}
+                  {{ fields.Segment(id='bizprocess-trigger-create-E', mvc_checked='bizprocess.trigger', name='bizprocess-trigger-create', label='Event', value='E') }}
+                  {{ fields.Segment(id='bizprocess-trigger-create-T', mvc_checked='bizprocess.trigger', name='bizprocess-trigger-create', label='Timer', value='T') }}
+                </div>
+          
+                <div mvc-show='errors.bizprocess.trigger'>
+                  <small class='text-danger' mvc-text='errors.bizprocess.trigger'></small>
+                </div>    
               </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
+            </div>
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Char(id=bizprocess.eventid.id, mvc_value='bizprocess.eventid', label=bizprocess.eventid.verbose, mvc_xenabled='this.model.bizprocess.trigger == "E"') }}
+              </div>  
+            </div>
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Char(id=bizprocess.timer.id, mvc_value='bizprocess.timer', label=bizprocess.timer.verbose, mvc_xenabled='this.model.bizprocess.trigger == "T"') }}
               </div>  
             </div>
           </div>
 
           <div class='card-footer'>
-            <div class='row' mvc-show='badMessage'>
+            <div class='row pt-2' mvc-show='badMessage'>
               <div class='col-12'>
                 <div class="alert alert-danger" role="alert">
                   <span mvc-text='badMessage'></span>  
                 </div>
               </div>
             </div>         
+            
+            <div class='row'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='success', mvc_click='save', text='Create Process') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
+              </div>  
+            </div>            
 
           </div>
         </div>

@@ -10,12 +10,17 @@ const {exec} = require(root + '/lib/server/utils/db.js');
 const {buildActionData} = require(root + '/lib/server/utils/processes.js');
 
 //const {formatEmailObject, emailOne, mergeDoc} = require('./processes.js');
-const actionMethods = {};
-actionMethods.smtp2go = require('./processes/smtp2go.js');
-actionMethods.elastic = require('./processes/elastic.js');
-actionMethods.mailmerge = require('./processes/mailmerge.js');
-actionMethods.io_int = require('./processes/io_int.js');
-actionMethods.io_ext = require('./processes/io_ext.js');
+const actionGroups = {};
+actionGroups.smtp2go = require('./processes/smtp2go.js');
+actionGroups.elastic = require('./processes/elastic.js');
+actionGroups.mailmerge = require('./processes/mailmerge.js');
+actionGroups.io_int = require('./processes/io_int.js');
+actionGroups.io_ext = require('./processes/io_ext.js');
+actionGroups.micro_services = require('./processes/microservice.js');
+
+let {_initial, _final} = require('./processes/_.js');
+actionGroups._initial = _initial;
+actionGroups._final = _final;
 
 const app = getAppName(__dirname);
 const database = 'db4admin';
@@ -540,8 +545,10 @@ const services = {
 
       return tm;
     },
-    
-    process: async function(database, pid, body) {
+  },
+
+  process: {
+    output: async function(database, pid, body) {
       let tm = new TravelMessage();
       let data = {};
       let security = {
@@ -568,7 +575,7 @@ const services = {
       ]      
 
       for (let step of steps) {
-        let id = actionMethods[step.id];
+        let id = actionGroups[step.id];
         let action = step.action;
         let input = buildActionData(data, id.actionMatch[action], id.actionParams[action]);
 
@@ -597,7 +604,56 @@ const services = {
       // Send back all data
       tm.data = data;
       return tm;      
+    },
+
+    getGroups: function() {
+      let tm = new TravelMessage();
+      let data = [];
+
+      data.push({value: '_', text: 'Process Handler'});
+      data.push({value: 'io', text: 'I/O'});
+      data.push({value: 'email', text: 'Email'});
+      data.push({value: 'doc', text: 'Document Process'});
+
+      tm.data = data;
+
+      return tm;
+    },
+
+    getActions: function() {
+      let tm = new TravelMessage();
+      let data = [];
+
+      for (let group in actionGroups) {
+        let v = actionGroups[group];
+
+        data.push({group: v.group, text: v.name, value: group});
+      }
+
+      tm.data = data;
+
+      return tm;
+    },
+
+    getSubActions: function(action) {
+      let tm = new TravelMessage();
+      let group = actionGroups[action];
+      let data = group.actionList;
+
+      tm.data = data;
+
+      return tm;
+    },
+
+    getSubActionInputs: function(action, subaction) {
+      let tm = new TravelMessage();
+      let data = actionGroups[action].actionParams[subaction];
+
+      tm.data = data;
+
+      return tm;
     }
+
   },
 
   auth: {

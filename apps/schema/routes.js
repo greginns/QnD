@@ -1140,6 +1140,176 @@ Router.add(new RouterMessage({
   } 
 }));
 
+
+// BIZPROCESS
+
+// getMany
+Router.add(new RouterMessage({
+  method: 'get',
+  app: app,
+  subapp: 'bizprocess',
+  version: version,
+  path: '/', 
+  id: 'getMany',
+  level: VIEW,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.bizprocess},
+  allowCORS,
+  fn: async function(req) {
+    let {rec, cols, where, values, limit, offset, orderby} = urlQueryParse(req.query);
+    let {database, pgschema} = getDBAndSchema(req);
+
+    let tm = await services.bizprocess.getMany({database, pgschema, rec, cols, where, values, limit, offset, orderby});
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+//getOne
+Router.add(new RouterMessage({
+  method: 'get',
+  app: app,
+  subapp: 'bizprocess',
+  version: version,
+  path: '/:id', 
+  id: 'getOne',
+  level: VIEW,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.bizprocess},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.bizprocess.getOne({database, pgschema, rec: {id} });
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+  
+    return tm.toResponse();
+  }.bind(this), 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// create
+Router.add(new RouterMessage({
+  method: 'post',
+  app: app,
+  subapp: 'bizprocess',
+  version: version,
+  path: '/', 
+  id: 'create',
+  level: CREATE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.bizprocess},
+  allowCORS,
+  fn: async function(req) {
+    let rec = req.body.bizprocess || {};
+    let {database, pgschema} = getDBAndSchema(req);
+
+    let tm = await services.bizprocess.create({database, pgschema, rec});
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// update
+Router.add(new RouterMessage({
+  method: 'put',
+  app: app,
+  subapp: 'bizprocess',
+  version: version,
+  path: '/:id', 
+  id: 'update',
+  level: UPDATE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.bizprocess},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.bizprocess.update({database, pgschema, id, rec: req.body.bizprocess || {} });
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+// delete
+Router.add(new RouterMessage({
+  method: 'delete',
+  app: app,
+  subapp: 'bizprocess',
+  version: version,
+  path: '/:id', 
+  id: 'delete',
+  level: DELETE,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.bizprocess},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.bizprocess.delete({database, pgschema, id});
+
+      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+    }
+
+    return tm.toResponse();
+  }, 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
 //strategy rtns
 Authentication.add(app, 'session', async function(req, security, strategy) {
   let tm = await loginServices.auth.session(req, security, strategy);

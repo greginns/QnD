@@ -15,8 +15,11 @@ const config = {
 };
 
 const smtp2go = {
-  discover: [
-    {'sendOne': 'Send One Transactional Email'}
+  group: 'email',
+  name: 'SMTP2Go',
+
+  actionList: [
+    {value: 'sendOne', text: 'Send One Transactional Email'}
   ],
 
   outputName: 'smtp2go',

@@ -1,0 +1,188 @@
+<page id='process-steps' style='display: none;'>
+  <section id='process-steps-section'>
+    <div class='row'>
+      <div class='col-12 mb-2'>
+        <a href='/' mvc-nohandle>Home</a>
+      </div>
+    </div>
+
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                <h4>Process Steps</h4>
+              </div>
+              <div class='col-2'>
+                <div class='d-block d-sm-none'>XS</div>
+                <div class='d-none d-sm-block d-md-none'>SM</div>
+                <div class='d-none d-md-block d-lg-none'>MD</div>
+                <div class='d-none d-lg-block d-xl-none'>LG</div>
+                <div class='d-none d-xl-block'>XL</div>
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                <div mvc-each='steps'>
+                  <div>
+                    <div class='row pt-2'>
+                      <div class='col-12'>
+                        <div class='card' data-index='$index' mvc-attr='{"draggable": "steps.$index.draggable", "droppable": "steps.$index.droppable"}'>
+                          <div class='card-header'>
+                            <div class='row'>
+                              <div class='col-12'>
+                                <h4 mvc-text='steps.$index.title'></h4>
+                              </div>
+                            </div>
+                          </div>  
+      
+                          <div class='card-body'>
+                            <div class='row'>
+                              <div class='col-12'>
+                                <span style='font-size: 20px' mvc-text='steps.$index.actionDesc'></span>
+                                <br>
+                                <span style='font-size: 14px' mvc-text='steps.$index.subActionDesc'></span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class='card-footer'>
+                            <div class='row'>
+                              <div class='col-3'>
+                                <span style='cursor: pointer' title='Edit' mvc-click='stepEdit'><i class="fal fa-edit"></i></span>
+                              </div>
+                              <div class='col-3' mvc-hide='steps.$index.hideDelete'>
+                                <span style='cursor: pointer' title='Delete' mvc-click='stepDelete'><i class="fal fa-trash-alt"></i></span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div class='row pt-2' mvc-hide='steps.$index.hide'>
+                      <div class='col-6 text-left'>
+                      </div>
+                      <div class='col-6 text-right' style='border-left: 2px solid black; margin-top: -10px; margin-bottom: -10px'>
+                        <button class='btn btn-outline-primary btn-sm' data-index='$index' mvc-click='stepAdd' title='Insert Step' style='margin-top: 10px; margin-bottom: 10px'>
+                          + Step
+                        </button>
+                      </div>
+                    </div>      
+                  </div>            
+                </div>
+              </div>  
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row pt-2' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+            
+            <div class='row'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='success', mvc_click='save', text='Save Steps') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
+              </div>  
+            </div>            
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class='d-block d-md-none' style='padding-top: 70px'>
+      <!-- Spacer XS SM-->
+    </div>
+
+    <div class='d-block d-lg-none' style='padding-top: 30px'>
+      <!-- Spacer XS SM MD -->
+    </div>
+
+    <div class='d-block' style='padding-top: 30px'>
+      <!-- Spacer XS DM MD LG XL -->
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id='process-step-popup'>
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class='modal-title'>
+              <span mvc-text='stepState'></span>
+              Step
+            </h5>
+          </div>
+
+          <div class="modal-body">
+            <div class='row pt-2'>
+              <div class='col-12'>
+                {{ fields.Char(type='text', id='process-step-title', maxlength='40', mvc_value='step.title', label='Title') }}
+              </div>
+            </div>
+
+            <div class='row pt-2' mvc-hide='step.hideSelect'>
+              <div class='col-12'>
+                <div class="form-label-group">
+                  <select mvc-value='step.action' class='form-control' mvc-each='actionSelect' mvc-index='$index1'>
+                    <optgroup mvc-optgroup='actionSelect.$index1.desc' mvc-each='actionSelect.$index1.items' mvc-index='$index2'>
+                      <option mvc-option='{"text": "actionSelect.$index1.items.$index2.text", "value": "actionSelect.$index1.items.$index2.value"}'></option>
+                    </optgroup>
+                  </select>
+                  <label>Action Group</label>
+                </div>
+              </div>
+            </div>
+
+            <div class='row pt-2' mvc-hide='step.hideSelect'>
+              <div class='col-12'>
+                <div class="form-label-group">
+                  <select mvc-value='step.subaction' class='form-control' mvc-each='subActionSelect'>
+                    <option mvc-option='{"text": "subActionSelect.$index.text", "value": "subActionSelect.$index.value"}'></option>
+                  </select>
+                  <label>Action</label>
+                </div>
+              </div>
+            </div>
+
+            <div id='process-step-data' mvc-each='step.data'>
+              <div class='row pt-2'>
+                <div class='col-12'>
+                  <span mvc-html='step.data.$index.input'></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class='modal-footer'>
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-primary' mvc-click='stepSave'>
+                  Save
+                </button>
+
+                <button class='btn btn-danger' mvc-click='stepExit'>
+                  Exit
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </section>
+</page>

@@ -1,7 +1,7 @@
 import {MVC} from '/~static/lib/client/core/mvc.js';
 import {App} from '/~static/lib/client/core/app.js';
 
-class Fullpage extends MVC {
+class Db4MVC extends MVC {
   constructor(element) {
     super(element);
   }
@@ -33,7 +33,11 @@ class Fullpage extends MVC {
   }
 }
 
-App.MVC = new Fullpage(document.body);
+for (let el of document.querySelectorAll('[mvc-mvc]')) {
+  App.MVC = new Db4MVC(el);
+
+  console.log(el.querySelectorAll('db4-model'))
+}
 
 class Db4Table extends HTMLElement {
   constructor() {

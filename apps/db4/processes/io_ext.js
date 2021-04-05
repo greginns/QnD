@@ -48,12 +48,15 @@ const nonGetCommon = async function(data, secVal, method) {
 }
 
 const io_ext = {
-  discover: [
-    {'get': 'Get Data'},
-    {'post': 'Send Data'},
-    {'put': 'Replace Data'},
-    {'patch': 'Update Data'},
-    {'delete': 'Delete Data'},
+  group: 'io',
+  name: 'External I/O',
+
+  actionList: [
+    {value: 'get', text: 'Get Data'},
+    {value: 'post', text: 'Send Data'},
+    {value: 'put', text: 'Replace Data'},
+    {value: 'patch', text: 'Update Data'},
+    {value: 'delete', text: 'Delete Data'},
   ],
 
   outputName: 'ioext',

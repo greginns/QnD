@@ -2,13 +2,16 @@ const root = process.cwd();
 const services = require(root + `/apps/db4/services.js`);
 
 const io_int = {
-  discover: [
-    {'lookup': 'Get One Row'},
-    {'lookups': 'Get Many Rows'},
-    {'create': 'Create One Row'},
-    {'update': 'Update One Row'},
-    {'delete': 'Delete One Row'},
-    {'query': 'Run a Query'}
+  group: 'io',
+  name: 'Internal I/O',
+
+  actionList: [
+    {value: 'lookup', text: 'Get One Row'},
+    {value: 'lookups', text: 'Get Many Rows'},
+    {value: 'create', text: 'Create One Row'},
+    {value: 'update', text: 'Update One Row'},
+    {value: 'delete', text: 'Delete One Row'},
+    {value: 'query', text: 'Run a Query'}
   ],
 
   outputName: 'ioint',

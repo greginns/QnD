@@ -1,8 +1,8 @@
-<page id='schema-app-list' style='display: none;'>
-  <section id='schema-app-list-section'>
+<page id='process-list' style='display: none;'>
+  <section id='process-list-section'>
     <div class='row'>
       <div class='col-12 mb-2'>
-        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a>
+        <a href='/' mvc-nohandle>Home</a> / <a href='/'>Menu</a>
       </div>
     </div>
 
@@ -12,10 +12,10 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6'>
-                <h4>Apps</h4>
+                <h4>Process</h4>
               </div>
               <div class='col-4'>
-                <button type="button" class="btn btn-sm btn-success" mvc-click='create' title='Add Application'><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn btn-sm btn-success" mvc-click='create' title='Add Process'><i class="fas fa-plus"></i></button>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -31,10 +31,10 @@
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <table class='table table-striped'>
-                  <tbody mvc-each='apps'>
+                  <tbody mvc-each='processes'>
                     <tr data-index='$index'>
-                      <td><span mvc-text='apps.$index.name'></span></td>
-                      <td style='cursor: pointer' title='Tables' mvc-click='tables'><i class="fal fa-table"></i></td>
+                      <td><span mvc-text='processes.$index.name'></span></td>
+                      <td style='cursor: pointer' title='Steps' mvc-click='steps'><i class="fal fa-shoe-prints"></i></td>
                       <td style='cursor: pointer' title='Edit' mvc-click='edit'><i class="fal fa-edit"></i></td>
                       <td style='cursor: pointer' title='Delete' mvc-click='delete'><i class="fal fa-trash-alt"></i></td>
                     </tr>

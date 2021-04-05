@@ -3,14 +3,13 @@ import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class App_update extends MVC {
+class Process_update extends MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.application = {};
-    this.model.workspace = '';
+    this.model.bizprocess = {};
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -27,22 +26,21 @@ class App_update extends MVC {
   }
   
   async inView(params) {
-    this.model.workspace = params.workspace || '';
-    let id = params.app;
+    let id = params.id || '';
 
-    if (!this.model.workspace || !id) this.gotoList();
+    if (!id) this.gotoList();
 
-    let res = await Module.tableStores.application.getOne(id);
+    let res = await Module.tableStores.bizprocess.getOne(id);
 
     if (Object.keys(res).length > 0) {
-      this.model.application = res;
-      this.origApp = res;
+      this.model.bizprocess = res;
+      this.origProcess = res;
     }
     else {
-      alert('Missing Workspace/App');
+      alert('Missing Process');
 
       this.gotoList();
-    }
+    }        
   }
 
   outView() {
@@ -50,9 +48,9 @@ class App_update extends MVC {
   }
 
   async save(ev) {
-    let app = this.model.application.toJSON();
-    let diffs = utils.object.diff(this.origApp, app);
-      
+    let bizprocess = this.model.bizprocess.toJSON();
+    let diffs = utils.object.diff(this.origProcess, bizprocess);
+
     if (Object.keys(diffs).length == 0) {
       this.model.badMessage = 'No Changes to Update';
       
@@ -62,19 +60,26 @@ class App_update extends MVC {
 
       return;
     }
-    
+
+    if (!bizprocess.name) {
+      this.model.badMessage = 'Please Enter a Process Name';
+        
+      setTimeout(function() {
+        this.model.badMessage = '';
+      }.bind(this), 2500);
+
+      return;
+    }
+
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
-    
-    let res = await Module.tableStores.application.update(app.id, diffs);
-    
+
+    // new (post) or old (put)?
+    let res = await Module.tableStores.bizprocess.update(bizprocess.id, diffs);
+
     if (res.status == 200) {
-      utils.modals.toast('APP', 'Updated', 2000);
-   
-      this.model.application.name = '';
-      this.model.application.desc = '';
-      this.gotoList();
+      utils.modals.toast('Process', 'Updated', 2000);
     }
     else {
       this.displayErrors(res);
@@ -89,15 +94,21 @@ class App_update extends MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app`);
+    Module.pager.go(`/`);
+  }
+
+  steps() {
+    let id = this.model.bizprocess.id;
+
+    Module.pager.go(`/${id}/steps`);
   }
 
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('schema-app-update');   // page html
-let mvc1 = new App_update('schema-app-update-section');
+let el1 = document.getElementById('process-update');   // page html
+let mvc1 = new Process_update('process-update-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/update', title: 'Apps - Update', sections: [section1]});
+let page1 = new Page({el: el1, path: '/:id/update', title: 'Process - Update', sections: [section1]});
 
 Module.pages.push(page1);

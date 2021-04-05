@@ -15,8 +15,11 @@ const config = {
 };
 
 const elastic = {
-  discover: [
-    {'sendOne': 'Send One Transactional Email'}
+  group: 'email',
+  name: 'Elastic',
+
+  actionList: [
+    {value: 'sendOne', text: 'Send One Transactional Email'}
   ],
 
   outputName: 'elastic',
