@@ -35,7 +35,7 @@ const Account = class extends Model {
         last: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Last Name'}),
         email: new Fields.Char({null: true, maxLength: 60, isEmail: true, verbose: 'Primary Email'}),
         password: new Fields.Password({null: true, maxLength: 60, verbose: 'Password'}),
-        database: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Database ID'}),
+        database: new Fields.Json({verbose: 'Database ID'}),
         isactive: new Fields.Boolean({notNull: true, default: true, verbose: 'Is Active'}),
         billinginfo: new Fields.Json({verbose: 'Billing Info'}),
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),

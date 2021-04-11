@@ -6,17 +6,17 @@ const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {CSRF, Session, Admin} = require(root + '/apps/db4admin/models.js');
+const {user} = require(root + '/apps/schema/models.js');
 const {exec} = require(root + '/lib/server/utils/db.js');
 const {buildActionData} = require(root + '/lib/server/utils/processes.js');
 
-//const {formatEmailObject, emailOne, mergeDoc} = require('./processes.js');
 const actionGroups = {};
 actionGroups.smtp2go = require('./processes/smtp2go.js');
 actionGroups.elastic = require('./processes/elastic.js');
 actionGroups.mailmerge = require('./processes/mailmerge.js');
 actionGroups.io_int = require('./processes/io_int.js');
 actionGroups.io_ext = require('./processes/io_ext.js');
-actionGroups.micro_services = require('./processes/microservice.js');
+actionGroups.micro_services = require('./processes/micro_services.js');
 
 let {_initial, _final} = require('./processes/_.js');
 actionGroups._initial = _initial;
@@ -25,9 +25,48 @@ actionGroups._final = _final;
 const app = getAppName(__dirname);
 const database = 'db4admin';
 const pgschema = 'public';
-const cookie = 'db4admin_session';
+const cookie = 'db4_session';
 
 const models = require(root + `/apps/schema/models.js`);
+
+async function verifySession(req) {
+  // get session record, make sure within 24 hrs
+  let sessID = req.cookies[cookie] || '';
+  let data = null, tmu, sess;
+  let now = (new Date()).getTime();
+
+  if (sessID) {
+    sess = await Session.selectOne({database, pgschema, cols: '*', showHidden: true, pks: sessID});
+
+    if (sess.status == 200) {
+      let then = (new Date(sess.data.issued)).getTime();
+      let elapsed = now-then;
+
+      if (elapsed < 1000*60*60*24) {
+        tmu = await user.selectOne({database: sess.data.data.database, pgschema, cols: '*', pks: [sess.data.data.user.id]});
+
+        if (tmu.isGood()) {
+          data = sess.data;
+        }
+      }
+    }
+  }
+
+  return data;
+}
+
+async function verifyCSRF(userID, token, session) {
+  // get token, check if user matches
+  if (!token) return false;
+
+  let tm = await CSRF.selectOne({database, pgschema, pks: token})
+
+  if (tm.isBad()) return false;
+
+  if (session && session != tm.data.session) return false;
+
+  return tm.data.admin == userID;
+}
 
 class TableInfo {
   constructor(database, table) {
@@ -362,59 +401,108 @@ class TableInfo {
     db4.js?database=xyz,workspace=abc,etc.
 */
 const services = {
+  output: {
+    login: async function(req) {
+      const tm = new TravelMessage();
+      const db = req.query.db || '';
+      const ws = req.query.ws || '';
+
+      try {
+        let ctx = {db, ws};
+        let tmpl = 'apps/db4/login.html';
+
+        try {
+          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+          tm.type = 'html';
+        }
+        catch(err) {
+          tm.status = 500;
+          tm.message = err.toString();
+        }
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+
+      return tm;
+    },
+
+    getdb4: async function(req) {
+      const tm = new TravelMessage();
+      const db = req.query.db || '';
+      const ws = req.query.ws || '';
+
+      try {
+        let ctx = {db, ws};
+        let tmpl = 'apps/db4/db4.js';
+
+        try {
+          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+          tm.type = 'js';
+        }
+        catch(err) {
+          tm.status = 500;
+          tm.message = err.toString();
+        }
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+
+      return tm;
+    },
+
+  },
+
+  admin: {
+    login: async function(req) {
+      // credentials good?
+      // create Session record 
+      // setup cookies
+      let match, userRec, session, tm;
+      let url = config.loginRedirects.db4 || '';
+      let body = req.body;
+      const db = req.query.db || '';
+  
+      // user valid?
+      userRec = await user.selectOne({database: db, pgschema, cols: ['id', 'first', 'last', 'password'], pks: [body.username]});
+      if (userRec.status != 200) return new TravelMessage({status: 403});
+  
+      // password valid?
+      match = await bcrypt.compare(body.password, userRec.data.password);
+      if (!match) return new TravelMessage({status: 403});
+      
+      // create session record
+      delete userRec.data.password;
+      session = new Session({data: {database, pgschema: userRec.data.workspace, 'user': userRec.data}});
+      tm = await session.insertOne({database: 'db4admin', pgschema: 'public'});
+  
+      if (tm.isBad()) return tm;
+  
+      // Reply with blank data, include session as cookie
+      return new TravelMessage({data: url, type: 'text', status: 200, cookies: [{name: cookie, value: session.token, path: '/', 'Max-Age': 60*60*24, HttpOnly: true}]});
+    },
+    
+    logout: async function(req) {
+      // delete session record
+      // remove cookie
+      let id = req.cookies[cookie] || '';
+      let session;
+      
+      if (id) {
+        session = new Session({id});
+  
+        await session.deleteOne({database: 'db4admin', pgschema: 'public'});
+      }
+      
+      return new TravelMessage({data: '/db4/v1/login', type: 'text', status: 200, cookies: [{name: cookie, value: ''}]});
+    },
+  
+  },
+
   table: {
-    insert: async function(database, table, data) {
-      let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
-
-      let [text, values, err] = ti.makeInsertOneSQL(data);
-
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-      }
-
-      return tm;
-    },
-
-    update: async function(database, table, data) {
-      let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
-
-      let [text, values, err] = ti.makeUpdateOneSQL(data);
-
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-      }
-
-      return tm;
-    },
-
-    delete: async function(database, table, data) {
-      let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
-
-      let [text, values, err] = ti.makeDeleteOneSQL(data);
-
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-        console.log(tm)
-      }
-
-      return tm;
-    },
-
     getOne: async function(database, table, pk, filters, columns) {
       let tm;
       let ti = new TableInfo(database, table);
@@ -473,6 +561,57 @@ const services = {
       return tm;
     },
 
+    insert: async function(database, table, data) {
+      let tm;
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      let [text, values, err] = ti.makeInsertOneSQL(data);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+      }
+
+      return tm;
+    },
+
+    update: async function(database, table, data) {
+      let tm;
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      let [text, values, err] = ti.makeUpdateOneSQL(data);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+      }
+
+      return tm;
+    },
+
+    delete: async function(database, table, data) {
+      let tm;
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      let [text, values, err] = ti.makeDeleteOneSQL(data);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+        console.log(tm)
+      }
+
+      return tm;
+    },
     query: async function(database, qid) {
       let tm;
       let table = 'eKVExJHhzJCpvxRC7Fsn8W'
@@ -497,56 +636,6 @@ const services = {
 
   },
 
-  output: {
-    getapi1: async function(req) {
-      const tm = new TravelMessage();
-
-      try {
-        let ctx = {};
-        let tmpl = 'apps/db4/api1.js';
-
-        try {
-          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
-          tm.type = 'js';
-        }
-        catch(err) {
-          tm.status = 500;
-          tm.message = err.toString();
-        }
-      }
-      catch(err) {
-        tm.status = 500;
-        tm.message = err.toString();
-      }
-
-      return tm;
-    },
-
-    getapi2: async function(req) {
-      const tm = new TravelMessage();
-
-      try {
-        let ctx = {};
-        let tmpl = 'apps/db4/api2.js';
-
-        try {
-          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
-          tm.type = 'js';
-        }
-        catch(err) {
-          tm.status = 500;
-          tm.message = err.toString();
-        }
-      }
-      catch(err) {
-        tm.status = 500;
-        tm.message = err.toString();
-      }
-
-      return tm;
-    },
-  },
-
   process: {
     output: async function(database, pid, body) {
       let tm = new TravelMessage();
@@ -556,36 +645,25 @@ const services = {
         'elastic': 'A8DAB667B4A3361FDD237E8316B1A0F56A642CC67100A1956B7D7E9A02180AF44BFF79C04A928F6EF5B07C1B58AAB741'
       }
 
+      let bizproc = await models.bizprocess.selectOne({database, pgschema: 'public', pks: pid});
+      let steps = bizproc.data.steps;
+
       // Data from post, event or timer.
-      data.initial = body;
-/*
-      data.user = {
-        id: 'bcsjdhsjd',
-        first: 'Greg',
-        last: 'Miller',
-        email: 'greg@reservation-net.com'
-      }
-*/
-      const steps = [
-        //{id: 'io_ext', action: 'get'},
-        {id: 'io_int', action: 'lookup'},
-        {id: 'mailmerge', action: 'renderString'},
-        {id: 'smtp2go', action: 'sendOne'}
-        //{id: 'elastic', action: 'sendOne'}
-      ]      
+      data._initial = body;
 
       for (let step of steps) {
-        let id = actionGroups[step.id];
-        let action = step.action;
-        let input = buildActionData(data, id.actionMatch[action], id.actionParams[action]);
+        if (step.action.substr(0,1) == '_') continue;
 
-        let secVal = security[step.id] || '';  // *** fake
+        let action = actionGroups[step.action];
+        let subaction = step.subaction;
+        let input = buildActionData(data, step.values, action.actionParams[subaction]);
+        let secVal = security[step.action] || '';  // *** fake
 
-        if (step.id == 'io_int') {
+        if (step.action == 'io_int') {
           let ti = new TableInfo(database, input.table);
           await ti.init();
 
-          let res1 = await services.table[action](database, input.table, input.pk, input.filters, input.columns);
+          let res1 = await services.table[subaction](database, input.table, input.pk, input.filters, input.columns);
 
           if (res1.status != 200) return res1;
 
@@ -593,11 +671,11 @@ const services = {
           data.user = res1.data;  // Testing only
         }
         else {
-          let res1 = await id.actions[action](input, secVal);
+          let res1 = await action.actions[subaction](input, secVal);
 
           if (res1.status != 200) return res1;
 
-          data[id.outputName] = res1.data;        
+          data[action.outputName] = res1.data;        
         }
       }
 
@@ -700,147 +778,6 @@ const services = {
       return res.data.token;
     }
   },
-
-  login: async function(body) {
-    // credentials good?
-    // create Session record 
-    // setup cookies
-    let match, admin, session, tm;
-    let url = config.loginRedirects.db4admin || '';
-
-    // user valid?
-    admin = await Admin.select({database, pgschema, cols: ['id', 'first', 'last', 'isowner', 'password'], rec: {email: body.username}});
-    if (admin.status != 200 || admin.data.length == 0) return new TravelMessage({status: 403});
-
-    admin.data = admin.data[0];
-
-    // password valid?
-    match = await bcrypt.compare(body.password, admin.data.password);
-    if (!match) return new TravelMessage({status: 403});
-    
-    // create session record
-    delete admin.data.password;
-    session = new Session({data: {database: 'db4_' + admin.data.id, pgschema: 'public', 'user': admin.data}});
-    tm = await session.insertOne({database, pgschema});
-
-    if (tm.isBad()) return tm;
-
-    // Reply with blank data, include session as cookie
-    return new TravelMessage({data: url, type: 'text', status: 200, cookies: [{name: cookie, value: session.token, path: '/', 'Max-Age': 60*60*24, HttpOnly: true}]});
-  },
-  
-  logout: async function(req) {
-    // delete session record
-    // remove cookie
-    let id = req.cookies[cookie] || '';
-    let session;
-    
-    if (id) {
-      session = new Session({id});
-
-      await session.deleteOne({database, pgschema});
-    }
-    
-    return new TravelMessage({data: '/db4admin/v1/login', type: 'text', status: 200, cookies: [{name: cookie, value: ''}]});
-  },
-};
-
-services.account = {
-  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
-    // Get one or more rows
-    return (where) 
-      ? await models.Account.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
-      : await models.Account.select({database, pgschema, rec, cols, limit, offset, orderby});
-  },
-  
-  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Get specific row
-    if ('id' in rec && rec.id == '_default') {
-      let tm = new TravelMessage();
-
-      tm.data = models.Account.getColumnDefaults();
-      tm.type = 'json';
-
-      return tm;
-    }
-    
-    return await models.Account.selectOne({database, pgschema, pks: [rec.id] });
-  },
-    
-  create: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Insert row
-    let tobj = new models.Account(rec);
-    let tm = await tobj.insertOne({database, pgschema});
-
-    return tm;    
-  },
-  
-  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
-    // Update row
-    rec.id = id;
-
-    let tobj = new models.Account(rec);
-    let tm = await tobj.updateOne({database, pgschema});
-    
-    return tm;
-  },
-  
-  delete: async function({database = '', pgschema = '', id = ''} = {}) {
-    // Delete row
-    let tobj = new models.Account({ id });
-    let tm = await tobj.deleteOne({database, pgschema});
-
-    return tm;
-  }
-};
-
-services.admin = {
-  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
-    // Get one or more rows
-    return (where) 
-      ? await models.Admin.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
-      : await models.Admin.select({database, pgschema, rec, cols, limit, offset, orderby});
-  },
-  
-  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Get specific row
-    if ('id' in rec && rec.id == '_default') {
-      let tm = new TravelMessage();
-
-      tm.data = models.Admin.getColumnDefaults();
-      tm.type = 'json';
-
-      return tm;
-    }
-    
-    return await models.Admin.selectOne({database, pgschema, pks: [rec.id] });
-  },
-    
-  create: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Insert row
-    let tobj = new models.Admin(rec);
-    let tm = await tobj.insertOne({database, pgschema});
-
-    return tm;    
-  },
-  
-  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
-    // Update row
-    rec.id = id;
-
-    let tobj = new models.Admin(rec);
-    let tm = await tobj.updateOne({database, pgschema});
-    
-    return tm;
-  },
-  
-  delete: async function({database = '', pgschema = '', id = ''} = {}) {
-    // Delete row
-    let tobj = new models.Admin({ id });
-    let tm = await tobj.deleteOne({database, pgschema});
-
-    return tm;
-  }
 };
 
 services.CSRF = {
@@ -942,44 +879,3 @@ services.session = {
 };
 
 module.exports = services;
-
-
-async function verifySession(req) {
-  // get session record, make sure within 24 hrs
-  let sessID = req.cookies[cookie] || '';
-  let data = null, tmu, sess;
-  let now = (new Date()).getTime();
-
-  if (sessID) {
-    sess = await Session.selectOne({database, pgschema, cols: '*', showHidden: true, pks: sessID});
-
-    if (sess.status == 200) {
-      let then = (new Date(sess.data.issued)).getTime();
-      let elapsed = now-then;
-
-      if (elapsed < 1000*60*60*24) {
-        tmu = await Admin.selectOne({database, pgschema, cols: '*', pks: sess.data.data.user.id});
-
-        if (tmu.isGood() && tmu.data.isactive) {
-          data = sess.data;
-        }
-      }
-    }
-  }
-
-  return data;
-}
-
-async function verifyCSRF(userID, token, session) {
-  // get token, check if user matches
-  if (!token) return false;
-
-  let tm = await CSRF.selectOne({database, pgschema, pks: token})
-
-  if (tm.isBad()) return false;
-
-  if (session && session != tm.data.session) return false;
-
-  return tm.data.admin == userID;
-}
-

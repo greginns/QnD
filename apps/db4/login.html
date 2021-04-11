@@ -24,7 +24,7 @@
         <div class='row'>
           <div class='col-12 text-center text-white'>
             <h4>
-              DB4 Admin Login
+              DB4 User Login
             </h4>
           </div>
         </div>
@@ -44,7 +44,7 @@
           <div class='card'>
             <div class='card-body'>
               <div class='row mb-3'>
-                <div class='col-12'><input type='text' maxlength='60' class='form-control' id='username' value='greg@reservation-net.com' placeholder='Email Address' /></div>
+                <div class='col-12'><input type='text' maxlength='60' class='form-control' id='username' value='12345' placeholder='User ID' /></div>
               </div>
               
               <div class='row mb-3'>
@@ -83,6 +83,8 @@
       };
       
       function login() {
+        let database = '{{db}}';
+        let workspace = '{{ws}}';
         let username = usernameEl.value;
         let password = passwordEl.value;
 
@@ -98,10 +100,11 @@
           return;
         }
 
-        io.post({username, password}, '/db4admin/v1/login/login')
+        io.post({database, workspace, username, password}, '/db4/v1/login/login')
         .then(function(res) {
           if (res.status == 200) {
-            location = res.data;
+console.log('Success')            
+            //location = res.data;
           }
           else {
             errMsgEl.innerText = res.data.errors.message;

@@ -141,14 +141,6 @@ const io_int = {
       }      
     },    
   },
-
-  actionMatch: {     // built by user
-    lookup: {
-      table: '"eKVExJHhzJCpvxRC7Fsn8W"',
-      pk: 'data.initial.id',
-      columns: '"*"'
-    },
-  }
 }
 
 module.exports = io_int;

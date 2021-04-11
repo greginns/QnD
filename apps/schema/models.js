@@ -30,11 +30,15 @@ const user = class extends Model {
   static definition() {
     return {
       schema: {
-        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Admin ID'}),
+        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'User ID'}),
         first: new Fields.Char({notNull: true, maxLength: 40, verbose: 'First Name'}),
         last: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Last Name'}),
         email: new Fields.Char({null: true, maxLength: 50, isEmail: true, verbose: 'Primary Email'}),
         password: new Fields.Password({null: true, maxLength: 20, verbose: 'Password'}),
+        workspace: new Fields.SUUID({notNull: true,  verbose: 'Workspace ID'}),
+        apikey: new Fields.Char({null: true, maxLength: 45, verbose: 'API key'}),
+        tacl: new Fields.Json({default: '[]', verbose: 'Table Access Control'}),
+        pacl: new Fields.Json({default: '[]', verbose: 'Process Access Control'}),
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
         updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),
 
@@ -43,6 +47,7 @@ const user = class extends Model {
       
       constraints: {
         pk: ['id'],
+        fk: [{name: 'workspace', columns: ['workspace'], app, table: workspace, tableColumns: ['id'], onDelete: 'NO ACTION'}],
       },
       
       hidden: ['password'],
@@ -95,7 +100,7 @@ const workspace = class extends Model {
       schema: {
         id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Workspace ID'}),
         name: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Workspace Name'}),
-        database: new Fields.SUUID({null: true, verbose: 'Workspace ID'}),        
+        database: new Fields.SUUID({notNull: true, verbose: 'Workspace ID'}),        
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
         updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),
       },
@@ -267,4 +272,4 @@ const bizprocess = class extends Model {
   }
 };
 
-module.exports = {database, workspace, application, table, query, bizprocess};
+module.exports = {user, database, workspace, application, table, query, bizprocess};

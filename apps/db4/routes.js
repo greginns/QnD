@@ -11,30 +11,31 @@ const app = getAppName(__dirname);
 const version = 'v1';
 
 //const models = require(root + `/apps/${app}/models.js`);
-const services = require(root + `/apps/${app}/services.js`);
+const services = require(root + `/apps/db4/services.js`);
 
 const getDBAndSchema = function(req) {
-  //let database = req.session.data.database;
-  //let pgschema = req.session.data.pgschema;
+  let database = req.session.data.database;
+  let pgschema = req.session.data.pgschema;
 
-  //return {database, pgschema};
-  return {database: 'db4_73WakrfVbNJBaAmhQtEeDv'};
+  return {database, pgschema};
+  //return {database: 'db4_73WakrfVbNJBaAmhQtEeDv'};
 }
 
-// API Code route
+// LOGIN/OUT ROUTES
+// login page
 Router.add(new RouterMessage({
   method: 'get',
   app,
-  subapp: 'api',
+  subapp: 'login',
   version,
-  path: ['/api1'], 
+  path: ['/'], 
   rewrite: false,
-  id: 'api',
+  id: 'loginpage',
   level: OPEN,
-  desc: 'API Code',
+  desc: 'Login Page',
   inAPI: false,
   fn: async function(req) {
-    let tm = await services.output.getapi1(req);
+    let tm = await services.output.login(req);
 
     return tm.toResponse();
   },
@@ -46,19 +47,117 @@ Router.add(new RouterMessage({
   }
 }));
 
+// login attempt
+Router.add(new RouterMessage({
+  method: 'post',
+  app,
+  subapp: 'login',
+  version,
+  path: '/', 
+  id: 'login',
+  level: OPEN,
+  allowCORS: true,
+  fn: async function(req) {
+    var tm = await services.admin.login(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: []
+  }
+}));
+
+// logout
+Router.add(new RouterMessage({
+  method: 'delete',
+  app,
+  subapp: 'login',
+  version,
+  path: '/', 
+  id: 'logout',
+  level: OPEN,
+  allowCORS: true,
+  fn: async function(req) {
+    var tm = await services.admin.logout(req);
+  
+    return tm.toResponse();
+  },
+  security: {
+    strategies: []
+  }
+}));
+
+// Get db4.js
 Router.add(new RouterMessage({
   method: 'get',
   app,
   subapp: 'api',
   version,
-  path: ['/api2'], 
+  path: ['/db4'], 
   rewrite: false,
   id: 'api',
   level: OPEN,
   desc: 'API Code',
   inAPI: false,
   fn: async function(req) {
-    let tm = await services.output.getapi2(req);
+    let tm = await services.output.getdb4(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+
+// Generic Table Handling Routes
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/:table/one', '/:table/:pk'], 
+  rewrite: false,
+  id: 'getone',
+  level: OPEN,
+  desc: 'Get one record',
+  allowCORS: true,
+  inAPI: false,
+  fn: async function(req) {
+    let {database} = getDBAndSchema(req);
+    let {filters, columns} = urlQueryParse(req.query);
+    let tm = await services.table.getOne(database, req.params.table, req.params.pk, filters, columns);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: false}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/:table/many'], 
+  rewrite: false,
+  id: 'getmany',
+  level: OPEN,
+  desc: 'Get many records',
+  allowCORS: true,
+  inAPI: false,
+  fn: async function(req) {
+    let {database} = getDBAndSchema(req);
+    let {filters, columns} = urlQueryParse(req.query);
+
+    let tm = await services.table.getMany(database, req.params.table, filters, columns);
 
     return tm.toResponse();
   },
@@ -90,7 +189,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: false}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -148,61 +247,7 @@ Router.add(new RouterMessage({
   }
 }));
 
-Router.add(new RouterMessage({
-  method: 'get',
-  app,
-  subapp: 'api',
-  version,
-  path: ['/:table/one', '/:table/:pk'], 
-  rewrite: false,
-  id: 'getone',
-  level: OPEN,
-  desc: 'Get one record',
-  allowCORS: true,
-  inAPI: false,
-  fn: async function(req) {
-    let {database} = getDBAndSchema(req);
-    let {filters, columns} = urlQueryParse(req.query);
-    let tm = await services.table.getOne(database, req.params.table, req.params.pk, filters, columns);
-
-    return tm.toResponse();
-  },
-  security: {
-    strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
-      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
-    ],
-  }
-}));
-
-Router.add(new RouterMessage({
-  method: 'get',
-  app,
-  subapp: 'api',
-  version,
-  path: ['/:table/many'], 
-  rewrite: false,
-  id: 'getmany',
-  level: OPEN,
-  desc: 'Get many records',
-  allowCORS: true,
-  inAPI: false,
-  fn: async function(req) {
-    let {database} = getDBAndSchema(req);
-    let {filters, columns} = urlQueryParse(req.query);
-
-    let tm = await services.table.getMany(database, req.params.table, filters, columns);
-
-    return tm.toResponse();
-  },
-  security: {
-    strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
-      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
-    ],
-  }
-}));
-
+// QUERY ROUTES
 Router.add(new RouterMessage({
   method: 'get',
   app,
@@ -231,6 +276,7 @@ Router.add(new RouterMessage({
   }
 }));
 
+// PROCESS ROUTES
 Router.add(new RouterMessage({
   method: 'post',
   app,
@@ -257,7 +303,6 @@ Router.add(new RouterMessage({
     ],
   }
 }));
-
 
 Router.add(new RouterMessage({
   method: 'get',
@@ -358,3 +403,10 @@ Router.add(new RouterMessage({
     ],
   }
 }));
+
+//strategy rtns
+Authentication.add(app, 'session', async function(req, security, strategy) {
+  let tm = await services.auth.session(req, security, strategy);
+
+  return tm.toResponse();    
+})

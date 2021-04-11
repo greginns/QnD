@@ -1,4 +1,25 @@
 const micro_services = {
+  /*
+    When setting up:
+    Get parameters as name/default pairs.
+    Build arguments as ({a='', b='', c=0, etc} = {})
+    Return name
+
+    let params = {a='xx', b='xy', x=43}
+    data['return_name'] = func(params) {
+      blah blah blah
+      return x
+    }
+
+    let fn = `function({a='', b='', c=0}={}) {
+        console.log(a,b,c);
+      }`;
+      
+      let func2 = new Function('return ' + fn)();
+      func2({a: 'greg', b: 'miller', c: 99})
+
+      func2.toString();
+  */
   group: 'io',
   name: 'Micro Services',
 
@@ -40,14 +61,6 @@ const micro_services = {
       },
     },
   },
-
-  actionMatch: {     // built by user
-    lookup: {
-      table: '"eKVExJHhzJCpvxRC7Fsn8W"',
-      pk: 'data.initial.id',
-      columns: '"*"'
-    },
-  }
 }
 
 module.exports = micro_services;
