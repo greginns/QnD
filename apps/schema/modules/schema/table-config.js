@@ -1,9 +1,9 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView, TableStore} from '/~static/lib/client/core/data.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Column_config extends MVC {
+class Column_config extends App.MVC {
   constructor(element) {
     super(element);
   }
@@ -30,6 +30,7 @@ class Column_config extends MVC {
   }
   
   async inView(params) {
+    this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
     this.model.table = params.table;
@@ -66,6 +67,8 @@ class Column_config extends MVC {
         return x.source + '<-->' + x.target;
       })
     }
+
+    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
   }
 
   outView() {
@@ -77,45 +80,48 @@ class Column_config extends MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table`);
   }
 
   pkEdit() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/pk/update`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/pk/update`);
   }
 
   orderbyEdit() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/orderby/update`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/orderby/update`);
   }
 
   indexCreate() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/create`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/create`);
   }
 
   indexDelete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let index = this.model.tableRec.indexes[idx];
 
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/${index.name}/delete`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/${index.name}/delete`);
   }  
 
   fkCreate() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/create`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/create`);
   }
 
   fkDelete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let fk = this.model.tableRec.fks[idx];
 
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/${fk.name}/delete`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/${fk.name}/delete`);
   }  
 
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('schema-table-config');   // page html
 let mvc1 = new Column_config('schema-table-config-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/config', title: 'Table - Config', sections: [section1]});
+let page1 = new Page({el: el1, path: '/database/:db/workspace/:workspace/app/:app/table/:table/config', title: 'Table - Config', sections: [section1]});
 
 Module.pages.push(page1);

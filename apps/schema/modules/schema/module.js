@@ -1,12 +1,13 @@
 // main
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
 import {Pages} from '/~static/lib/client/core/paging.js';
 import {io} from '/~static/lib/client/core/io.js';
-import {App} from '/~static/lib/client/core/app.js';
 
 // js for pages
 import '/~static/apps/schema/modules/schema/navbar.js';
+import '/~static/apps/schema/modules/schema/database-list.js';
 import '/~static/apps/schema/modules/schema/workspace-list.js';
 import '/~static/apps/schema/modules/schema/workspace-create.js';
 import '/~static/apps/schema/modules/schema/workspace-update.js';
@@ -35,7 +36,41 @@ import '/~static/apps/schema/modules/schema/query-create.js';
 import '/~static/apps/schema/modules/schema/query-update.js';
 import '/~static/apps/schema/modules/schema/query-delete.js';
 
-import '/~static/project/mixins/mvc_ext.js';
+Module.breadcrumb = async function({db='', ws='', app='', table='', query=''} = {}) {
+  const hrefs = [];
+
+  if (db) {
+    let dbRec = await Module.tableStores.database.getOne(db);
+
+    hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database')">${dbRec.name}</span>`});
+
+    if (ws) {
+      let wsRec = await Module.tableStores.workspace.getOne(ws);
+
+      hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace')">${wsRec.name}</span>`});
+
+      if (app) {
+        let appRec = await Module.tableStores.application.getOne(app);
+
+        hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace/${ws}/app')">${appRec.name}</span>`});
+
+        if (table) {
+          let tableRec = await Module.tableStores.table.getOne(table);
+  
+          hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace/${ws}/app/${app}/table')">${tableRec.name}</span>`});        
+
+          if (query) {
+            let queryRec = await Module.tableStores.query.getOne(query);
+    
+            hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace/${ws}/app/${app}/table/${table}/query')">${queryRec.name}</span>`});
+          }
+        }
+      }
+    }
+  }
+
+  return hrefs;
+}
 
 class db4TableAccess extends TableAccess {
   constructor({modelName, url=''} = {}) {
@@ -104,6 +139,7 @@ let moduleStart = function() {
 
     // setup data table access
     // gets us access to raw data.
+    Module.data.database = new TableAccess({modelName: 'database', url: `/schema/v1/database`});
     Module.data.workspace = new TableAccess({modelName: 'workspace', url: `/schema/v1/workspace`});
     Module.data.application = new TableAccess({modelName: 'application', url: `/schema/v1/application`});
     Module.data.table = new db4TableAccess({modelName: 'table', url: `/schema/v1/table`});
@@ -115,6 +151,10 @@ let moduleStart = function() {
     // One WSDataComm instance per app.
     // First path segment must be the same as app
     App.wsDataWatch = new WSDataComm('schema', 'roam3.adventurebooking.com:3011');                 // WS instances for this app
+
+    model = `/schema/database`;                    
+    App.wsDataWatch.addModel(model);             
+    Module.tableStores.database = new TableStore({accessor: Module.data.database, model, safemode});  // setup a table store in Module so all pages can access
 
     model = `/schema/workspace`;                    
     App.wsDataWatch.addModel(model);             
@@ -132,7 +172,7 @@ let moduleStart = function() {
     App.wsDataWatch.addModel(model);
     Module.tableStores.query = new TableStore({accessor: Module.data.query, model, safemode});  // setup a table store in Module so all pages can access
 
-    getAllPromises.push(Module.tableStores.workspace.getAll());                 // seed the workspace store
+    getAllPromises.push(Module.tableStores.database.getAll());                 // seed the database store
 
     // start following via WS ---
     App.wsDataWatch.start();
@@ -151,7 +191,7 @@ let moduleStart = function() {
   let startPages = async function() {
     // page URL data  
     const module = location.pathname.split('/')[1]; 
-    const startPage = 'workspace';
+    const startPage = 'database';
 
     // Start up pages.  Module.pages saved up all page references
     const pager = new Pages({root: `/${module}`, pages: Module.pages});

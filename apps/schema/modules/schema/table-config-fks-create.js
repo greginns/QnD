@@ -1,10 +1,10 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView, TableStore} from '/~static/lib/client/core/data.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Table_config_fks_create extends MVC {
+class Table_config_fks_create extends App.MVC {
   constructor(element) {
     super(element);
   }
@@ -44,6 +44,7 @@ class Table_config_fks_create extends MVC {
   }
   
   async inView(params) {
+    this.model.database = params.db;
     let workspace = params.workspace;
     let model = '/schema/application';
     let conditions = {};
@@ -62,6 +63,8 @@ class Table_config_fks_create extends MVC {
 
     this.appStore.redo({filters, conditions});
     this.appStore.getMany();
+
+    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
   }
 
   outView() {
@@ -151,7 +154,7 @@ class Table_config_fks_create extends MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config`);
   }
 
   async getForeignTables() {
@@ -175,12 +178,16 @@ class Table_config_fks_create extends MVC {
 
     this.model.foreignTable = await Module.tableStores.table.getOne(ft);
   }
+
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
+  }  
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('schema-table-config-fks-create');   // page html
 let mvc1 = new Table_config_fks_create('schema-table-config-fks-create-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/config/fks/create', title: 'Tables - Config Index', sections: [section1]});
+let page1 = new Page({el: el1, path: '/database/:db/workspace/:workspace/app/:app/table/:table/config/fks/create', title: 'Tables - Config Index', sections: [section1]});
 
 Module.pages.push(page1);

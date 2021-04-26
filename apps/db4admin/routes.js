@@ -73,7 +73,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'login',
   version,
-  path: '/login', 
+  path: '/', 
   id: 'login',
   level: OPEN,
   fn: async function(req) {
@@ -92,7 +92,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'login',
   version,
-  path: '/logout', 
+  path: '/', 
   id: 'logout',
   level: OPEN,
   fn: async function(req) {
@@ -108,7 +108,6 @@ Router.add(new RouterMessage({
 
 // Model Routes
 let allowCORS = true, inAPI = true;
-let admin = 'b9455c80-757d-4cc8-831f-b7ec4d9c9b01';
 
 // Admin
 
@@ -190,7 +189,7 @@ Router.add(new RouterMessage({
   fn: async function(req) {
     let {database, pgschema} = getDbPg(req.session);
     let rec = req.body.admin || {};
-    rec.admin = admin;
+    //rec.admin = admin;
 
     let tm = await services.admin.create({database, pgschema, rec});
 
@@ -250,7 +249,7 @@ Router.add(new RouterMessage({
   id: 'delete',
   level: DELETE,
   inAPI,
-  apiInfo: {type: 'json', schema: models.admin},
+  apiInfo: {type: 'json', schema: models.Admin},
   allowCORS,
   fn: async function(req) {
     let id = req.params.id;

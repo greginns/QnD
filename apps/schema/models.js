@@ -100,7 +100,8 @@ const workspace = class extends Model {
       schema: {
         id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Workspace ID'}),
         name: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Workspace Name'}),
-        database: new Fields.SUUID({notNull: true, verbose: 'Workspace ID'}),        
+        database: new Fields.SUUID({notNull: true, verbose: 'Database ID'}),
+        domains: new Fields.Json({default: '[]', verbose: 'Allowed Domains'}),        
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
         updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),
       },

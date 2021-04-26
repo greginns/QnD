@@ -21,7 +21,7 @@ module.exports = {
     urlParts.shift();  // get rid of subapp
 
     url = urlParts.join('/');
-    ft = req.params.fn.split('.').pop();  // pop off ft
+    ft = req.params.fn.split('.').pop();  // pop off file type
 
     try {
       tm.data = await fs.readFile(root + '/' + url);  

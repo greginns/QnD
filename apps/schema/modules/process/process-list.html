@@ -15,7 +15,7 @@
                 <h4>Process</h4>
               </div>
               <div class='col-4'>
-                <button type="button" class="btn btn-sm btn-success" mvc-click='create' title='Add Process'><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn btn-sm btn-success" mvc-click='create()' title='Add Process'><i class="fas fa-plus"></i></button>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -34,9 +34,9 @@
                   <tbody mvc-each='processes'>
                     <tr data-index='$index'>
                       <td><span mvc-text='processes.$index.name'></span></td>
-                      <td style='cursor: pointer' title='Steps' mvc-click='steps'><i class="fal fa-shoe-prints"></i></td>
-                      <td style='cursor: pointer' title='Edit' mvc-click='edit'><i class="fal fa-edit"></i></td>
-                      <td style='cursor: pointer' title='Delete' mvc-click='delete'><i class="fal fa-trash-alt"></i></td>
+                      <td style='cursor: pointer' title='Steps' mvc-click='steps()'><i class="fal fa-shoe-prints"></i></td>
+                      <td style='cursor: pointer' title='Edit' mvc-click='edit()'><i class="fal fa-edit"></i></td>
+                      <td style='cursor: pointer' title='Delete' mvc-click='delete()'><i class="fal fa-trash-alt"></i></td>
                     </tr>
                   </tbody>
                 </table>

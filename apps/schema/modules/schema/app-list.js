@@ -1,17 +1,16 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableStore, TableView} from '/~static/lib/client/core/data.js';
-import {App} from '/~static/lib/client/core/app.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class App_list extends MVC {
+class App_list extends App.MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
     this.model.apps = [];
-    this.workspace = '';
+    this.model.workspace = '';
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -30,11 +29,12 @@ class App_list extends MVC {
   }
   
   async inView(params) {
+    this.model.database = params.db;
     let workspace = params.workspace;
     let model = '/schema/application';
     let conditions = {};
 
-    this.workspace = workspace;
+    this.model.workspace = workspace;
 
     let filters = {workspace};
     
@@ -50,6 +50,8 @@ class App_list extends MVC {
     this.appStore.addView(this.appView);
 
     this.appStore.getMany();
+
+    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace});
   }
 
   outView() {
@@ -57,35 +59,40 @@ class App_list extends MVC {
   }
 
   create() {
-    Module.pager.go(`/workspace/${this.workspace}/app/create`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/create`);
   }
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let uuid = this.model.apps[idx].id;
 
-    Module.pager.go(`/workspace/${this.workspace}/app/${uuid}/update`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${uuid}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let uuid = this.model.apps[idx].id;
 
-    Module.pager.go(`/workspace/${this.workspace}/app/${uuid}/delete`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${uuid}/delete`);
   }
 
   tables(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let uuid = this.model.apps[idx].id;
 
-    Module.pager.go(`/workspace/${this.workspace}/app/${uuid}/table`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${uuid}/table`);
   }
+
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
+  }
+
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('schema-app-list');   // page html
 let mvc1 = new App_list('schema-app-list-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app', title: 'Apps', sections: [section1]});
+let page1 = new Page({el: el1, path: '/database/:db/workspace/:workspace/app', title: 'Apps', sections: [section1]});
 
 Module.pages.push(page1);

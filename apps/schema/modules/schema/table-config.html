@@ -1,10 +1,6 @@
 <page id='schema-table-config' style='display: none;'>
   <section id='schema-table-config-section'>
-    <div class='row'>
-      <div class='col-12 mb-2'>
-        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app/${app}' mvc-handle>Apps</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table' mvc-handle>Tables</a>
-      </div>
-    </div>
+    {% include "./breadcrumb-schema.html" %}
 
     <div class='row justify-content-center'>
       <div class='col-12'>
@@ -34,7 +30,7 @@
                 <div class='row'>
                   <div class='col-6 col-lg-4'>
                     <span mvc-text='tableRec.pk' class='mr-2'></span>
-                    <span style='cursor: pointer' title='Edit' mvc-click='pkEdit'><i class="fal fa-edit"></i></span>
+                    <span style='cursor: pointer' title='Edit' mvc-click='pkEdit()'><i class="fal fa-edit"></i></span>
                   </div>
                 </div>
               </div>
@@ -49,7 +45,7 @@
                 <div class='row'>
                   <div class='col-6 col-lg-4'>
                     <span mvc-text='tableRec.orderby' class='mr-2'></span>
-                    <span style='cursor: pointer' title='Edit' mvc-click='orderbyEdit'><i class="fal fa-edit"></i></span>
+                    <span style='cursor: pointer' title='Edit' mvc-click='orderbyEdit()'><i class="fal fa-edit"></i></span>
                   </div>
                 </div>
               </div>
@@ -60,7 +56,7 @@
                 Foreign Keys
               </div>
               <div class='col-6 col-md-4 col-lg-2 mb-2'>
-                <button type="button" class="btn btn-sm btn-success" mvc-click='fkCreate' title='Add New Foreign Key'><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn btn-sm btn-success" mvc-click='fkCreate()' title='Add New Foreign Key'><i class="fas fa-plus"></i></button>
               </div>
             </div>
 
@@ -72,7 +68,7 @@
                       <td><span mvc-text='tableRec.fks.$index.name'></span></td>
                       <td><span mvc-text='tableRec.fks.$index.ftableName'></span></td>
                       <td><span mvc-text='tableRec.fks.$index.linksX'></span></td>
-                      <td style='cursor: pointer' title='Delete' mvc-click='fkDelete'><i class="fal fa-trash-alt"></i></td>
+                      <td style='cursor: pointer' title='Delete' mvc-click='fkDelete()'><i class="fal fa-trash-alt"></i></td>
                     </tr>
                   </tbody>
                 </table>
@@ -84,7 +80,7 @@
                 Indexes
               </div>
               <div class='col-6 col-md-4 col-lg-2 mb-2'>
-                <button type="button" class="btn btn-sm btn-success" mvc-click='indexCreate' title='Add New Index'><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn btn-sm btn-success" mvc-click='indexCreate()' title='Add New Index'><i class="fas fa-plus"></i></button>
               </div>
             </div>
 
@@ -95,7 +91,7 @@
                     <tr data-index='$index'>
                       <td><span mvc-text='tableRec.indexes.$index.name'></span></td>
                       <td><span mvc-text='tableRec.indexes.$index.columns'></span></td>
-                      <td style='cursor: pointer' title='Delete' mvc-click='indexDelete'><i class="fal fa-trash-alt"></i></td>
+                      <td style='cursor: pointer' title='Delete' mvc-click='indexDelete()'><i class="fal fa-trash-alt"></i></td>
                     </tr>
                   </tbody>
                 </table>
@@ -104,12 +100,6 @@
           </div>
 
           <div class='card-footer'>
-            <div class='row pt-2'>
-              <div class='col-6 col-md-2 mb-2'>
-                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
-              </div>  
-            </div>
-
             <div class='row' mvc-show='badMessage'>
               <div class='col-12'>
                 <div class="alert alert-danger" role="alert">
@@ -118,6 +108,11 @@
               </div>
             </div>         
 
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-2'>
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+              </div>  
+            </div>
           </div>
         </div>
 

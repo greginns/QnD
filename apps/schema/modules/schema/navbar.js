@@ -1,8 +1,8 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 import {Section} from '/~static/lib/client/core/paging.js';
 
-class Navbar extends MVC {
+class Navbar extends App.MVC {
   constructor(element) {
     super(element);
   }

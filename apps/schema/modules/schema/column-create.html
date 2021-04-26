@@ -1,10 +1,6 @@
 <page id='schema-column-create' style='display: none;'>
   <section id='schema-column-create-section'>
-    <div class='row'>
-      <div class='col-12 mb-2'>
-        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app/${app}' mvc-handle>Apps</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table/${table}' mvc-handle>Tables</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table/${table}/column' mvc-handle>Columns</a>
-      </div>
-    </div>
+    {% include "./breadcrumb-schema.html" %}
 
     <div class='row justify-content-center'>
       <div class='col-12'>
@@ -117,15 +113,6 @@
           </div>
 
           <div class='card-footer'>
-            <div class='row pt-2'>
-              <div class='col-6 col-md-2 mb-2'>
-                {{ buttons.btn(class='success', mvc_click='save', text='Create Column') }}
-              </div>  
-              <div class='col-6 col-md-2 mb-2'>
-                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
-              </div>  
-            </div>
-
             <div class='row' mvc-show='badMessage'>
               <div class='col-12'>
                 <div class="alert alert-danger" role="alert">
@@ -134,6 +121,14 @@
               </div>
             </div>         
 
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-2'>
+                {{ buttons.btn(class='success', mvc_click='save()', text='Create Column') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-2'>
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+              </div>  
+            </div>
           </div>
         </div>
 

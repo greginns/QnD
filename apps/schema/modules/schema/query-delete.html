@@ -1,5 +1,7 @@
 <page id='schema-query-delete' style='display: none;'>
   <section id='schema-query-delete-section'>
+    {% include "./breadcrumb-schema.html" %}
+        
     <div class='row justify-content-center'>
       <div class='col-12'>
         <div class='card'>
@@ -23,12 +25,6 @@
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <span mvc-text='query.name'></span>
               </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='danger', mvc_click='delete', text='Delete query') }}
-              </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
-              </div>  
             </div>
           </div>
 
@@ -40,6 +36,15 @@
                 </div>
               </div>
             </div>         
+            
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete query') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+              </div>  
+            </div>
 
             <div class='row pt-2'>
               <div class='col-12'>

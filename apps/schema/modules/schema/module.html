@@ -73,9 +73,8 @@
 
 {% block script %}
   <script type="module">
-    import {App} from '/~static/lib/client/core/app.js';
+    import {App} from '/~static/project/app.js';
 
-    App.CSRF = '{{CSRFToken}}';
     App.USER = JSON.parse('{{USER|safe}}');
   </script>
 
@@ -87,6 +86,7 @@
   <div class="container-fluid">
     {% include "./navbar.html" %}
     <div id='qndPages'>
+      {% include "./database-list.html" %}
       {% include "./workspace-list.html" %}
       {% include "./workspace-create.html" %}
       {% include "./workspace-update.html" %}

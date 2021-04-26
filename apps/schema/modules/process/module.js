@@ -1,8 +1,8 @@
 // main
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
 import {Pages} from '/~static/lib/client/core/paging.js';
-import {App} from '/~static/lib/client/core/app.js';
 
 // js for pages
 import '/~static/apps/schema/modules/process/navbar.js';
@@ -11,8 +11,6 @@ import '/~static/apps/schema/modules/process/process-create.js';
 import '/~static/apps/schema/modules/process/process-update.js';
 import '/~static/apps/schema/modules/process/process-delete.js';
 import '/~static/apps/schema/modules/process/process-steps.js';
-
-import '/~static/project/mixins/mvc_ext.js';
 
 let moduleStart = function() {
   let connectToData = async function() {

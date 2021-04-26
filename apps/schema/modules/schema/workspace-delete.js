@@ -1,9 +1,9 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Workspace_delete extends MVC {
+class Workspace_delete extends App.MVC {
   constructor(element) {
     super(element);
   }
@@ -28,6 +28,7 @@ class Workspace_delete extends MVC {
   
   async inView(params) {
     let id = params.id || '';
+    this.database = params.db;
 
     if (!id) this.gotoList();
 
@@ -42,6 +43,8 @@ class Workspace_delete extends MVC {
 
       this.gotoList();
     }
+
+    this.model.hrefs = await Module.breadcrumb({db: this.model.database});
   }
 
   outView() {
@@ -80,15 +83,18 @@ class Workspace_delete extends MVC {
   }
 
   gotoList() {
-    Module.pager.go('/workspace');
+    Module.pager.go(`/database/${this.database}/workspace`);
   }
-
+  
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('schema-workspace-delete');   // page html
 let mvc1 = new Workspace_delete('schema-workspace-delete-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:id/delete', title: 'Workspaces - Delete', sections: [section1]});
+let page1 = new Page({el: el1, path: '/database/:db/workspace/:id/delete', title: 'Workspaces - Delete', sections: [section1]});
 
 Module.pages.push(page1);

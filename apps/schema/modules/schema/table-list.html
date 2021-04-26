@@ -1,10 +1,6 @@
 <page id='schema-table-list' style='display: none;'>
   <section id='schema-table-list-section'>
-    <div class='row'>
-      <div class='col-12 mb-2'>
-        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app' mvc-handle>Apps</a>
-      </div>
-    </div>
+    {% include "./breadcrumb-schema.html" %}
 
     <div class='row justify-content-center'>
       <div class='col-12'>
@@ -15,7 +11,7 @@
                 <h4>Tables</h4>
               </div>
               <div class='col-4'>
-                <button type="button" class="btn btn-sm btn-success" mvc-click='create' title='Add Table'><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn btn-sm btn-success" mvc-click='create()' title='Add Table'><i class="fas fa-plus"></i></button>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -34,11 +30,11 @@
                   <tbody mvc-each='tables'>
                     <tr data-index='$index'>
                       <td><span mvc-text='tables.$index.name'></span></td>
-                      <td style='cursor: pointer' title='Columns' mvc-click='columns'><i class="fal fa-columns"></i></td>
-                      <td style='cursor: pointer' title='Config' mvc-click='config'><i class="fal fa-cog"></i></td>
-                      <td style='cursor: pointer' title='Query' mvc-click='query'><i class="fal fa-search"></i></td>
-                      <td style='cursor: pointer' title='Edit' mvc-click='edit'><i class="fal fa-edit"></i></td>
-                      <td style='cursor: pointer' title='Delete' mvc-click='delete'><i class="fal fa-trash-alt"></i></td>
+                      <td style='cursor: pointer' title='Columns' mvc-click='columns()'><i class="fal fa-columns"></i></td>
+                      <td style='cursor: pointer' title='Config' mvc-click='config()'><i class="fal fa-cog"></i></td>
+                      <td style='cursor: pointer' title='Query' mvc-click='query()'><i class="fal fa-search"></i></td>
+                      <td style='cursor: pointer' title='Edit' mvc-click='edit()'><i class="fal fa-edit"></i></td>
+                      <td style='cursor: pointer' title='Delete' mvc-click='delete()'><i class="fal fa-trash-alt"></i></td>
                     </tr>
                   </tbody>
                 </table>

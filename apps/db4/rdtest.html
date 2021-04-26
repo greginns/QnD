@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang=en style='height: 100%'>
+  <head>
+    <title>
+      RD-Parser test
+    </title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    {% block css %}
+    <style type="text/css">
+    </style>
+    {% endblock %}
+  </head>
+  
+  <body>
+    <textarea id='formula'></textarea>
+    <button id='btn'>
+      Parse
+    </button>
+    
+    <script type="module">
+      import Parser from "/static/v1/static/lib/client/core/rd-parse.js";
+      import Grammar from "/static/v1/static/lib/client/core/grammar.js";
+      import ASTParser from "/static/v1/static/lib/client/core/ast-parser.js";
+
+      const parser = Parser(Grammar);
+
+      let inpEl = document.getElementById('formula');
+      let btnEl = document.getElementById('btn');
+
+      //inpEl.addEventListener('keyup', key13);
+      btnEl.addEventListener('click', parse);
+
+      function key13(ev) {
+        if (ev.which == 13) {
+          parse();
+        }
+      };
+      
+      async function parse() {
+        let formula = inpEl.value;
+
+        try {
+          let ast = parser(formula);
+          console.log('AST', ast)
+          console.log(await ASTParser('event',ast));
+        }
+        catch(e) {
+          console.log('error', e)
+        }        
+      }
+    </script>
+  </body>
+</html>

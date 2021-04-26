@@ -29,16 +29,19 @@
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <span mvc-text='bizprocess.name'></span>
               </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='danger', mvc_click='delete', text='Delete Process') }}
-              </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
-              </div>  
             </div>
           </div>
 
           <div class='card-footer'>
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete Process') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+              </div>  
+            </div>
+
             <div class='row' mvc-show='badMessage'>
               <div class='col-12'>
                 <div class="alert alert-danger" role="alert">

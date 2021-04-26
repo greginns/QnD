@@ -73,9 +73,8 @@
 
 {% block script %}
   <script type="module">
-    import {App} from '/~static/lib/client/core/app.js';
+    import {App} from '/~static/project/app.js';
 
-    App.CSRF = '{{CSRFToken}}';
     App.USER = JSON.parse('{{USER|safe}}');
   </script>
 

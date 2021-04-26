@@ -1,9 +1,9 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class App_update extends MVC {
+class App_update extends App.MVC {
   constructor(element) {
     super(element);
   }
@@ -27,6 +27,7 @@ class App_update extends MVC {
   }
   
   async inView(params) {
+    this.model.database = params.db;
     this.model.workspace = params.workspace || '';
     let id = params.app;
 
@@ -43,6 +44,8 @@ class App_update extends MVC {
 
       this.gotoList();
     }
+
+    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace});
   }
 
   outView() {
@@ -89,15 +92,18 @@ class App_update extends MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app`);
   }
 
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('schema-app-update');   // page html
 let mvc1 = new App_update('schema-app-update-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/update', title: 'Apps - Update', sections: [section1]});
+let page1 = new Page({el: el1, path: '/database/:db/workspace/:workspace/app/:app/update', title: 'Apps - Update', sections: [section1]});
 
 Module.pages.push(page1);

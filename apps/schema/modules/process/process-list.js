@@ -1,10 +1,9 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableStore, TableView} from '/~static/lib/client/core/data.js';
-import {App} from '/~static/lib/client/core/app.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Process_list extends MVC {
+class Process_list extends App.MVC {
   constructor(element) {
     super(element);
   }

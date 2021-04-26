@@ -98,10 +98,11 @@
           return;
         }
 
-        io.post({username, password}, '/db4admin/v1/login/login')
+        io.post({username, password}, '/db4admin/v1/login')
         .then(function(res) {
           if (res.status == 200) {
-            location = res.data;
+            window.localStorage.setItem('db4admin_CSRF_token', res.data.token);
+            location = res.data.url;
           }
           else {
             errMsgEl.innerText = res.data.errors.message;

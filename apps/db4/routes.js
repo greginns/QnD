@@ -22,7 +22,7 @@ const getDBAndSchema = function(req) {
 }
 
 // LOGIN/OUT ROUTES
-// login page
+// Stand-alone login page
 Router.add(new RouterMessage({
   method: 'get',
   app,
@@ -42,6 +42,32 @@ Router.add(new RouterMessage({
   security: {
     strategies: [
       //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+// test if logged in
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'login',
+  version,
+  path: ['/test'], 
+  rewrite: false,
+  id: 'loginpage',
+  level: OPEN,
+  allowCORS: true,
+  desc: 'Login Page',
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.output.login(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -112,6 +138,30 @@ Router.add(new RouterMessage({
   }
 }));
 
+// Get rdtest.html
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/rdtest'], 
+  rewrite: false,
+  id: 'api',
+  level: OPEN,
+  desc: 'API Code',
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.output.getrdtest(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
 
 // Generic Table Handling Routes
 Router.add(new RouterMessage({
@@ -135,7 +185,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      {session: {allowAnon: false, needCSRF: false}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -163,7 +213,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -189,7 +239,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      {session: {allowAnon: false, needCSRF: false}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -215,7 +265,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -241,7 +291,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -270,7 +320,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -298,7 +348,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -323,7 +373,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -348,7 +398,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -373,7 +423,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }
@@ -398,7 +448,7 @@ Router.add(new RouterMessage({
   },
   security: {
     strategies: [
-      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {session: {allowAnon: false, needCSRF: true}},
       //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
     ],
   }

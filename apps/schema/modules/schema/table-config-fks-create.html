@@ -1,10 +1,6 @@
 <page id='schema-table-config-fks-create' style='display: none;'>
   <section id='schema-table-config-fks-create-section'>
-    <div class='row'>
-      <div class='col-12 mb-2'>
-        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app/${app}' mvc-handle>Apps</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table' mvc-handle>Tables</a>
-      </div>
-    </div>
+    {% include "./breadcrumb-schema.html" %}
 
     <div class='row justify-content-center'>
       <div class='col-12'>
@@ -60,7 +56,7 @@
                         <span mvc-text='fk.links.$index.target'></span>
                       </td>
                       <td>
-                        <button class='btn-sm btn-outline-danger' mvc-click='removePair'>
+                        <button class='btn-sm btn-outline-danger' mvc-click='removePair()'>
                           Remove Pair
                         </button>
                       </td>
@@ -75,7 +71,7 @@
                         {{ fields.SelectMVC(id='fk_create_links', size='1', mvc_value='link.target', mvc_each='foreignTable.pk', valueField='', textField='', label='Foreign Table PK Columns', multiple='')}}
                       </td>
                       <td>
-                        <button class='btn-sm btn-outline-success' mvc-click='addPair'>
+                        <button class='btn-sm btn-outline-success' mvc-click='addPair()'>
                           Add Pair
                         </button>
                       </td>
@@ -87,15 +83,6 @@
           </div>
 
           <div class='card-footer'>
-            <div class='row pt-2'>
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='success', mvc_click='save', text='Create Foreign Key') }}
-              </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
-              </div>  
-            </div>
-
             <div class='row' mvc-show='badMessage'>
               <div class='col-12'>
                 <div class="alert alert-danger" role="alert">
@@ -104,6 +91,14 @@
               </div>
             </div>         
 
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='success', mvc_click='save()', text='Create Foreign Key') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+              </div>  
+            </div>
           </div>
         </div>
 

@@ -1,9 +1,9 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableStore, TableView} from '/~static/lib/client/core/data.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Query_list extends MVC {
+class Query_list extends App.MVC {
   constructor(element) {
     super(element);
   }
@@ -32,6 +32,7 @@ class Query_list extends MVC {
   }
   
   async inView(params) {
+    this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
     this.model.table = params.table;
@@ -46,6 +47,8 @@ class Query_list extends MVC {
 
     this.queryStore.redo({filters, conditions});
     this.queryStore.getMany();
+
+    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
   }
 
   outView() {
@@ -53,28 +56,32 @@ class Query_list extends MVC {
   }
 
   create() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query/create`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query/create`);
   }
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let uuid = this.model.queries[idx].id;
 
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query/${uuid}/update`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query/${uuid}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let uuid = this.model.queries[idx].id;
 
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query/${uuid}/delete`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query/${uuid}/delete`);
   }
+
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
+  }  
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('schema-query-list');   // page html
 let mvc1 = new Query_list('schema-query-list-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/query', title: 'Queries', sections: [section1]});
+let page1 = new Page({el: el1, path: '/database/:db/workspace/:workspace/app/:app/table/:table/query', title: 'Queries', sections: [section1]});
 
 Module.pages.push(page1);

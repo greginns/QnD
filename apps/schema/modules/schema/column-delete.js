@@ -1,9 +1,9 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Column_delete extends MVC {
+class Column_delete extends App.MVC {
   constructor(element) {
     super(element);
   }
@@ -29,10 +29,13 @@ class Column_delete extends MVC {
   }
   
   async inView(params) {
+    this.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
     this.model.table = params.table;
     this.model.columnName = params.name;
+
+    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
   }
 
   outView() {
@@ -65,15 +68,18 @@ class Column_delete extends MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column`);
+    Module.pager.go(`/database/${this.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column`);
   }
-
+  
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('schema-column-delete');   // page html
 let mvc1 = new Column_delete('schema-column-delete-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/column/:name/delete', title: 'Columns - Delete', sections: [section1]});
+let page1 = new Page({el: el1, path: 'database/:db/workspace/:workspace/app/:app/table/:table/column/:name/delete', title: 'Columns - Delete', sections: [section1]});
 
 Module.pages.push(page1);

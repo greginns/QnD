@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Doesn't really work as the csrf token saved to localStorage is under the wronf domain -->
 <html lang=en style='height: 100%'>
   <head>
     <title>
@@ -83,8 +84,8 @@
       };
       
       function login() {
-        let database = '{{db}}';
-        let workspace = '{{ws}}';
+        let database = '{{database}}';
+        let workspace = '{{workspace}}';
         let username = usernameEl.value;
         let password = passwordEl.value;
 
@@ -100,11 +101,12 @@
           return;
         }
 
-        io.post({database, workspace, username, password}, '/db4/v1/login/login')
+        io.post({database, workspace, username, password}, '/db4/v1/login')
         .then(function(res) {
           if (res.status == 200) {
-console.log('Success')            
-            //location = res.data;
+            window.localStorage.setItem('db4_CSRF_token', res.data.token);
+
+            //location = res.data.url;
           }
           else {
             errMsgEl.innerText = res.data.errors.message;

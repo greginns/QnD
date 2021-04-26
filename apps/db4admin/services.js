@@ -40,7 +40,7 @@ async function verifySession(req) {
   return data;
 }
 
-async function verifyCSRF(userID, token, session) {
+async function verifyCSRF(userID, token, sessionID) {
   // get token, check if user matches
   if (!token) return false;
 
@@ -48,9 +48,17 @@ async function verifyCSRF(userID, token, session) {
 
   if (tm.isBad()) return false;
 
-  if (session && session != tm.data.session) return false;
+  if (sessionID && sessionID != tm.data.session) return false;
 
-  return tm.data.admin == userID;
+  return tm.data.data.admin.id == userID;
+}
+
+async function makeCSRF(sessdata, token) {
+  // create CSRF record
+  let rec = new CSRF({data: {admin: sessdata}, session: token});
+  let res = await rec.insertOne({database, pgschema});
+
+  return res.data.token;
 }
 
 const services = {
@@ -117,7 +125,7 @@ const services = {
       if (!sessdata) return new TravelMessage({type: 'text', status: (strategy.redirect) ? 302 : 401, message: strategy.redirect});
 
       if (sessdata && strategy.needCSRF) {
-        status = await verifyCSRF(sessdata.data.user.id, req.CSRFToken || null, req.cookies[cookie] || '')
+        status = await verifyCSRF(sessdata.data.user.id, req.CSRFTokenDB4Admin || null, req.cookies[cookie] || '')
       }
 
       if (!status) {
@@ -134,18 +142,6 @@ const services = {
 
       return new TravelMessage({type: 'text', status: 200, data: sessdata});
     },
-
-    makeCSRF: async function(req) {
-      let sessdata = await verifySession(req)
-
-      if (!sessdata) return null;
-      
-      // create CSRF record
-      let rec = new CSRF({admin: sessdata.data.user.id, session: sessdata.token});
-      let res = await rec.insertOne({database, pgschema});
-
-      return res.data.token;
-    }
   },
 
   login: async function(body) {
@@ -172,8 +168,10 @@ const services = {
 
     if (tm.isBad()) return tm;
 
+    let token = await makeCSRF(admin.data, session.token);
+
     // Reply with blank data, include session as cookie
-    return new TravelMessage({data: url, type: 'text', status: 200, cookies: [{name: cookie, value: session.token, path: '/', 'Max-Age': 60*60*24, HttpOnly: true}]});
+    return new TravelMessage({data: {url, token}, type: 'json', status: 200, cookies: [{name: cookie, value: session.token, path: '/', 'Max-Age': 60*60*24, HttpOnly: true}]});
   },
   
   logout: async function(req) {
@@ -284,104 +282,6 @@ services.admin = {
   delete: async function({database = '', pgschema = '', id = ''} = {}) {
     // Delete row
     let tobj = new models.Admin({ id });
-    let tm = await tobj.deleteOne({database, pgschema});
-
-    return tm;
-  }
-};
-
-services.CSRF = {
-  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
-    // Get one or more rows
-    return (where) 
-      ? await models.CSRF.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
-      : await models.CSRF.select({pgschema, rec, cols, limit, offset, orderby});
-  },
-  
-  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Get specific row
-    if ('id' in rec && rec.id == '_default') {
-      let tm = new TravelMessage();
-
-      tm.data = models.CSRF.getColumnDefaults();
-      tm.type = 'json';
-
-      return tm;
-    }
-    
-    return await models.CSRF.selectOne({database, pgschema, pks: [rec.id] });
-  },
-    
-  create: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Insert row
-    let tobj = new models.CSRF(rec);
-    let tm = await tobj.insertOne({database, pgschema});
-
-    return tm;    
-  },
-  
-  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
-    // Update row
-    rec.id = id;
-
-    let tobj = new models.CSRF(rec);
-    let tm = await tobj.updateOne({database, pgschema});
-    
-    return tm;
-  },
-  
-  delete: async function({database = '', pgschema = '', id = ''} = {}) {
-    // Delete row
-    let tobj = new models.CSRF({ id });
-    let tm = await tobj.deleteOne({database, pgschema});
-
-    return tm;
-  }
-};
-
-services.session = {
-  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
-    // Get one or more rows
-    return (where) 
-      ? await models.session.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
-      : await models.session.select({database, pgschema, rec, cols, limit, offset, orderby});
-  },
-  
-  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Get specific row
-    if ('id' in rec && rec.id == '_default') {
-      let tm = new TravelMessage();
-
-      tm.data = models.session.getColumnDefaults();
-      tm.type = 'json';
-
-      return tm;
-    }
-    
-    return await models.session.selectOne({database, pgschema, pks: [rec.id] });
-  },
-    
-  create: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Insert row
-    let tobj = new models.session(rec);
-    let tm = await tobj.insertOne({database, pgschema});
-
-    return tm;    
-  },
-  
-  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
-    // Update row
-    rec.id = id;
-
-    let tobj = new models.session(rec);
-    let tm = await tobj.updateOne({database, pgschema});
-    
-    return tm;
-  },
-  
-  delete: async function({database = '', pgschema = '', id = ''} = {}) {
-    // Delete row
-    let tobj = new models.session({ id });
     let tm = await tobj.deleteOne({database, pgschema});
 
     return tm;

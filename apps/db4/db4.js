@@ -1,8 +1,10 @@
 import {MVC} from '/~static/lib/client/core/mvc.js';
+import {addMVCBindings} from '/~static/lib/client/core/mvc-bindings.js';
+import {addDB4Functions} from '/~static/lib/client/core/mvc-db4.js';
 import {io} from "/static/v1/static/lib/client/core/io.js";
-import {App} from '/~static/lib/client/core/app.js';
+import {App} from '/~static/project/app.js';
 
-class Db4MVC extends MVC {
+class Db4MVC extends App.MVC {
   constructor(element) {
     super(element);
   }
@@ -13,7 +15,6 @@ class Db4MVC extends MVC {
       app: {},
       message: ''
     };
-
   }
 
   async ready() {
@@ -29,10 +30,11 @@ class Db4MVC extends MVC {
     return true;  
   }
 
-  fred() {
-    this.model.contact = {};
+  fred(obj) {
+console.log(obj)    
+console.log(this.model.contacts.proxyFor)
   }
-}
+};
 
 // fire it up!
 for (let mel of document.querySelectorAll('[mvc-mvc]')) {
@@ -40,9 +42,11 @@ for (let mel of document.querySelectorAll('[mvc-mvc]')) {
 
   let attrTypes = ['string', 'number', 'object', 'array'];
 
+  // process db4-model tags
   for (let el of mel.querySelectorAll('db4-model')) {
     let name = el.getAttribute('name') || '';
     let type = el.getAttribute('type') || 'string';
+    let initial = el.getAttribute('initial') || '';
     
     if (!name) {
       console.error('db4-model has no model name');
@@ -54,23 +58,14 @@ for (let mel of document.querySelectorAll('[mvc-mvc]')) {
       continue;
     }
 
-    mvc.model[name] = (type == 'object') ? {} : (type == 'array') ? [] : '';
+    mvc.model[name] = (type == 'object') ? {} : (type == 'array') ? [] : initial;
+
+    mvc.$updateModel('gname', 'Gnarly')
   }
-
-  let fn = `function({a='', b='', c=0}={}) {
-    console.log(a,b,c);
-    console.log(this);
-  }`;
-  
-  let func2 = new Function('return ' + fn)();
-
-  mvc._addMethod('fuck', func2);
-  mvc.fuck({a: 'greggie', b: 'jay', c: 99});
-}
+};
 
 // LOGIN Stuff
 (function() {
-  const url = 'https://roam3.adventurebooking.com:3011';
   const db4_login_html = `
     <div id='db4-login-inline' style = 'position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: rgba(0, 0, 0, 0.5); visibility: hidden;'>
       <div style = 'margin: 100px auto; padding: 20px; background: #fff; border: 1px solid #666; width: 300px; border-radius: 6px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.5); position: relative;'>
@@ -106,8 +101,8 @@ for (let mel of document.querySelectorAll('[mvc-mvc]')) {
   };
 
   const login = function() {
-    let database = '{{db}}';
-    let workspace = '{{ws}}';
+    let database = '{{database}}';
+    let workspace = '{{workspace}}';
     let username = usernameEl.value;
     let password = passwordEl.value;
 
@@ -123,9 +118,10 @@ for (let mel of document.querySelectorAll('[mvc-mvc]')) {
       return;
     }
     
-    io.post({database, workspace, username, password}, url + '/db4/v1/login')
+    io.post({database, workspace, username, password}, App.url + '/db4/v1/login')
     .then(function(res) {
       if (res.status == 200) {
+        localStorage.setItem('db4_CSRF_token', res.data.token);
         loginClose();
         callback();
       }
@@ -164,6 +160,8 @@ for (let mel of document.querySelectorAll('[mvc-mvc]')) {
   loginBtnEl.addEventListener('click', login);
   
   App.reLogin = loginOpen;
+
+  io.get({}, App.url + '/db4/v1/login/test')
 })();
 
 /*

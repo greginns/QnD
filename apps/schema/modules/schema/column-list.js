@@ -1,8 +1,8 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Column_list extends MVC {
+class Column_list extends App.MVC {
   constructor(element) {
     super(element);
   }
@@ -28,10 +28,12 @@ class Column_list extends MVC {
   }
   
   async inView(params) {
+    this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
     this.model.table = params.table;
 
+    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
     this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
   }
 
@@ -40,21 +42,25 @@ class Column_list extends MVC {
   }
 
   create() {
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/create`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/create`);
   }
 
   edit(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let name = this.model.tableRec.columns[idx].name;
 
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/update`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/update`);
   }
 
   delete(ev) {
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let name = this.model.tableRec.columns[idx].name;
 
-    Module.pager.go(`/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/delete`);
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/delete`);
+  }
+
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
   }
 }
 
@@ -62,6 +68,6 @@ class Column_list extends MVC {
 let el1 = document.getElementById('schema-column-list');   // page html
 let mvc1 = new Column_list('schema-column-list-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/workspace/:workspace/app/:app/table/:table/column', title: 'Columns', sections: [section1]});
+let page1 = new Page({el: el1, path: '/database/:db/workspace/:workspace/app/:app/table/:table/column', title: 'Columns', sections: [section1]});
 
 Module.pages.push(page1);

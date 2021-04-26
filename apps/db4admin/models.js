@@ -35,7 +35,7 @@ const Account = class extends Model {
         last: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Last Name'}),
         email: new Fields.Char({null: true, maxLength: 60, isEmail: true, verbose: 'Primary Email'}),
         password: new Fields.Password({null: true, maxLength: 60, verbose: 'Password'}),
-        database: new Fields.Json({verbose: 'Database ID'}),
+        databases: new Fields.Json({verbose: 'Database IDs'}),
         isactive: new Fields.Boolean({notNull: true, default: true, verbose: 'Is Active'}),
         billinginfo: new Fields.Json({verbose: 'Billing Info'}),
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
@@ -108,14 +108,13 @@ const CSRF = class extends Model {
     return {
       schema: {
         token: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'CSRF token'}),
-        admin: new Fields.Char({notNull: true, maxLength: 22, verbose: 'Admin ID'}),
+        data: new Fields.Json({verbose: 'User Data'}),
         session: new Fields.Char({null: true, maxLength: 22, verbose: 'Session ID'}),
         issued: new Fields.DateTime({notNull: true, maxLength: 30, onBeforeInsert: getTimestamp, verbose: 'Issued On'}),
       },
       
       constraints: {
         pk: ['token'],
-        fk: [{name: 'admin', columns: ['admin'], table: Admin, tableColumns: ['id'], onDelete: 'NO ACTION'}],
       },
       
       orderBy: ['issued'],

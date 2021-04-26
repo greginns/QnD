@@ -6,7 +6,6 @@ const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {CSRF, Session, Admin} = require(root + '/apps/db4admin/models.js');
-const {user} = require(root + '/apps/schema/models.js');
 const {exec} = require(root + '/lib/server/utils/db.js');
 const {buildActionData} = require(root + '/lib/server/utils/processes.js');
 
@@ -43,7 +42,7 @@ async function verifySession(req) {
       let elapsed = now-then;
 
       if (elapsed < 1000*60*60*24) {
-        tmu = await user.selectOne({database: sess.data.data.database, pgschema, cols: '*', pks: [sess.data.data.user.id]});
+        tmu = await models.user.selectOne({database: sess.data.data.database, pgschema, cols: '*', pks: [sess.data.data.user.id]});
 
         if (tmu.isGood()) {
           data = sess.data;
@@ -55,7 +54,7 @@ async function verifySession(req) {
   return data;
 }
 
-async function verifyCSRF(userID, token, session) {
+async function verifyCSRF(userID, token, sessionID) {
   // get token, check if user matches
   if (!token) return false;
 
@@ -63,10 +62,535 @@ async function verifyCSRF(userID, token, session) {
 
   if (tm.isBad()) return false;
 
-  if (session && session != tm.data.session) return false;
+  if (sessionID && sessionID != tm.data.session) return false;
 
-  return tm.data.admin == userID;
+  return tm.data.data.user.id == userID;
 }
+
+
+async function makeCSRF(sessdata, token) {
+  // create CSRF record
+  let rec = new CSRF({data: {user: sessdata}, session: token});
+  let res = await rec.insertOne({database, pgschema});
+
+  return res.data.token;
+}
+
+/*
+  Eventually:
+    add DB to Workspace
+    compare file DB to logged in DB, or DB specified on js module load.
+    compare file pgschema to pgschema specified on js module load.
+
+    No cross DB FKs, but files from multiple DBs on same page.
+    db4.js?database=xyz,workspace=abc,etc.
+*/
+const services = {
+  output: {
+    login: async function(req) {
+      // output login page
+      const tm = new TravelMessage();
+      const db = req.query.database || '';  // comes in via URL
+      const ws = req.query.workspace || ''; 
+
+      try {
+        let ctx = {database: db, workspace: ws};
+        let tmpl = 'apps/db4/login.html';
+
+        try {
+          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+          tm.type = 'html';
+        }
+        catch(err) {
+          tm.status = 500;
+          tm.message = err.toString();
+        }
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+
+      return tm;
+    },
+
+    getdb4: async function(req) {
+      // output db4.js
+      const tm = new TravelMessage();
+      const db = req.query.database || '';
+      const ws = req.query.workspace || '';
+
+      try {
+        let ctx = {database: db, workspace: ws};
+        let tmpl = 'apps/db4/db4.js';
+
+        try {
+          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+          tm.type = 'js';
+        }
+        catch(err) {
+          tm.status = 500;
+          tm.message = err.toString();
+        }
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+
+      return tm;
+    },
+
+    getrdtest: async function(req) {
+      // output rdtest.js
+      const tm = new TravelMessage();
+
+      try {
+        let tmpl = 'apps/db4/rdtest.html';
+        let ctx = {};
+
+        try {
+          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+          tm.type = 'html';
+        }
+        catch(err) {
+          tm.status = 500;
+          tm.message = err.toString();
+        }
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+
+      return tm;
+    },
+
+  },
+
+  admin: {
+    login: async function(req) {
+      // credentials good?
+      // create Session record 
+      // setup cookies
+      let match, userRec, session, tm;
+      let url = config.loginRedirects.db4 || '';
+      let body = req.body;
+      const db = body.database || '';   // database from login
+      const ws = body.workspace || '';  // workspace from login
+      const domain = (new URL(req.headers.referer)).hostname;
+
+      // db and ws match?  Allowed domain
+      let wsRec = await models.workspace.selectOne({database: db, pgschema, pks: [ws]});
+      if (wsRec.status != 200) return new TravelMessage({status: 403});
+
+      if (db != wsRec.data.database) return new TravelMessage({status: 403});
+      if (wsRec.data.domains.indexOf(domain) == -1) return new TravelMessage({status: 403});
+
+      // user valid?
+      userRec = await models.user.selectOne({database: db, pgschema, cols: ['id', 'first', 'last', 'password'], pks: [body.username]});
+   
+      if (userRec.status != 200) return new TravelMessage({status: 403});
+  
+      // password valid?
+      match = await bcrypt.compare(body.password, userRec.data.password);
+      if (!match) return new TravelMessage({status: 403});
+      
+      // create session record
+      delete userRec.data.password;
+      session = new Session({data: {database: db, pgschema: userRec.data.workspace, 'user': userRec.data}});
+      tm = await session.insertOne({database: 'db4admin', pgschema: 'public'});
+  
+      if (tm.isBad()) return tm;
+  
+      let token = await makeCSRF(userRec.data, session.token);
+
+      // Reply with CSRF token, include session as cookie
+      return new TravelMessage({data: {url, token}, type: 'json', status: 200, cookies: [{name: cookie, value: session.token, path: '/', 'Max-Age': 60*60*24, HttpOnly: true}]});
+    },
+    
+    logout: async function(req) {
+      // delete session record
+      // remove cookie
+      let id = req.cookies[cookie] || '';
+      let session;
+      
+      if (id) {
+        session = new Session({id});
+  
+        await session.deleteOne({database: 'db4admin', pgschema: 'public'});
+      }
+      
+      return new TravelMessage({data: '/db4/v1/login', type: 'text', status: 200, cookies: [{name: cookie, value: ''}]});
+    },
+  
+  },
+
+  table: {
+    getOne: async function(database, table, pk, filters, columns) {
+      let tm;
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      if (pk) {
+        // if pk was sent rather than filters, replace filters with pk
+        let pks = ti.tableInfo.pk;
+
+        filters = {};
+        filters[pks[0]] = pk;
+      }
+
+      let [text, values, err] = ti.makeSelectOneSQL(filters, columns);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+
+        if (tm.status == 200) {
+          if (tm.data.length != 1) {
+            tm.status = 400;
+            tm.type='text';
+            tm.message = 'Zero or more than one entry found';
+          }
+          else {
+            tm.data = tm.data[0];
+          }
+        }
+      }
+
+      return tm;
+    },
+
+    lookup: async function(database, table, pk, filters, columns) {
+      return services.table.getOne(database, table, pk, filters, columns);
+    },
+
+    getMany: async function(database, table, filters, columns) {
+      let tm;
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      let [text, values, err] = ti.makeSelectManySQL(filters, columns);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+        console.log(tm)
+      }
+
+      return tm;
+    },
+
+    insert: async function(database, table, data) {
+      let tm;
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      let [text, values, err] = ti.makeInsertOneSQL(data);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+      }
+
+      return tm;
+    },
+
+    update: async function(database, table, data) {
+      let tm;
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      let [text, values, err] = ti.makeUpdateOneSQL(data);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+      }
+
+      return tm;
+    },
+
+    delete: async function(database, table, data) {
+      let tm;
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      let [text, values, err] = ti.makeDeleteOneSQL(data);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+        console.log(tm)
+      }
+
+      return tm;
+    },
+    query: async function(database, qid) {
+      let tm;
+      let table = 'eKVExJHhzJCpvxRC7Fsn8W'
+      let ti = new TableInfo(database, table);
+      await ti.init();
+
+      let filters = {};
+      let columns = ['*'];
+
+      let [text, values, err] = ti.makeSelectManySQL(filters, columns);
+
+      if (err) {
+        tm = new TravelMessage({status: 400, data: err, type: 'text'});
+      }
+      else {
+        tm = await exec(database, {text, values});
+        console.log(tm)
+      }
+
+      return tm;
+    },
+
+  },
+
+  process: {
+    output: async function(database, pid, body) {
+      let tm = new TravelMessage();
+      let data = {};
+      let security = {
+        'smtp2go': 'api-1F90F3A4875211EBAA9DF23C91C88F4E',
+        'elastic': 'A8DAB667B4A3361FDD237E8316B1A0F56A642CC67100A1956B7D7E9A02180AF44BFF79C04A928F6EF5B07C1B58AAB741'
+      }
+
+      let bizproc = await models.bizprocess.selectOne({database, pgschema: 'public', pks: pid});
+      let steps = bizproc.data.steps;
+
+      // Data from post, event or timer.
+      data._initial = body;
+
+      for (let step of steps) {
+        if (step.action.substr(0,1) == '_') continue;
+
+        let action = actionGroups[step.action];
+        let subaction = step.subaction;
+        let input = buildActionData(data, step.values, action.actionParams[subaction]);
+        let secVal = security[step.action] || '';  // *** fake
+
+        if (step.action == 'io_int') {
+          let ti = new TableInfo(database, input.table);
+          await ti.init();
+
+          let res1 = await services.table[subaction](database, input.table, input.pk, input.filters, input.columns);
+
+          if (res1.status != 200) return res1;
+
+          data[ti.tableName] = res1.data;        
+          data.user = res1.data;  // Testing only
+        }
+        else {
+          let res1 = await action.actions[subaction](input, secVal);
+
+          if (res1.status != 200) return res1;
+
+          data[action.outputName] = res1.data;        
+        }
+      }
+
+      // Send back all data
+      tm.data = data;
+      return tm;      
+    },
+
+    getGroups: function() {
+      let tm = new TravelMessage();
+      let data = [];
+
+      data.push({value: '_', text: 'Process Handler'});
+      data.push({value: 'io', text: 'I/O'});
+      data.push({value: 'email', text: 'Email'});
+      data.push({value: 'doc', text: 'Document Process'});
+
+      tm.data = data;
+
+      return tm;
+    },
+
+    getActions: function() {
+      let tm = new TravelMessage();
+      let data = [];
+
+      for (let group in actionGroups) {
+        let v = actionGroups[group];
+
+        data.push({group: v.group, text: v.name, value: group});
+      }
+
+      tm.data = data;
+
+      return tm;
+    },
+
+    getSubActions: function(action) {
+      let tm = new TravelMessage();
+      let group = actionGroups[action];
+      let data = group.actionList;
+
+      tm.data = data;
+
+      return tm;
+    },
+
+    getSubActionInputs: function(action, subaction) {
+      let tm = new TravelMessage();
+      let data = actionGroups[action].actionParams[subaction];
+
+      tm.data = data;
+
+      return tm;
+    }
+
+  },
+
+  auth: {
+    session: async function(req, security, strategy) {
+      /*
+        test SessionID
+        test Admin
+        test Anonymous
+        test CSRF
+      */
+      let status = 200;
+      let sessdata = await verifySession(req);
+
+      if (!sessdata) return new TravelMessage({type: 'text', status: (strategy.redirect) ? 302 : 401, message: strategy.redirect});
+
+      if (sessdata && strategy.needCSRF) {
+        status = await verifyCSRF(sessdata.data.user.id, req.CSRFTokenDB4 || null, req.cookies[cookie] || '')
+      }
+
+      if (!status) {
+        if (strategy.redirect) return new TravelMessage({type: 'text', status: (strategy.redirect) ? 302 : 401, message: strategy.redirect});
+
+        return new TravelMessage({type: 'text', status: 401});
+      }
+        
+      return new TravelMessage({type: 'text', status: 200, data: sessdata});
+    },
+
+    ws: async function(req) {
+      let sessdata = await verifySession(req);
+
+      return new TravelMessage({type: 'text', status: 200, data: sessdata});
+    },
+  },
+};
+/*
+services.CSRF = {
+  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.CSRF.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.CSRF.select({pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
+
+      tm.data = models.CSRF.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+    
+    return await models.CSRF.selectOne({database, pgschema, pks: [rec.id] });
+  },
+    
+  create: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Insert row
+    let tobj = new models.CSRF(rec);
+    let tm = await tobj.insertOne({database, pgschema});
+
+    return tm;    
+  },
+  
+  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.CSRF(rec);
+    let tm = await tobj.updateOne({database, pgschema});
+    
+    return tm;
+  },
+  
+  delete: async function({database = '', pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.CSRF({ id });
+    let tm = await tobj.deleteOne({database, pgschema});
+
+    return tm;
+  }
+};
+
+services.session = {
+  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.session.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.session.select({database, pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
+
+      tm.data = models.session.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+    
+    return await models.session.selectOne({database, pgschema, pks: [rec.id] });
+  },
+    
+  create: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Insert row
+    let tobj = new models.session(rec);
+    let tm = await tobj.insertOne({database, pgschema});
+
+    return tm;    
+  },
+  
+  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.session(rec);
+    let tm = await tobj.updateOne({database, pgschema});
+    
+    return tm;
+  },
+  
+  delete: async function({database = '', pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.session({ id });
+    let tm = await tobj.deleteOne({database, pgschema});
+
+    return tm;
+  }
+};
+*/
+
 
 class TableInfo {
   constructor(database, table) {
@@ -390,492 +914,5 @@ class TableInfo {
     return [text, values, err];
   }
 }
-
-/*
-  Eventually:
-    add DB to Workspace
-    compare file DB to logged in DB, or DB specified on js module load.
-    compare file pgschema to pgschema specified on js module load.
-
-    No cross DB FKs, but files from multiple DBs on same page.
-    db4.js?database=xyz,workspace=abc,etc.
-*/
-const services = {
-  output: {
-    login: async function(req) {
-      const tm = new TravelMessage();
-      const db = req.query.db || '';
-      const ws = req.query.ws || '';
-
-      try {
-        let ctx = {db, ws};
-        let tmpl = 'apps/db4/login.html';
-
-        try {
-          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
-          tm.type = 'html';
-        }
-        catch(err) {
-          tm.status = 500;
-          tm.message = err.toString();
-        }
-      }
-      catch(err) {
-        tm.status = 500;
-        tm.message = err.toString();
-      }
-
-      return tm;
-    },
-
-    getdb4: async function(req) {
-      const tm = new TravelMessage();
-      const db = req.query.db || '';
-      const ws = req.query.ws || '';
-
-      try {
-        let ctx = {db, ws};
-        let tmpl = 'apps/db4/db4.js';
-
-        try {
-          tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
-          tm.type = 'js';
-        }
-        catch(err) {
-          tm.status = 500;
-          tm.message = err.toString();
-        }
-      }
-      catch(err) {
-        tm.status = 500;
-        tm.message = err.toString();
-      }
-
-      return tm;
-    },
-
-  },
-
-  admin: {
-    login: async function(req) {
-      // credentials good?
-      // create Session record 
-      // setup cookies
-      let match, userRec, session, tm;
-      let url = config.loginRedirects.db4 || '';
-      let body = req.body;
-      const db = req.query.db || '';
-  
-      // user valid?
-      userRec = await user.selectOne({database: db, pgschema, cols: ['id', 'first', 'last', 'password'], pks: [body.username]});
-      if (userRec.status != 200) return new TravelMessage({status: 403});
-  
-      // password valid?
-      match = await bcrypt.compare(body.password, userRec.data.password);
-      if (!match) return new TravelMessage({status: 403});
-      
-      // create session record
-      delete userRec.data.password;
-      session = new Session({data: {database, pgschema: userRec.data.workspace, 'user': userRec.data}});
-      tm = await session.insertOne({database: 'db4admin', pgschema: 'public'});
-  
-      if (tm.isBad()) return tm;
-  
-      // Reply with blank data, include session as cookie
-      return new TravelMessage({data: url, type: 'text', status: 200, cookies: [{name: cookie, value: session.token, path: '/', 'Max-Age': 60*60*24, HttpOnly: true}]});
-    },
-    
-    logout: async function(req) {
-      // delete session record
-      // remove cookie
-      let id = req.cookies[cookie] || '';
-      let session;
-      
-      if (id) {
-        session = new Session({id});
-  
-        await session.deleteOne({database: 'db4admin', pgschema: 'public'});
-      }
-      
-      return new TravelMessage({data: '/db4/v1/login', type: 'text', status: 200, cookies: [{name: cookie, value: ''}]});
-    },
-  
-  },
-
-  table: {
-    getOne: async function(database, table, pk, filters, columns) {
-      let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
-
-      if (pk) {
-        // if pk was sent rather than filters, replace filters with pk
-        let pks = ti.tableInfo.pk;
-
-        filters = {};
-        filters[pks[0]] = pk;
-      }
-
-      let [text, values, err] = ti.makeSelectOneSQL(filters, columns);
-
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-
-        if (tm.status == 200) {
-          if (tm.data.length != 1) {
-            tm.status = 400;
-            tm.type='text';
-            tm.message = 'Zero or more than one entry found';
-          }
-          else {
-            tm.data = tm.data[0];
-          }
-        }
-      }
-
-      return tm;
-    },
-
-    lookup: async function(database, table, pk, filters, columns) {
-      return services.table.getOne(database, table, pk, filters, columns);
-    },
-
-    getMany: async function(database, table, filters, columns) {
-      let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
-
-      let [text, values, err] = ti.makeSelectManySQL(filters, columns);
-
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-        console.log(tm)
-      }
-
-      return tm;
-    },
-
-    insert: async function(database, table, data) {
-      let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
-
-      let [text, values, err] = ti.makeInsertOneSQL(data);
-
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-      }
-
-      return tm;
-    },
-
-    update: async function(database, table, data) {
-      let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
-
-      let [text, values, err] = ti.makeUpdateOneSQL(data);
-
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-      }
-
-      return tm;
-    },
-
-    delete: async function(database, table, data) {
-      let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
-
-      let [text, values, err] = ti.makeDeleteOneSQL(data);
-
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-        console.log(tm)
-      }
-
-      return tm;
-    },
-    query: async function(database, qid) {
-      let tm;
-      let table = 'eKVExJHhzJCpvxRC7Fsn8W'
-      let ti = new TableInfo(database, table);
-      await ti.init();
-
-      let filters = {};
-      let columns = ['*'];
-
-      let [text, values, err] = ti.makeSelectManySQL(filters, columns);
-
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-        console.log(tm)
-      }
-
-      return tm;
-    },
-
-  },
-
-  process: {
-    output: async function(database, pid, body) {
-      let tm = new TravelMessage();
-      let data = {};
-      let security = {
-        'smtp2go': 'api-1F90F3A4875211EBAA9DF23C91C88F4E',
-        'elastic': 'A8DAB667B4A3361FDD237E8316B1A0F56A642CC67100A1956B7D7E9A02180AF44BFF79C04A928F6EF5B07C1B58AAB741'
-      }
-
-      let bizproc = await models.bizprocess.selectOne({database, pgschema: 'public', pks: pid});
-      let steps = bizproc.data.steps;
-
-      // Data from post, event or timer.
-      data._initial = body;
-
-      for (let step of steps) {
-        if (step.action.substr(0,1) == '_') continue;
-
-        let action = actionGroups[step.action];
-        let subaction = step.subaction;
-        let input = buildActionData(data, step.values, action.actionParams[subaction]);
-        let secVal = security[step.action] || '';  // *** fake
-
-        if (step.action == 'io_int') {
-          let ti = new TableInfo(database, input.table);
-          await ti.init();
-
-          let res1 = await services.table[subaction](database, input.table, input.pk, input.filters, input.columns);
-
-          if (res1.status != 200) return res1;
-
-          data[ti.tableName] = res1.data;        
-          data.user = res1.data;  // Testing only
-        }
-        else {
-          let res1 = await action.actions[subaction](input, secVal);
-
-          if (res1.status != 200) return res1;
-
-          data[action.outputName] = res1.data;        
-        }
-      }
-
-      // Send back all data
-      tm.data = data;
-      return tm;      
-    },
-
-    getGroups: function() {
-      let tm = new TravelMessage();
-      let data = [];
-
-      data.push({value: '_', text: 'Process Handler'});
-      data.push({value: 'io', text: 'I/O'});
-      data.push({value: 'email', text: 'Email'});
-      data.push({value: 'doc', text: 'Document Process'});
-
-      tm.data = data;
-
-      return tm;
-    },
-
-    getActions: function() {
-      let tm = new TravelMessage();
-      let data = [];
-
-      for (let group in actionGroups) {
-        let v = actionGroups[group];
-
-        data.push({group: v.group, text: v.name, value: group});
-      }
-
-      tm.data = data;
-
-      return tm;
-    },
-
-    getSubActions: function(action) {
-      let tm = new TravelMessage();
-      let group = actionGroups[action];
-      let data = group.actionList;
-
-      tm.data = data;
-
-      return tm;
-    },
-
-    getSubActionInputs: function(action, subaction) {
-      let tm = new TravelMessage();
-      let data = actionGroups[action].actionParams[subaction];
-
-      tm.data = data;
-
-      return tm;
-    }
-
-  },
-
-  auth: {
-    session: async function(req, security, strategy) {
-      /*
-        test SessionID
-        test Admin
-        test Anonymous
-        test CSRF
-      */
-      let status = 200;
-      let sessdata = await verifySession(req);
-
-      if (!sessdata) return new TravelMessage({type: 'text', status: (strategy.redirect) ? 302 : 401, message: strategy.redirect});
-
-      if (sessdata && strategy.needCSRF) {
-        status = await verifyCSRF(sessdata.data.user.id, req.CSRFToken || null, req.cookies[cookie] || '')
-      }
-
-      if (!status) {
-        if (strategy.redirect) return new TravelMessage({type: 'text', status: (strategy.redirect) ? 302 : 401, message: strategy.redirect});
-
-        return new TravelMessage({type: 'text', status: 401});
-      }
-        
-      return new TravelMessage({type: 'text', status: 200, data: sessdata});
-    },
-
-    ws: async function(req) {
-      let sessdata = await verifySession(req);
-
-      return new TravelMessage({type: 'text', status: 200, data: sessdata});
-    },
-
-    makeCSRF: async function(req) {
-      let sessdata = await verifySession(req)
-
-      if (!sessdata) return null;
-      
-      // create CSRF record
-      let rec = new CSRF({admin: sessdata.data.user.id, session: sessdata.token});
-      let res = await rec.insertOne({database, pgschema});
-
-      return res.data.token;
-    }
-  },
-};
-
-services.CSRF = {
-  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
-    // Get one or more rows
-    return (where) 
-      ? await models.CSRF.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
-      : await models.CSRF.select({pgschema, rec, cols, limit, offset, orderby});
-  },
-  
-  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Get specific row
-    if ('id' in rec && rec.id == '_default') {
-      let tm = new TravelMessage();
-
-      tm.data = models.CSRF.getColumnDefaults();
-      tm.type = 'json';
-
-      return tm;
-    }
-    
-    return await models.CSRF.selectOne({database, pgschema, pks: [rec.id] });
-  },
-    
-  create: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Insert row
-    let tobj = new models.CSRF(rec);
-    let tm = await tobj.insertOne({database, pgschema});
-
-    return tm;    
-  },
-  
-  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
-    // Update row
-    rec.id = id;
-
-    let tobj = new models.CSRF(rec);
-    let tm = await tobj.updateOne({database, pgschema});
-    
-    return tm;
-  },
-  
-  delete: async function({database = '', pgschema = '', id = ''} = {}) {
-    // Delete row
-    let tobj = new models.CSRF({ id });
-    let tm = await tobj.deleteOne({database, pgschema});
-
-    return tm;
-  }
-};
-
-services.session = {
-  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
-    // Get one or more rows
-    return (where) 
-      ? await models.session.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
-      : await models.session.select({database, pgschema, rec, cols, limit, offset, orderby});
-  },
-  
-  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Get specific row
-    if ('id' in rec && rec.id == '_default') {
-      let tm = new TravelMessage();
-
-      tm.data = models.session.getColumnDefaults();
-      tm.type = 'json';
-
-      return tm;
-    }
-    
-    return await models.session.selectOne({database, pgschema, pks: [rec.id] });
-  },
-    
-  create: async function({database = '', pgschema = '', rec = {}} = {}) {
-    // Insert row
-    let tobj = new models.session(rec);
-    let tm = await tobj.insertOne({database, pgschema});
-
-    return tm;    
-  },
-  
-  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
-    // Update row
-    rec.id = id;
-
-    let tobj = new models.session(rec);
-    let tm = await tobj.updateOne({database, pgschema});
-    
-    return tm;
-  },
-  
-  delete: async function({database = '', pgschema = '', id = ''} = {}) {
-    // Delete row
-    let tobj = new models.session({ id });
-    let tm = await tobj.deleteOne({database, pgschema});
-
-    return tm;
-  }
-};
 
 module.exports = services;

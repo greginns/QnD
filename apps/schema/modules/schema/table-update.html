@@ -1,10 +1,6 @@
 <page id='schema-table-update' style='display: none;'>
   <section id='schema-table-update-section'>
-    <div class='row'>
-      <div class='col-12 mb-2'>
-        <a href='/' mvc-nohandle>Home</a> / <a href='/workspace'>Workspaces</a> / <a mvc-href='/workspace/${workspace}/app/${app}' mvc-handle>Apps</a> / <a mvc-href='/workspace/${workspace}/app/${app}/table' mvc-handle>Tables</a>
-      </div>
-    </div>
+    {% include "./breadcrumb-schema.html" %}
 
     <div class='row justify-content-center'>
       <div class='col-12'>
@@ -35,14 +31,6 @@
                 {{ fields.Text(id=table.desc.id, mvc_value='table.desc', label=table.desc.verbose) }}
               </div>  
             </div>
-            <div class='row pt-2'>
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='success', mvc_click='save', text='Update Table') }}
-              </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='warning', mvc_click='cancel', text='Cancel') }}
-              </div>  
-            </div>
           </div>
 
           <div class='card-footer'>
@@ -52,8 +40,16 @@
                   <span mvc-text='badMessage'></span>  
                 </div>
               </div>
-            </div>         
-
+            </div>
+                     
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='success', mvc_click='save()', text='Update Table') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+              </div>  
+            </div>
           </div>
         </div>
 
