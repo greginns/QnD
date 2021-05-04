@@ -280,7 +280,51 @@ services.table = {
     
     return await models.table.selectOne({database, pgschema, pks: [rec.id] });
   },
+
+  getAssociated: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    let tblRec = await getATable(database, pgschema, [rec.id]);
+    let assoc = [];
+    let tm = new TravelMessage();
+
+    if (tblRec.status != 200) return tblRec;
+
+    for (let fk of tblRec.data.fks || []) {
+      let tblF = await getATable(database, pgschema, [fk.ftable]);
+      let cols = tblF.data.columns.map(function(col) {
+        return {name: col.name};
+      })
+
+      assoc.push({id: fk.ftable, name: tblF.data.name, relname: fk.name, cols});
+    }
+
+    tm.data = assoc;
+
+    return tm;
+  },
+
+  getSets: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    let tblRec = await getATable(database, pgschema, [rec.id]);
+    let assoc = [];
+    let tm = new TravelMessage();
+
+    if (tblRec.status != 200) return tblRec;
     
+    for (let rfk of tblRec.data.rfks || []) {
+      let tblF = await getATable(database, pgschema, [rfk.ftable]);
+      let cols = tblF.data.columns.map(function(col) {
+        return {name: col.name};
+      })
+
+      assoc.push({id: rfk.ftable, name: tblF.data.name, relname: rfk.name, cols});
+    }
+
+    tm.data = assoc;
+  
+    return tm;
+  },
+
   create: async function({database = '', pgschema = '', rec = {}} = {}) {
     // Insert row
     let app = await getAnApp(database, pgschema, [rec.app]);
@@ -377,29 +421,66 @@ console.log(tm1)
   },
 
   insertFK: async function({database = '', pgschema = '', id = '', rec = {}} = {}) {
+    // id = table pk
+/*
+FK
+[
+  {
+    "name":"contact",                         
+    "app":"idTZPGDvGsw6CoScdUjL63",         foreign table's app
+    "ftable":"eKVExJHhzJCpvxRC7Fsn8W",      foreign table
+    "links":[
+      {"source":"contact","target":"id"}    source field ---> target field
+    ]
+  }
+]
+
+RFK
+[
+  {
+    "name":"contact",
+    "app":"jpn23uLqGHnVVjGx8CeMCQ",         source table's app
+    "ftable":"tXSsfRco6GDhRXiB4tL1Dt",      source table
+    "links":[
+      {"source":"id","target":"contact"}    reverse of source
+    ]
+  }
+]
+*/    
     let table = await getATable(database, pgschema, [id]);
     let app = await getAnApp(database, pgschema, [table.data.app]);
     let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
     let res;
 
     if (table.status == 200 && app.status == 200) {
-      let fks = table.fks || [];
+      let fks = table.fks || [];              // existing fks
       let ok = true;
 
       for (let fk of fks) {
-        if (fk.name == rec.table.fk.name) {
+        if (fk.name == rec.fk.name) {   // existing name, skip
           ok = false;
           break;
         }
       }
 
       if (ok) {
-        let fapp = await getAnApp(database, pgschema, [rec.fk.app]);
-        let ftable = await getATable(database, pgschema, [rec.fk.ftable]);
+        // Update source table fks
+        let fapp = await getAnApp(database, pgschema, [rec.fk.app]);        // fk app
+        let ftable = await getATable(database, pgschema, [rec.fk.ftable]);  // fk table
 
-        fks.push(rec.fk);
-        res = await updateTable(database, pgschema, {id, fks});
+        fks.push(rec.fk);       // add new fk
+        res = await updateTable(database, pgschema, {id, fks});   // update table with all fks
 
+        // Create rfk on foreign table
+        let rfks = ftable.rfks || [];
+        let links = rec.fk.links.map(function(link) {
+          return {source: link.target, target: link.source};  // basically reverse source and target
+        })
+
+        rfks.push({name: rec.fk.name, app: table.data.app, ftable: id, links});
+        res = await updateTable(database, pgschema, {id: rec.fk.ftable, rfks});   // update table with all rfks
+
+        // Physically create FK   *** CREATE INDEX for backward relation
         let sb = new SqlBuilder(workspace.data.name, 'postgres');
         let sql = sb.createFK(app.data.name, table.data.name, fapp.data.name, ftable.data.name, rec.fk);
         let tm1 = await exec(database, sql[0]);
@@ -430,28 +511,44 @@ console.log(tm1)
       for (let idx=0; idx<fks.length; idx++) {
         if (name == fks[idx].name) {
           oldFK = fks.splice(idx, 1);
+          oldFK = oldFK[0];
           ok = true;
           break;
         }
       }
 
       if (ok) {
-        oldFK = oldFK[0];
+        // Update source table fks
         let fapp = await getAnApp(database, pgschema, [oldFK.app]);
         let ftable = await getATable(database, pgschema, [oldFK.ftable]);
 
         res = await updateTable(database, pgschema, {id, fks});
 
+        // Update rfk on foreign table
+        let rfks = ftable.data.rfks || [];
+
+        for (let idx = 0; idx<rfks.length; idx++) {
+          let rfk = rfks[idx];
+
+          if (rfk.name == name && rfk.app == table.data.app && rfk.ftable == id) {
+            rfks.splice(idx, 1);
+
+            res = await updateTable(database, pgschema, {id: oldFK.ftable, rfks});
+            break;
+          }
+        }
+
+        // Physically remove fk  *** DELETE INDEX
         let sb = new SqlBuilder(workspace.data.name, 'postgres');
 
         res.data.sql = sb.dropFK(app.data.name, table.data.name, fapp.data.name, ftable.data.name, oldFK)
       }
       else {
-        res = new TravelMessage({status: 404});  
+        res = new TravelMessage({status: 400});  
       }            
     }
     else {
-      res = new TravelMessage({status: 404});
+      res = new TravelMessage({status: 400});
     }
 
     return res;    
@@ -645,8 +742,6 @@ console.log(tm1)
 
     return res;
   },
-
-
 }
 
 services.query = {

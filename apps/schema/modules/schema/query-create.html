@@ -1,4 +1,4 @@
-<page id='schema-query-create' style='display: none;'>
+<page id='schema-query-create' class='fade'>
   <section id='schema-query-create-section'>
     {% include "./breadcrumb-schema.html" %}
     
@@ -23,37 +23,81 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Char(type='text', id=query.name.id, maxlength=query.name.maxLength, mvc_value='query.name', label=query.name.verbose) }}
+                <div class='row mb-2'>
+                  <div class='col-12'>
+                    {{ fields.Char(type='text', id=query.name.id, maxlength=query.name.maxLength, mvc_value='query.name', label=query.name.verbose, mvc_disabled='true') }}
+                  </div>
+                </div>
+                
+                <div class='row mb-2'>
+                  <div class='col-12'>
+                    {{ fields.Integer(type='text', id=query.limit.id, min='0', max='500', step='1', mvc_value='query.limit', label=query.limit.verbose) }}
+                  </div>
+                </div>
+
+                <div class='row mb-2'>
+                  <div class='col-12'>
+                    {{ fields.Integer(type='text', id=query.limit.offset, min='0', max='500', step='1', mvc_value='query.offset', label=query.offset.verbose) }}
+                  </div>
+                </div>
               </div>
 
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Text(id=query.desc.id, mvc_value='query.desc', label=query.desc.verbose) }}
+                {{ fields.Text(id=query.desc.id, rows='5', mvc_value='query.desc', label=query.desc.verbose) }}
               </div>  
             </div>
 
             <div class='row pt-2'>
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Text(id=query.columns.id, mvc_value='query.columns', label=query.columns.verbose) }}
-              </div>  
+              <div class='col-12 col-md-6'>
+                <span class='label-color'>
+                  Columns
+                </span>
+              </div>
+              <div class='col-12 col-md-6'>
+                <span class='label-color'>
+                  Chosen Columns
+                </span>
+              </div>
+            </div>
 
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6'>
+                <span class="anchor anchor-root" id='db4-query-create-column-accordion'>
+                </span>
+              </div>
+              <div class='col-12 col-md-6'>
+                <span id='db4-query-create-column-chosen'>
+                </span>
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6'>
+                <span class='label-color'>
+                  Orderby Columns
+                </span>
+              </div>  
+              <div class='col-12 col-md-6'>
+                <span class='label-color'>
+                  Chosen Orderby Columns
+                </span>
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6'>
+                <span class="anchor anchor-root" id='db4-query-create-orderby-accordion'>
+                </span>
+              </div>
+              <div class='col-12 col-md-6'>
+                <span id='db4-query-create-orderby-chosen'>
+                </span>
+              </div>
+            </div>
+
+            <div class='row pt-4'>
+              <div class='col-12 col-md-6'>
                 {{ fields.Text(id=query.where.id, mvc_value='query.where', label=query.where.verbose) }}
-              </div>  
-            </div>
-
-            <div class='row pt-2'>
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Integer(type='text', id=query.limit.id, min='0', max='500', step='1', mvc_value='query.limit', label=query.limit.verbose) }}
-              </div>  
-
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Integer(type='text', id=query.limit.offset, min='0', max='500', step='1', mvc_value='query.offset', label=query.offset.verbose) }}
-              </div>  
-            </div>            
-
-            <div class='row pt-2'>
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Text(id=query.orderby.id, mvc_value='query.orderby', label=query.orderby.verbose) }}
               </div>  
             </div>
           </div>

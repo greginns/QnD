@@ -39,6 +39,8 @@ Router.add(new RouterMessage({
     '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
     '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
     '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
+    '/schemabuilder/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc/:etc',
   ], 
   rewrite: true,
   id: 'schemabuilder',
@@ -701,6 +703,75 @@ Router.add(new RouterMessage({
   } 
 }));
 
+//getAssociated
+Router.add(new RouterMessage({
+  method: 'get',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id/associated', 
+  id: 'getAssociated',
+  level: VIEW,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.table.getAssociated({database, pgschema, rec: {id} });
+    }
+  
+    return tm.toResponse();
+  }.bind(this), 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+//getSets
+Router.add(new RouterMessage({
+  method: 'get',
+  app: app,
+  subapp: 'table',
+  version: version,
+  path: '/:id/sets', 
+  id: 'getSets',
+  level: VIEW,
+  inAPI,
+  apiInfo: {type: 'json', schema: models.table},
+  allowCORS,
+  fn: async function(req) {
+    let id = req.params.id;
+    let tm;
+
+    if (!id) {
+      tm = new TravelMessage({data: {message: 'Invalid ID'}, status: 400});
+    }
+    else {
+      let {database, pgschema} = getDBAndSchema(req);
+
+      tm = await services.table.getSets({database, pgschema, rec: {id} });
+    }
+  
+    return tm.toResponse();
+  }.bind(this), 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      //{basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
 // create
 Router.add(new RouterMessage({
   method: 'post',

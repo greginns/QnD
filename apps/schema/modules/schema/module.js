@@ -33,7 +33,7 @@ import '/~static/apps/schema/modules/schema/column-update.js';
 import '/~static/apps/schema/modules/schema/column-delete.js';
 import '/~static/apps/schema/modules/schema/query-list.js';
 import '/~static/apps/schema/modules/schema/query-create.js';
-import '/~static/apps/schema/modules/schema/query-update.js';
+//import '/~static/apps/schema/modules/schema/query-update.js';
 import '/~static/apps/schema/modules/schema/query-delete.js';
 
 Module.breadcrumb = async function({db='', ws='', app='', table='', query=''} = {}) {
@@ -62,7 +62,7 @@ Module.breadcrumb = async function({db='', ws='', app='', table='', query=''} = 
           if (query) {
             let queryRec = await Module.tableStores.query.getOne(query);
     
-            hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace/${ws}/app/${app}/table/${table}/query')">${queryRec.name}</span>`});
+            hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace/${ws}/app/${app}/table/${table}/query')">Queries</span>`});
           }
         }
       }

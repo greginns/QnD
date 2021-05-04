@@ -28,7 +28,7 @@ class Workspace_delete extends App.MVC {
   
   async inView(params) {
     let id = params.id || '';
-    this.database = params.db;
+    this.model.database = params.db;
 
     if (!id) this.gotoList();
 
@@ -83,7 +83,7 @@ class Workspace_delete extends App.MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/database/${this.database}/workspace`);
+    Module.pager.go(`/database/${this.model.database}/workspace`);
   }
   
   breadcrumbGo(ev) {

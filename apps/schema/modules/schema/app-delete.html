@@ -1,4 +1,4 @@
-<page id='schema-app-delete' style='display: none;'>
+<page id='schema-app-delete' class='fade'>
   <section id='schema-app-delete-section'>
     {% include "./breadcrumb-schema.html" %}
 
@@ -35,16 +35,16 @@
                   <span mvc-text='badMessage'></span>  
                 </div>
               </div>
+            </div>
 
-              <div class='row pt-2'>
-                <div class='col-6 col-md-2 mb-4'>
-                  {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete App') }}
-                </div>  
-                <div class='col-6 col-md-2 mb-4'>
-                  {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
-                </div>  
-              </div>              
-            </div>         
+            <div class='row pt-2'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete App') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+              </div>  
+            </div>              
 
             <div class='row pt-2'>
               <div class='col-12'>

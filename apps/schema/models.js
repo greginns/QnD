@@ -169,6 +169,7 @@ const table = class extends Model {
         columns: new Fields.Json({verbose: 'Columns'}),
         pk: new Fields.Json({default: '[]', verbose: 'PK'}),
         fks: new Fields.Json({default: '[]', verbose: 'FKs'}),
+        rfks: new Fields.Json({default: '[]', verbose: 'Reverse FKs'}),
         indexes: new Fields.Json({default: '[]', verbose: 'Indexes'}),
         orderby: new Fields.Json({default: '[]', verbose: 'Order By'}),
         workspace: new Fields.SUUID({notNull: true, verbose: 'Workspace ID'}),

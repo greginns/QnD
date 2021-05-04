@@ -1,4 +1,4 @@
-<page id='schema-table-config-fks-create' style='display: none;'>
+<page id='schema-table-config-fks-create' class='fade'>
   <section id='schema-table-config-fks-create-section'>
     {% include "./breadcrumb-schema.html" %}
 
@@ -29,11 +29,11 @@
 
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.SelectMVC(id='fk_create_apps', size='1', mvc_value='fk.app', mvc_each='apps', mvc_on='{"change": "getForeignTables"}', valueField='id', textField='name', label='Choose an App', multiple='')}}
+                {{ fields.SelectMVC(id='fk_create_apps', size='1', mvc_value='fk.app', mvc_each='apps', mvc_on='{"change": "getForeignTables()"}', valueField='id', textField='name', label='Choose an App', multiple='')}}
               </div>  
 
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.SelectMVC(id='fk_create_ftables', size='1', mvc_value='fk.ftable', mvc_each='foreignTables', mvc_on='{"change": "getForeignColumns"}', valueField='id', textField='name', label='Choose a Foreign Table', multiple='')}}
+                {{ fields.SelectMVC(id='fk_create_ftables', size='1', mvc_value='fk.ftable', mvc_each='foreignTables', mvc_on='{"change": "getForeignColumns()"}', valueField='id', textField='name', label='Choose a Foreign Table', multiple='')}}
               </div>  
             </div>
 

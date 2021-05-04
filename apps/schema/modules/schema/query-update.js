@@ -52,7 +52,7 @@ class Query_update extends App.MVC {
       this.gotoList();
     }    
 
-    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
+    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table, query: this.model.queryId});
   }
 
   outView() {

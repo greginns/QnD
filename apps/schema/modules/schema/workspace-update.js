@@ -92,6 +92,11 @@ class Workspace_update extends App.MVC {
   gotoList() {
     Module.pager.go(`/database/${this.model.database}/workspace`);
   }
+
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
+  }
+
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
