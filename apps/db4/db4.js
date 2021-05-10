@@ -1,8 +1,5 @@
-import {MVC} from '/~static/lib/client/core/mvc.js';
-import {addMVCBindings} from '/~static/lib/client/core/mvc-bindings.js';
-import {addDB4Functions} from '/~static/lib/client/core/mvc-db4.js';
 import {io} from "/static/v1/static/lib/client/core/io.js";
-import {App} from '/~static/project/app.js';
+import {App} from '/~static/project/db4app.js';
 
 class Db4MVC extends App.MVC {
   constructor(element) {
@@ -37,7 +34,7 @@ console.log(this.model.contacts.proxyFor)
 };
 
 // fire it up!
-for (let mel of document.querySelectorAll('[mvc-mvc]')) {
+for (let mel of document.querySelectorAll('[db4-mvc]')) {
   let mvc = new Db4MVC(mel);
 
   let attrTypes = ['string', 'number', 'object', 'array'];
@@ -159,7 +156,7 @@ for (let mel of document.querySelectorAll('[mvc-mvc]')) {
   passwordEl.addEventListener('keyup', key13);
   loginBtnEl.addEventListener('click', login);
   
-  App.reLogin = loginOpen;
+  window.QNDreLogin = loginOpen;
 
   io.get({}, App.url + '/db4/v1/login/test')
 })();

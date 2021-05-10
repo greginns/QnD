@@ -3,7 +3,7 @@ import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Process_create extends MVC {
+class Process_update extends MVC {
   constructor(element) {
     super(element);
   }
@@ -21,13 +21,26 @@ class Process_create extends MVC {
 
   async ready() {
     return new Promise(async function(resolve) {
-
       resolve();
     }.bind(this));
   }
   
   async inView(params) {
-    this.model.bizprocess.trigger = 'P';
+    let id = params.id || '';
+
+    if (!id) this.gotoList();
+
+    let res = await Module.tableStores.bizprocess.getOne(id);
+
+    if (Object.keys(res).length > 0) {
+      this.model.bizprocess = res;
+      this.origProcess = res;
+    }
+    else {
+      alert('Missing Process');
+
+      this.gotoList();
+    }        
   }
 
   outView() {
@@ -36,10 +49,17 @@ class Process_create extends MVC {
 
   async save(ev) {
     let bizprocess = this.model.bizprocess.toJSON();
-    
-    bizprocess.steps = [];
-    bizprocess.initdata = {};
-    bizprocess.respdata = {};
+    let diffs = utils.object.diff(this.origProcess, bizprocess);
+
+    if (Object.keys(diffs).length == 0) {
+      this.model.badMessage = 'No Changes to Update';
+      
+      setTimeout(function() {
+        this.model.badMessage = '';
+      }.bind(this), 2500);
+
+      return;
+    }
 
     if (!bizprocess.name) {
       this.model.badMessage = 'Please Enter a Process Name';
@@ -56,12 +76,10 @@ class Process_create extends MVC {
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = await Module.tableStores.bizprocess.insert(bizprocess);
+    let res = await Module.tableStores.bizprocess.update(bizprocess.id, diffs);
 
     if (res.status == 200) {
-      utils.modals.toast('Process', 'Created', 2000);
-   
-      this.gotoSteps(res.data.id);
+      utils.modals.toast('Process', 'Updated', 2000);
     }
     else {
       this.displayErrors(res);
@@ -79,16 +97,18 @@ class Process_create extends MVC {
     Module.pager.go(`/`);
   }
 
-  gotoSteps(id) {
+  steps() {
+    let id = this.model.bizprocess.id;
+
     Module.pager.go(`/${id}/steps`);
   }
 
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('process-create');   // page html
-let mvc1 = new Process_create('process-create-section');
+let el1 = document.getElementById('process-update');   // page html
+let mvc1 = new Process_update('process-update-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/create', title: 'Process - Create', sections: [section1]});
+let page1 = new Page({el: el1, path: '/:id/update', title: 'Process - Update', sections: [section1]});
 
 Module.pages.push(page1);

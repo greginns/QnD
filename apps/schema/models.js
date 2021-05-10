@@ -173,7 +173,8 @@ const table = class extends Model {
         indexes: new Fields.Json({default: '[]', verbose: 'Indexes'}),
         orderby: new Fields.Json({default: '[]', verbose: 'Order By'}),
         workspace: new Fields.SUUID({notNull: true, verbose: 'Workspace ID'}),
-        app: new Fields.SUUID({notNull: true, verbose: 'App ID'}),        
+        app: new Fields.SUUID({notNull: true, verbose: 'App ID'}),     
+        apiacl: new Fields.Json({default: {"one": false, "many": false, "create": false, "update": false, "delete": false}, verbose: 'API ACL'}),   // one, many, create, update, delete
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
         updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
       },
@@ -212,9 +213,10 @@ const query = class extends Model {
         table: new Fields.SUUID({notNull: true, verbose: 'Table ID'}),        
         columns: new Fields.Json({verbose: 'Columns'}),
         where: new Fields.Text({null: true, verbose: 'Where clause'}),
-        limit: new Fields.Integer({null: true, verbose: 'Limit'}),
-        offset: new Fields.Integer({null: true, verbose: 'Offset'}),
         orderby: new Fields.Json({verbose: 'Orderby'}),
+        sql: new Fields.Text({null: true, verbose: 'Generated SQL'}),
+        valueobj: new Fields.Json({verbose: 'Values object'}),
+        api: new Fields.Boolean({default: false, verbose: 'API Access'}),
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
         updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
       },
@@ -255,6 +257,7 @@ const bizprocess = class extends Model {
         initdata: new Fields.Json({verbose: 'Initial Dataschema'}),
         respdata: new Fields.Json({verbose: 'Response Dataschema'}),
         steps: new Fields.Json({verbose: 'Steps'}),
+        api: new Fields.Boolean({default: false, verbose: 'API Access'}),
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
         updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
       },
@@ -274,4 +277,68 @@ const bizprocess = class extends Model {
   }
 };
 
-module.exports = {user, database, workspace, application, table, query, bizprocess};
+const code = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Code ID'}),
+        name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Function Name'}),
+        tag: new Fields.Char({null: true, maxLength: 100, verbose: 'Tag'}),
+        desc: new Fields.Text({null: true, verbose: 'Description'}),
+        code: new Fields.Text({null: true, verbose: 'Code'}),
+        type: new Fields.Char({notNull: true, maxLength: 2, verbose: 'Usage'}),
+        created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
+        updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
+      },
+
+      constraints: {
+        pk: ['id'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['name'],
+      
+      dbschema: 'public',
+      app,
+      desc: 'Code'
+    }
+  }
+};
+
+const codebundle = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Bundle ID'}),
+        name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Bundle Name'}),
+        desc: new Fields.Text({null: true, verbose: 'Bundle Description'}),
+        bundle: new Fields.Json({null: true, verbose: 'Functions'}),
+        created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
+        updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
+      },
+
+      constraints: {
+        pk: ['id'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['name'],
+      
+      dbschema: 'public',
+      app,
+      desc: 'Code Bundles'
+    }
+  }
+};
+
+module.exports = {user, database, workspace, application, table, query, bizprocess, code, codebundle};

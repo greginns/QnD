@@ -9,8 +9,11 @@ const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {jsonQueryExecify, SqlBuilder} = require(root + '/lib/server/utils/sqlUtil.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
-const loginServices = require(root + '/apps/db4admin/services.js');
+//const loginServices = require(root + '/apps/db4admin/services.js');
 const {exec} = require(root + '/lib/server/utils/db.js');
+const {makeQuerySQL} = require(root + '/apps/db4/services.js');
+
+const {actionGroups} = require(root + '/apps/db4/processes/index.js');
 
 const app = getAppName(__dirname);
 const services = {};
@@ -81,6 +84,36 @@ services.output = {
       ctx.table = models.table.getColumnDefns();
       ctx.query = models.query.getColumnDefns();
       ctx.bizprocess = models.bizprocess.getColumnDefns();
+
+      ctx.USER = JSON.stringify(req.session.data.user);
+
+      try {
+        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+        tm.type = 'html';
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+    }
+    catch(err) {
+      tm.status = 500;
+      tm.message = err.toString();
+    }
+
+    return tm;
+  },  
+
+  code: async function(req) {
+    // main admin manage page.  Needs a user so won't get here without one
+    let tm = new TravelMessage();
+
+    try {
+      let ctx = {};
+      let tmpl = 'apps/schema/modules/code/module.html';
+
+      ctx.code = models.code.getColumnDefns();
+      ctx.codebundle = models.codebundle.getColumnDefns();
 
       ctx.USER = JSON.stringify(req.session.data.user);
 
@@ -768,13 +801,15 @@ services.query = {
     
   create: async function({database = '', pgschema = '', rec = {}} = {}) {
     // Insert row
+    let [sql, valueobj] = await makeQuerySQL(database, rec);
+
+    rec.sql = sql;
+    rec.valueobj = valueobj;    
+
     let tobj = new models.query(rec);
     let tm = await tobj.insertOne({database, pgschema});
 
-    let sql = SqlBuilder.createSchema(rec.name, 'postgres');
-    let tm1 = await exec(database, sql[0]);
-
-    console.log(tm1)
+    console.log(tm)
 
     return tm;    
   },
@@ -782,6 +817,11 @@ services.query = {
   update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
     // Update row
     rec.id = id;
+
+    let [sql, valueobj] = await makeQuerySQL(database, rec);
+
+    rec.sql = sql;
+    rec.valueobj = valueobj;        
 
     let tobj = new models.query(rec);
     let tm = await tobj.updateOne({database, pgschema});
@@ -800,7 +840,7 @@ services.query = {
     console.log(tm1)
 
     return tm;
-  }
+  },
 };
 
 services.bizprocess = {
@@ -853,6 +893,153 @@ console.log(rec)
     let tm1 = await exec(database, sql[0]);
 
     console.log(tm1)
+
+    return tm;
+  },
+  
+  getGroups: function() {
+    let tm = new TravelMessage();
+    let data = [];
+
+    data.push({value: '_', text: 'Process Handler'});
+    data.push({value: 'io', text: 'I/O'});
+    data.push({value: 'email', text: 'Email'});
+    data.push({value: 'doc', text: 'Document Process'});
+
+    tm.data = data;
+
+    return tm;
+  },
+
+  getActions: function() {
+    let tm = new TravelMessage();
+    let data = [];
+
+    for (let group in actionGroups) {
+      let v = actionGroups[group];
+
+      data.push({group: v.group, text: v.name, value: group});
+    }
+
+    tm.data = data;
+
+    return tm;
+  },
+
+  getSubActions: function(action) {
+    let tm = new TravelMessage();
+    let group = actionGroups[action];
+    let data = group.actionList;
+
+    tm.data = data;
+
+    return tm;
+  },
+
+  getSubActionInputs: function(action, subaction) {
+    let tm = new TravelMessage();
+    let data = actionGroups[action].actionParams[subaction];
+
+    tm.data = data;
+
+    return tm;
+  }
+
+};
+
+services.code = {
+  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.code.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.code.select({database, pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
+
+      tm.data = models.code.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+    
+    return await models.code.selectOne({database, pgschema, pks: [rec.id] });
+  },
+    
+  create: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Insert row
+    let tobj = new models.code(rec);
+    let tm = await tobj.insertOne({database, pgschema});
+
+    return tm;    
+  },
+  
+  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.code(rec);
+    let tm = await tobj.updateOne({database, pgschema});
+    
+    return tm;
+  },
+  
+  delete: async function({database = '', pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.code({ id });
+    let tm = await tobj.deleteOne({database, pgschema});
+
+    return tm;
+  }
+};
+
+services.codebundle = {
+  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.codebundle.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.codebundle.select({database, pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
+
+      tm.data = models.codebundle.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+    
+    return await models.codebundle.selectOne({database, pgschema, pks: [rec.id] });
+  },
+    
+  create: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Insert row
+    let tobj = new models.codebundle(rec);
+    let tm = await tobj.insertOne({database, pgschema});
+
+    return tm;    
+  },
+  
+  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.codebundle(rec);
+    let tm = await tobj.updateOne({database, pgschema});
+    
+    return tm;
+  },
+  
+  delete: async function({database = '', pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.codebundle({ id });
+    let tm = await tobj.deleteOne({database, pgschema});
 
     return tm;
   }

@@ -1,4 +1,4 @@
-<page id='process-create' style='display: none;'>
+<page id='process-create' class='fade'>
   <section id='process-create-section'>
     <div class='row'>
       <div class='col-12 mb-2'>
@@ -30,11 +30,13 @@
                 {{ fields.Char(type='text', id=bizprocess.name.id, maxlength=bizprocess.name.maxLength, mvc_value='bizprocess.name', label=bizprocess.name.verbose) }}
               </div>  
             </div>
+            
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 {{ fields.Text(id=bizprocess.desc.id, mvc_value='bizprocess.desc', label=bizprocess.desc.verbose) }}
               </div>  
             </div>
+            
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <label class='label-color'>Trigger</label>
@@ -50,15 +52,23 @@
                 </div>    
               </div>  
             </div>
+            
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 {{ fields.Char(id=bizprocess.eventid.id, mvc_value='bizprocess.eventid', label=bizprocess.eventid.verbose, mvc_xenabled='this.model.bizprocess.trigger == "E"') }}
               </div>  
             </div>
+            
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 {{ fields.Char(id=bizprocess.timer.id, mvc_value='bizprocess.timer', label=bizprocess.timer.verbose, mvc_xenabled='this.model.bizprocess.trigger == "T"') }}
               </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12'>
+                {{ fields.Boolean(id=bizprocess.api.id, mvc_checked='bizprocess.api', label=bizprocess.api.verbose) }}    
+              </div>
             </div>
           </div>
 

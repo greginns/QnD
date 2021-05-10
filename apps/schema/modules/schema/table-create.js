@@ -32,6 +32,8 @@ class Table_create extends App.MVC {
     this.model.workspace = params.workspace;
     this.model.app = params.app;
 
+    this.model.table = {apiacl: {one: false, many: false, create: false, update: false, delete: false}};
+
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app});
   }
 

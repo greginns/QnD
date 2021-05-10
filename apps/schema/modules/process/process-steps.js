@@ -3,7 +3,6 @@ import {utils} from '/~static/lib/client/core/utils.js';
 import {io} from '/~static/lib/client/core/io.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
-import {db4ExpressionParser} from '/~static/lib/client/core/db4ExpressionParser.js';
 
 class Process_create extends MVC {
   constructor(element) {
@@ -45,10 +44,10 @@ class Process_create extends MVC {
     return new Promise(async function(resolve) {
       let res;
 
-      res = await io.get({}, '/db4/v1/api/process/groups');
+      res = await io.get({}, '/schema/v1/bizprocess/groups');
       this.actionGroup = res.data;
 
-      res = await io.get({}, '/db4/v1/api/process/actions');
+      res = await io.get({}, '/schema/v1/bizprocess/actions');
       this.actionList = res.data;
 
       this.buildSelect();
@@ -303,7 +302,7 @@ class Process_create extends MVC {
 
     let actions = [{value: '', text: 'No Subaction'}];
 
-    let res = await io.get({}, '/db4/v1/api/process/actions/' + nv);
+    let res = await io.get({}, '/db4/v1/bizprocess/actions/' + nv);
 
     if (res.status == 200) {
       for (let subact of res.data) {
@@ -323,7 +322,7 @@ class Process_create extends MVC {
 
     this.model.step.data = [];
 
-    let res = await io.get({}, `/db4/v1/api/process/${action}/${subaction}`);
+    let res = await io.get({}, `/db4/v1/bizprocess/${action}/${subaction}`);
 
     if (res.status == 200) {
       // build inputs

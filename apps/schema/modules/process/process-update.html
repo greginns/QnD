@@ -1,4 +1,4 @@
-<page id='process-update' style='display: none;'>
+<page id='process-update' class='fade'>
   <section id='process-update-section'>
     <div class='row'>
       <div class='col-12 mb-2'>
@@ -59,6 +59,11 @@
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 {{ fields.Char(id=bizprocess.timer.id, mvc_value='bizprocess.timer', label=bizprocess.timer.verbose, mvc_xenabled='this.model.bizprocess.trigger == "T"') }}
               </div>  
+            </div>
+            <div class='row pt-2'>
+              <div class='col-12'>
+                {{ fields.Boolean(id=bizprocess.api.id, mvc_checked='bizprocess.api', label=bizprocess.api.verbose) }}    
+              </div>
             </div>
           </div>
 

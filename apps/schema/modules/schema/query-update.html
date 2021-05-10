@@ -28,16 +28,9 @@
                     {{ fields.Char(type='text', id=query.name.id, maxlength=query.name.maxLength, mvc_value='query.name', label=query.name.verbose, mvc_disabled='true') }}
                   </div>
                 </div>
-                
                 <div class='row mb-2'>
                   <div class='col-12'>
-                    {{ fields.Integer(type='text', id=query.limit.id, min='0', max='500', step='1', mvc_value='query.limit', label=query.limit.verbose) }}
-                  </div>
-                </div>
-
-                <div class='row mb-2'>
-                  <div class='col-12'>
-                    {{ fields.Integer(type='text', id=query.limit.offset, min='0', max='500', step='1', mvc_value='query.offset', label=query.offset.verbose) }}
+                    {{ fields.Boolean(id=query.api.id, mvc_checked='query.api', label=query.api.verbose) }}    
                   </div>
                 </div>
               </div>
@@ -71,7 +64,7 @@
               </div>
             </div>
 
-            <div class='row pt-2'>
+            <div class='row pt-4'>
               <div class='col-12 col-md-6'>
                 <span class='label-color'>
                   Orderby Columns
@@ -98,6 +91,9 @@
             <div class='row pt-4'>
               <div class='col-12 col-md-6'>
                 {{ fields.Text(id=query.where.id, mvc_value='query.where', label=query.where.verbose) }}
+              </div>  
+              <div class='col-12 col-md-6'>
+                {{ fields.Text(id=query.sql.id, mvc_value='query.sql', label=query.sql.verbose, mvc_disabled='true')}}
               </div>  
             </div>
           </div>

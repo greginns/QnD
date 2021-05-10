@@ -6,11 +6,12 @@ import {Pages} from '/~static/lib/client/core/paging.js';
 
 // js for pages
 //import '/~static/apps/schema/modules/process/navbar.js';
-import '/~static/apps/schema/modules/process/process-list.js';
-import '/~static/apps/schema/modules/process/process-create.js';
-import '/~static/apps/schema/modules/process/process-update.js';
-import '/~static/apps/schema/modules/process/process-delete.js';
-import '/~static/apps/schema/modules/process/process-steps.js';
+import '/~static/apps/schema/modules/code/code-list.js';
+import '/~static/apps/schema/modules/code/code-create.js';
+import '/~static/apps/schema/modules/code/code-delete.js';
+import '/~static/apps/schema/modules/code/codebundle-list.js';
+import '/~static/apps/schema/modules/code/codebundle-create.js';
+import '/~static/apps/schema/modules/code/codebundle-delete.js';
 
 let moduleStart = function() {
   let connectToData = async function() {
@@ -19,10 +20,8 @@ let moduleStart = function() {
 
     // setup data table access
     // gets us access to raw data.
-    Module.data.workspace = new TableAccess({modelName: 'workspace', url: `/schema/v1/workspace`});
-    Module.data.application = new TableAccess({modelName: 'application', url: `/schema/v1/application`});
-    Module.data.table = new TableAccess({modelName: 'table', url: `/schema/v1/table`});
-    Module.data.bizprocess = new TableAccess({modelName: 'bizprocess', url: `/schema/v1/bizprocess`});
+    Module.data.code = new TableAccess({modelName: 'code', url: `/schema/v1/code`});
+    Module.data.codebundle = new TableAccess({modelName: 'codebundle', url: `/schema/v1/codebundle`});
 
     // url-like of interest to follow model changes
     // WS data change notifications.  
@@ -31,23 +30,17 @@ let moduleStart = function() {
     // First path segment must be the same as app
     App.wsDataWatch = new WSDataComm('schema', 'roam3.adventurebooking.com:3011');                 // WS instances for this app
 
-    model = `/schema/workspace`;
+    model = `/schema/code`;
     App.wsDataWatch.addModel(model);             
-    Module.tableStores.workspace = new TableStore({accessor: Module.data.workspace, model, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.code = new TableStore({accessor: Module.data.code, model, safemode});  // setup a table store in Module so all pages can access
 
-    model = `/schema/application`;
-    App.wsDataWatch.addModel(model);
-    Module.tableStores.application = new TableStore({accessor: Module.data.application, model, safemode});  // setup a table store in Module so all pages can access
+    getAllPromises.push(Module.tableStores.code.getAll());                 
 
-    model = `/schema/table`;
-    App.wsDataWatch.addModel(model);
-    Module.tableStores.table = new TableStore({accessor: Module.data.table, model, safemode});  // setup a table store in Module so all pages can access
-
-    model = `/schema/bizprocess`;                    
+    model = `/schema/codebundle`;
     App.wsDataWatch.addModel(model);             
-    Module.tableStores.bizprocess = new TableStore({accessor: Module.data.bizprocess, model, safemode});  // setup a table store in Module so all pages can access
+    Module.tableStores.codebundle = new TableStore({accessor: Module.data.codebundle, model, safemode});  // setup a table store in Module so all pages can access
 
-    getAllPromises.push(Module.tableStores.workspace.getAll());                 // seed the workspace store
+    getAllPromises.push(Module.tableStores.codebundle.getAll());                 
 
     // start following via WS ---
     App.wsDataWatch.start();
@@ -66,7 +59,7 @@ let moduleStart = function() {
   let startPages = async function() {
     // page URL data  
     const module = location.pathname.split('/')[1]; 
-    const startPage = 'create';
+    const startPage = 'code';
 
     // Start up pages.  Module.pages saved up all page references
     const pager = new Pages({root: `/${module}`, pages: Module.pages});
@@ -88,6 +81,6 @@ let moduleStart = function() {
   connectToData();
 }
 
-window.name = 'DB4_process'
+window.name = 'DB4_code'
 
 moduleStart();

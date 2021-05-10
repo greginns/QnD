@@ -19,6 +19,7 @@ class Table_update extends App.MVC {
       message: ''
     };
 
+    this.model.true = true;
   }
 
   async ready() {

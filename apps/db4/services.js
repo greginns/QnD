@@ -9,17 +9,7 @@ const {CSRF, Session, Admin} = require(root + '/apps/db4admin/models.js');
 const {exec} = require(root + '/lib/server/utils/db.js');
 const {buildActionData} = require(root + '/lib/server/utils/processes.js');
 
-const actionGroups = {};
-actionGroups.smtp2go = require('./processes/smtp2go.js');
-actionGroups.elastic = require('./processes/elastic.js');
-actionGroups.mailmerge = require('./processes/mailmerge.js');
-actionGroups.io_int = require('./processes/io_int.js');
-actionGroups.io_ext = require('./processes/io_ext.js');
-actionGroups.micro_services = require('./processes/micro_services.js');
-
-let {_initial, _final} = require('./processes/_.js');
-actionGroups._initial = _initial;
-actionGroups._final = _final;
+const {actionGroups} = require('./processes/index.js');
 
 const app = getAppName(__dirname);
 const database = 'db4admin';
@@ -67,13 +57,53 @@ async function verifyCSRF(userID, token, sessionID) {
   return tm.data.data.user.id == userID;
 }
 
-
 async function makeCSRF(sessdata, token) {
   // create CSRF record
   let rec = new CSRF({data: {user: sessdata}, session: token});
   let res = await rec.insertOne({database, pgschema});
 
   return res.data.token;
+}
+
+async function makeQuerySQL(database, qData) {
+  let table = qData.table;
+
+  let ti = new TableInfo(database, table);
+  await ti.init();
+  
+  // select columns
+  let cols = await ti.makeQueryCols(qData.columns);
+
+  // from table
+  let from = ti.makeSchemaTableName();
+
+  // joins
+  let joins = await ti.makeQueryJoins(qData.columns);
+
+  // where
+  let [where, valueobj] = ti.makeQueryWhere(qData.where);
+
+  // orderby
+  let orderby = await ti.makeQueryCols(qData.orderby);
+
+  let sql = 'SELECT ';
+  sql += cols.join(',') + '\n';
+  sql += 'FROM ' + from + '\n';
+  sql += joins.join('\n') + '\n';
+  sql += where + '\n';
+  if (orderby.length > 0) sql += ('ORDER BY ' + orderby.join(',') + '\n');
+
+  return [sql, valueobj];
+}
+
+function substituteValues(valueobj, data) {
+  let values = [];
+
+  for (let val of valueobj) {
+    values.push(data[val] || '');
+  }
+
+  return values;
 }
 
 /*
@@ -287,6 +317,7 @@ const services = {
 
     insert: async function(database, table, data) {
       let tm;
+
       let ti = new TableInfo(database, table);
       await ti.init();
 
@@ -304,6 +335,7 @@ const services = {
 
     update: async function(database, table, data) {
       let tm;
+
       let ti = new TableInfo(database, table);
       await ti.init();
 
@@ -336,32 +368,33 @@ const services = {
 
       return tm;
     },
-    query: async function(database, qid) {
-      let tm;
-      let table = 'eKVExJHhzJCpvxRC7Fsn8W'
-      let ti = new TableInfo(database, table);
-      await ti.init();
 
-      let filters = {};
-      let columns = ['*'];
+    query: async function(database, qid, opts) {
+      let tm = new TravelMessage();
+      let qRec = await models.query.selectOne({database, pgschema: 'public', pks: qid});
+      
+      if (qRec.status !=200) return qRec;
 
-      let [text, values, err] = ti.makeSelectManySQL(filters, columns);
+      let text = qRec.data.sql;
+      let valueobj = qRec.data.valueobj;
+      let values = substituteValues(valueobj, opts);
 
-      if (err) {
-        tm = new TravelMessage({status: 400, data: err, type: 'text'});
-      }
-      else {
-        tm = await exec(database, {text, values});
-        console.log(tm)
+      if ('_offset' in opts) {
+        text += 'OFFSET ' + opts['_offset'] + '\n';
       }
 
+      if ('_limit' in opts) {
+        text += 'LIMIT ' + opts['_limit'] + '\n';
+      }      
+console.log(text, values)
+      tm = await exec(database, {text, values});
+console.log(tm)
       return tm;
     },
-
   },
 
   process: {
-    output: async function(database, pid, body) {
+    execute: async function(database, pid, body) {
       let tm = new TravelMessage();
       let data = {};
       let security = {
@@ -407,55 +440,6 @@ const services = {
       tm.data = data;
       return tm;      
     },
-
-    getGroups: function() {
-      let tm = new TravelMessage();
-      let data = [];
-
-      data.push({value: '_', text: 'Process Handler'});
-      data.push({value: 'io', text: 'I/O'});
-      data.push({value: 'email', text: 'Email'});
-      data.push({value: 'doc', text: 'Document Process'});
-
-      tm.data = data;
-
-      return tm;
-    },
-
-    getActions: function() {
-      let tm = new TravelMessage();
-      let data = [];
-
-      for (let group in actionGroups) {
-        let v = actionGroups[group];
-
-        data.push({group: v.group, text: v.name, value: group});
-      }
-
-      tm.data = data;
-
-      return tm;
-    },
-
-    getSubActions: function(action) {
-      let tm = new TravelMessage();
-      let group = actionGroups[action];
-      let data = group.actionList;
-
-      tm.data = data;
-
-      return tm;
-    },
-
-    getSubActionInputs: function(action, subaction) {
-      let tm = new TravelMessage();
-      let data = actionGroups[action].actionParams[subaction];
-
-      tm.data = data;
-
-      return tm;
-    }
-
   },
 
   auth: {
@@ -593,22 +577,39 @@ services.session = {
 
 
 class TableInfo {
+  // rtns to save/retrieve data
   constructor(database, table) {
     this.database = database;
     this.table = table;
   }
 
   async init() {
-    let tbl = await models.table.selectOne({database: this.database, pgschema: 'public', pks: this.table});
-    let app = await models.application.selectOne({database: this.database, pgschema: 'public', pks: tbl.data.app});
-    let workspace = await models.workspace.selectOne({database: this.database, pgschema: 'public', pks: app.data.workspace});
+    let tbl = await this.getATable(this.table);
+    let app = await this.getAnApp(tbl.data.app);
+    let workspace = await this.getAWorkspace(app.data.workspace);
 
     this.tableInfo = tbl.data;
     this.appInfo = app.data;
     this.workspaceInfo = workspace.data;
 
-    this.tableName = `${this.appInfo.name}_${this.tableInfo.name}`;
+    this.tableName = this.makeTableName(this.appInfo.name, this.tableInfo.name);
     this.schemaName = `${this.workspaceInfo.name}`;
+  }
+
+  async getATable(table) {
+    return await models.table.selectOne({database: this.database, pgschema: 'public', pks: table});
+  }
+
+  async getAnApp(app) {
+    return await models.application.selectOne({database: this.database, pgschema: 'public', pks: app});
+  }
+
+  async getAWorkspace(ws) {
+    return await models.workspace.selectOne({database: this.database, pgschema: 'public', pks: ws});
+  }
+
+  makeTableName(app, table) {
+    return `${app}_${table}`;
   }
 
   getAllColumns() {
@@ -645,7 +646,7 @@ class TableInfo {
     return cols;
   }
 
-  makeTableName() {
+  makeSchemaTableName() {
     return `"${this.schemaName}"."${this.tableName}"`;
   }
 
@@ -763,7 +764,7 @@ class TableInfo {
       err = `The following fields are mandatory: ${errors.join(', ')}`;
     }
 
-    return [`INSERT INTO ${this.makeTableName()} (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING ${allCols.join(',')};`, values, err];
+    return [`INSERT INTO ${this.makeSchemaTableName()} (${cols.join(',')}) VALUES(${params.join(',')}) RETURNING ${allCols.join(',')};`, values, err];
   }
 
   makeUpdateOneSQL(data) {
@@ -799,7 +800,7 @@ class TableInfo {
 
     allCols = allCols.concat(this.makePKColumns());
 
-    return [`UPDATE ${this.makeTableName()} SET ${set.join(',')} WHERE ${where.join(' AND ')} RETURNING ${allCols};`, values, err];
+    return [`UPDATE ${this.makeSchemaTableName()} SET ${set.join(',')} WHERE ${where.join(' AND ')} RETURNING ${allCols};`, values, err];
   }
 
   makeDeleteOneSQL(data) {
@@ -837,7 +838,7 @@ class TableInfo {
       err = `The following fields are mandatory: ${errors.join(', ')}`;
     }
 
-    return [`DELETE FROM ${this.makeTableName()} WHERE ${where.join(' AND ')} RETURNING ${allCols};`, values, err];
+    return [`DELETE FROM ${this.makeSchemaTableName()} WHERE ${where.join(' AND ')} RETURNING ${allCols};`, values, err];
   }
 
   makeSelectOneSQL(filters, cols) {
@@ -878,7 +879,7 @@ class TableInfo {
       err = `The following fields are mandatory: ${errors.join(', ')}`;
     }
 
-    return [`SELECT ${selCols} FROM ${this.makeTableName()} WHERE ${where.join(' AND ')};`, values, err];
+    return [`SELECT ${selCols} FROM ${this.makeSchemaTableName()} WHERE ${where.join(' AND ')};`, values, err];
   }
 
   makeSelectManySQL(filters, cols) {
@@ -908,11 +909,186 @@ class TableInfo {
 
     selCols = selCols.concat(this.makePKColumns());
 
-    text = `SELECT ${selCols} FROM ${this.makeTableName()}`;
+    text = `SELECT ${selCols} FROM ${this.makeSchemaTableName()}`;
     if (where.length > 0) text += `WHERE ${where.join(' AND ')};`
 
     return [text, values, err];
   }
+
+  async makeQueryCols(cols) {
+    // table.field
+    // table<|>fkname.field
+    // table<|>fkname.table<|>fkname.field
+    const colList = [];
+    const tableList = {};
+    const appList = {};
+
+    for (let col of cols) {
+      let parts = col.split('.');
+      let field = parts.pop();
+      let table = parts.pop();
+
+      if (table.indexOf('<') > -1) table = table.substr(0, table.indexOf('<'));
+      if (table.indexOf('>') > -1) table = table.substr(0, table.indexOf('>'));
+
+      if (!(table in tableList)) {
+        let tRec = await this.getATable(table);
+
+        tableList[table] = tRec.data;
+      }
+
+      let app = tableList[table].app;
+
+      if (!(app in appList)) {
+        let aRec = await this.getAnApp(app);
+
+        appList[app] = aRec.data;
+      }
+
+      let tName = this.makeTableName(appList[app].name, tableList[table].name);
+
+      colList.push(`"${tName}"."${field}"`);
+    }
+
+    return colList;
+  }
+
+  async makeQueryJoins(cols) {
+    // [
+    // "eKVExJHhzJCpvxRC7Fsn8W<contact.tXSsfRco6GDhRXiB4tL1Dt.date",
+    // "eKVExJHhzJCpvxRC7Fsn8W.last",
+    // "eKVExJHhzJCpvxRC7Fsn8W.first"
+    // ]
+
+    // LEFT JOIN "ws"."app"_"table" ON ""
+    const self = this;
+    const tableList = {};
+    const appList = {};
+    const workList = {};
+    const joinList = [];
+    const relsFull = [];
+    const relsPart = {};
+
+    const getTAW = async function(table) {
+      if (!(table in tableList)) {
+        let tRec = await self.getATable(table);
+
+        tableList[table] = tRec.data;
+      }
+
+      let app = tableList[table].app;
+
+      if (!(app in appList)) {
+        let aRec = await self.getAnApp(app);
+
+        appList[app] = aRec.data;
+      }
+
+      let ws = appList[app].workspace;
+
+      if (!(ws in workList)) {
+        let wRec = await self.getAWorkspace(ws);
+
+        workList[ws] = wRec.data;
+      }
+
+      let tRec = tableList[table];
+      let aRec = appList[tRec.app];
+      let wRec = workList[aRec.workspace];
+
+      return [tRec, aRec, wRec];
+    }
+
+    const makeJoin = async function(part) {
+      // table<|>[r]fk
+      let join = 'LEFT JOIN ';
+      let pos = part.indexOf('<') || part.indexOf('>');
+      let table = part.substr(0,pos);
+      let dir = part.substr(pos,1);
+      let relName = part.substr(pos+1);
+      let [t,a,w] = await getTAW(table);
+      let sourcetName = self.makeTableName(a.name, t.name);
+      let sourcetfqn = `"${w.name}"."${sourcetName}"`;
+      
+      let relFld = (dir == '<') ? t.rfks : t.fks;
+
+      for (let rel of relFld) {
+        if (rel.name == relName) {
+          let ons = [];
+          let ftable = rel.ftable;
+          let [t,a,w] = await getTAW(ftable);
+
+          let targettName = self.makeTableName(a.name, t.name);
+          let targettfqn = `"${w.name}"."${targettName}"`;
+
+          join += targettfqn + ' ON ';
+          
+          for (let link of rel.links) {
+            ons.push(`"${sourcetName}"."${link.source}" = "${targettName}"."${link.target}"`);
+          }
+          
+          join += ons.join(' AND ');
+          break;
+        }
+      }
+
+      return join;
+    }
+
+    for (let col of cols) {
+      let parts = col.split('.');
+
+      if (parts.length < 3) continue;
+
+      parts.pop();  // field
+      let rejoin = parts.join('.');
+
+      if (relsFull.indexOf(rejoin) == -1) relsFull.push(rejoin);
+
+      parts.pop();  // table
+
+      for (let part of parts) {
+        let join = await makeJoin(part);
+
+        relsPart[part] = join;
+        joinList.push(join);
+      }
+    }
+
+    return joinList;
+  }
+
+  makeQueryWhere(where) {
+    // from this:  WHERE "frstname" = ${first} to this: WHERE "frstname" = '$1'
+    // and return ['first']
+    let posn, posn2;
+    let valueobj = [];
+    let index = 0;
+
+    if (where.substr(0,5).toUpperCase() != 'WHERE') {
+      where = 'WHERE ' + where;
+    }
+    else {
+      where = 'WHERE ' + where.substr(6);
+    }
+
+    while (true) {
+      posn = where.indexOf('${');
+      if (posn == -1) break;
+
+      posn2 = where.indexOf('}', posn);
+      if (posn == -1) break;
+
+      let tmpl = where.substring(posn+2, posn2);
+
+      ++index;
+      valueobj.push(tmpl || '');
+      
+      where = `${where.substring(0,posn)} $${index} ${where.substr(posn2+1)}`;
+    }
+
+    return [where, valueobj];
+  }
 }
 
-module.exports = services;
+module.exports = {services, makeQuerySQL};

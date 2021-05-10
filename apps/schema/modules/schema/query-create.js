@@ -13,6 +13,8 @@ class queryAccordion {
     this.tableId = tableId;
     this.paths = paths || [];
 
+    anchor.innerHTML = '';
+
     this.accordionToggle = this.accordionToggle.bind(this);
 
     this.buildAccordion(this.anchor, '', this.tableId);
@@ -352,6 +354,7 @@ class Query_create extends App.MVC {
     query.columns = this.$copy(this.columnAccordion.getPaths());
     query.orderby = this.$copy(this.orderByAccordion.getPaths());
 
+/*  IF WE WANT SYSTEM TO GENERATE SQL ON SAVE THEN WE NEED TO SEND ALL DATA, NOT JUST DIFFS
     if (this.queryId) {
       diffs = utils.object.diff(this.origQuery, query);
         
@@ -365,12 +368,12 @@ class Query_create extends App.MVC {
         return;
       }
     }
-
+*/
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
 
-    let res = (this.queryId) ? await Module.tableStores.query.update(query.id, diffs) : await Module.tableStores.query.insert(query);
+    let res = (this.queryId) ? await Module.tableStores.query.update(query.id, query) : await Module.tableStores.query.insert(query);
 
     if (res.status == 200) {
       utils.modals.toast('query', 'Created', 2000);

@@ -1,8 +1,8 @@
-<page id='process-delete' class='fade'>
-  <section id='process-delete-section'>
+<page id='codebundle-create' class='fade'>
+  <section id='codebundle-create-section'>
     <div class='row'>
       <div class='col-12 mb-2'>
-        <a href='/' mvc-nohandle>Home</a>
+        <a href='/' mvc-nohandle>Home</a> / <a href='/'>Codebundle</a>
       </div>
     </div>
 
@@ -12,7 +12,7 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6'>
-                <h4>Delete Existing Process</h4>
+                <h4>Enter New Code Bundle</h4>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -26,38 +26,38 @@
           
           <div class='card-body'>
             <div class='row pt-2'>
+              <div class='col-12 col-md-6 mb-4'>
+                {{ fields.Char(type='text', id=codebundle.name.id, maxlength=codebundle.name.maxLength, mvc_value='codebundle.name', mvc_event_type='input', label=codebundle.name.verbose) }}
+              </div>  
+            </div>
+            
+            <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                <span mvc-text='bizprocess.name'></span>
+                {{ fields.Text(id=codebundle.desc.id, mvc_value='codebundle.desc', label=codebundle.desc.verbose) }}
+              </div>  
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+              {{ fields.SelectMVC(id=codebundle.bundle.id, size='10', mvc_value='codebundle.bundle', mvc_each='codes', valueField='id', textField='name', label=codebundle.bundle.verbose, multiple='') }}
               </div>  
             </div>
           </div>
 
           <div class='card-footer'>
-            <div class='row pt-2'>
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete Process') }}
-              </div>  
-              <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
-              </div>  
-            </div>
-
-            <div class='row' mvc-show='badMessage'>
+            <div class='row pt-2' mvc-show='badMessage'>
               <div class='col-12'>
                 <div class="alert alert-danger" role="alert">
                   <span mvc-text='badMessage'></span>  
                 </div>
               </div>
             </div>         
-
-            <div class='row pt-2'>
-              <div class='col-12'>
-                <span style='color: red'>
-                  Deleting a Process will permanently remove it.  
-                  Think very carefully before deleting a Process.
-                </span>
-              </div>
-            </div>
+            
+            <div class='row'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='success', mvc_click='save()', text='Create Code Bundle') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+              </div>  
+            </div>            
 
           </div>
         </div>

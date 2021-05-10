@@ -1,0 +1,114 @@
+<page id='code-create' class='fade'>
+  <section id='code-create-section'>
+    <div class='row'>
+      <div class='col-12 mb-2'>
+        <a href='/' mvc-nohandle>Home</a> / <a href='/'>Code</a>
+      </div>
+    </div>
+
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                <h4>Enter New Code</h4>
+              </div>
+              <div class='col-2'>
+                <div class='d-block d-sm-none'>XS</div>
+                <div class='d-none d-sm-block d-md-none'>SM</div>
+                <div class='d-none d-md-block d-lg-none'>MD</div>
+                <div class='d-none d-lg-block d-xl-none'>LG</div>
+                <div class='d-none d-xl-block'>XL</div>
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 mb-4'>
+                {{ fields.Char(type='text', id=code.name.id, maxlength=code.name.maxLength, mvc_value='code.name', mvc_event_type='input', label=code.name.verbose) }}
+              </div>  
+              <div class='col-12 col-md-6 mb-4'>
+                <div class="form-label-group">
+                  <select xid="code_name_type" mvc-value="code.type" class="form-select">
+                    <option value='CE'>Client Event Handler</option>
+                    <option value='SR'>Server  Request Handler</option>
+                    <option value='UT'>Utility</option>
+                  </select>
+                  <label>{{code.type.verbose}}</label>
+                </div>
+                
+                <div mvc-show='errors.code.type'>
+                  <small class='text-danger' mvc-text='errors.code.type'></small>
+                </div>
+              </div>  
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 mb-4'>
+                {{ fields.Char(type='text', id=code.tag.id, maxlength=code.tag.maxLength, mvc_value='code.tag', label=code.tag.verbose) }}
+              </div>  
+            </div>
+            
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                {{ fields.Text(id=code.desc.id, mvc_value='code.desc', label=code.desc.verbose) }}
+              </div>  
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                <div>
+                  <span style='padding-left: 41px; background-color: #eeeeee'></span>
+                  <span style='padding-left: 4px'></span>
+                  <span mvc-text='code.name'></span>
+                  <span mvc-text='params'></span>
+                </div>
+                <div style='width: 100%; height: 220px; position: relative'>
+                  <div class='ace-editor' id='db4-code-create-code'>
+                  </div>
+                </div>
+                <div>
+                  <span style='padding-left: 41px; background-color: #eeeeee'></span>
+                  <span style='padding-left: 4px'></span>
+                    }
+                </div>
+              </div>  
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row pt-2' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+            
+            <div class='row'>
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='success', mvc_click='save()', text='Create Code') }}
+              </div>  
+              <div class='col-6 col-md-2 mb-4'>
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+              </div>  
+            </div>            
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class='d-block d-md-none' style='padding-top: 70px'>
+      <!-- Spacer XS SM-->
+    </div>
+
+    <div class='d-block d-lg-none' style='padding-top: 30px'>
+      <!-- Spacer XS SM MD -->
+    </div>
+
+    <div class='d-block' style='padding-top: 30px'>
+      <!-- Spacer XS DM MD LG XL -->
+    </div>
+  </section>
+</page>

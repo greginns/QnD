@@ -1,7 +1,7 @@
 {% extends "project/base.html" %}
 
 {% block title %}
-  Schema Builder
+  Code Builder
 {% endblock %}
 
 {% block css %}
@@ -95,11 +95,14 @@
   <div class="container-fluid">
     {% include "./navbar.html" %}
     <div id='qndPages'>
-      {% include "./process-list.html" %}
-      {% include "./process-create.html" %}
-      {% include "./process-update.html" %}
-      {% include "./process-delete.html" %}
-      {% include "./process-steps.html" %}
+      {% include "./code-list.html" %}
+      {% include "./code-create.html" %}
+      {% include "./code-update.html" %}
+      {% include "./code-delete.html" %}
+      {% include "./codebundle-list.html" %}
+      {% include "./codebundle-create.html" %}      
+      {% include "./codebundle-update.html" %}      
+      {% include "./codebundle-delete.html" %}      
     </div>
   </div>
   
@@ -112,7 +115,7 @@
 {% endblock %}
 
 {% block init %}
-<script type="module" src="/~static/apps/schema/modules/process/module.js"></script>
+<script type="module" src="/~static/apps/schema/modules/code/module.js"></script>
 
 <script type="text/javascript">
 </script>

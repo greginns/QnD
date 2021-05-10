@@ -1,5 +1,5 @@
-<page id='process-delete' class='fade'>
-  <section id='process-delete-section'>
+<page id='codebundle-delete' class='fade'>
+  <section id='codebundle-delete-section'>
     <div class='row'>
       <div class='col-12 mb-2'>
         <a href='/' mvc-nohandle>Home</a>
@@ -12,7 +12,7 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6'>
-                <h4>Delete Existing Process</h4>
+                <h4>Delete Existing Code Bundle</h4>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -27,7 +27,8 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                <span mvc-text='bizprocess.name'></span>
+                <span mvc-text='codebundle.id'></span>
+                <span mvc-text='codebundle.name'></span>
               </div>  
             </div>
           </div>
@@ -35,7 +36,7 @@
           <div class='card-footer'>
             <div class='row pt-2'>
               <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete Process') }}
+                {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete Code Bundle') }}
               </div>  
               <div class='col-6 col-md-2 mb-4'>
                 {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
@@ -53,8 +54,8 @@
             <div class='row pt-2'>
               <div class='col-12'>
                 <span style='color: red'>
-                  Deleting a Process will permanently remove it.  
-                  Think very carefully before deleting a Process.
+                  Deleting a Bundle will permanently remove it.  
+                  Think very carefully before deleting a Bundle.
                 </span>
               </div>
             </div>

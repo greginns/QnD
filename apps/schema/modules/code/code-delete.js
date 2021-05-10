@@ -3,13 +3,14 @@ import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 
-class Process_create extends MVC {
+class App_delete extends MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.bizprocess = {};
+    this.model.code = {};
+    this.origapp = {};
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -21,47 +22,49 @@ class Process_create extends MVC {
 
   async ready() {
     return new Promise(async function(resolve) {
-
       resolve();
     }.bind(this));
   }
   
   async inView(params) {
-    this.model.bizprocess.trigger = 'P';
+    let id = params.id || '';
+
+    if (!id) this.gotoList();
+
+    let res = await Module.tableStores.code.getOne(id);
+
+    if (Object.keys(res).length > 0) {
+      this.model.code = res;
+    }
+    else {
+      alert('Missing code');
+
+      this.gotoList();
+    }
   }
 
   outView() {
     return true;  
   }
 
-  async save(ev) {
-    let bizprocess = this.model.bizprocess.toJSON();
-    
-    bizprocess.steps = [];
-    bizprocess.initdata = {};
-    bizprocess.respdata = {};
+  async delete(ev) {
+    let ret = await utils.modals.reConfirm(ev.target, 'Confirm Deletion?');
 
-    if (!bizprocess.name) {
-      this.model.badMessage = 'Please Enter a Process Name';
-        
-      setTimeout(function() {
-        this.model.badMessage = '';
-      }.bind(this), 2500);
+    if (!ret) return;
 
-      return;
-    }
-
+    let code = this.model.code.toJSON();
+   
     let spinner = utils.modals.buttonSpinner(ev.target, true);
 
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = await Module.tableStores.bizprocess.insert(bizprocess);
-
+    let res = await Module.tableStores.code.delete(code.id);
+    
     if (res.status == 200) {
-      utils.modals.toast('Process', 'Created', 2000);
+      utils.modals.toast('Code', 'Deleted', 2000);
    
-      this.gotoSteps(res.data.id);
+      this.gotoList();
     }
     else {
       this.displayErrors(res);
@@ -76,19 +79,15 @@ class Process_create extends MVC {
   }
 
   gotoList() {
-    Module.pager.go(`/`);
-  }
-
-  gotoSteps(id) {
-    Module.pager.go(`/${id}/steps`);
+    Module.pager.go(`/code`);
   }
 
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('process-create');   // page html
-let mvc1 = new Process_create('process-create-section');
+let el1 = document.getElementById('code-delete');   // page html
+let mvc1 = new App_delete('code-delete-section');
 let section1 = new Section({mvc: mvc1});
-let page1 = new Page({el: el1, path: '/create', title: 'Process - Create', sections: [section1]});
+let page1 = new Page({el: el1, path: '/code/:id/delete', title: 'Code - Delete', sections: [section1]});
 
 Module.pages.push(page1);
