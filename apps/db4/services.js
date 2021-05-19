@@ -17,6 +17,7 @@ const pgschema = 'public';
 const cookie = 'db4_session';
 
 const models = require(root + `/apps/schema/models.js`);
+const schemaServices = require(root + `/apps/schema/services.js`);
 
 async function verifySession(req) {
   // get session record, make sure within 24 hrs
@@ -167,6 +168,52 @@ const services = {
         tm.status = 500;
         tm.message = err.toString();
       }
+
+      return tm;
+    },
+
+    getBundle: async function(req) {
+      // output db4.js
+      const tm = new TravelMessage({type: 'js'});
+      const bundle = req.params.bundle;
+      const db = req.query.database || '';
+      const ws = req.query.workspace || '';
+      let codeBundle = {'CE': '', 'UT': ''};
+      let expBundle = 'let bundle = {';
+
+      const makeCode = function(name, type, code) {
+        let ret = '';
+
+        switch (type) {
+          case 'CE':
+            ret = `${name}: function(evObj) {${code}},`;
+            break;
+
+          case 'UT':
+            ret = `${name}: function(obj) {${code}},`;
+        }
+
+        return ret;
+      };
+
+      let res = await schemaServices.codebundle.getOne({database: db, pgschema: 'public', rec: {id: bundle}});
+
+      if (res.status == 200) {
+        for (let id of res.data.bundle) {
+          let res = await schemaServices.code.getOne({database: db, pgschema: 'public', rec: {id: id}});
+          if (res.status == 200) {
+            let code = makeCode(res.data.name, res.data.type, res.data.code);
+            codeBundle[res.data.type] += code;
+          }
+        }
+      }
+
+      if (codeBundle.CE.length > 0) expBundle += `CE: {${codeBundle.CE}},`;
+      if (codeBundle.UT.length > 0) expBundle += `UT: {${codeBundle.UT}}`;
+
+      expBundle += '};  export {bundle};';
+
+      tm.data = expBundle;
 
       return tm;
     },

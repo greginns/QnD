@@ -46,6 +46,8 @@ class Code_create extends MVC {
       this.model.codeId = params.id;
       this.model.code = await Module.tableStores.code.getOne(params.id);
       this.origCode = this.$copy(this.model.code);
+
+      this.editor.setValue(this.model.code.code);
     }
     else {
       this.model.codeId = '';
@@ -117,10 +119,11 @@ class Code_create extends MVC {
         break;
 
       case 'UT':
+        code += '(obj) {';
         break;
 
       case 'SR':
-        code += 'function(req) {\n\n}';
+        code += 'function(req) {';
         break;
     }
 

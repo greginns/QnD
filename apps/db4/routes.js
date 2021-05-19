@@ -121,12 +121,38 @@ Router.add(new RouterMessage({
   version,
   path: ['/db4'], 
   rewrite: false,
-  id: 'api',
+  id: 'db4',
   level: OPEN,
   desc: 'API Code',
   inAPI: false,
   fn: async function(req) {
     let tm = await services.output.getdb4(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      //{session: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+    ],
+  }
+}));
+
+// Get code bundle
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'api',
+  version,
+  path: ['/bundle/:bundle'], 
+  rewrite: false,
+  id: 'bundle',
+  level: OPEN,
+  desc: 'Get Code Bundle',
+  allowCORS: true,
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.output.getBundle(req);
 
     return tm.toResponse();
   },
