@@ -9,26 +9,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/css/bootstrap.min.css" integrity="sha384-DhY6onE6f3zzKbjUPRc2hOzGAdEf4/Dz+WJwBvEYL/lkkIsI3ihufq9hk9K4lVoK" crossorigin="anonymous">
-
     {% block css %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
     <style type="text/css">
+    .center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+    }
     </style>
     {% endblock %}
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/js/bootstrap.bundle.min.js" integrity="sha384-BOsAfwzjNJHrJ8cZidOg56tcQWfp6y72vEJ8xQ9w6Quywb24iOsW913URv1IS4GD" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/16a638b808.js" crossorigin="anonymous"></script>
   </head>
 
   <body>
-    <a href='/schemabuilder'>Schema Builder</a>
-    <br>
-    <a href='/processbuilder'>Process Builder</a>
-    <br>
-    <a href='/code'>Function Builder</a>
-    <br>
-    <a href='/codebuilder'>Code Bundler</a>    
-    <br>
-    <a href='/account'>Account</a>
-    <br>
+    <div class="container-fluid">
+      <div class='row bg-secondary fixed-top'>
+        <div class='col-4 col-md-2 mb-2'>
+          <img src='/static/v1/static/logo.png'></img>
+        </div>
+        <div class='col-4 col-md-8 mb-2 text-white text-center'>
+          <span class='align-middle' style='font-size: 24px'>DB For HTML</span>
+        </div>
+        <div class='col-4 col-md-2 mb-2 text-white text-right'>
+          <span class='align-middle'></span>
+        </div>
+      </div>
+
+      <div class='center'>
+        <div class='row'>
+          <div class='col-1'>
+          </div>
+
+          <div class='col-12 col-md-2 text-center'>
+            <i class="fal fa-database fa-5x"></i><br>
+            <a href='/schemabuilder'>Schema Builder</a>
+          </div>
+
+          <div class='col-12 col-md-2 text-center'>
+            <i class="fal fa-cogs fa-5x"></i><br>
+            <a href='/processbuilder'>Process Builder</a>
+          </div>
+
+          <div class='col-12 col-md-2 text-center'>
+            <i class="fab fa-js fa-5x"></i><br>
+            <a href='/codebuilder'>Function Builder</a>
+          </div>
+
+          <div class='col-12 col-md-2 text-center'>
+            <i class="fal fa-file-archive fa-5x"></i><br>
+            <a href='/codebuilder/codebundle'>Code Bundler</a>    
+          </div>
+
+          <div class='col-12 col-md-2 text-center'>
+            <i class="fal fa-user fa-5x"></i><br>
+            <a href='/account'>Account</a>
+          </div>
+
+          <div class='col-1'>
+          </div>
+        </div>
+      </div>
+    </div>
+    
   </body>
 </html>
   

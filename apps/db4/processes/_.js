@@ -8,7 +8,6 @@ const _initial = {
     {value: '_initial', text: 'Handle Incoming Process'},
   ],
 
-  outputName: '_initial',
   outputSuccess: 'Data Object',
 
   actions: {

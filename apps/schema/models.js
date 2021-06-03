@@ -174,7 +174,8 @@ const table = class extends Model {
         orderby: new Fields.Json({default: '[]', verbose: 'Order By'}),
         workspace: new Fields.SUUID({notNull: true, verbose: 'Workspace ID'}),
         app: new Fields.SUUID({notNull: true, verbose: 'App ID'}),     
-        apiacl: new Fields.Json({default: {"one": false, "many": false, "create": false, "update": false, "delete": false}, verbose: 'API ACL'}),   // one, many, create, update, delete
+        apiacl: new Fields.Json({default: {"one": false, "many": false, "create": false, "update": false, "delete": false}, verbose: 'API ACL'}),
+        zap: new Fields.Json({default: '{create: "", update: "", delete: ""}', verbose: 'Zap'}),
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
         updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
       },
@@ -341,4 +342,150 @@ const codebundle = class extends Model {
   }
 };
 
-module.exports = {user, database, workspace, application, table, query, bizprocess, code, codebundle};
+const zapsub = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Zap ID'}),
+        name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Zap Name'}),
+        url: new Fields.Char({notNull: true, maxLength: 250, verbose: 'Zapier URL'}),
+        created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
+        updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
+      },
+      
+      constraints: {
+        pk: ['id'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['name'],
+      
+      dbschema: 'public',
+      app,
+      desc: 'Zap Subscriptions'
+    }
+  }
+};
+
+const zaptable = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Entry ID'}),
+        zapsub: new Fields.SUUID({notNull: true, verbose: 'Zap ID'}),        
+        table: new Fields.SUUID({notNull: true, verbose: 'Table ID'}),   
+        event: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Event Name'}),     
+        created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
+        updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
+      },
+
+      constraints: {
+        pk: ['id'],
+        fk: [
+          {name: 'zapsub', columns: ['zapsub'], app, table: zapsub, tableColumns: ['id'], onDelete: 'NO ACTION'},
+          {name: 'table', columns: ['table'], app, table: table, tableColumns: ['id'], onDelete: 'NO ACTION'},
+        ],
+        index: [{name: 'tablezaps', columns: ['table']}]
+      },
+      
+      hidden: [],
+      
+      orderBy: ['table'],
+      
+      dbschema: 'public',
+      app,
+      desc: 'Table Zap Events'
+    }
+  }
+};
+
+const zapq = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.Serial({}),
+        zapsub: new Fields.SUUID({notNull: true, verbose: 'Zap ID'}),
+        source: new Fields.Jsonb({null: true, verbose: 'Entry Source'}),
+        body: new Fields.Jsonb({null: true, verbose: 'Post Body'}),
+        options: new Fields.Jsonb({null: true, verbose: 'Post Options'}),
+        added: new Fields.DateTime({notNull: true, verbose: 'Added Timestamp'}),
+        runat: new Fields.DateTime({notNull: true, verbose: 'Next Run Time'}),
+        retries: new Fields.Integer({notNull: true, default: 0, verbose: 'Retry Attempts'}),
+        result: new Fields.Jsonb({null: true, verbose: 'Latest Result'}),
+        status: new Fields.Char({null: true, maxLength: 3, verbose: 'HTTP Status'}),
+        created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
+        updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
+      },
+      
+      constraints: {
+        pk: ['id'],
+        fk: [
+          {name: 'zapsub', columns: ['zapsub'], app, table: zapsub, tableColumns: ['id'], onDelete: 'NO ACTION'},
+        ]
+      },
+      
+      hidden: [],
+      
+      orderBy: ['source'],
+      
+      dbschema: 'public',
+      app,
+      desc: 'Zap Queue'
+    }
+  }
+};
+
+const zapstat = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.Serial({}),
+        zapsub: new Fields.SUUID({notNull: true, verbose: 'Zap ID'}),
+        source: new Fields.Jsonb({null: true, verbose: 'Entry Source'}),
+        body: new Fields.Jsonb({null: true, verbose: 'Post Body'}),
+        options: new Fields.Jsonb({null: true, verbose: 'Post Options'}),
+        added: new Fields.DateTime({notNull: true, verbose: 'Added Timestamp'}),
+        success: new Fields.Boolean({notNull: true, default: true, verbose: 'Success or Fail'}),
+        retries: new Fields.Integer({notNull: true, default: 0, verbose: 'Retry Attempts'}),
+        result: new Fields.Jsonb({null: true, verbose: 'Latest Result'}),
+        status: new Fields.Char({null: true, maxLength: 3, verbose: 'HTTP Status'}),
+        created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
+        updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
+      },
+      
+      constraints: {
+        pk: ['id'],
+        fk: [
+          {name: 'zapsub', columns: ['zapsub'], app, table: zapsub, tableColumns: ['id'], onDelete: 'NO ACTION'},
+        ]
+      },
+      
+      hidden: [],
+      
+      orderBy: ['source'],
+      
+      dbschema: 'public',
+      app,
+      desc: 'Zap Results'
+    }
+  }
+};
+
+module.exports = {user, database, workspace, application, table, query, bizprocess, code, codebundle, zapsub, zaptable, zapq, zapstat};

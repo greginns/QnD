@@ -29,7 +29,7 @@
                 <table class='table table-striped'>
                   <tbody mvc-each='tableRec.columns'>
                     <tr data-index='$index'>
-                      <td><span mvc-text='tableRec.columns.$index.name'></span></td>
+                      <td><span mvc-text='tableRec.columns[$index].name'></span></td>
                       <td style='cursor: pointer' title='Edit' mvc-click='edit()'><i class="fal fa-edit"></i></td>
                       <td style='cursor: pointer' title='Delete' mvc-click='delete()'><i class="fal fa-trash-alt"></i></td>
                     </tr>

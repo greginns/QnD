@@ -29,7 +29,7 @@
                 <table class='table table-striped'>
                   <tbody mvc-each='apps'>
                     <tr data-index='$index'>
-                      <td><span mvc-text='apps.$index.name'></span></td>
+                      <td><span mvc-text='apps[$index].name'></span></td>
                       <td style='cursor: pointer' title='Tables' mvc-click='tables()'><i class="fal fa-table"></i></td>
                       <td style='cursor: pointer' title='Edit' mvc-click='edit()'><i class="fal fa-edit"></i></td>
                       <td style='cursor: pointer' title='Delete' mvc-click='delete()'><i class="fal fa-trash-alt"></i></td>

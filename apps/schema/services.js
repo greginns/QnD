@@ -38,6 +38,22 @@ const updateTable = async function(database, pgschema, rec) {
   return await tobj.updateOne({database, pgschema});
 }
 
+const updateZaptable = async function(database, pgschema, rec) {
+  let table = rec.id;
+  let zrec = {};
+
+  await models.zaptable.delete({database, pgschema, obj:{table}});
+
+  for (let event of ['create', 'update', 'delete']) {
+    if (rec.zap[event]) {
+      zrec = {zapsub: rec.zap[event], table, event};
+
+      let tobj = new models.zaptable(zrec);
+      await tobj.insertOne({database, pgschema});
+    }
+  }
+}
+
 services.output = {
   schema: async function(req) {
     // main admin manage page.  Needs a user so won't get here without one
@@ -391,8 +407,9 @@ console.log(tm1)
     let table = await getATable(database, pgschema, [id]);
 
     if (table.status == 200) {
-      tm = await updateTable(database, pgschema, rec)
-
+      tm = await updateTable(database, pgschema, rec);
+      await updateZaptable(database, pgschema, rec);
+/*
       if (tm.status == 200) {
         let app = await getAnApp(database, pgschema, [tm.data.app]);
         let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
@@ -403,6 +420,7 @@ console.log(tm1)
           tm.data.sql = sb.renameTable(app.data.name, table.data.name, rec.name);
         }
       }
+*/      
     }
     else {
       tm = new TravelMessage({status: 400})
@@ -796,7 +814,9 @@ services.query = {
       return tm;
     }
     
-    return await models.query.selectOne({database, pgschema, pks: [rec.id] });
+    let tm = await models.query.selectOne({database, pgschema, pks: [rec.id] });
+console.log(tm, rec)    
+    return tm;
   },
     
   create: async function({database = '', pgschema = '', rec = {}} = {}) {
@@ -905,6 +925,7 @@ console.log(rec)
     data.push({value: 'io', text: 'I/O'});
     data.push({value: 'email', text: 'Email'});
     data.push({value: 'doc', text: 'Document Process'});
+    data.push({value: 'code', text: 'Server Side Functions'});
 
     tm.data = data;
 
@@ -926,12 +947,16 @@ console.log(rec)
     return tm;
   },
 
-  getSubActions: function(action) {
+  getSubActions: async function(action, database) {
     let tm = new TravelMessage();
     let group = actionGroups[action];
-    let data = group.actionList;
 
-    tm.data = data;
+    if (group.group == 'code') {
+      tm.data = await group.actionList(database);
+    }
+    else {
+      tm.data = group.actionList;
+    }
 
     return tm;
   },
@@ -1039,6 +1064,55 @@ services.codebundle = {
   delete: async function({database = '', pgschema = '', id = ''} = {}) {
     // Delete row
     let tobj = new models.codebundle({ id });
+    let tm = await tobj.deleteOne({database, pgschema});
+
+    return tm;
+  }
+};
+
+services.zapsub = {
+  getMany: async function({database = '', pgschema = '', rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    // Get one or more rows
+    return (where) 
+      ? await models.zapsub.where({database, pgschema, where, values, cols, limit, offset, orderby}) 
+      : await models.zapsub.select({database, pgschema, rec, cols, limit, offset, orderby});
+  },
+  
+  getOne: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
+
+      tm.data = models.zapsub.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+    
+    return await models.zapsub.selectOne({database, pgschema, pks: [rec.id] });
+  },
+    
+  create: async function({database = '', pgschema = '', rec = {}} = {}) {
+    // Insert row
+    let tobj = new models.zapsub(rec);
+    let tm = await tobj.insertOne({database, pgschema});
+
+    return tm;    
+  },
+  
+  update: async function({database = '', pgschema = '', id = '', rec= {}} = {}) {
+    // Update row
+    rec.id = id;
+
+    let tobj = new models.zapsub(rec);
+    let tm = await tobj.updateOne({database, pgschema});
+    
+    return tm;
+  },
+  
+  delete: async function({database = '', pgschema = '', id = ''} = {}) {
+    // Delete row
+    let tobj = new models.zapsub({ id });
     let tm = await tobj.deleteOne({database, pgschema});
 
     return tm;

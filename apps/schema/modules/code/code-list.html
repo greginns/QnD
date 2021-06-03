@@ -33,10 +33,10 @@
                 <table class='table table-striped'>
                   <tbody mvc-each='codes'>
                     <tr data-index='$index'>
-                      <td><span mvc-text='codes.$index.name'></span></td>
+                      <td><span mvc-text='codes[$index].name'></span></td>
                       <td style='cursor: pointer' title='Edit' mvc-click='edit()'><i class="fal fa-edit"></i></td>
                       <td style='cursor: pointer' title='Delete' mvc-click='delete()'><i class="fal fa-trash-alt"></i></td>
-                      <td><span mvc-text='codes.$index.id'></span></td>
+                      <td><span mvc-text='codes[$index].id'></span></td>
                     </tr>
                   </tbody>
                 </table>

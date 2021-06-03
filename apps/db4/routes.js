@@ -205,14 +205,14 @@ Router.add(new RouterMessage({
   fn: async function(req) {
     let {database} = getDBAndSchema(req);
     let {filters, columns} = urlQueryParse(req.query);
-    let tm = await services.table.getOne(database, req.params.table, req.params.pk, filters, columns);
+    let tm = await services.table.getOne(database, req.params.table, req.params.pk, filters, columns, req.viaDB4API);
 
     return tm.toResponse();
   },
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {api: {allowAnon: false, needCSRF: false}},
     ],
   }
 }));
@@ -233,14 +233,14 @@ Router.add(new RouterMessage({
     let {database} = getDBAndSchema(req);
     let {filters, columns} = urlQueryParse(req.query);
 
-    let tm = await services.table.getMany(database, req.params.table, filters, columns);
+    let tm = await services.table.getMany(database, req.params.table, filters, columns, req.viaDB4API);
 
     return tm.toResponse();
   },
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {api: {allowAnon: false, needCSRF: false}},
     ],
   }
 }));
@@ -259,20 +259,20 @@ Router.add(new RouterMessage({
   inAPI: false,
   fn: async function(req) {
     let {database} = getDBAndSchema(req);
-    let tm = await services.table.insert(database, req.params.table, req.body);
+    let tm = await services.table.insert(database, req.params.table, req.body, req.viaDB4API);
     
     return tm.toResponse();
   },
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {api: {allowAnon: false, needCSRF: false}},
     ],
   }
 }));
 
 Router.add(new RouterMessage({
-  method: 'patch',
+  method: 'put',
   app,
   subapp: 'api',
   version,
@@ -285,14 +285,14 @@ Router.add(new RouterMessage({
   inAPI: false,
   fn: async function(req) {
     let {database} = getDBAndSchema(req);
-    let tm = await services.table.update(database, req.params.table, req.body);
+    let tm = await services.table.update(database, req.params.table, req.body, req.viaDB4API);
 
     return tm.toResponse();
   },
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {api: {allowAnon: false, needCSRF: false}},
     ],
   }
 }));
@@ -311,14 +311,14 @@ Router.add(new RouterMessage({
   inAPI: false,
   fn: async function(req) {
     let {database} = getDBAndSchema(req);
-    let tm = await services.table.delete(database, req.params.table, req.body);
+    let tm = await services.table.delete(database, req.params.table, req.body, req.viaDB4API);
 
     return tm.toResponse();
   },
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {api: {allowAnon: false, needCSRF: false}},
     ],
   }
 }));
@@ -340,14 +340,14 @@ Router.add(new RouterMessage({
     let {database} = getDBAndSchema(req);
     //let {filters, columns} = urlQueryParse(req.query);
 
-    let tm = await services.table.query(database, req.params.qid, req.query);
+    let tm = await services.table.query(database, req.params.qid, req.query, req.viaDB4API);
 
     return tm.toResponse();
   },
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {api: {allowAnon: false, needCSRF: false}},
     ],
   }
 }));
@@ -368,14 +368,14 @@ Router.add(new RouterMessage({
   fn: async function(req) {
     let {database} = getDBAndSchema(req);
 
-    let tm = await services.process.execute(database, req.params.pid, req.body);
+    let tm = await services.process.execute(req, database, req.viaDB4API);
 
     return tm.toResponse();
   },
   security: {
     strategies: [
       {session: {allowAnon: false, needCSRF: true}},
-      //{basic: {allowAnon: false, needCSRF: false, redirect: '/db4admin/v1/login/'}},
+      {api: {allowAnon: false, needCSRF: false}},
     ],
   }
 }));
@@ -385,4 +385,10 @@ Authentication.add(app, 'session', async function(req, security, strategy) {
   let tm = await services.auth.session(req, security, strategy);
 
   return tm.toResponse();    
-})
+});
+
+Authentication.add(app, 'api', async function(req, security, strategy) {
+  let tm = await services.auth.api(req, security, strategy);
+
+  return tm.toResponse();    
+});

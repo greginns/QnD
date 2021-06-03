@@ -14,8 +14,6 @@ const io_int = {
     {value: 'query', text: 'Run a Query'}
   ],
 
-  outputName: 'ioint',
-
   actions: {
     lookup: async function(database, data) {
       let tm = await services.table.getOne(database, data.table, data.pk, data.filters, data.columns)

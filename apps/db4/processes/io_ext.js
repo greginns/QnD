@@ -59,8 +59,6 @@ const io_ext = {
     {value: 'delete', text: 'Delete Data'},
   ],
 
-  outputName: 'ioext',
-
   actions: {
     get: async function(data, secVal) {
       let headers = {}, body = {}, options = {}, type, chunked=false;

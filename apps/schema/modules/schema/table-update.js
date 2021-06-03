@@ -2,6 +2,7 @@ import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
+import {TableStore, TableView} from '/~static/lib/client/core/data.js';
 
 class Table_update extends App.MVC {
   constructor(element) {
@@ -12,6 +13,7 @@ class Table_update extends App.MVC {
     this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
+    this.model.zaps = [];
 
     this.model.badMessage = '';
     this.model.errors = {
@@ -20,6 +22,10 @@ class Table_update extends App.MVC {
     };
 
     this.model.true = true;
+
+    this.zapStore;
+    this.zapView = new TableView({proxy: this.model.zaps});
+
   }
 
   async ready() {
@@ -39,6 +45,7 @@ class Table_update extends App.MVC {
     let res = await Module.tableStores.table.getOne(this.model.table);
 
     if (Object.keys(res).length > 0) {
+      if (!('zap' in res) || !res.zap) res.zap = {'create': '', 'update': '', delete: ''};
       this.model.table = res;
       this.origTable = res;
     }
@@ -49,6 +56,25 @@ class Table_update extends App.MVC {
     }
 
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app});
+
+    // get zapsubs
+    let model = '/schema/zapsub';
+    let conditions = {};
+
+    let filters = {};
+    
+    conditions[model] = function(rec) {
+      return true;
+    };
+
+    if (this.zapStore) {
+      this.zapStore.kill();
+    }
+
+    this.zapStore = new TableStore({accessor: Module.data.zapsub, filters, conditions});
+    this.zapStore.addView(this.zapView);
+
+    this.zapStore.getMany();    
   }
 
   outView() {
@@ -58,7 +84,7 @@ class Table_update extends App.MVC {
   async save(ev) {
     let table = this.model.table.toJSON();
     let diffs = utils.object.diff(this.origTable, table);
-      
+
     if (Object.keys(diffs).length == 0) {
       this.model.badMessage = 'No Changes to Update';
       

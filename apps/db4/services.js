@@ -5,7 +5,7 @@ const config = require(root + '/config.json');
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
-const {CSRF, Session, Admin} = require(root + '/apps/db4admin/models.js');
+const {CSRF, Session} = require(root + '/apps/db4admin/models.js');
 const {exec} = require(root + '/lib/server/utils/db.js');
 const {buildActionData} = require(root + '/lib/server/utils/processes.js');
 
@@ -18,6 +18,26 @@ const cookie = 'db4_session';
 
 const models = require(root + `/apps/schema/models.js`);
 const schemaServices = require(root + `/apps/schema/services.js`);
+
+const invalidAPIACLStatus = function() {
+  return new TravelMessage({status: 401});
+}
+
+const makeZapqEntry = async function(database, event, table, body) {
+  let runat = new Date();
+  let zaprecs = await models.zaptable.select({database, pgschema: 'public', rec: {table, event}});
+
+  for (let rec of zaprecs.data) {
+    let zapsubRec = await models.zapsub.selectOne({database, pgschema: 'public', pks: [rec.zapsub]});
+    let options = {method: 'POST', url: zapsubRec.data.url};
+    let source = {source: 'table', table, action: event};
+
+    let zrec = {zapsub: rec.zapsub, source, body, options, added: runat, runat, retries: 0};
+    let zapq = new models.zapq(zrec);
+
+    return await zapq.insertOne({database, pgschema: 'public'});
+  }
+};
 
 async function verifySession(req) {
   // get session record, make sure within 24 hrs
@@ -64,6 +84,25 @@ async function makeCSRF(sessdata, token) {
   let res = await rec.insertOne({database, pgschema});
 
   return res.data.token;
+}
+
+async function verifyAPI(req) {
+  // verify API strategy
+  // get apikey, verify
+  // from that get DB and user info
+  let data = null;
+  let database = 'db4_73WakrfVbNJBaAmhQtEeDv';
+  let apikey = req.headers.apikey || 'gxPnyqxAgxxHyajo3WHtRA';
+
+  if (apikey != 'gxPnyqxAgxxHyajo3WHtRA') return null;
+
+  // this will have to be setup when generating apikey
+  data = {"database":"db4_73WakrfVbNJBaAmhQtEeDv", pgschema: "Workspace1", "user":{"id":"12345","first":"Greg","last":"Miller","_pk":"12345"}};
+
+  let tmu = await models.user.selectOne({database, pgschema, cols: '*', pks: [data.user.id]});
+  if (!tmu.isGood()) return null;
+ 
+  return data;
 }
 
 async function makeQuerySQL(database, qData) {
@@ -304,11 +343,16 @@ const services = {
   },
 
   table: {
-    getOne: async function(database, table, pk, filters, columns) {
+    getOne: async function(database, table, pk, filters, columns, viaDB4API) {
       let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
+      let ti = await initTableInfo(database, table);
 
+      if (viaDB4API) {
+        let acl = ti.getAPIACL();
+
+        if (!acl.one) return invalidAPIACLStatus();
+      }
+      
       if (pk) {
         // if pk was sent rather than filters, replace filters with pk
         let pks = ti.tableInfo.pk;
@@ -340,14 +384,19 @@ const services = {
       return tm;
     },
 
-    lookup: async function(database, table, pk, filters, columns) {
+    lookup: async function(database, table, pk, filters, columns, viaDB4API) {
       return services.table.getOne(database, table, pk, filters, columns);
     },
 
-    getMany: async function(database, table, filters, columns) {
+    getMany: async function(database, table, filters, columns, viaDB4API) {
       let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
+      let ti = await initTableInfo(database, table);
+
+      if (viaDB4API) {
+        let acl = ti.getAPIACL();
+
+        if (!acl.many) return invalidAPIACLStatus();
+      }
 
       let [text, values, err] = ti.makeSelectManySQL(filters, columns);
 
@@ -362,11 +411,15 @@ const services = {
       return tm;
     },
 
-    insert: async function(database, table, data) {
+    insert: async function(database, table, data, viaDB4API) {
       let tm;
+      let ti = await initTableInfo(database, table);
 
-      let ti = new TableInfo(database, table);
-      await ti.init();
+      if (viaDB4API) {
+        let acl = ti.getAPIACL();
+
+        if (!acl.create) return invalidAPIACLStatus();
+      }
 
       let [text, values, err] = ti.makeInsertOneSQL(data);
 
@@ -377,15 +430,23 @@ const services = {
         tm = await exec(database, {text, values});
       }
 
+      if (tm.status == 200) {
+        makeZapqEntry(database, 'create', table, data);
+      }
+
       return tm;
     },
 
-    update: async function(database, table, data) {
+    update: async function(database, table, data, viaDB4API) {
       let tm;
+      let ti = await initTableInfo(database, table);
 
-      let ti = new TableInfo(database, table);
-      await ti.init();
+      if (viaDB4API) {
+        let acl = ti.getAPIACL();
 
+        if (!acl.update) return invalidAPIACLStatus();
+      }
+      
       let [text, values, err] = ti.makeUpdateOneSQL(data);
 
       if (err) {
@@ -395,13 +456,22 @@ const services = {
         tm = await exec(database, {text, values});
       }
 
+      if (tm.status == 200) {
+        makeZapqEntry(database, 'update', table, data);
+      }
+
       return tm;
     },
 
-    delete: async function(database, table, data) {
+    delete: async function(database, table, data, viaDB4API) {
       let tm;
-      let ti = new TableInfo(database, table);
-      await ti.init();
+      let ti = await initTableInfo(database, table);
+
+      if (viaDB4API) {
+        let acl = ti.getAPIACL();
+
+        if (!acl.delete) return invalidAPIACLStatus();
+      }
 
       let [text, values, err] = ti.makeDeleteOneSQL(data);
 
@@ -413,14 +483,22 @@ const services = {
         console.log(tm)
       }
 
+      if (tm.status == 200) {
+        makeZapqEntry(database, 'delete', table, data);
+      }
+
       return tm;
     },
 
-    query: async function(database, qid, opts) {
+    query: async function(database, qid, opts, viaDB4API) {
       let tm = new TravelMessage();
       let qRec = await models.query.selectOne({database, pgschema: 'public', pks: qid});
       
       if (qRec.status !=200) return qRec;
+
+      if (viaDB4API && !qRec.data.api) {
+        return invalidAPIACLStatus();
+      }
 
       let text = qRec.data.sql;
       let valueobj = qRec.data.valueobj;
@@ -441,19 +519,30 @@ console.log(tm)
   },
 
   process: {
-    execute: async function(database, pid, body) {
+    execute: async function(req, database, viaDB4API) {
+      let pid = req.params.pid;
+      let body = req.body;
       let tm = new TravelMessage();
       let data = {};
+      let stepCount = 1;
       let security = {
         'smtp2go': 'api-1F90F3A4875211EBAA9DF23C91C88F4E',
         'elastic': 'A8DAB667B4A3361FDD237E8316B1A0F56A642CC67100A1956B7D7E9A02180AF44BFF79C04A928F6EF5B07C1B58AAB741'
       }
 
       let bizproc = await models.bizprocess.selectOne({database, pgschema: 'public', pks: pid});
+
+      if (bizproc.status !=200) return bizproc;
+
+      if (viaDB4API && !bizproc.data.api) {
+        return invalidAPIACLStatus();
+      }
+
       let steps = bizproc.data.steps;
 
       // Data from post, event or timer.
       data._initial = body;
+      data._req = {body: req.body, params: req.params, query: req.query};
 
       for (let step of steps) {
         if (step.action.substr(0,1) == '_') continue;
@@ -462,28 +551,35 @@ console.log(tm)
         let subaction = step.subaction;
         let input = buildActionData(data, step.values, action.actionParams[subaction]);
         let secVal = security[step.action] || '';  // *** fake
+        let res1;
 
         if (step.action == 'io_int') {
           let ti = new TableInfo(database, input.table);
           await ti.init();
 
-          let res1 = await services.table[subaction](database, input.table, input.pk, input.filters, input.columns);
+          res1 = await services.table[subaction](database, input.table, input.pk, input.filters, input.columns);
 
           if (res1.status != 200) return res1;
 
           data[ti.tableName] = res1.data;        
           data.user = res1.data;  // Testing only
         }
-        else {
-          let res1 = await action.actions[subaction](input, secVal);
+        else if (step.action.substr(0,4) == 'code') {
+          res1 = await action.actions(database, subaction, data);
 
           if (res1.status != 200) return res1;
-
-          data[action.outputName] = res1.data;        
         }
+        else {
+          res1 = await action.actions[subaction](input, secVal, database, pid);
+
+          if (res1.status != 200) return res1;
+        }
+
+        data[step.outname || 'step' + stepCount++] = res1.data;        
       }
 
       // Send back all data
+      delete data._req;
       tm.data = data;
       return tm;      
     },
@@ -514,6 +610,17 @@ console.log(tm)
         
       return new TravelMessage({type: 'text', status: 200, data: sessdata});
     },
+
+    api: async function(req, security, strategy) {
+      // api - test apikey, get user
+      let sessdata = await verifyAPI(req);
+
+      if (!sessdata) return new TravelMessage({type: 'text', status: 401});
+
+      req.viaDB4API = true;
+        
+      return new TravelMessage({type: 'text', status: 200, data: {data: sessdata}});
+    },    
 
     ws: async function(req) {
       let sessdata = await verifySession(req);
@@ -622,6 +729,12 @@ services.session = {
 };
 */
 
+const initTableInfo = async function(database, table) {
+  let ti = new TableInfo(database, table);
+  await ti.init();
+
+  return ti;
+}
 
 class TableInfo {
   // rtns to save/retrieve data
@@ -770,6 +883,10 @@ class TableInfo {
     }
 
     if (errors.length > 0) return `The following fields are mandatory: ${errors.join(', ')}`;
+  }
+
+  getAPIACL() {
+    return this.tableInfo.apiacl;
   }
   
   makeInsertOneSQL(data) {

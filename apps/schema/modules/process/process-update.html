@@ -52,12 +52,12 @@
             </div>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Char(id=bizprocess.eventid.id, mvc_value='bizprocess.eventid', label=bizprocess.eventid.verbose, mvc_xenabled='this.model.bizprocess.trigger == "E"') }}
+                {{ fields.Char(id=bizprocess.eventid.id, mvc_value='bizprocess.eventid', label=bizprocess.eventid.verbose, mvc_enabled='this.model.bizprocess.trigger == "E"') }}
               </div>  
             </div>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Char(id=bizprocess.timer.id, mvc_value='bizprocess.timer', label=bizprocess.timer.verbose, mvc_xenabled='this.model.bizprocess.trigger == "T"') }}
+                {{ fields.Char(id=bizprocess.timer.id, mvc_value='bizprocess.timer', label=bizprocess.timer.verbose, mvc_enabled='this.model.bizprocess.trigger == "T"') }}
               </div>  
             </div>
             <div class='row pt-2'>

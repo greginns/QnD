@@ -22,7 +22,6 @@ const elastic = {
     {value: 'sendOne', text: 'Send One Transactional Email'}
   ],
 
-  outputName: 'elastic',
   outputSuccess: `{
     "success": true, 
     "data": { 

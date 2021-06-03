@@ -123,7 +123,7 @@ class Code_create extends MVC {
         break;
 
       case 'SR':
-        code += 'function(req) {';
+        code += 'function(dataObj) {';
         break;
     }
 
@@ -134,6 +134,8 @@ class Code_create extends MVC {
     let alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz$_';
     let numer = '0123456789';
     let changed = false;
+
+    if (!nv) return;
 
     if (alpha.indexOf(nv.substr(0,1)) == -1) {
       nv = nv.substr(1);

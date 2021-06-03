@@ -54,7 +54,8 @@
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 {{ fields.Text(id=code.desc.id, mvc_value='code.desc', label=code.desc.verbose) }}
-              </div>  
+              </div>
+
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <div>
                   <span style='padding-left: 41px; background-color: #eeeeee'></span>
@@ -71,7 +72,34 @@
                   <span style='padding-left: 4px'></span>
                     }
                 </div>
-              </div>  
+              </div> 
+              
+              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+                <div mvc-show='code.type=="CE"'>
+                  <code>
+                    evObj.ev - Event<br>
+                    evObj.target - Event target<br>
+                    evObj.args - Function arguments<br>
+                    evObj.attrs - Element attributes
+                  </code>                
+                </div>
+
+                <div mvc-show='code.type=="SR"'>
+                  <code>
+                    dataObj._initial = Request body<br>
+                    dataObj._req.body - Request body<br>
+                    dataObj._req.params - URL parameters, ie /:id<br>
+                    dataObj._req.query - URL query values, ie ?id=
+                  </code>                
+                </div>
+
+                <div mvc-show='code.type=="UT"'>
+                  <code>
+                    obj - pass/receive all arguments within one object.
+                  </code>                
+                </div>
+
+              </div>
             </div>
           </div>
 

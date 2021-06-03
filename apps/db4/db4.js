@@ -55,10 +55,6 @@ class Db4MVC extends App.MVC {
       console.log(this._watchedPaths)
     }.bind(this), 1000)
   }
-
-  stars(ev) {
-    return '*'.repeat(ev.args[0]);
-  }
 };
 
 async function fireItUp() {

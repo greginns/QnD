@@ -22,7 +22,6 @@ const smtp2go = {
     {value: 'sendOne', text: 'Send One Transactional Email'}
   ],
 
-  outputName: 'smtp2go',
   outputSuccess: `{
     "request_id": "aa253464-0bd0-467a-b24b-6159dcd7be60",
     "data": {

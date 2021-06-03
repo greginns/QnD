@@ -92,6 +92,7 @@ class Process_create extends MVC {
         action: step.action || '',
         subaction: step.subaction || '',
         values: {},
+        outname: step.outname,
         hide: step.hide,
         hideDelete: step.hideDelete,
         hideSelect: step.hideSelect,
@@ -211,6 +212,7 @@ class Process_create extends MVC {
       subaction: '',
       data: [],
       values: {},
+      outname: '',
       hide: false,
       hideDelete: false,
       hideSelect: false,
@@ -232,6 +234,7 @@ class Process_create extends MVC {
       subActionDesc: 'Handle Incoming Process',
       data: [{'input': this.makeInput({prompt: 'Incoming Data', type: 'object'}, 0), 'value': '', 'name': '_initial'}],
       values: {'_initial': ''},
+      outname: '_initial',
       hide: false,
       hideDelete: true,
       hideSelect: true,
@@ -249,6 +252,7 @@ class Process_create extends MVC {
       subActionDesc: 'Return Process Data',
       data: [{'input': this.makeInput({prompt: 'Return Data', type: 'object'}, 0), 'value': '', 'name': '_final'}],
       values: {'_final': ''},
+      outname: '_final',
       hide: true,
       hideDelete: true,
       hideSelect: true,
@@ -302,7 +306,7 @@ class Process_create extends MVC {
 
     let actions = [{value: '', text: 'No Subaction'}];
 
-    let res = await io.get({}, '/db4/v1/bizprocess/actions/' + nv);
+    let res = await io.get({}, '/schema/v1/bizprocess/actions/' + nv);
 
     if (res.status == 200) {
       for (let subact of res.data) {
@@ -322,7 +326,7 @@ class Process_create extends MVC {
 
     this.model.step.data = [];
 
-    let res = await io.get({}, `/db4/v1/bizprocess/${action}/${subaction}`);
+    let res = await io.get({}, `/schema/v1/bizprocess/${action}/${subaction}`);
 
     if (res.status == 200) {
       // build inputs
@@ -343,12 +347,12 @@ class Process_create extends MVC {
       case 'number':
         inp = `
           <div class="form-label-group">
-            <input type="text" xid="process-step-data-${idx}" mvc-value="step.data.${idx}.value" class="form-control" />
+            <input type="text" xid="process-step-data-${idx}" mvc-value="step.data[${idx}].value" class="form-control" />
             <label>${obj.prompt}</label>
           </div>
       
-          <div mvc-show='errors.step.data.${idx}.error'>
-            <small class='text-danger' mvc-text='errors.step.data.${idx}'></small>
+          <div mvc-show='errors.step.data[${idx}].error'>
+            <small class='text-danger' mvc-text='errors.step.data[${idx}]'></small>
           </div>
         `;
 
@@ -359,12 +363,12 @@ class Process_create extends MVC {
       case 'text':
         inp = `
           <div class="form-label-group">
-            <textarea xid="process-step-data-${idx}" mvc-value="step.data.${idx}.value" class="form-control"></textarea>
+            <textarea xid="process-step-data-${idx}" mvc-value="step.data[${idx}].value" class="form-control"></textarea>
             <label>${obj.prompt}</label>
           </div>
     
-          <div mvc-show='errors.step.data.${idx}.error'>
-            <small class='text-danger' mvc-text='errors.step.data.${idx}'></small>
+          <div mvc-show='errors.step.data[${idx}].error'>
+            <small class='text-danger' mvc-text='errors.step.data[${idx}]'></small>
           </div>
         `;
 

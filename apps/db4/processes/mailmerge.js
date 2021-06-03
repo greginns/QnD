@@ -11,7 +11,6 @@ const mailmerge = {
     {value: 'renderString', text: 'Render document from a template string'}
   ],
 
-  outputName: 'mailmerge',
   outputSuccess: 'Document string',
 
   actions: {

@@ -144,6 +144,7 @@ let moduleStart = function() {
     Module.data.application = new TableAccess({modelName: 'application', url: `/schema/v1/application`});
     Module.data.table = new db4TableAccess({modelName: 'table', url: `/schema/v1/table`});
     Module.data.query = new TableAccess({modelName: 'query', url: `/schema/v1/query`});
+    Module.data.zapsub = new TableAccess({modelName: 'zapsub', url: `/schema/v1/zapsub`});
 
     // url-like of interest to follow model changes
     // WS data change notifications.  
@@ -171,6 +172,10 @@ let moduleStart = function() {
     model = `/schema/query`;
     App.wsDataWatch.addModel(model);
     Module.tableStores.query = new TableStore({accessor: Module.data.query, model, safemode});  // setup a table store in Module so all pages can access
+
+    model = `/schema/zapsub`;
+    App.wsDataWatch.addModel(model);
+    Module.tableStores.zapsub = new TableStore({accessor: Module.data.zapsub, model, safemode});  // setup a table store in Module so all pages can access
 
     getAllPromises.push(Module.tableStores.database.getAll());                 // seed the database store
 
