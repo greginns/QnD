@@ -35,7 +35,7 @@ class Table_config_pk extends App.MVC {
     this.model.table = params.table;
 
     this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
-
+console.log(this.model.tableRec.pk)
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
   }
 

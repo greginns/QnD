@@ -8,6 +8,7 @@ const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {CSRF, Session} = require(root + '/apps/db4admin/models.js');
 const {exec} = require(root + '/lib/server/utils/db.js');
 const {buildActionData} = require(root + '/lib/server/utils/processes.js');
+const {modelEvents} = require(root + '/lib/server/utils/events.js');
 
 const {actionGroups} = require('./processes/index.js');
 
@@ -314,9 +315,9 @@ const services = {
       
       // create session record
       delete userRec.data.password;
-      session = new Session({data: {database: db, pgschema: userRec.data.workspace, 'user': userRec.data}});
+      session = new Session({data: {database: db, pgschema: ws || userRec.data.workspace, 'user': userRec.data}});
       tm = await session.insertOne({database: 'db4admin', pgschema: 'public'});
-  
+
       if (tm.isBad()) return tm;
   
       let token = await makeCSRF(userRec.data, session.token);
@@ -343,7 +344,7 @@ const services = {
   },
 
   table: {
-    getOne: async function(database, table, pk, filters, columns, viaDB4API) {
+    getOne: async function(database, table, pk, columns, viaDB4API) {
       let tm;
       let ti = await initTableInfo(database, table);
 
@@ -352,16 +353,8 @@ const services = {
 
         if (!acl.one) return invalidAPIACLStatus();
       }
-      
-      if (pk) {
-        // if pk was sent rather than filters, replace filters with pk
-        let pks = ti.tableInfo.pk;
 
-        filters = {};
-        filters[pks[0]] = pk;
-      }
-
-      let [text, values, err] = ti.makeSelectOneSQL(filters, columns);
+      let [text, values, err] = ti.makeSelectOneSQL(pk, columns);
 
       if (err) {
         tm = new TravelMessage({status: 400, data: err, type: 'text'});
@@ -384,8 +377,8 @@ const services = {
       return tm;
     },
 
-    lookup: async function(database, table, pk, filters, columns, viaDB4API) {
-      return services.table.getOne(database, table, pk, filters, columns);
+    lookup: async function(database, table, pk, columns, viaDB4API) {
+      return services.table.getOne(database, table, pk, columns, viaDB4API);
     },
 
     getMany: async function(database, table, filters, columns, viaDB4API) {
@@ -431,6 +424,7 @@ const services = {
       }
 
       if (tm.status == 200) {
+        modelEvents.emit(`${database}.${ti.workspace}.${table}`, {action: '+', rows: tm.data});
         makeZapqEntry(database, 'create', table, data);
       }
 
@@ -457,6 +451,7 @@ const services = {
       }
 
       if (tm.status == 200) {
+        modelEvents.emit(`${database}.${ti.workspace}.${table}`, {action: '*', rows: tm.data});
         makeZapqEntry(database, 'update', table, data);
       }
 
@@ -484,6 +479,7 @@ const services = {
       }
 
       if (tm.status == 200) {
+        modelEvents.emit(`${database}.${ti.workspace}.${table}`, {action: '-', rows: tm.data});
         makeZapqEntry(database, 'delete', table, data);
       }
 
@@ -746,7 +742,10 @@ class TableInfo {
   async init() {
     let tbl = await this.getATable(this.table);
     let app = await this.getAnApp(tbl.data.app);
-    let workspace = await this.getAWorkspace(app.data.workspace);
+
+    this.workspace = app.data.workspace;
+
+    let workspace = await this.getAWorkspace(this.workspace);
 
     this.tableInfo = tbl.data;
     this.appInfo = app.data;
@@ -860,29 +859,18 @@ class TableInfo {
   }
 
   makePKColumns() {
-    let pks = this.tableInfo.pk;
-    let pkList = [];
-    let idx = -1;
-
-    for (let pk of pks) {
-      idx++;
-      pkList.push(`"${pk}" AS "_PK${idx}"`);
-    }
+    let pk = this.tableInfo.pk;
+    let pkList = [`"${pk}" AS "_pk"`];
 
     return pkList;
   }
 
   testPKFields(data) {
-    let pks = this.tableInfo.pk;
-    let errors = [];
+    let pk = this.tableInfo.pk;
 
-    for (let pk of pks) {
-      if (! (pk in data)) {
-        errors.push(pk);
-      }
-    }
-
-    if (errors.length > 0) return `The following fields are mandatory: ${errors.join(', ')}`;
+    if (! (pk in data)) {
+      return `${pk} is mandatory`;  
+    }    
   }
 
   getAPIACL() {
@@ -1005,36 +993,23 @@ class TableInfo {
     return [`DELETE FROM ${this.makeSchemaTableName()} WHERE ${where.join(' AND ')} RETURNING ${allCols};`, values, err];
   }
 
-  makeSelectOneSQL(filters, cols) {
+  makeSelectOneSQL(pk, cols) {
     let colList = this.getAllColumns();
-    let where = [], values = [];
-    let pk = this.tableInfo.pk;
-    let idx = 0;
-    let name, type, visible;
+    let pkField = this.tableInfo.pk;
+    let name, visible;
     let selCols = [];
     let err, errors = [];
 
+    let where = `"${pkField}" = $1`;
+    let values = [pk];
+
     for (let col of colList) {
       name = col.name;
-      type = col.type;
       visible = !col.hidden;
 
       if ((cols.indexOf(name) > -1) || (cols[0] == '*' && visible)) {
         selCols.push(`"${name}"`);
       }
-
-      if (pk.indexOf(name) != -1) {
-        idx++;
-        
-        if (name in filters) {
-          where.push(`"${name}"=$${idx}`);
-
-          values.push(type == 'JA' || type == 'JB' ? JSON.stringify(filters[name]): filters[name]);
-        }
-        else {
-          errors.push(name);
-        }
-      }        
     } 
 
     selCols = selCols.concat(this.makePKColumns());
@@ -1043,7 +1018,7 @@ class TableInfo {
       err = `The following fields are mandatory: ${errors.join(', ')}`;
     }
 
-    return [`SELECT ${selCols} FROM ${this.makeSchemaTableName()} WHERE ${where.join(' AND ')};`, values, err];
+    return [`SELECT ${selCols} FROM ${this.makeSchemaTableName()} WHERE ${where};`, values, err];
   }
 
   makeSelectManySQL(filters, cols) {

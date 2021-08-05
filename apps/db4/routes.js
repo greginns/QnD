@@ -195,7 +195,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'api',
   version,
-  path: ['/:table/one', '/:table/:pk'], 
+  path: ['/:table/:pk'], 
   rewrite: false,
   id: 'getone',
   level: OPEN,
@@ -204,8 +204,8 @@ Router.add(new RouterMessage({
   inAPI: false,
   fn: async function(req) {
     let {database} = getDBAndSchema(req);
-    let {filters, columns} = urlQueryParse(req.query);
-    let tm = await services.table.getOne(database, req.params.table, req.params.pk, filters, columns, req.viaDB4API);
+    let {columns} = urlQueryParse(req.query);
+    let tm = await services.table.getOne(database, req.params.table, req.params.pk, columns, req.viaDB4API);
 
     return tm.toResponse();
   },
@@ -222,7 +222,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'api',
   version,
-  path: ['/:table/many'], 
+  path: ['/:table/many', '/:table'], 
   rewrite: false,
   id: 'getmany',
   level: OPEN,
@@ -276,7 +276,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'api',
   version,
-  path: ['/:table'], 
+  path: ['/:table/:pk'], 
   rewrite: false,
   id: 'update',
   level: OPEN,
@@ -392,3 +392,9 @@ Authentication.add(app, 'api', async function(req, security, strategy) {
 
   return tm.toResponse();    
 });
+
+Authentication.add(app, 'ws', async function(req, security, strategy) {
+  let tm = await services.auth.ws(req, security, strategy);
+
+  return tm.toResponse();    
+})
