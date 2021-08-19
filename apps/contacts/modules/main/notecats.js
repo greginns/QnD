@@ -1,7 +1,6 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {TableView} from '/~static/lib/client/core/data.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
 
 class notecats extends Verror {
@@ -66,7 +65,7 @@ class notecats extends Verror {
     let res = (this.model.existingEntry) ? await Module.tableStores.config.update(this.configID, {data}) : await Module.tableStores.config.insert({id: this.configID, data});
 
     if (res.status == 200) {
-      utils.modals.toast('group',(this.model.existingEntry) ?  'Updated' : 'Created', 2000);
+      utils.modals.toast('Group', group.type + ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
     }
     else {
       this.displayErrors(res);
@@ -74,7 +73,17 @@ class notecats extends Verror {
     
     utils.modals.overlay(false);
     utils.modals.buttonSpinner(ev.target, false, spinner);
-    //await utils.modals.alert('Saved');
+    
+    Module.pager.back();
+  }
+
+
+  async exit(ev) {
+    this.go();
+  }
+
+  go() {
+    Module.pager.go('/setup');
   }
   
   // Clearing

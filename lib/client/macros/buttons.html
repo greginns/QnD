@@ -4,8 +4,20 @@
 </button>
 {% endmacro %}
 
+{% macro btnoutline(class='primary', mvc_click='', text, mvc_disabled='') %}
+<button class='btn btn-outline-{{class}}' mvc-click='{{mvc_click}}' mvc-disabled='{{mvc_disabled}}'>
+  {{text}}
+</button>
+{% endmacro %}
+
 {% macro btnsm(class='primary', mvc_click='', text, mvc_disabled='') %}
 <button class='btn btn-sm btn-{{class}}' mvc-click='{{mvc_click}}' mvc-disabled='{{mvc_disabled}}'>
+  {{text}}
+</button>
+{% endmacro %}
+
+{% macro btnsmoutline(class='primary', mvc_click='', text, mvc_disabled='') %}
+<button class='btn btn-sm btn-outline-{{class}}' mvc-click='{{mvc_click}}' mvc-disabled='{{mvc_disabled}}'>
   {{text}}
 </button>
 {% endmacro %}

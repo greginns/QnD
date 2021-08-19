@@ -70,7 +70,7 @@
             <div class='row'>
               <div class='col-12'>
                 <i style='font-size: 24px' class="fas fa-chevron-left"></i>
-                <span mvc-click ='searchAgain' class='pointer'>Search Again</span>
+                <span mvc-click ='searchAgain()' class='pointer'>Search Again</span>
               </div>
             </div>          
           </div>
@@ -81,12 +81,12 @@
                 <table class='sticky respo'>
                   <thead>
                     <tr mvc-each='headers'>
-                      <th><span mvc-text='headers.$index'></span></th>
+                      <th><span mvc-text='headers[$index]'></span></th>
                     </tr>
                   </thead>
-                  <tbody mvc-each='contacts' mvc-click='updateContact'>
+                  <tbody mvc-each='contacts' mvc-click='updateContact()'>
                     <tr mvc-each='headers' mvc-index='$index2' data-index='$index'>
-                      <td mvc-attr='{"data-label": "headers.$index2"}'><span mvc-text='contacts.$index.$index2'></span></td>
+                      <td mvc-attr='{"data-label": "headers[$index2]"}'><span mvc-text='contacts[$index][$index2]'></span></td>
                     </tr>
                   </tbody>
                 </table>
@@ -97,7 +97,7 @@
           <div class='card-footer'>
             <div class='row'>
               <div class='col-12'>
-                <button class='btn btn-success' mvc-click='newContact'>
+                <button class='btn btn-success' mvc-click='newContact()'>
                   + New Contact
                 </button>
               </div>

@@ -1,7 +1,6 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {MVC} from '/~static/lib/client/core/mvc.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {TableQuery} from '/~static/lib/client/core/data.js';
 
 class Searchresults extends MVC {
   constructor(element) {

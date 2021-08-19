@@ -1,115 +1,95 @@
 {% macro Char(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='', mvc_filter='', mvc_role='', placeholder='') %}
 <label>
-  {{label}}
-  <input type="text" mbsc-input xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' />
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
+  <input type="text" mbsc-input xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' />
 </label>
 {% endmacro %}
 
 {% macro Text(id='', rows='10', cols='40', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
 <label>
-  {{label}}
-  <textarea mbsc-textarea xid="{{id}}" rows="{{rows}}" cols="{{cols}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' /></textarea>
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
+  <textarea mbsc-textarea xid="{{id}}" rows="{{rows}}" cols="{{cols}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' data-label='{{label}}'  mvc-error='errors.{{mvc_value}}' data-input-style='underline'/></textarea>
 </label>
 {% endmacro %}
 
-{% macro Password(type='password', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
+{% macro Password(type='password', id='', maxlength='', mvc_value='', mvc_on='{}', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
 <label>
-  {{label}}
-  <input type="text" mbsc-input data-password-toggle="true" data-icon-show="eye" data-icon-hide="eye-blocked" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' />
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
+  <input type="text" mbsc-input data-password-toggle="true" data-icon-show="eye" data-icon-hide="eye-blocked" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' />
 </label>
 {% endmacro %}
 
-{% macro Date(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
+{% macro Date(type='text', id='', maxlength='', mvc_value='', mvc_on='{}', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
 <label>
-  {{label}}
-  <input type="date" mbsc-input xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' />
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
+  <input type="date" mbsc-input xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' />
 </label>
 {% endmacro %}
 
-{% macro Time(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
+{% macro Time(type='text', id='', maxlength='', mvc_value='', mvc_on='{}', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
 <label>
-  {{label}}
-  <input type="time" mbsc-input xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' />
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
+  <input type="time" mbsc-input xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' />
 </label>
 {% endmacro %}
 
 {% macro Boolean(id='', mvc_checked='', label='', mvc_enabled='', mvc_disabled='') %}
 <label>
-  {{label}}
-  <input type="checkbox" mbsc-checkbox xid="{{id}}" mvc-checked="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' />
-  <span style='display: none' mvc-text='errors.{{mvc_checked}}' mvc-show='errors.{{mvc_checked}}' class="mbsc-err-msg"></span>
+  <input type="checkbox" mbsc-checkbox xid="{{id}}" mvc-checked="{{mvc_checked}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' data-label='{{label}}' data-input-style='underline' />
 </label>
 {% endmacro %}
 
 {% macro Switch(id='', mvc_checked='', label='', mvc_enabled='', mvc_disabled='') %}
 <label>
-  {{label}}
-  <input type="checkbox" mbsc-switch xid="{{id}}" mvc-checked="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' />
-  <span style='display: none' mvc-text='errors.{{mvc_checked}}' mvc-show='errors.{{mvc_checked}}' class="mbsc-err-msg"></span>
+  <input type="checkbox" mbsc-switch xid="{{id}}" mvc-checked="{{mvc_checked}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' data-color='primary' data-label='{{label}}' data-input-style='underline' />
 </label>
 {% endmacro %}
 
 {% macro Radio(id='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
 <label>
-  <input type="radio" mbsc-radio mvc-checked="{{mvc_checked}}" name="{{name}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}">
-  {{label}}
+  <input type="radio" mbsc-radio mvc-checked="{{mvc_checked}}" name="{{name}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}" data-label='{{label}}' data-input-style='underline' >
 </label>
 {% endmacro %}
 
 {% macro Segment(id='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
 <label>
   {{label}}
-  <input type="radio" mbsc-segmented mvc-checked="{{mvc_checked}}" name="{{name}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}">
+  <input type="radio" mbsc-segmented mvc-checked="{{mvc_checked}}" name="{{name}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}" data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' >
 </label>
 {% endmacro %}
 
 {% macro Integer(id='', min='1', max='999', step='1', mvc_value='', mvc_edit='integer', label='') %}
-<div>
-  <label for="{{id}}">Label</label>
-  <input id="{{id}}" mbsc-stepper type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' placeholder='{{label}}' />
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
-</div>
+  <input mbsc-stepper type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' placeholder='{{label}}' data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' />
 {% endmacro %}
 
 {% macro Float(id='', min='1', max='99999.99', step='1', mvc_value='', mvc_edit='float', label='') %}
-<div>
-  <label for="{{id}}">Label</label>
-  <input id="{{id}}" mbsc-stepper type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' placeholder='{{label}}' />
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
-</div>
+<label>
+  <input mbsc-stepper type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' />
+</label>
 {% endmacro %}
 
-{% macro Phone(type='text', id='', maxlength='', mvc_value='', label='', mvc_attr='{"phone_ctrycode": ""}', mvc_enabled='', mvc_disabled='', mvc_event_type='input', placeholder='') %}
+{% macro Phone(type='text', id='', maxlength='', mvc_value='', mvc_on='{}', label='', mvc_attr='{"phone_ctrycode": ""}', mvc_enabled='', mvc_disabled='', mvc_event_type='input', placeholder='') %}
 <label>
-  {{label}}
-  <input type="text" mbsc-input xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-filter='phone' mvc-attr="{{mvc_attr}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' />
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
+  <input type="text" mbsc-input xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-filter='phone' mvc-attr="{{mvc_attr}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' />
 </label>
 {% endmacro %}
 
 {% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', mvc_on='{}', mvc_enabled='', mvc_disabled='', valueField='value', textField='text', label='', multiple='') %}
 <label>
-  {{label}}
-  <select mbsc-dropdown xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' {{multiple}}>
+  <select mbsc-dropdown xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' {{multiple}} data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' >
     <option mvc-option='{value: "{{mvc_each}}.$index.{{valueField}}", text: "{{mvc_each}}.$index.{{textField}}"}'></option>
   </select>
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
+</label>
+{% endmacro %}            
+
+{% macro SelectMobi(id='', size='10', mvc_value='', mvc_options=[], mvc_on='{}', mvc_enabled='', mvc_disabled='', valueField='value', textField='text', label='', multiple='') %}
+<label>
+  <select mbsc-dropdown xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-options='{{mvc_options}}' valuefield='{{valueField}}' textfield='{{textField}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' {{multiple}} data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' >
+  </select>
 </label>
 {% endmacro %}            
 
 {% macro SelectChoices(id='', size='10', mvc_value='', mvc_enabled='', mvc_disabled='', choices=[], label='', multiple='') %}
 <label>
-  {{label}}
-  <select mbsc-dropdown xid="{{id}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' {{multiple}}>
+  <select mbsc-dropdown xid="{{id}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' {{multiple}} data-label='{{label}}' mvc-error='errors.{{mvc_value}}' data-input-style='underline' >
     {% for choice in choices %}
     <option value='{{choice.value}}'>{{choice.text}}</option>
     {% endfor %}
   </select>
-  <span style='display: none' mvc-text='errors.{{mvc_value}}' mvc-show='errors.{{mvc_value}}' class="mbsc-err-msg"></span>
 </label>
 {% endmacro %}            

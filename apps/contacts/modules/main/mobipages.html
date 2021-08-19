@@ -1,0 +1,488 @@
+<!--div class='contact-address'>
+  <div mbsc-form-group>
+    <h4>Address</h4>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.address1.id, maxlength=contact.address1.maxLength, mvc_value='contact.address1', label=contact.address1.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.address2.id, maxlength=contact.address2.maxLength, mvc_value='contact.address2', label=contact.address2.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.SelectMVC(id=contact.country.id, size='1', mvc_value='contact.country', mvc_each='countries', valueField='id', textField='name', label='Country') }}
+      </div>
+    </div>           
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.postcode.id, maxlength=contact.postcode.maxLength, mvc_value='contact.postcode', mvc_on='{"blur": "postcodeChanged"}', mvc_event_type='input', mvc_edit='upper', label=contact.postcode.verbose) }}
+      </div>
+    </div>           
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.SelectMVC(id=contact.region.id, size='1', mvc_value='contact.region', mvc_each='regions', valueField='id', textField='name', label='Region') }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.city.id, maxlength=contact.city.maxLength, mvc_value='contact.city', mvc_on='{"blur": "cityChanged"}', label=contact.city.verbose) }}
+      </div>
+    </div>
+  </div>
+</div-->
+
+<!--div class='contact-address'>
+  <div mbsc-form-group>
+    <h4>Address</h4>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.address1.id, maxlength=contact.address1.maxLength, mvc_value='contact.address1', label=contact.address1.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.address2.id, maxlength=contact.address2.maxLength, mvc_value='contact.address2', label=contact.address2.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.city.id, maxlength=contact.city.maxLength, mvc_value='contact.city', mvc_on='{"blur": "cityChanged"}', label=contact.city.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.SelectMVC(id=contact.region.id, size='1', mvc_value='contact.region', mvc_each='regions', valueField='id', textField='name', label='Region') }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.SelectMVC(id=contact.country.id, size='1', mvc_value='contact.country', mvc_each='countries', valueField='id', textField='name', label='Country') }}
+      </div>
+    </div>           
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.postcode.id, maxlength=contact.postcode.maxLength, mvc_value='contact.postcode', mvc_on='{"blur": "postcodeChanged"}', mvc_event_type='input', mvc_edit='upper', label=contact.postcode.verbose) }}
+      </div>
+    </div>           
+  </div>  
+</div-->
+
+<!--div class='contact-cat'>
+  <div mbsc-form-group>
+    <h4>Categorizing</h4>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.SelectMVC(id=contact.grptype.id, size='1', mvc_value='contact.grptype', mvc_each='groups', valueField='id', textField='type', label='Group Type') }}
+      </div>
+    </div>           
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Family', value='F') }}
+        {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Non-Profit', value='G') }}
+        {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Corp', value='C') }}
+        <span style='display: none' mvc-text='errors.contact.cat' mvc-show='errors.contact.cat' class="mbsc-err-msg"></span>
+      </div>
+    </div>                         
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        <div style='height: auto;'>
+          <div>Tags</div>
+          <span mvc-dhtml='contact.tags' mvc-filter='tag' tag-format='formatTag'></span>  
+          {{ buttons.btn(class='success', mvc_click='addTag', text='Add') }}
+        </div>
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        <div style='height: auto;'>
+          <div>E-Groups</div>
+          <span mvc-dhtml='contact.egroups' mvc-filter='tag' tag-format='formatEgroup'></span>  
+          {{ buttons.btn(class='success', mvc_click='addEgroup', text='Add') }}
+        </div>
+      </div>
+    </div>  
+  </div>
+</div-->
+
+<!--div class='contact-contact'>
+  <div mbsc-form-group>
+    <h4>Contact Info</h4>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact.email', label=contact.email.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.email2.id, maxlength=contact.email2.maxLength, mvc_value='contact.email2', label=contact.email2.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12 mbsc-col-lg-7'>
+        {{ fields.Phone(type='text', id=contact.phone.id, maxlength=contact.phone.maxLength, mvc_value='contact.phone', mvc_attr='{"ctrycode": "contact.country"}', label=contact.phone.verbose) }}
+      </div>
+
+      <div class='mbsc-col-12 mbsc-col-lg-5'>
+        {{ fields.Switch(id=contact.iscell.id, mvc_checked='contact.iscell', label=contact.iscell.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12 mbsc-col-lg-7'>
+        {{ fields.Phone(type='text', id=contact.phone2.id, maxlength=contact.phone2.maxLength, mvc_value='contact.phone2', mvc_attr='{"ctrycode": "ctrycode"}', label=contact.phone2.verbose) }}
+      </div>
+
+      <div class='mbsc-col-12 mbsc-col-lg-5'>
+        {{ fields.Switch(id=contact.iscell2.id, mvc_checked='contact.iscell2', label=contact.iscell2.verbose) }}
+      </div>
+    </div>
+  </div>
+</div-->
+
+<!--page id='contacts-contact-create' style='display: none;'>
+  <section id='contacts-contact-create-section'>
+    <div mbsc-form >
+      <div class='mbsc-grid'>
+        <div class='mbsc-row'>
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-name.html" %}
+          </div>
+
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-address-create.html" %}
+          </div>
+
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-contact.html" %}
+          </div>  
+
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-notes.html" %}
+          </div>  
+          
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-emergency.html" %}
+          </div>  
+          
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-flags.html" %}
+          </div>                
+          
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-cat.html" %}
+          </div>  
+
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-misc.html" %}
+          </div>  
+        </div>
+
+        <div class='mbsc-row' mvc-show='badMessage'>
+          <div class='mbsc-col-12'>
+            <div class="alert alert-danger" role="alert">
+              <span mvc-text='badMessage'></span>  
+            </div>
+          </div>
+        </div>         
+
+        <div class='mbsc-row'>
+          <div class='mbsc-col-12'>
+            {{ buttons.btn(class='success', mvc_click='save', text='Add Contact') }}
+            {{ buttons.btn(class='warning', mvc_click='clear', text='Clear') }}
+            {{ buttons.btn(class='warning', mvc_click='test', text='Test') }}
+          </div>
+        </div>            
+
+        <div class='d-block d-md-none' style='padding-top: 70px'>
+        </div>
+
+        <div class='d-block d-lg-none' style='padding-top: 30px'>
+        </div>
+
+        <div class='d-block' style='padding-top: 30px'>
+        </div>
+
+        <nav class="navbar fixed-bottom navbar-expand-lg navbar-light bg-primary d-block d-lg-none" style='padding: .2rem 1rem;'>
+          <div class='nav nav-fill'>
+            <div class="nav-link pointer" mvc-click='goto' to='contact-name'>Name</div>
+            <div class="nav-link pointer" mvc-click='goto' to='contact-address'>Address</div>
+            <div class="nav-link pointer" mvc-click='goto' to='contact-contact'>Contact</div>
+            <div class="nav-link pointer" mvc-click='goto' to='contact-notes'>Notes</div>
+            <div class="nav-link pointer" mvc-click='goto' to='contact-emergency'>Emergency</div>
+            <div class="nav-link pointer" mvc-click='goto' to='contact-flags'>Flags</div>        
+            <div class="nav-link pointer" mvc-click='goto' to='contact-cat'>Category</div>        
+            <div class="nav-link pointer" mvc-click='goto' to='contact-misc'>Misc</div>
+          </div>
+        </nav>
+      </div>
+    </div>  
+  </section>
+</page-->
+
+<!--div class='contact-emergency'>
+  <div mbsc-form-group>
+    <h4>Emergency Contact<h4>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.emgname.id, maxlength=contact.emgname.maxLength, mvc_value='contact.emgname', label=contact.emgname.verbose) }}
+      </div>
+    </div>           
+    
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.emgphone.id, maxlength=contact.emgphone.maxLength, mvc_value='contact.emgphone', label=contact.emgphone.verbose) }}
+      </div>
+    </div>           
+    
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.emgrelation.id, maxlength=contact.emgrelation.maxLength, mvc_value='contact.emgrelation', label=contact.emgrelation.verbose) }}
+      </div>
+    </div>           
+  </div>
+</div-->
+
+<!--div class='contact-flags'>
+  <div mbsc-form-group>
+    <h4>Flags</h4>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12 mbsc-col-md-6'>
+        {{ fields.Switch(id=contact.masssms.id, mvc_checked='contact.masssms', label=contact.masssms.verbose) }}
+      </div>
+      <div class='mbsc-col-12 mbsc-col-md-6'>
+        {{ fields.Switch(id=contact.allowrsv.id, mvc_checked='contact.allowrsv', label=contact.allowrsv.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12 mbsc-col-md-6'>
+        {{ fields.Switch(id=contact.massemail.id, mvc_checked='contact.massemail', label=contact.massemail.verbose) }}
+      </div>
+      <div class='mbsc-col-12 mbsc-col-md-6'>
+        {{ fields.Switch(id=contact.allowfup.id, mvc_checked='contact.allowfup', label=contact.allowfup.verbose) }}
+      </div>
+    </div>           
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12 mbsc-col-md-6'>
+        {{ fields.Switch(id=contact.massmail.id, mvc_checked='contact.massmail', label=contact.massmail.verbose) }}
+      </div>                    
+      <div class='mbsc-col-12 mbsc-col-md-6'>
+        {{ fields.Switch(id=contact.allowbill.id, mvc_checked='contact.allowbill', label=contact.allowbill.verbose) }}
+      </div>
+    </div>                         
+  </div>
+</div-->  
+
+<!--div class='contact-misc'>
+  <div mbsc-form-group>
+    <h4>Miscellaneous</h4>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Date(id=contact.dob.id, maxlength=contact.dob.maxLength, mvc_value='contact.dob', label=contact.dob.verbose) }}
+      </div>
+    </div>           
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='Male', value='M') }}
+        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='Female', value='F') }}
+        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='N/A', value='U') }}
+
+        <span style='display: none' mvc-text='errors.contact.gender' mvc-show='errors.contact.gender' class="mbsc-err-msg"></span>
+      </div>
+    </div>           
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.occupation.id, maxlength=contact.occupation.maxLength, mvc_value='contact.occupation', label=contact.occupation.verbose) }}
+      </div>
+    </div>                         
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.taxno.id, maxlength=contact.taxno.maxLength, mvc_value='contact.taxno', label=contact.taxno.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.agentno.id, maxlength=contact.agentno.maxLength, mvc_value='contact.agentno', label=contact.agentno.verbose) }}
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        <div style='width: 100%' mvc-text='agent.fullname'></div>
+      </div>
+    </div>                                       
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Float(type='text', min='0', max='99.99', step='1', id=contact.agentper.id, maxlength=contact.agentper.maxLength, mvc_value='contact.agentper', label=contact.agentper.verbose) }}
+      </div>
+    </div>           
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-8 mbsc-col-md-6 mbsc-col-lg-6'>
+        {{ fields.Switch(id=contact.acct.id, mvc_checked='contact.acct', label=contact.acct.verbose) }}
+      </div>
+      <div class='mbsc-col-4 mbsc-col-md-6 mbsc-col-lg-5' mvc-show='contact.acct'>
+        <button class='mbsc-btn-primary' mvc-click='accessAccount'>
+          Account
+        </button>
+      </div>
+    </div>
+  </div>
+</div-->
+
+<!--div class='contact-name'>
+  <div mbsc-form-group>
+    <h4>Name</h4>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {# { fields.SelectMobi(id=contact.title.id, size='1', mvc_value='contact.title', mvc_options='titles', valueField='id', textField='title', label='Title') } #}
+      </div>
+    </div>
+    
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.first.id, maxlength=contact.first.maxLength, mvc_value='contact.first', label=contact.first.verbose) }}
+      </div>
+    </div>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.last.id, maxlength=contact.last.maxLength, mvc_value='contact.last', label=contact.last.verbose) }}
+      </div>
+    </div>
+    
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ fields.Char(type='text', id=contact.group.id, maxlength=contact.group.maxLength, mvc_value='contact.group', label=contact.group.verbose) }}
+      </div>
+    </div>
+  </div>
+</div-->
+
+<!--div class='contact-notes'>
+  <div mbsc-form-group>
+    <h4>Notes</h4>
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        <table class='table table-sm'>
+          <tbody mvc-each='contact.notes' mvc-click='notesEdit'>
+            <tr data-index='$index'>
+              <td><span mvc-text='contact.notes[$index].topic'></span></td>
+              <td><span mvc-text='contact.notes[$index].subject'></span></td>
+              <td><span mvc-text='contact.notes[$index].datetime' mvc-filter='datetime'></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class='mbsc-row'>
+      <div class='mbsc-col-12'>
+        {{ buttons.btn(class='success', mvc_click='notesAdd', text='Add') }}
+      </div>
+    </div>           
+  </div>
+</div-->  
+
+<!--page id='contacts-contact-update' style='display: none;'>
+  <section id='contacts-contact-update-section'>
+    <div mbsc-form >
+      <div class='mbsc-grid'>
+        <div class='mbsc-row'>
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-name.html" %}
+          </div>
+
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-address-update.html" %}
+          </div>
+
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-contact.html" %}
+          </div>  
+
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-notes.html" %}
+          </div>  
+          
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-emergency.html" %}
+          </div>  
+          
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-flags.html" %}
+          </div>                
+          
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-cat.html" %}
+          </div>  
+
+          <div class='mbsc-col-12 mbsc-col-lg-6 mbsc-col-xl-4'>
+            {% include "./contact-misc.html" %}
+          </div>  
+        </div>
+
+        <div class='mbsc-row' mvc-show='badMessage'>
+          <div class='mbsc-col-12'>
+            <div class="alert alert-danger" role="alert">
+              <span mvc-text='badMessage'></span>  
+            </div>
+          </div>
+        </div>         
+
+        <div class='mbsc-row'>
+          <div class='mbsc-col'>
+            {{ buttons.btn(class='primary', mvc_click='save', text='Update Contact') }}
+            {{ buttons.btn(class='danger', mvc_click='delete', text='Delete Contact') }}
+          </div>
+        </div>            
+      </div>
+    </div>
+
+    <div class='d-block d-md-none' style='padding-top: 70px'>
+    </div>
+
+    <div class='d-block d-lg-none' style='padding-top: 30px'>
+    </div>
+
+    <div class='d-block' style='padding-top: 30px'>
+    </div>
+
+    <nav class="navbar fixed-bottom navbar-expand-lg navbar-light bg-primary d-block d-lg-none" style='padding: .2rem 1rem;'>
+      <div class='nav nav-fill'>
+        <div class="nav-link pointer" mvc-click='goto' to='contact-name'>Name</div>
+        <div class="nav-link pointer" mvc-click='goto' to='contact-address'>Address</div>
+        <div class="nav-link pointer" mvc-click='goto' to='contact-contact'>Contact</div>
+        <div class="nav-link pointer" mvc-click='goto' to='contact-notes'>Notes</div>
+        <div class="nav-link pointer" mvc-click='goto' to='contact-emergency'>Emergency</div>
+        <div class="nav-link pointer" mvc-click='goto' to='contact-flags'>Flags</div>
+        <div class="nav-link pointer" mvc-click='goto' to='contact-cat'>Category</div>
+        <div class="nav-link pointer" mvc-click='goto' to='contact-misc'>Misc</div>        
+      </div>
+    </nav>
+  </section>
+</page-->
+

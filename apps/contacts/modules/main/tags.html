@@ -1,39 +1,4 @@
-<page id='contacts-tags' style='display: none;'>
-  <section id='contacts-tags-section'>
     <div class='row justify-content-center'>
-      
-      <div class='col-12 col-md-6 col-lg-4 col-xl-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-6'>
-                <h4>
-                  Tags
-                </h4>
-              </div>
-              <div class='col-6'>
-                <div class='d-md-none'>
-                  <span mvc-hide='existingEntry'>
-                    {{ buttons.btn(class='success', mvc_click='newTag', text='+ Tag') }}
-                  </span>
-                </div>
-              </div>
-            </div>          
-          </div>
-          
-          <div class='card-body' style='padding: 0px'>
-            <div style='height: calc(100vh - 130px); overflow-y: auto'>
-              <ul class="list-group list-group-flush" mvc-each='tags' mvc-click='listClicked' id='tagList'>
-                <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" mvc-attr='{"data-pk": "tags.$index.id"}' mvc-disabled='tag.id'>
-                  <span mvc-text='tags.$index.desc'></span>
-                  <span mvc-text='tags.$index.id'></span>
-                </button>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class='col-12 col-md-6 col-lg-6 col-xl-9'>
         <div class='card'>
           <div class='card-header'>
@@ -82,19 +47,19 @@
             <div class='row'>
               <div class='col-12'>
                 <span mvc-hide='existingEntry'>
-                  {{ buttons.btn(class='success', mvc_click='save', text='Create Tag') }}
+                  {{ buttons.btn(class='success', mvc_click='save()', text='Add Tag') }}
+                  {{ buttons.btn(class='warning', mvc_click='clear()', text='Clear') }}
                 </span>
                 <span mvc-show='existingEntry'>
-                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save', text='Update Tag') }}
-                  {{ buttons.btn(class='danger', mvc_click='delete', text='Delete Tag') }}
+                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save()', text='Update Tag') }}
+                  {{ buttons.btn(class='danger mb-3 mb-lg-0', mvc_click='delete()', text='Delete Tag') }}
                 </span>
-                {{ buttons.btn(class='warning', mvc_click='clear', text='Clear') }}
+                {{ buttons.btn(class='danger', mvc_click='exit()', text='Exit') }}
               </div>
             </div>            
+ 
           </div>
         </div>
 
       </div>
     </div>
-  </section>
-</page>

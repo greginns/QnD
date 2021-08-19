@@ -1,13 +1,13 @@
-<fieldset class="border px-2 contact-misc">
+<fieldset class="border px-2 contact-notes">
   <legend class="w-auto fieldset-legend">Notes</legend>
   <div class='row'>
     <div class='col-12 mb-3'>
       <table class='table table-sm'>
-        <tbody mvc-each='contact.notes' mvc-click='notesEdit'>
+        <tbody mvc-each='contact.notes' mvc-click='notesEdit()'>
           <tr data-index='$index'>
-            <td><span mvc-text='contact.notes.$index.topic'></span></td>
-            <td><span mvc-text='contact.notes.$index.subject'></span></td>
-            <td><span mvc-text='contact.notes.$index.datetime' mvc-filter='datetime'></span></td>
+            <td><span mvc-text='contact.notes[$index].topic'></span></td>
+            <td><span mvc-text='contact.notes[$index].subject'></span></td>
+            <td><span mvc-text='contact.notes[$index].datetime' mvc-filter='datetime'></span></td>
           </tr>
         </tbody>
       </table>
@@ -16,9 +16,7 @@
 
   <div class='row'>
     <div class='col-12 mb-3'>
-      <button class='btn btn-sm btn-success' mvc-click='notesAdd'>
-        Add 
-      </button>
+      {{ buttons.btnsmoutline(class='primary', mvc_click='notesAdd()', text='Add') }}
     </div>
   </div>           
-</fieldset>                
+</fieldset>

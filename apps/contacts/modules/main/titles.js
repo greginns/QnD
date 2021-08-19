@@ -18,12 +18,9 @@ class title extends Verror {
       title: {},
       message: ''
     };
-
-    this.$addWatched('title.id', this.idEntered.bind(this));
         
     this.titleOrig = {};
     this.defaults = {};
-    this.titleListEl = document.getElementById('titleList');
 
     //this.ready(); //  use if not in router
   }
@@ -41,13 +38,17 @@ class title extends Verror {
   }
   
   inView(params) {
+    this.clearErrors();
+
     if ('id' in params && params.id) {
-      this.idEntered(params.id);
+      this.existingEntry(params.id);
     }    
+    else {
+      this.newEntry();
+    }
   }
 
   outView() {
-
     return true;  
   }
 
@@ -78,11 +79,18 @@ class title extends Verror {
     let res = (this.model.existingEntry) ? await Module.tableStores.title.update(title.id, diffs) : await Module.tableStores.title.insert(title);
 
     if (res.status == 200) {
-      utils.modals.toast('title',(this.model.existingEntry) ? title.title + ' Updated' : 'Created', 2000);
+      utils.modals.toast('Group', group.type + ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
    
       this.titleOrig = this.model.title.toJSON();
 
-      this.clearIt();
+      setTimeout(function() {
+        if (this.model.existingEntry) {
+          this.go();
+        }
+        else {
+          this.clearIt();
+        }
+      }.bind(this), 1000);
     }
     else {
       this.displayErrors(res);
@@ -108,9 +116,11 @@ class title extends Verror {
     let res = await Module.tableStores.title.delete(title.id);
 
     if (res.status == 200) {
-      utils.modals.toast('title', 'title Removed', 1000);
-
-      this.clearIt();
+      utils.modals.toast('Title', 'Title Removed', 1000);
+      
+      setTimeout(function() {
+        Module.pager.back();
+      }, 1000)
     }
     else {
       this.displayErrors(res);
@@ -118,6 +128,16 @@ class title extends Verror {
 
     utils.modals.overlay(false);
     utils.modals.buttonSpinner(ev.target, false, spinner);
+  }
+
+  async exit(ev) {
+    if (await this.canClear(ev)) {
+      this.go();
+    }
+  }
+
+  go() {
+    Module.pager.go('/setup');
   }
 
   async canClear(ev) {
@@ -133,62 +153,24 @@ class title extends Verror {
     return ret;
   }
 
-  newTitle() {
+  newEntry() {
+    this.model.title = {};
+    this.model.existingEntry = false;
+
+    this.setDefaults();
+    this.titleOrig = this.model.title.toJSON();
+
     this.$focus('title.id');
     window.scrollTo(0,document.body.scrollHeight);
   }
-  
-  listClicked(ev) {
-    // title selected from list
-    let el = ev.target.closest('button');
-    if (!el) return;
 
-    let id = el.getAttribute('data-pk');
-    if (id) this.model.title.id = id;
-
-    Module.pager.replaceQuery('id=' + id);
-    window.scrollTo(0,document.body.scrollHeight);
-  }
-
-  async idEntered(id) {
-    // title ID entered
-    if (!id) return;
-
-    let ret = await this.getTitleFromList(id);
-
-    if (ret.id) this.setTitle(ret.id);
-  }
-
-  async getTitleFromList(pk) {
-    return (pk) ? await Module.tableStores.title.getOne(pk) : {};
-  }
-  
-  async setTitle(pk) {
-    this.clearErrors();
-
+  async existingEntry(pk) {
+    this.model.title = await Module.tableStores.title.getOne(pk);
     this.model.existingEntry = true;
-    this.model.title = await this.getTitleFromList(pk);
+
     this.titleOrig = this.model.title.toJSON();
-
-    this.highlightList(pk);
-
-    Module.pager.replaceQuery('id=' + pk);    
   }
 
-  highlightList(pk) {
-    // highlight chosen title in list
-    let btn = this.titleListEl.querySelector(`button[data-pk="${pk}"]`);
-    
-    if (btn) btn.classList.add('active');
-  }
-
-  clearList() {
-    // clear list of active entry
-    let btn = this.titleListEl.querySelector('button.active');
-
-    if (btn) btn.classList.remove('active');
-  }
-  
   setDefaults() {
     // set title to default value
     for (let k in this.defaults.title) {
@@ -200,9 +182,14 @@ class title extends Verror {
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-titles');   // page html
-let mvc = new title('contacts-titles-section');
-let section1 = new Section({mvc});
-let page = new Page({el, path: '/titles', title: 'Contact Titles', sections: [section1]});
-    
-Module.pages.push(page);
+let el1 = document.getElementById('contacts-titles-create');   // page html
+let el2 = document.getElementById('contacts-titles-update');   // page html
+let title1 = new title('contacts-titles-create-section');
+let title2 = new title('contacts-titles-update-section');
+let section1 = new Section({mvc: title1});
+let section2 = new Section({mvc: title2});
+let page1 = new Page({el: el1, path: '/titles', title: 'Add Title', sections: [section1]});
+let page2 = new Page({el: el2, path: '/titles/:id', title: 'Update Title', sections: [section2]});
+
+Module.pages.push(page1);
+Module.pages.push(page2);

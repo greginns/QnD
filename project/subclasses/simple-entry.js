@@ -12,11 +12,9 @@ class Verror extends MVC {
   clearIt() {
     this.clearErrors();
     this.setDefaults();   // in super
-    this.clearList();     // in super
 
     this.model.existingEntry = false;
 
-    Module.pager.clearQuery();
     window.scrollTo(0,0);
   }
 

@@ -19,11 +19,8 @@ class egroup extends Verror {
       message: ''
     };
 
-    this.$addWatched('egroup.id', this.idEntered.bind(this));
-        
     this.egroupOrig = {};
     this.defaults = {};
-    this.egroupListEl = document.getElementById('egroupList');
 
     //this.ready(); //  use if not in router
   }
@@ -34,30 +31,31 @@ class egroup extends Verror {
 
       Module.tableStores.egroup.addView(egroups);
     
-      this.defaults.egroup = await Module.data.egroup.getDefault();   
-      this.setDefaults();   
+      this.defaults.egroup = await Module.data.egroup.getDefault();      
 
       resolve();
-
     }.bind(this));
   }
   
   inView(params) {
-    setTimeout(function() {
-      if ('id' in params && params.id) {
-        this.idEntered(params.id);
-      }
-    }.bind(this), 1000)
+    this.clearErrors();
 
+    if ('id' in params && params.id) {
+      this.existingEntry(params.id);
+    }    
+    else {
+      this.newEntry();
+    }
   }
 
   outView() {
     return true;  
   }
 
+  // IO
   async save(ev) {
-    var egroup = this.model.egroup.toJSON();
-    var diffs;
+    let egroup = this.model.egroup.toJSON();
+    let diffs;
 
     this.clearErrors();
           
@@ -82,11 +80,18 @@ class egroup extends Verror {
     let res = (this.model.existingEntry) ? await Module.tableStores.egroup.update(egroup.id, diffs) : await Module.tableStores.egroup.insert(egroup);
 
     if (res.status == 200) {
-      utils.modals.toast('group',(this.model.existingEntry) ? egroup.desc + ' Updated' : 'Created', 2000);
+      utils.modals.toast('E-Group', group.type + ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
    
       this.egroupOrig = this.model.egroup.toJSON();
 
-      this.clearIt();
+      setTimeout(function() {
+        if (this.model.existingEntry) {
+          this.go();
+        }
+        else {
+          this.clearIt();
+        }
+      }.bind(this), 1000);
     }
     else {
       this.displayErrors(res);
@@ -112,9 +117,11 @@ class egroup extends Verror {
     let res = await Module.tableStores.egroup.delete(egroup.id);
 
     if (res.status == 200) {
-      utils.modals.toast('egroup', 'Egroup Removed', 1000);
-
-      this.clearIt();
+      utils.modals.toast('E-Group', 'E-Group Removed', 1000);
+            
+      setTimeout(function() {
+        Module.pager.back();
+      }, 1000)
     }
     else {
       this.displayErrors(res);
@@ -123,7 +130,18 @@ class egroup extends Verror {
     utils.modals.overlay(false);
     utils.modals.buttonSpinner(ev.target, false, spinner);
   }
+
+  async exit(ev) {
+    if (await this.canClear(ev)) {
+      this.go();
+    }
+  }
+
+  go() {
+    Module.pager.go('/setup');
+  }
   
+  // Clearing
   async canClear(ev) {
     let egroup = this.model.egroup.toJSON();
     let orig = this.egroupOrig;
@@ -136,65 +154,27 @@ class egroup extends Verror {
 
     return ret;
   }
-  
-  newgroup() {
+
+  newEntry() {
+    this.model.egroup = {};
+    this.model.existingEntry = false;
+
+    this.setDefaults();
+    this.egroupOrig = this.model.egroup.toJSON();
+
     this.$focus('egroup.id');
     window.scrollTo(0,document.body.scrollHeight);
   }
-  
-  listClicked(ev) {
-    // group selected from list
-    let el = ev.target.closest('button');
-    if (!el) return;
 
-    let id = el.getAttribute('data-pk');
-    if (id) this.model.egroup.id = id;
-
-    Module.pager.replaceQuery('id=' + id);
-    window.scrollTo(0,document.body.scrollHeight);
-  }
-
-  async idEntered(id) {
-    // group ID entered
-    if (!id) return;
-
-    let ret = await this.getEgroupFromList(id);
-
-    if (ret.id) this.setEgroup(ret.id);
-  }
-
-  async getEgroupFromList(pk) {
-    return (pk) ? await Module.tableStores.egroup.getOne(pk) : {};
-  }
-  
-  async setEgroup(pk) {
-    this.clearErrors();
-
+  async existingEntry(pk) {
+    this.model.egroup = await Module.tableStores.egroup.getOne(pk);
     this.model.existingEntry = true;
-    this.model.egroup = await this.getEgroupFromList(pk);
+
     this.egroupOrig = this.model.egroup.toJSON();
-
-    this.highlightList(pk);
-
-    Module.pager.replaceQuery('id=' + pk);
   }
 
-  highlightList(pk) {
-    // highlight chosen group in list
-    let btn = this.egroupListEl.querySelector(`button[data-pk="${pk}"]`);
-
-    if (btn) btn.classList.add('active');
-  }
-
-  clearList() {
-    // clear list of active entry
-    let btn = this.egroupListEl.querySelector('button.active');
-
-    if (btn) btn.classList.remove('active');
-  }
-  
   setDefaults() {
-    // set group to default value
+    // set entry to default value
     for (let k in this.defaults.egroup) {
       this.model.egroup[k] = this.defaults.egroup[k];
     }
@@ -204,9 +184,14 @@ class egroup extends Verror {
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-egroups');   // page html
-let mvc = new egroup('contacts-egroups-section');
-let section1 = new Section({mvc});
-let page = new Page({el, path: '/egroups', title: 'Contact Egroups', sections: [section1]});
-    
-Module.pages.push(page);
+let el1 = document.getElementById('contacts-egroups-create');   // page html
+let el2 = document.getElementById('contacts-egroups-update');   // page html
+let egroup1 = new egroup('contacts-egroups-create-section');
+let egroup2 = new egroup('contacts-egroups-update-section');
+let section1 = new Section({mvc: egroup1});
+let section2 = new Section({mvc: egroup2});
+let page1 = new Page({el: el1, path: '/egroups', title: 'Add E-Group', sections: [section1]});
+let page2 = new Page({el: el2, path: '/egroups/:id', title: 'Update E-Group', sections: [section2]});
+
+Module.pages.push(page1);
+Module.pages.push(page2);

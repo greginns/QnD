@@ -27,6 +27,7 @@ const Tenant = class extends Model {
         email: new Fields.Char({notNull: true, maxLength: 50, isEmail: true, verbose: 'Email Address'}),
         active: new Fields.Boolean({default: true, verbose: 'Active'}),     
         added: new Fields.DateTime({onBeforeInsert: setNewDate, verbose: 'Date Added'}),     
+        database: new Fields.Char({maxLength: 50, verbose: 'Database'}),
       },
       
       constraints: {

@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {User, CSRF} = require(root + '/apps/login/models.js');
 const {Session, Tenant} = require(root + '/apps/admin/models.js');
+const database = 'qnd';
 const pgschema = 'public';
 const config = require(root + '/config.json');
 
@@ -15,13 +16,13 @@ async function verifySession(req) {
   let tenant = null, user = null, tmt, tmu, sess;
 
   if (sessID) {
-    sess = await Session.selectOne({pgschema, cols: '*', showHidden: true, pks: sessID});
+    sess = await Session.selectOne({database, pgschema, cols: '*', showHidden: true, pks: sessID});
 
     if (sess.status == 200) {
-      tmt = await Tenant.selectOne({pgschema, cols: '*', pks: sess.data.tenant});
+      tmt = await Tenant.selectOne({database, pgschema, cols: '*', pks: sess.data.tenant});
 
       if (tmt.isGood()) {
-        tmu = await User.selectOne({pgschema: tmt.data.code, cols: '*', pks: sess.data.user});
+        tmu = await User.selectOne({database, pgschema: tmt.data.code, cols: '*', pks: sess.data.user});
 
         if (tmu.isGood() && tmu.data.active) {
           tenant = tmt.data;
@@ -46,12 +47,12 @@ async function verifyBasic(req) {
   [tu, pswd, ...x] = tup.split(':');
   [xtenant, xuser, ...x] = tu.split('-');
 
-  tm = await Tenant.selectOne({pgschema, cols: '*', pks: xtenant});
+  tm = await Tenant.selectOne({database, pgschema, cols: '*', pks: xtenant});
 
   if (tm.isGood()) {
     xtenant = tm.data;
 
-    tm = await User.selectOne({pgschema: xtenant.code, cols: '*', showHidden: true, pks: xuser});
+    tm = await User.selectOne({database, pgschema: xtenant.code, cols: '*', showHidden: true, pks: xuser});
 
     if (tm.isGood() && tm.data.active) {
       let match = await bcrypt.compare(pswd, tm.data.password);
@@ -87,8 +88,9 @@ async function verifyCSRF(user, tenant, token) {
   // get token, check if user matches
   if (!token) return false;
 
-  let tm = await CSRF.selectOne({pgschema: tenant.code, pks: token})
-
+  let tm = await CSRF.selectOne({database, pgschema: tenant.code, pks: token})
+//console.log(database, tenant.code, token)
+//console.log(tm)
   if (tm.isBad()) return false;
 
   return tm.data.user == user.code;    
@@ -129,14 +131,14 @@ module.exports = {
       if (tenant && user) {
         status = await verifyAnonAndCSRF(req, user, tenant, strategy);
       }
-
+//console.log('A', status)
       if (status != 200) {
         if (strategy.redirect) return new TravelMessage({type: 'text', status: 302, message: strategy.redirect});
 
         return new TravelMessage({type: 'text', status: 401});
       }
         
-      return new TravelMessage({type: 'text', status: 200, data: {tenant, user}});
+      return new TravelMessage({type: 'text', status: 200, data: {tenant, user, data: {database: tenant.database, pgschema: tenant.code}}});
     },
 
     basic: async function(req, security, strategy) {
@@ -158,13 +160,13 @@ module.exports = {
         return new TravelMessage({type: 'text', status: 401});
       }
         
-      return new TravelMessage({type: 'text', status: 200, data: {tenant, user}});
+      return new TravelMessage({type: 'text', status: 200, data: {tenant, user, data: {database: tenant.database, pgschema: tenant.code}}});
     },
 
     ws: async function(req) {
       var [tenant, user] = await verifySession(req);
 
-      return new TravelMessage({type: 'text', status: 200, data: {tenant, user}});
+      return new TravelMessage({type: 'text', status: 200, data: {tenant, user, data: {database: tenant.database, pgschema: tenant.code}}});
     },
 
     login: async function(body) {
@@ -175,20 +177,20 @@ module.exports = {
       var url = config.loginRedirects.login || '';
 
       // tenant valid?
-      tm = await Tenant.selectOne({pgschema, cols: '', pks: body.tenant});
+      tm = await Tenant.selectOne({database, pgschema, cols: '', pks: body.tenant});
       if (tm.status != 200) return new TravelMessage({status: 403});
 
       // user valid?
-      tm = await User.selectOne({pgschema: body.tenant, cols: 'password', pks: body.username});
+      tm = await User.selectOne({database, pgschema: body.tenant, cols: 'password', pks: body.username});
       if (tm.status != 200) return new TravelMessage({status: 403});
 
       // password valid?
       match = await bcrypt.compare(body.password, tm.data.password);
       if (!match) return new TravelMessage({status: 403});
-      
+
       // create session record
       rec = new Session({id: uuidv1(), tenant: body.tenant, user: body.username});
-      tm = await rec.insertOne({pgschema});
+      tm = await rec.insertOne({database, pgschema});
 
       if (tm.isBad()) return tm;
      

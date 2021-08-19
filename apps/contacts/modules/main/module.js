@@ -4,10 +4,12 @@ import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data
 import {Pages} from '/~static/lib/client/core/paging.js';
 
 // js for pages
+
 import '/~static/apps/contacts/modules/main/navbar.js';
 import '/~static/apps/contacts/modules/main/contact.js';
 import '/~static/apps/contacts/modules/main/contact-search.js';
 import '/~static/apps/contacts/modules/main/contact-results.js';
+import '/~static/apps/contacts/modules/main/setup.js';
 import '/~static/apps/contacts/modules/main/titles.js';
 import '/~static/apps/contacts/modules/main/groups.js';
 import '/~static/apps/contacts/modules/main/egroups.js';
@@ -15,7 +17,7 @@ import '/~static/apps/contacts/modules/main/tagcats.js';
 import '/~static/apps/contacts/modules/main/tags.js';
 import '/~static/apps/contacts/modules/main/notecats.js';
 
-import '/~static/project/mixins/mvc_ext.js';
+//import '/~static/project/mixins/mvc_ext.js';
 
 let moduleStart = function() {
   let connectToData = async function() {
@@ -127,6 +129,7 @@ let moduleStart = function() {
 
     try {
       // fire off init method in each section of each page.
+      document.getElementById('overlayAndSpinner').style.display = 'none';
       await pager.ready(startPage);   // default page
     }
     catch(e) {

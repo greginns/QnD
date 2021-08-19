@@ -53,7 +53,7 @@ console.log(err)
     let tm = new TravelMessage();
 
     try {
-      tm.data = await fs.readFile(root + '/db.png');  //hub-spoke
+      tm.data = await fs.readFile(root + '/hub-spoke.png');  //db
       tm.type = 'png';
     }
     catch(err) {

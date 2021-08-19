@@ -5,12 +5,8 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-5'>
-                <span mvc-text='contact.id'></span>
-              </div>
-              <div class='col-5'>
-                Entered:
-                <span mvc-text='contact.doe' mvc-filter='date'></span>
+              <div class='col-10'>
+                <h3>Contact Update</h3>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -55,6 +51,7 @@
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 {% include "./contact-misc.html" %}
               </div>  
+
             </div>
           </div>
 
@@ -69,8 +66,8 @@
 
             <div class='row'>
               <div class='col-12'>
-                {{ buttons.btn(class='primary', mvc_click='save', text='Update Contact') }}
-                {{ buttons.btn(class='danger', mvc_click='delete', text='Delete Contact') }}
+                {{ buttons.btn(class='primary', mvc_click='save()', text='Update Contact') }}
+                {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete Contact') }}    
               </div>
             </div>            
           </div>
@@ -80,27 +77,24 @@
     </div>
 
     <div class='d-block d-md-none' style='padding-top: 70px'>
-      <!-- Spacer XS SM-->
     </div>
 
     <div class='d-block d-lg-none' style='padding-top: 30px'>
-      <!-- Spacer XS SM MD -->
     </div>
 
     <div class='d-block' style='padding-top: 30px'>
-      <!-- Spacer XS DM MD LG XL -->
     </div>
 
     <nav class="navbar fixed-bottom navbar-expand-lg navbar-light bg-primary d-block d-lg-none" style='padding: .2rem 1rem;'>
       <div class='nav nav-fill'>
-        <div class="nav-link pointer" mvc-click='goto' to='contact-name'>Name</div>
-        <div class="nav-link pointer" mvc-click='goto' to='contact-address'>Address</div>
-        <div class="nav-link pointer" mvc-click='goto' to='contact-contact'>Contact</div>
-        <div class="nav-link pointer" mvc-click='goto' to='contact-notes'>Notes</div>
-        <div class="nav-link pointer" mvc-click='goto' to='contact-emergency'>Emergency</div>
-        <div class="nav-link pointer" mvc-click='goto' to='contact-flags'>Flags</div>
-        <div class="nav-link pointer" mvc-click='goto' to='contact-cat'>Category</div>
-        <div class="nav-link pointer" mvc-click='goto' to='contact-misc'>Misc</div>        
+        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-name'>Name</div>
+        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-address'>Address</div>
+        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-contact'>Contact</div>
+        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-notes'>Notes</div>
+        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-emergency'>Emergency</div>
+        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-flags'>Flags</div>        
+        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-cat'>Category</div>        
+        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-misc'>Misc</div>
       </div>
     </nav>
   </section>

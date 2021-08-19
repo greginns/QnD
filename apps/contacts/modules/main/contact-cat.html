@@ -27,11 +27,9 @@
       <div style='height: auto;' class="form-control">
         <div class='div-label'>Tags</div>
         <div class='mb-2'>
-          <span mvc-dhtml='contact.tags' mvc-filter='tag' mvc-tag-format='formatTag'></span>  
+          <span mvc-dhtml='contact.tags' mvc-filter='chip' chip-format='formatTag'></span>  
         </div>
-        <button class='btn btn-sm btn-success' mvc-click='addTag'>
-          Add
-        </button>
+        {{ buttons.btnsmoutline(class='primary', mvc_click='addTag()', text='Add') }}
       </div>
     </div>
   </div>
@@ -41,11 +39,9 @@
       <div style='height: auto;' class="form-control">
         <div class='div-label'>E-Groups</div>
         <div class='mb-2'>
-          <span mvc-dhtml='contact.egroups' mvc-filter='tag' mvc-tag-format='formatEgroup'></span>  
+          <span mvc-dhtml='contact.egroups' mvc-filter='chip' chip-format='formatEgroup'></span>  
         </div>
-        <button class='btn btn-sm btn-success' mvc-click='addEgroup'>
-          Add
-        </button>
+        {{ buttons.btnsmoutline(class='primary', mvc_click='addEgroup()', text='Add') }}
       </div>
     </div>
   </div>  

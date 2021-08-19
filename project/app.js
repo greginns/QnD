@@ -18,6 +18,9 @@ App.reLogin = '';
 
 App.url = 'https://roam3.adventurebooking.com:3011';
 
+MVC.dateFormat = App.dateFormat;
+MVC.timeFormat = App.timeFormat;
+
 App.MVC = class extends MVC {
   constructor(element) {
     super(element);
@@ -33,8 +36,5 @@ App.MVC = class extends MVC {
     this.model._params = params;
   }
 };
-
-App.MVC.dateFormat = App.dateFormat;
-App.MVC.timeFormat = App.timeFormat;
 
 export {App};

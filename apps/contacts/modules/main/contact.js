@@ -1,8 +1,8 @@
-import {App} from '/~static/lib/client/core/app.js';
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {TableView, TableQuery} from '/~static/lib/client/core/data.js';
+import {TableView} from '/~static/lib/client/core/data.js';
 import {Multisel} from '/~static/lib/client/widgets/multisel.js';
 import {Notes} from '/~static/lib/client/widgets/notes.js';
 import {Address} from '/~static/apps/contacts/utils/address.js'
@@ -38,7 +38,7 @@ class Contact extends ContactWithAddress {
     this.$addWatched('contact.country', this.countryChanged.bind(this));
         
     this.contactOrig = {};
-    this.defaults = {doe: window.dayjs()};
+    this.defaults = {doe: window.dayjs(), notes: []};
     this.contactListEl = document.getElementById('contactList');
     this.address = new Address();
     this.notesInst = new Notes();
@@ -68,8 +68,9 @@ class Contact extends ContactWithAddress {
 
     return new Promise(async function(resolve) {
       // fill up on data
-      Module.tableStores.contact.addView(new TableView({proxy: this.model.contacts}));
       Module.tableStores.title.addView(new TableView({proxy: this.model.titles, filterFunc}));
+
+      Module.tableStores.contact.addView(new TableView({proxy: this.model.contacts}));
       Module.tableStores.group.addView(new TableView({proxy: this.model.groups, filterFunc}));
       Module.tableStores.egroup.addView(new TableView({proxy: this.model.egroups, filterFunc}));
       Module.tableStores.tagcat.addView(new TableView({proxy: this.model.tagcats}));
@@ -198,6 +199,7 @@ class Contact extends ContactWithAddress {
 
     this.model.existingEntry = true;
     this.model.contact = contact;
+this.model.contact.notes = this.model.contact.notes || [];
     this.contactOrig = this.model.contact.toJSON();
   }
   
@@ -225,18 +227,18 @@ class Contact extends ContactWithAddress {
     let span = document.createElement('span');
     let textspan = document.createElement('span');
     let xspan = document.createElement('span');
+
     let dt = dayjs(entry.date);
     let dtx = dt.format(App.dateFormat);
     let tmx = dt.format(App.timeFormat);
 
-    xspan.classList.add('tagx');
+    xspan.classList.add('chipx');
     xspan.innerHTML = '&times;';
     xspan.addEventListener('click', this.delTag.bind(this));
 
-    textspan.classList.add('tagtext');
     textspan.innerText = this.getTagDesc(entry.tag);
 
-    span.classList.add('tag');
+    span.classList.add('chip');
     span.classList.add('mb-2');
     span.title = dtx + ' ' + tmx;
     span.setAttribute('data-tag', entry.tag);
@@ -307,22 +309,26 @@ class Contact extends ContactWithAddress {
   }
 
   async addTag() {
-    let tags = this.model.contact.tags || [];
+    let tags = this.model.contact.tags.toJSON() || [];
     let groups = this.reorgTags();
+
     let ms = new Multisel('Tags', groups, []);
     let res = await ms.select();
-    let dt = (new Date).toJSON();
-
-    for (let tag of res) {
-      tags.push({tag, 'date': dt});
-    }
-
     ms = undefined;
-    this.model.contact.tags = tags;
+
+    if (res.length > 0) {
+      let dt = (new Date).toJSON();
+
+      for (let tag of res) {
+        tags.push({tag, 'date': dt});
+      }
+    
+      this.model.contact.tags = tags;
+    }
   }
 
   delTag(ev) {
-    let tags = this.model.contact.tags;
+    let tags = this.model.contact.tags.toJSON() || [];
     let span = ev.target.closest('span.tag')
     let tag = span.getAttribute('data-tag');
 
@@ -343,11 +349,12 @@ class Contact extends ContactWithAddress {
     let span = document.createElement('span');
     let textspan = document.createElement('span');
     let xspan = document.createElement('span');
+
     let dt = dayjs(entry.date);
     let dtx = dt.format(App.dateFormat);
     let tmx = dt.format(App.timeFormat);
 
-    xspan.classList.add('tagx');
+    xspan.classList.add('chipx');
     xspan.innerHTML = '&times;';
     xspan.addEventListener('click', this.delEgroup.bind(this));
 
@@ -401,13 +408,16 @@ class Contact extends ContactWithAddress {
 
     let ms = new Multisel('E-Groups', groups, []);
     let res = await ms.select();
-    let dt = (new Date).toJSON();
-
-    for (let egrp of res) {
-      egroups.push({'egroup': egrp, 'date': dt});
-    }
-
     ms = undefined;
+
+    if (res.length > 0) {
+      let dt = (new Date).toJSON();
+
+      for (let egrp of res) {
+        egroups.push({'egroup': egrp, 'date': dt});
+      }
+    }
+    
     this.model.contact.egroups = egroups;
   }
 
@@ -429,7 +439,7 @@ class Contact extends ContactWithAddress {
   }
 
   async notesEdit(ev) {
-    let notes = this.model.contact.notes || [];
+    let notes = this.model.contact.notes.toJSON() || [];
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let note = notes[idx];
 
@@ -444,7 +454,7 @@ class Contact extends ContactWithAddress {
   }
 
   async notesAdd() {
-    let notes = this.model.contact.notes || [];
+    let notes = this.model.contact.notes.toJSON() || [];
     let topic = '';
     let subject = '';
     let operator = App.USER.code;
@@ -494,7 +504,7 @@ class Contact extends ContactWithAddress {
     let values = [first];
     let conditions = {'/contacts/contact': func};
 
-    new TableQuery({accessor: Module.data.contact, query, values, conditions});
+    //new TableQuery({accessor: Module.data.contact, query, values, conditions});
   }
 }
 

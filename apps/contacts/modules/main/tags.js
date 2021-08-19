@@ -20,38 +20,38 @@ class tag extends Verror {
       message: ''
     };
 
-    this.$addWatched('tag.id', this.idEntered.bind(this));
-        
     this.tagOrig = {};
     this.defaults = {};
-    this.tagListEl = document.getElementById('tagList');
 
     //this.ready(); //  use if not in router
   }
 
   async ready() {
-    let filterFunc = function(x) {
-      // only show active=true
-      return x.active;
+    let activeFunc = function(rec) {
+      return rec.active;
     }
 
     return new Promise(async function(resolve) {
       let tags = new TableView({proxy: this.model.tags});
-      let tagcats = new TableView({proxy: this.model.tagcats, filterFunc});
+      let tagcats = new TableView({proxy: this.model.tagcats, filterFunc: activeFunc});
 
       Module.tableStores.tag.addView(tags);
       Module.tableStores.tagcat.addView(tagcats);
     
-      this.defaults.tag = await Module.data.tag.getDefault();   
-      this.setDefaults();   
+      this.defaults.tag = await Module.data.tag.getDefault();      
 
       resolve();
     }.bind(this));
   }
   
   inView(params) {
+    this.clearErrors();
+
     if ('id' in params && params.id) {
-      this.idEntered(params.id);
+      this.existingEntry(params.id);
+    }    
+    else {
+      this.newEntry();
     }
   }
 
@@ -59,9 +59,10 @@ class tag extends Verror {
     return true;  
   }
 
+  // IO
   async save(ev) {
-    var tag = this.model.tag.toJSON();
-    var diffs;
+    let tag = this.model.tag.toJSON();
+    let diffs;
 
     this.clearErrors();
           
@@ -86,11 +87,18 @@ class tag extends Verror {
     let res = (this.model.existingEntry) ? await Module.tableStores.tag.update(tag.id, diffs) : await Module.tableStores.tag.insert(tag);
 
     if (res.status == 200) {
-      utils.modals.toast('Tag',(this.model.existingEntry) ? tag.desc + ' Updated' : 'Created', 2000);
+      utils.modals.toast('Group', group.type + ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
    
       this.tagOrig = this.model.tag.toJSON();
 
-      this.clearIt();
+      setTimeout(function() {
+        if (this.model.existingEntry) {
+          this.go();
+        }
+        else {
+          this.clearIt();
+        }
+      }.bind(this), 1000);
     }
     else {
       this.displayErrors(res);
@@ -116,9 +124,11 @@ class tag extends Verror {
     let res = await Module.tableStores.tag.delete(tag.id);
 
     if (res.status == 200) {
-      utils.modals.toast('tag', 'tag Removed', 1000);
-
-      this.clearIt();
+      utils.modals.toast('Tag', 'Tag Removed', 1000);
+            
+      setTimeout(function() {
+        Module.pager.back();
+      }, 1000)
     }
     else {
       this.displayErrors(res);
@@ -128,6 +138,17 @@ class tag extends Verror {
     utils.modals.buttonSpinner(ev.target, false, spinner);
   }
 
+  async exit(ev) {
+    if (await this.canClear(ev)) {
+      this.go();
+    }
+  }
+
+  go() {
+    Module.pager.go('/setup');
+  }
+  
+  // Clearing
   async canClear(ev) {
     let tag = this.model.tag.toJSON();
     let orig = this.tagOrig;
@@ -141,65 +162,26 @@ class tag extends Verror {
     return ret;
   }
 
-  newTag() {
+  newEntry() {
+    this.model.tag = {};
+    this.model.existingEntry = false;
+
+    this.setDefaults();
+    this.tagOrig = this.model.tag.toJSON();
+
     this.$focus('tag.id');
     window.scrollTo(0,document.body.scrollHeight);
   }
-  
-  listClicked(ev) {
-    // cat selected from list
-    let el = ev.target.closest('button');
-    if (!el) return;
 
-    let id = el.getAttribute('data-pk');
-    if (id) this.model.tag.id = id;
-
-    Module.pager.replaceQuery('id=' + id);
-
-    window.scrollTo(0,document.body.scrollHeight);
-  }
-
-  async idEntered(id) {
-    // tag ID entered
-    if (!id) return;
-
-    let ret = await this.gettagFromList(id);
-
-    if (ret.id) this.settag(ret.id);
-  }
-
-  async gettagFromList(pk) {
-    return (pk) ? await Module.tableStores.tag.getOne(pk) : {};
-  }
-  
-  async settag(pk) {
-    this.clearErrors();
-
+  async existingEntry(pk) {
+    this.model.tag = await Module.tableStores.tag.getOne(pk);
     this.model.existingEntry = true;
-    this.model.tag = await this.gettagFromList(pk);
+
     this.tagOrig = this.model.tag.toJSON();
-
-    this.highlightList(pk);
-
-    Module.pager.replaceQuery('id=' + pk);
   }
 
-  highlightList(pk) {
-    // highlight chosen cat in list
-    let btn = this.tagListEl.querySelector(`button[data-pk="${pk}"]`);
-    
-    if (btn) btn.classList.add('active');
-  }
-
-  clearList() {
-    // clear list of active entry
-    let btn = this.tagListEl.querySelector('button.active');
-
-    if (btn) btn.classList.remove('active');
-  }
-  
   setDefaults() {
-    // set cat to default value
+    // set entry to default value
     for (let k in this.defaults.tag) {
       this.model.tag[k] = this.defaults.tag[k];
     }
@@ -209,9 +191,14 @@ class tag extends Verror {
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el = document.getElementById('contacts-tags');   // page html
-let mvc = new tag('contacts-tags-section');
-let section1 = new Section({mvc});
-let page = new Page({el, path: '/tags', title: 'Contact Tags', sections: [section1]});
-    
-Module.pages.push(page);
+let el1 = document.getElementById('contacts-tags-create');   // page html
+let el2 = document.getElementById('contacts-tags-update');   // page html
+let tag1 = new tag('contacts-tags-create-section');
+let tag2 = new tag('contacts-tags-update-section');
+let section1 = new Section({mvc: tag1});
+let section2 = new Section({mvc: tag2});
+let page1 = new Page({el: el1, path: '/tags', title: 'Add Tag', sections: [section1]});
+let page2 = new Page({el: el2, path: '/tags/:id', title: 'Update Tag', sections: [section2]});
+
+Module.pages.push(page1);
+Module.pages.push(page2);
