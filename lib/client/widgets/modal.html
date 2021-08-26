@@ -1,4 +1,4 @@
-<div id='mvc-alert' class="modal fade" role="dialog" style='z-index: 1100'>
+<div id='mvc-alert' class="modal fade" role="dialog" style='z-index: 3100'>
   <div class="modal-dialog modal-sm" role="document">
     <div class="modal-content">
       <div class="modal-header" mvc-show='opts.title'>
@@ -25,8 +25,8 @@
 
         <div class='row mb-3'>
           <div class='col-12' mvc-each='opts.buttons' id='mvc-alert-button-container'>
-            <button class='btn btn-sm m-1' mvc-class='opts.buttons.$index.class' data-index='$index' mvc-on='{click: "clicked"}'>
-              <span mvc-text='opts.buttons.$index.text'></span>
+            <button class='btn btn-sm m-1' mvc-class='opts.buttons[$index].class' data-index='$index' mvc-click="clicked()">
+              <span mvc-text='opts.buttons[$index].text'></span>
             </button>
           </div>
         </div>

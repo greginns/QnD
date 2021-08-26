@@ -1,7 +1,11 @@
 import {MVC} from '/~static/lib/client/core/mvc.js';
-import {Module} from '/~static/lib/client/core/module.js';
+import {Address} from '/~static/apps/contacts/utils/address.js'
 
 class Verror extends MVC {
+  constructor(x) {
+    super(x);
+  }
+
   // Basic errors/clearing
   async clear(ev) {
     if (await this.canClear(ev)) {
@@ -59,6 +63,12 @@ class Verror extends MVC {
 }
 
 class ContactWithAddress extends Verror {
+  constructor(x) {
+    super(x)
+
+    this.address = new Address();
+  }
+
   async countryChanged(nv, ov) {
     if (!nv) return;
 

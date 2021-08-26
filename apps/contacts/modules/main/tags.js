@@ -180,6 +180,27 @@ class tag extends Verror {
     this.tagOrig = this.model.tag.toJSON();
   }
 
+  async testID() {
+    let id = this.model.tag.id;
+    let ret = await Module.tableStores.tag.getOne(id);
+    
+    if (Object.keys(ret).length == 0) return;
+
+    let options = {text: id + ' already exists.  Do you wish to edit?', buttons: [{text: 'Yes', class: 'btn-primary'}, {text: 'No', class: 'btn-danger'}], defaultButton: 1, okayButton: 0};
+    let btn = await Module.modal.confirm(options);
+
+    this.model.tag.id = '';
+
+    if (btn == 0) {
+      // edit
+      Module.pager.go('/tags/' + id);
+    }
+    else {
+      // retry
+      this.$focus('tag.id');
+    }
+  }
+
   setDefaults() {
     // set entry to default value
     for (let k in this.defaults.tag) {

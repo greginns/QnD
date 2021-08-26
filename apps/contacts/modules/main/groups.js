@@ -173,6 +173,27 @@ class group extends Verror {
     this.groupOrig = this.model.group.toJSON();
   }
 
+  async testID() {
+    let id = this.model.group.id;
+    let ret = await Module.tableStores.group.getOne(id);
+    
+    if (Object.keys(ret).length == 0) return;
+
+    let options = {text: id + ' already exists.  Do you wish to edit?', buttons: [{text: 'Yes', class: 'btn-primary'}, {text: 'No', class: 'btn-danger'}], defaultButton: 1, okayButton: 0};
+    let btn = await Module.modal.confirm(options);
+
+    this.model.group.id = '';
+
+    if (btn == 0) {
+      // edit
+      Module.pager.go('/groups/' + id);
+    }
+    else {
+      // retry
+      this.$focus('group.id');
+    }
+  }
+
   setDefaults() {
     // set entry to default value
     for (let k in this.defaults.group) {

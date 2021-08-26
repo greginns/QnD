@@ -7,10 +7,10 @@ const {SendMessage} = require(root + '/lib/server/utils/messages.js');
 //var qstr = 'p1=val1&p2=val2&p2=val21';
 //console.log(qParse(qstr));
 
-const database = 'db4_73WakrfVbNJBaAmhQtEeDv';
-const pgschema = 'public';
+const database = 'qnd'; //'db4_73WakrfVbNJBaAmhQtEeDv';
+const pgschema = 'gm'; //'public';
 //const migApp = 'db4admin';
-const migApp = 'schema';
+const migApp = 'contacts'; //'schema';
 
 (async function() {
   let res = await migration({database, pgschema, migApp});

@@ -33,6 +33,8 @@ class title extends Verror {
     
       this.defaults.title = await Module.data.title.getDefault();      
 
+      //this.$addWatched('title.id', this.testID.bind(this));
+
       resolve();
     }.bind(this));
   }
@@ -79,7 +81,7 @@ class title extends Verror {
     let res = (this.model.existingEntry) ? await Module.tableStores.title.update(title.id, diffs) : await Module.tableStores.title.insert(title);
 
     if (res.status == 200) {
-      utils.modals.toast('Group', group.type + ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+      utils.modals.toast('Title', title.title + ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
    
       this.titleOrig = this.model.title.toJSON();
 
@@ -160,8 +162,8 @@ class title extends Verror {
     this.setDefaults();
     this.titleOrig = this.model.title.toJSON();
 
-    this.$focus('title.id');
     window.scrollTo(0,document.body.scrollHeight);
+    this.$focus('title.id');
   }
 
   async existingEntry(pk) {
@@ -169,6 +171,27 @@ class title extends Verror {
     this.model.existingEntry = true;
 
     this.titleOrig = this.model.title.toJSON();
+  }
+
+  async testID() {
+    let id = this.model.title.id;
+    let ret = await Module.tableStores.title.getOne(id);
+    
+    if (Object.keys(ret).length == 0) return;
+
+    let options = {text: id + ' already exists.  Do you wish to edit?', buttons: [{text: 'Yes', class: 'btn-primary'}, {text: 'No', class: 'btn-danger'}], defaultButton: 1, okayButton: 0};
+    let btn = await Module.modal.confirm(options);
+
+    this.model.title.id = '';
+
+    if (btn == 0) {
+      // edit
+      Module.pager.go('/titles/' + id);
+    }
+    else {
+      // retry
+      this.$focus('title.id');
+    }
   }
 
   setDefaults() {

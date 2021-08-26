@@ -4,7 +4,7 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-5'>
-                {{ fields.Char(type='text', id=egroup.id.id, maxlength=egroup.id.maxLength, mvc_value='egroup.id', mvc_event_type='blur', mvc_disabled='existingEntry', mvc_edit='upper', label=egroup.id.verbose) }}
+                {{ fields.Char(type='text', id=egroup.id.id, maxlength=egroup.id.maxLength, mvc_value='egroup.id', mvc_on='{"blur": "testID()"}', mvc_disabled='existingEntry', mvc_edit='upper', label=egroup.id.verbose) }}
               </div>
               <div class='col-2'></div>
               <div class='col-5'>

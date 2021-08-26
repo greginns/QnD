@@ -12,8 +12,8 @@
           <div class="modal-body">
             <ul class="list-group" mvc-each='postcodes' mvc-click='citySelected'>
               <li class='list-group-item' data-index='$index'>
-                <span mvc-text='postcodes.$index.postcode'></span>
-                <span mvc-text='postcodes.$index.city'></span>
+                <span mvc-text='postcodes[$index].postcode'></span>
+                <span mvc-text='postcodes[$index].city'></span>
               </li>
             </ul>
           </div>
@@ -37,8 +37,8 @@
           <div class="modal-body">
             <ul class="list-group" mvc-each='postcodes' mvc-click='postcodeSelected'>
               <li class='list-group-item' data-index='$index'>
-                <span mvc-text='postcodes.$index.postcode'></span>
-                <span mvc-text='postcodes.$index.city'></span>
+                <span mvc-text='postcodes[$index].postcode'></span>
+                <span mvc-text='postcodes[$index].city'></span>
               </li>
             </ul>
           </div>

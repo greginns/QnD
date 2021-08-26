@@ -2,9 +2,9 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
 import {Pages} from '/~static/lib/client/core/paging.js';
+import {Modal} from '/~static/lib/client/widgets/modal.js';
 
 // js for pages
-
 import '/~static/apps/contacts/modules/main/navbar.js';
 import '/~static/apps/contacts/modules/main/contact.js';
 import '/~static/apps/contacts/modules/main/contact-search.js';
@@ -24,6 +24,7 @@ let moduleStart = function() {
     // setup data table access
     // gets us access to raw data.
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
+    Module.data.associate = new TableAccess({modelName: 'associate', url: `/contacts/v1/associate`});
     Module.data.title = new TableAccess({modelName: 'title', url: `/contacts/v1/title`});
     Module.data.group = new TableAccess({modelName: 'group', url: `/contacts/v1/group`});
     Module.data.egroup = new TableAccess({modelName: 'egroup', url: `/contacts/v1/egroup`});
@@ -48,6 +49,14 @@ let moduleStart = function() {
 
     Module.tableStores.contact = new TableStore({accessor: Module.data.contact, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.contact.getAll());               // seed the table store
+
+    // Associate table ---
+    model = `/contacts/associate`;               
+
+    contactData.addModel(model);                          
+
+    Module.tableStores.associate = new TableStore({accessor: Module.data.associate, model, safemode});  // setup a table store in Module so all pages can access
+    //getAllPromises.push(Module.tableStores.associate.getAll());
 
     // Title table ---
     model = `/contacts/title`;               
@@ -147,4 +156,5 @@ let moduleStart = function() {
 
 window.name = 'HUB_contacts'
 
+Module.modal = new Modal();
 moduleStart();

@@ -2,7 +2,7 @@
   <legend class="w-auto fieldset-legend">Contact Info</legend>
   <div class='row'>
     <div class='col-12 mb-3'>
-      {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact.email', label=contact.email.verbose) }}
+      {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact.email', mvc_on='{"blur": "emailTest()"}', label=contact.email.verbose) }}
     </div>
   </div>
 

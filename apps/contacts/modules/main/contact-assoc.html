@@ -1,0 +1,150 @@
+<div class="modal fade contacts-contact-assoc" role="dialog" style='z-index: 2100'>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>Associations</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class='row'>
+          <div class='col-12 col-md-6 mb-3'>
+            {{ fields.SelectMVC(id='assoc-list', size='1', mvc_value='associate.desc', mvc_each='assoc.list', label='Suggested Descriptions') }}
+          </div>
+          <div class='col-12 col-md-6 mb-3'>
+            {{ fields.Char(type='text', id=associate.desc, maxlength=associate.desc.maxLength, mvc_value='associate.desc', label=associate.desc.verbose) }}
+          </div>
+        </div>
+
+        <div class='row'>
+          <div class='col-12 col-md-3 mb-3'>
+            {{ fields.Char(type='text', id=associate.assoc, maxlength=associate.assoc.maxLength, mvc_value='associate.assoc', mvc_on='{"blur": "assocTest()"}', label=associate.assoc.verbose) }}
+          </div>
+          <div class='col-12 col-md-6 mb-3'>
+            <span mvc-text='assoc.name'></span>
+          </div>
+        </div>
+
+        <div class='row'>
+          <div class='col-12 mb-3'>
+            {{ buttons.btnsmoutline(class='primary', mvc_click='assocAdd()', text='Add Association') }}
+            {{ buttons.btnsmoutline(class='primary', mvc_click='assocNew()', text='New Contact') }}
+          </div>
+        </div>
+
+        <div mvc-show='assocNew'>
+          <div class='row'>
+            <div class='col-12 mb-3'>
+              <h5>New Associated Contact</h5>
+            </div>
+          </div>
+
+          <div class='row'>
+            <div class='col-12 col-md-6 mb-3'>
+              {{ fields.Char(type='text', id=contact.first.id, maxlength=contact.first.maxLength, mvc_value='contact2.first', label=contact.first.verbose) }}
+            </div>
+
+            <div class='col-12 col-md-6 mb-3'>
+              {{ fields.Char(type='text', id=contact.last.id, maxlength=contact.last.maxLength, mvc_value='contact2.last', label=contact.last.verbose) }}
+            </div>
+          </div>
+          
+          <div class='row'>
+            <div class='col-12 col-md-6 mb-3'>
+              {{ fields.Char(type='text', id=contact.email.id, maxlength=contact.email.maxLength, mvc_value='contact2.email', mvc_on='{"blur": "assocEmailTest()"}', label=contact.email.verbose) }}
+            </div>
+
+            <div class='col-12 col-md-4 mb-3'>
+              {{ fields.Phone(type='text', id=contact.phone.id, maxlength=contact.phone.maxLength, mvc_value='contact2.phone', mvc_attr='{"ctrycode": "contact.country"}', label=contact.phone.verbose) }}
+            </div>
+
+            <div class='col-12 col-md-2 mb-3'>
+              {{ fields.Switch(id=contact.iscell.id, mvc_checked='contact2.iscell', label=contact.iscell.verbose) }}
+            </div>
+          </div>
+
+          <div class='row'>
+            <div class='col-12 mb-3'>
+              {{ buttons.btnsmoutline(class='primary', mvc_click='assocAdd2()', text='Save and Add') }}
+              {{ buttons.btnsmoutline(class='danger', mvc_click='assocBail()', text='Bail') }}
+            </div>
+          </div>          
+        </div>
+
+        <div mvc-hide='assocNew'>
+          <div class='row'>
+            <div class='col-12'>
+              <h5>Associated Contacts</h5>
+            </div>
+          </div>
+
+          <div class='row'>
+            <div class='col-12'>
+              <table class='table table-sm'>
+                <thead>
+                  <tr>
+                    <th>Association</th>
+                    <th colspan='2'>Contact</th>
+                    <th>
+                  </tr>
+                </thead>
+                <tbody mvc-each='assocs'>
+                  <tr>
+                    <td mvc-text='assocs[$index].desc'></td>
+                    <td mvc-text='assocs[$index].assoc' class='pointer' style='text-decoration: underline' mvc-click='assocJump(assocs[$index].assoc)'></td>
+                    <td>
+                      <span mvc-text='assocs[$index].contacts_Contact.first'></span>
+                      <span mvc-text='assocs[$index].contacts_Contact.last'></span>
+                    </td>
+                    <td>
+                      <button class='btn btn-sm btn-outline-danger' mvc-click='assocDel(assocs[$index].id)'>
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class='row'>
+            <div class='col-12'>
+              <hr>
+            </div>
+          </div>
+
+          <div class='row'>
+            <div class='col-12'>
+              <span mvc-text='contact.first'></span>
+              is also associated with
+            </div>
+          </div>
+
+          <div class='row'>
+            <div class='col-12'>
+              <table class='table table-sm'>
+                <thead>
+                  <tr>
+                    <th>Association</th>
+                    <th colspan='2'>Contact</th>
+                  </tr>
+                </thead>
+                <tbody mvc-each='assocsx'>
+                  <tr>
+                    <td mvc-text='assocsx[$index].desc'></td>
+                    <td mvc-text='assocsx[$index].contact' class='pointer' style='text-decoration: underline' mvc-click='assocJump(assocsx[$index].contact)'></td>
+                    <td>
+                      <span mvc-text='assocsx[$index].contacts_Contact.first'></span>
+                      <span mvc-text='assocsx[$index].contacts_Contact.last'></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

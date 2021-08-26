@@ -140,7 +140,7 @@ class tagcat extends Verror {
   go() {
     Module.pager.go('/setup');
   }
-    
+
   // Clearing
   async canClear(ev) {
     let tagcat = this.model.tagcat.toJSON();
@@ -171,6 +171,27 @@ class tagcat extends Verror {
     this.model.existingEntry = true;
 
     this.tagcatOrig = this.model.tagcat.toJSON();
+  }
+
+  async testID() {
+    let id = this.model.tagcat.id;
+    let ret = await Module.tableStores.tagcat.getOne(id);
+    
+    if (Object.keys(ret).length == 0) return;
+
+    let options = {text: id + ' already exists.  Do you wish to edit?', buttons: [{text: 'Yes', class: 'btn-primary'}, {text: 'No', class: 'btn-danger'}], defaultButton: 1, okayButton: 0};
+    let btn = await Module.modal.confirm(options);
+
+    this.model.tagcat.id = '';
+
+    if (btn == 0) {
+      // edit
+      Module.pager.go('/tagcats/' + id);
+    }
+    else {
+      // retry
+      this.$focus('tagcat.id');
+    }
   }
 
   setDefaults() {

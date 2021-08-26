@@ -173,6 +173,27 @@ class egroup extends Verror {
     this.egroupOrig = this.model.egroup.toJSON();
   }
 
+  async testID() {
+    let id = this.model.egroup.id;
+    let ret = await Module.tableStores.egroup.getOne(id);
+    
+    if (Object.keys(ret).length == 0) return;
+
+    let options = {text: id + ' already exists.  Do you wish to edit?', buttons: [{text: 'Yes', class: 'btn-primary'}, {text: 'No', class: 'btn-danger'}], defaultButton: 1, okayButton: 0};
+    let btn = await Module.modal.confirm(options);
+
+    this.model.egroup.id = '';
+
+    if (btn == 0) {
+      // edit
+      Module.pager.go('/egroups/' + id);
+    }
+    else {
+      // retry
+      this.$focus('egroup.id');
+    }
+  }
+
   setDefaults() {
     // set entry to default value
     for (let k in this.defaults.egroup) {

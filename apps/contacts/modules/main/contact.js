@@ -5,7 +5,6 @@ import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 import {Multisel} from '/~static/lib/client/widgets/multisel.js';
 import {Notes} from '/~static/lib/client/widgets/notes.js';
-import {Address} from '/~static/apps/contacts/utils/address.js'
 import {ContactWithAddress} from '/~static/project/subclasses/simple-entry.js';
 import {io} from '/~static/lib/client/core/io.js';
 
@@ -16,6 +15,7 @@ class Contact extends ContactWithAddress {
 
   createModel() {
     this.model.contact = {};
+    this.model.contact2 = {};
     this.model.contacts = [];
     this.model.titles = [];
     this.model.groups = [];
@@ -26,12 +26,23 @@ class Contact extends ContactWithAddress {
     this.model.regions = [];
     this.model.postcodes = [];
     this.model.config = [];
-    this.model.tag='';
+    this.model.tag = '';
+    this.model.dymo = '';
+    this.model.dymos = [];
+    this.model.associate = {desc: '', assoc: ''};
+    this.model.assoc = {};
+    this.model.assoc.list = [];
+    this.model.assoc.name = '';
+    this.model.assocs = [];
+    this.model.assocsx = [];
+    this.model.assocNew = false;
 
     this.model.existingEntry = false;
     this.model.badMessage = '';
     this.model.errors = {
       contact: {},
+      contact2: {},
+      associate: {},
       message: ''
     };
 
@@ -40,8 +51,15 @@ class Contact extends ContactWithAddress {
     this.contactOrig = {};
     this.defaults = {doe: window.dayjs(), notes: []};
     this.contactListEl = document.getElementById('contactList');
-    this.address = new Address();
+    
     this.notesInst = new Notes();
+
+    this.errorMessages = {
+      '1': 'Email Address is already in use',
+      '2': 'Description is required',
+      '3': 'Contact ID is required',
+      '4': 'Already Associated',
+    }
   }
 
   async ready() {
@@ -469,6 +487,344 @@ this.model.contact.notes = this.model.contact.notes || [];
       this.model.contact.notes = notes;
     }
     catch(e) {
+    }
+  }
+
+  // Email test
+  async emailTest() {
+    let email = this.model.contact.email;
+    let cid = this.model.contact.id;
+
+    this.model.errors.contact.email = '';
+
+    if (!email) return;
+
+    let filters = {email};
+    let res = await Module.data.contact.getMany({filters});
+    let selfOwn = true;
+
+    if (res.status == 200) {
+      if (res.data.length > 0) {
+        for (let cont of res.data) {
+          if (cont.id != cid) {
+            selfOwn = false;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!selfOwn) {
+      this.model.errors.contact.email = this.errorMessages['1'];
+      this.$select('contact.email');
+    }
+  }
+
+  // Actions
+  dymo() {
+    const printers = dymo.label.framework.getPrinters();
+    const dymos = [];
+    
+    for (let i = 0; i < printers.length; i++) {
+      let printer = printers[i];
+
+      if (printer.printerType == "LabelWriterPrinter") {
+        dymos.push({text: printer.name, value: printer.name});
+        
+        if (i == 0) {
+          this.model.dymo = printer.name;
+        }
+      }
+    }
+
+    this.model.dymos = dymos;
+
+    this.dymoModal = new bootstrap.Modal(this._section.querySelectorAll('div.contacts-contact-dymo')[0]);
+    this.dymoModal.show();    
+  }
+
+  dymoPrint() {
+    let contact = this.model.contact.toJSON();
+    let printer = this.model.dymo;
+
+    let xml = `<?xml version="1.0" encoding="utf-8"?>
+    <DieCutLabel Version="8.0" Units="twips">
+      <PaperOrientation>Landscape</PaperOrientation>
+      <Id>Address</Id>
+      <PaperName>30252 Address</PaperName>
+      <DrawCommands>
+        <RoundRectangle X="0" Y="0" Width="1581" Height="5040" Rx="270" Ry="270" />
+      </DrawCommands>
+      <ObjectInfo>
+        <AddressObject>
+          <Name>Address</Name>
+          <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+          <BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+          <LinkedObjectName></LinkedObjectName>
+          <Rotation>Rotation0</Rotation>
+          <IsMirrored>False</IsMirrored>
+          <IsVariable>True</IsVariable>
+          <HorizontalAlignment>Left</HorizontalAlignment>
+          <VerticalAlignment>Middle</VerticalAlignment>
+          <TextFitMode>ShrinkToFit</TextFitMode>
+          <UseFullFontHeight>True</UseFullFontHeight>
+          <Verticalized>False</Verticalized>
+          <StyledText>
+            <Element>
+              <Attributes>
+                <Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+                <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+              </Attributes>
+            </Element>
+          </StyledText>
+          <ShowBarcodeFor9DigitZipOnly>False</ShowBarcodeFor9DigitZipOnly>
+          <BarcodePosition>BelowAddress</BarcodePosition>
+          <LineFonts>
+            <Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+            <Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+            <Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+          </LineFonts>
+        </AddressObject>
+        <Bounds X="332" Y="150" Width="4455" Height="1260" />
+      </ObjectInfo>
+    </DieCutLabel>`;
+
+    let label = dymo.label.framework.openLabelXml(xml);
+      
+    let data = `${contact.first} ${contact.last}\n${contact.address1}\n${contact.address2}\n${contact.city} ${contact.region.substr(3)}  ${contact.postcode}`;
+      
+    label.setAddressText(0, data);
+		label.print(printer);
+
+    this.dymoModal.hide();
+  }
+
+  // Associations
+  associated() {
+    let descs = [];
+    let contact = this.model.contact.toJSON();
+
+    if (contact.cat == 'F') {
+      descs.push({text: 'Spouse', value: 'Spouse'});
+      descs.push({text: 'Dependent', value: 'Dependent'});
+      descs.push({text: 'Relative', value: 'Relative'});
+    }
+    else {
+      descs.push({text: 'Co-worker', value: 'Co-worker'});
+    }
+
+    this.model.assoc.list = descs;
+
+    this.assocInit();
+
+    this.dymoModal = new bootstrap.Modal(this._section.querySelectorAll('div.contacts-contact-assoc')[0]);
+    this.dymoModal.show();    
+  }
+
+  assocInit() {
+    let contact = this.model.contact.toJSON();
+    
+    this.model.associate = {contact: contact.id, desc: '', assoc: ''};    
+    this.model.assoc.name = '';
+    this.model.errors.contact2 = {};
+    this.model.errors.associate = {};
+
+    this.assocGather();
+  }
+
+  async assocTest() {
+    let assoc = this.model.associate.assoc;
+    let res = await Module.tableStores.contact.getOne(assoc);
+
+    if (Object.keys(res).length == 0) {  // no such contact
+      this.model.associate.assoc = '';
+      this.model.assoc.name = '';
+      this.$focus('associate.assoc');
+    }
+    else {
+      this.model.assoc.name = res.first + ' ' + res.last;
+    }
+  }
+
+  async assocAdd() {
+    // make sure assoc is not already there.
+    let assoc = this.model.associate.toJSON();
+    let assocs = this.model.assocs;
+
+    if (!assoc.desc) {
+      this.model.errors.associate.desc = this.errorMessages['2'];
+      return;
+    }
+
+    if (!assoc.assoc) {
+      this.model.errors.associate.assoc = this.errorMessages['3'];
+      return;
+    }
+
+    for (let ass of assocs) {
+      if (assoc.assoc == ass.assoc) {
+        this.model.errors.associate.assoc = this.errorMessages['4'];
+        return;
+      }
+    }
+
+    let res = await Module.data.associate.insert(assoc);
+
+    if (res.status == 200) {
+      this.assocInit();
+      return true;
+    }
+    else {
+      this.model.errors.associate = res.data.errors.associate;
+      return false;
+    }    
+  }
+
+  async assocDel(ev) {
+    let id = ev.args[0];
+
+    let ret = await Module.modal.confirm('Are you sure you wish to remove this Association?');
+    if (ret != 0) return;
+
+    ret = await Module.tableStores.associate.delete(id);
+    if (ret.status != 200) {
+      await Module.modal.alert('Deletion failed');
+      return;
+    }
+
+    this.assocInit();
+  }
+
+  assocJump(ev) {
+    let id = ev.args[0];
+
+    window.open('/contactpage/contact/update/' + id, '_assoc');
+  }
+
+  async assocGather() {
+    let contact = this.model.contact.toJSON();
+    let assocs = [], assocsx = [];
+
+    let query1 = {
+      Associate: {
+        columns: ['id', 'contact', 'desc', 'assoc'],
+        leftJoin: [
+          {Contact: {columns: ['first', 'last'], name: 'contact'}}
+        ],
+        where: '"contacts_Associate"."contact"=$1'
+      }
+    };
+
+    let query2 = {
+      Associate: {
+        columns: ['id', 'contact', 'desc', 'assoc'],
+        leftJoin: [
+          {Contact: {columns: ['first', 'last'], name: 'assoc'}}
+        ],
+        where: '"contacts_Associate"."assoc"=$1'
+      }
+    }
+    
+    let values = [contact.id];
+
+    // My associates
+    let res = await Module.data.contact.query({query: query1, values})    
+
+    if (res.status == 200 && res.data.length > 0) {
+      for (let ass of res.data) {
+        assocs.push(ass);
+      }
+    }
+
+    this.model.assocs = assocs;
+
+    // Who has me as an associate?
+    res = await Module.data.contact.query({query: query2, values})    
+
+    if (res.status == 200 && res.data.length > 0) {
+      for (let ass of res.data) {
+        assocsx.push(ass);
+      }
+    }
+
+    this.model.assocsx = assocsx;    
+  }
+
+  assocNew() {
+    const empties = ['first', 'last', 'email', 'phone', 'occupation'];
+    const nullies = ['dob', 'doe'];
+    const falsies = ['acct', 'massmail', 'massemail', 'masssms', 'allowbill', 'iscell'];
+    let contact2 = this.model.contact.toJSON();
+    
+    delete contact2._pk;
+    delete contact2.id;
+
+    contact2.gender = 'U';
+
+    empties.forEach(function(fld) {
+      contact2[fld] = '';
+    });
+
+    nullies.forEach(function(fld) {
+      contact2[fld] = null;
+    });
+
+    falsies.forEach(function(fld) {
+      contact2[fld] = false;
+    })
+
+    this.model.contact2 = contact2;
+    this.model.errors.contact2 = {};
+    this.model.assocNew = true;
+  }
+
+  async assocAdd2(ev) {
+    let contact2 = this.model.contact2.toJSON();
+    let spinner = utils.modals.buttonSpinner(ev.target, true);
+
+    utils.modals.overlay(true);
+
+    // Save Contact
+    let res = await Module.tableStores.contact.insert(contact2);
+
+    utils.modals.overlay(false);
+    utils.modals.buttonSpinner(ev.target, false, spinner);
+
+    if (res.status == 200) {
+      this.assocBail();
+    }
+    else {
+      for (let k in res.data.errors.contact) {
+        this.model.errors.contact2[k] = res.data.errors.contact[k];
+      }
+
+      return;
+    }
+
+    // Save Assoc
+    this.model.associate.assoc = res.data._pk;
+    this.assocAdd();
+  }
+
+  assocBail() {
+    this.model.assocNew = false;
+    this.model.errors.contact2 = {};
+  }
+
+  async assocEmailTest() {
+    let email = this.model.contact2.email;
+    this.model.errors.contact2.email = '';
+
+    if (!email) return;
+
+    let filters = {email};
+    let res = await Module.data.contact.getMany({filters});
+
+    if (res.status == 200) {
+      if (res.data.length > 0) {
+        this.model.errors.contact2.email = this.errorMessages['1'];
+        this.$focus('contact2.email');
+      }
     }
   }
 

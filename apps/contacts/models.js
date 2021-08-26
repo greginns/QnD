@@ -20,7 +20,7 @@ const Contact = class extends Model {
   static definition() {
     return {
       schema: {
-        id: new Fields.Char({notNull: true, maxLength: 10, verbose: 'Contact ID'}),
+        id: new Fields.Serial({verbose: 'Contact ID'}),
         first: new Fields.Char({notNull: true, maxLength: 40, verbose: 'First Name'}),
         last: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Last Name'}),
         group: new Fields.Char({null: true, maxLength: 40, verbose: 'Group Name'}),
@@ -82,6 +82,9 @@ const Contact = class extends Model {
           {name: 'country', columns: ['country'], app, table: Country, tableColumns: ['id'], onDelete: 'NO ACTION'},
           {name: 'agentno', columns: ['agentno'], app, table: Contact, tableColumns: ['id'], onDelete: 'NO ACTION'},
         ],
+        unique: [
+          {name: 'email', columns: ['email']},
+        ],
       },
       
       hidden: [],
@@ -91,6 +94,43 @@ const Contact = class extends Model {
       dbschema: '',
       app,
       desc: 'Contact Master'
+    }
+  }
+};
+
+const Associate = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.Serial({verbose: 'ID'}),
+        contact: new Fields.Char({notNull: true, maxLength: 10, verbose: 'Contact'}),
+        desc: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Description'}),
+        assoc: new Fields.Char({notNull: true, maxLength: 10, verbose: 'Contact'}),
+      },
+
+      constraints: {
+        pk: ['id'],
+        fk: [
+          {name: 'contact', columns: ['contact'], app, table: Contact, tableColumns: ['id'], onDelete: 'NO ACTION'},
+          {name: 'assoc', columns: ['assoc'], app, table: Contact, tableColumns: ['id'], onDelete: 'NO ACTION'}
+        ],
+        index: [
+          {name: 'contact', columns: ['contact']},
+          {name: 'assoc', columns: ['assoc']}
+        ]
+      },
+      
+      hidden: [],
+      
+      orderBy: ['contact','desc'],
+      
+      dbschema: '',
+      app,
+      desc: 'Associated Contacts'
     }
   }
 };
@@ -360,4 +400,4 @@ const Config = class extends Model {
   }
 };
 
-module.exports = {Contact, Title, Group, Country, Region, Postcode, Egroup, Tagcat, Tag, Config};
+module.exports = {Contact, Associate, Title, Group, Country, Region, Postcode, Egroup, Tagcat, Tag, Config};
