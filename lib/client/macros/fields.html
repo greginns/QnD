@@ -99,7 +99,7 @@
 
 {% macro Segment(id='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
 <!--div class="toggle-radio" data-color='blue'-->
-  <input type="radio" name="{{name}}" id="{{id}}-{{value}}" mvc-checked='{{mvc_checked}}' value="{{value}}">
+  <input type="radio" name="{{name}}" id="{{id}}-{{value}}" mvc-checked='{{mvc_checked}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}">
   <label for="{{id}}-{{value}}">{{label}}</label>
 <!--/div-->
 {% endmacro %}
@@ -184,5 +184,53 @@
 
 <div mvc-show='errors.{{mvc_value}}'>
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
+</div>
+{% endmacro %}            
+
+{% macro Editor(toolbar='toolbar-container', editor='editor-container', errors='editor.errors') %}
+<div class="{{toolbar}}">
+  <span class="ql-formats">
+    <select class="ql-font"></select>
+    <select class="ql-size"></select>
+  </span>
+  <span class="ql-formats">
+    <button class="ql-bold"></button>
+    <button class="ql-italic"></button>
+    <button class="ql-underline"></button>
+    <button class="ql-strike"></button>
+  </span>
+  <span class="ql-formats">
+    <select class="ql-color"></select>
+    <select class="ql-background"></select>
+  </span>
+  <span class="ql-formats">
+    <button class="ql-header" value="1"></button>
+    <button class="ql-header" value="2"></button>
+    <button class="ql-blockquote"></button>
+    <!--button class="ql-code-block"></button-->
+  </span>
+  <span class="ql-formats">
+    <button class="ql-list" value="ordered"></button>
+    <button class="ql-list" value="bullet"></button>
+    <button class="ql-indent" value="-1"></button>
+    <button class="ql-indent" value="+1"></button>
+  </span>
+  <span class="ql-formats">
+    <select class="ql-align"></select>
+  </span>
+  <span class="ql-formats">
+    <button class="ql-link"></button>
+    <button class="ql-image"></button>
+    <button class="ql-video"></button>
+  </span>
+  <span class="ql-formats">
+    <button class="ql-clean"></button>
+  </span>
+</div>
+
+<div class="{{editor}}"></div>
+
+<div mvc-show='{{errors}}'>
+  <small class='text-danger' mvc-text='{{errors}}'></small>
 </div>
 {% endmacro %}            

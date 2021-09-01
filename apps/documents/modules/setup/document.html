@@ -1,0 +1,90 @@
+<page id='documents-document' style='display: none;'>
+  <section id='documents-document-section'>
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-12'>
+                 <h4><span mvc-text='docDesc'></span> Design</h4>
+              </div>
+            </div>
+          </div>
+          
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-12 col-md-3'>
+                <div class='row'>
+                  <div class='col-12 mb-3'>
+                    <button class='btn btn-primary' mvc-click='newDoc()'>
+                      New Document
+                    </button>
+                  </div>
+                </div>
+
+                <div class='row'>
+                  <div class='col-12'>
+                    <ul class='list-group' mvc-each='documents' mvc-click='oldDoc()'>
+                      <li class="list-group-item" data-index='$index'>
+                        <span mvc-text='documents[$index].name'></span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class='col-12 col-md-9'>
+                <div class='row'>
+                  <div class='col-12 mb-3'>
+                    {{ fields.Char(id=document.name.id, maxlength=document.name.maxlength, mvc_value='document.name', label=document.name.verbose, mvc_enabled='haveDoc') }}
+                  </div>
+                </div>
+
+                <div class='row'>
+                  <div class='col-12 col-md-6 mb-3'>
+                    {{ fields.Boolean(id=document.active.id, mvc_checked='document.active', label=document.active.verbose, mvc_enabled='haveDoc') }}
+                  </div>
+                  <div class='col-12 col-md-6 mb-3'>
+                    {{ fields.Boolean(id=document.default.id, mvc_checked='document.default', label=document.default.verbose, mvc_enabled='haveDoc') }}
+                  </div>
+                </div>
+
+                <div class='row' style='min-height: 400px'>
+                  <div class='col-12 mb-3'>
+                    {{ fields.Editor() }}
+                  </div>
+                </div>
+
+                <div class='row mb-3' style='height: 30px'>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row mb-3'>
+              <div class='col-12 col-md-3'>
+              </div>
+              <div class='col-12 col-md-9'>
+                <button class='btn btn-success' mvc-click='save()' mvc-enabled='haveDoc'>
+                  Save
+                </button>
+                <button class='btn btn-danger' mvc-click='delete()' mvc-enabled='haveDoc'>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</page>

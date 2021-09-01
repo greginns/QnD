@@ -1,0 +1,128 @@
+<page id='documents-docsetup' style='display: none;'>
+  <section id='documents-docsetup-section'>
+    <div class='row justify-content-center'>
+      <div class='col-12 col-md-9'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-12 mb-3'>
+                <h4>Document Setup</h4>
+              </div>
+            </div>          
+
+            <div class='row'>
+              <div class='col-12 col-md-6 col-xl-3 mb-3'>
+                {{ fields.SelectMVC(id=docsetup.company.id, size='1', mvc_value='docsetup.company', mvc_each='companies', mvc_on='{"change": "getDocsetup()"}', label=docsetup.company.verbose) }}
+              </div>
+            
+              <div class='col-12 col-md-6 col-xl-3 mb-3'>
+                <div class="form-label-group">
+                  <select size='1' mvc-value="docsetup.doctype" mvc-each='docgroups' class="form-select" mvc-on='{"change": "getDocsetup()"}'>
+                    <optgroup mvc-optgroup='docgroups[$index].label' mvc-each='docgroups[$index].items' mvc-index='$index1'>
+                      <option mvc-option='{"text": "docgroups[$index].items[$index1].text", "value": "docgroups[$index].items[$index1].value"}'></option>
+                    <optgroup>
+                  </select>
+                  <label>Doc Type</label>
+                </div>
+                
+                <div mvc-show='errors.docsetup.doctype'>
+                  <small class='text-danger' mvc-text='errors.docsetup.doctype'></small>
+                </div>
+              </div>
+            </div>            
+          </div>
+
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Char(id=docsetup.fromaddr.id, maxlength=docsetup.fromaddr.maxlength, mvc_value='docsetup.fromaddr', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', label=docsetup.fromaddr.verbose) }}
+                <small>Blank = User</small>
+              </div>
+
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Char(id=docsetup.toaddr.id, maxlength=docsetup.toaddr.maxlength, mvc_value='docsetup.toaddr', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', label=docsetup.toaddr.verbose) }}
+                <small>Blank = Guest</small>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Char(id=docsetup.ccaddr.id, maxlength=docsetup.ccaddr.maxlength, mvc_value='docsetup.ccaddr', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', label=docsetup.ccaddr.verbose) }}
+                <small>Comma Separated List</small>
+              </div>
+
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Char(id=docsetup.bccaddr.id, maxlength=docsetup.bccaddr.maxlength, mvc_value='docsetup.bccaddr', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', label=docsetup.bccaddr.verbose) }}
+                <small>Comma Separated List</small>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Text(id=docsetup.subjlist.id, rows='4', mvc_value='docsetup.subjlist', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', label=docsetup.subjlist.verbose) }}
+                <small>Each on a separate line</small>
+              </div>
+
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Char(id=docsetup.subject.id, maxlength=docsetup.subject.maxlength, mvc_value='docsetup.subject', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', label=docsetup.subject.verbose) }}
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-3'>
+                <label class='label-color'>Letter Placement</label>      
+
+                <div class="toggle-radio" data-color='blue'>
+                  {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='Before', value='B') }}
+                  {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='After', value='A') }}
+                </div>
+
+                <div mvc-show='errors.docsetup.ltrplace'>
+                  <small class='text-danger' mvc-text='errors.docsetup.ltrplace'></small>
+                </div>
+              </div>
+            </div>  
+
+            <div class='row'>
+              <div class='col-6 col-md-3 mb-3'>
+                Document Default
+              </div>  
+
+              <div class='col-6 col-md-3 mb-3'>
+              </div>  
+
+              <div class='col-6 col-md-3 mb-3'>
+                Letter Default
+              </div>  
+
+              <div class='col-6 col-md-3 mb-3'>
+              </div>  
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                {{ buttons.btn(class='success', mvc_click='save()', text='Save') }}
+                {{ buttons.btn(class='warning', mvc_click='clear()', text='Clear') }}
+                <span mvc-show='existingEntry'>
+                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='doc()', text='Documents') }}
+                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='letter()', text='Letters') }}
+                </span>
+              </div>
+            </div>            
+          </div>
+        </div>
+
+      </div>
+    </div>  
+  </section>
+</page>
