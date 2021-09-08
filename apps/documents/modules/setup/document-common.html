@@ -1,0 +1,91 @@
+<div class='row justify-content-center'>
+  <div class='col-12'>
+    <div class='card'>
+      <div class='card-header'>
+        <div class='row'>
+          <div class='col-12 col-md-4'>
+            <span class='align-middle pointer' mvc-click='go()'>
+              <i class="fas fa-chevron-left"></i>
+              Document Set Up
+            </span>
+          </div>
+          <div class='col-12 col-md-4 text-center'>
+             <h4><span mvc-text='docDesc'></span> Design</h4>
+          </div>
+          <div class='col-12 col-md-4'>
+          </div>
+        </div>
+      </div>
+      
+      <div class='card-body'>
+        <div class='row'>
+          <div class='col-12 col-md-3'>
+            <div class='row'>
+              <div class='col-12'>
+                <ul class='list-group docul' mvc-each='documents' mvc-click='oldDoc()'>
+                  <li class="list-group-item" mvc-attr='{"data-id": "documents[$index].id"}' mvc-text='documents[$index].name' mvc-attrclass='{"text-success": "documents[$index].default"}'' mvc-attrclassx='{"text-danger": "documents[$index].active"}'>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class='col-12 col-md-9'>
+            <div class='row'>
+              <div class='col-12 mb-3'>
+                {{ fields.Char(id=document.name.id, maxlength=document.name.maxlength, mvc_value='document.name', label=document.name.verbose) }}
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Boolean(id=document.active.id, mvc_checked='document.active', label=document.active.verbose) }}
+              </div>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Boolean(id=document.default.id, mvc_checked='document.default', label=document.default.verbose) }}
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12'>
+                {{ fields.Text(id=document.body.id, rows='10', cols='20', mvc_value='document.body', label=document.body.verbose) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class='card-footer'>
+        <div class='row' mvc-show='badMessage'>
+          <div class='col-12'>
+            <div class="alert alert-danger" role="alert">
+              <span mvc-text='badMessage'></span>  
+            </div>
+          </div>
+        </div>         
+
+        <div class='row'>
+          <div class='col-12 col-md-3'>
+          </div>
+          <div class='col-12 col-md-9'>
+            <button class='btn btn-success' mvc-click='save()'>
+              Save
+            </button>
+            <button class='btn btn-warning' mvc-click='clear()'>
+              Clear
+            </button>
+            <button class='btn btn-danger' mvc-click='delete()' mvc-show='existingEntry'>
+              Delete
+            </button>
+            <button class='btn btn-secondary' mvc-click='view()'>
+              View
+            </button>
+            <button class='btn btn-secondary' mvc-click='getExample()'>
+              Load Example
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

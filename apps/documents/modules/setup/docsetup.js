@@ -1,7 +1,6 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {TableView} from '/~static/lib/client/core/data.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
 
 class Docsetup extends Verror {
@@ -23,41 +22,6 @@ class Docsetup extends Verror {
       {text: 'Company-2', value: '2'}
     ];
 
-    this.model.docgroups = [
-      {label: 'Reservations', items: [
-        {text: 'Customer Invoice', value: 'invoiceA'},
-        {text: 'In-House Invoice', value: 'invoiceB'},
-        {text: 'Itinerary', value: 'itinerary'},
-        {text: 'Quotation', value: 'quote'},
-        {text: 'Cancellation', value: 'cancel'},
-        {text: 'Payment Receipt', value: 'receipt'},
-        {text: 'CC Receipt', value: 'ccreceipt'},
-      ]},
-      {label: "Online", items: [
-        {text: "Token", value: 'token'},
-        {text: "Lost Password", value: 'pswdlost'},
-        {text: "Temp Password", value: 'pswdtemp'},
-        {text: "Signup", value: 'signup'},
-      ]},
-      {label: "Accounts", items: [
-        {text: "Payment Receipt", value: 'accreceipt'},
-        {text: "CC Receipt", value: 'accccreceipt'},
-      ]},
-      {label: "Gift Certificates", items: [
-        {text: "Gift Certificate", value: 'giftcert'},
-        {text: "Payment Receipt", value: 'gcreceipt'},
-        {text: "CC Receipt", value: 'gcccreceipt'},
-      ]},
-      {label: "Point of Sale", items: [
-        {text: "Receipt", value: 'posreceipt'},
-        {text: "CC Receipt", value: 'posccreceipt'},
-      ]},
-      {label: "Other", items: [
-        {text: "Letter", value: 'letter'},
-        {text: "Voucher", value: 'raincheck'},
-      ]},
-    ]
-
     this.docsetupOrig = {};
     this.defaults = {};
 
@@ -66,7 +30,13 @@ class Docsetup extends Verror {
 
   async ready() {
     return new Promise(async function(resolve) {
-      this.defaults.docsetup = await Module.data.docsetup.getDefault();      
+      this.defaults.docsetup = await Module.data.docsetup.getDefault();    
+      
+      let ret = await Module.data.document.getOne('_doctypes');   
+
+      if (ret.status == 200) {
+        this.model.docgroups = JSON.parse(ret.data);
+      }
 
       resolve();
     }.bind(this));
@@ -75,6 +45,7 @@ class Docsetup extends Verror {
   inView(params) {
     this.clearErrors();
     this.setDefaults();
+    this.getDocsetup();
   }
 
   outView() {
@@ -182,7 +153,20 @@ class Docsetup extends Verror {
         this.newEntry();
       }
       else {
-        this.existingEntry(res.data[0]);
+        let doc = res.data[0];
+        this.existingEntry(doc);
+
+        filters = {default: true};
+
+        let docres = await Module.data.document.getMany({filters});
+        if (docres.status == 200 && docres.data.length> 0) {
+          this.model.defaultDoc = docres.data[0].name;
+        }
+
+        let ltrres = await Module.data.docletter.getMany({filters});
+        if (ltrres.status == 200 && ltrres.data.length> 0) {
+          this.model.defaultLtr = ltrres.data[0].name;
+        }
       }
     }
   }
@@ -214,6 +198,9 @@ class Docsetup extends Verror {
     this.model.docsetup.doctype = docsetup.doctype;
 
     this.docsetupOrig = this.model.docsetup.toJSON();
+
+    this.model.defaultDoc = '';
+    this.model.defaultLtr = '';
   }
 
   doc() {

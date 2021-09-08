@@ -7,7 +7,7 @@ import {Modal} from '/~static/lib/client/widgets/modal.js';
 // js for pages
 import '/~static/apps/documents/modules/setup/docsetup.js';
 import '/~static/apps/documents/modules/setup/document.js';
-//import '/~static/apps/documents/modules/setup/docletter.js';
+import '/~static/apps/documents/modules/send/docsend.js';
 
 let moduleStart = function() {
   let connectToData = async function() {
@@ -16,6 +16,7 @@ let moduleStart = function() {
     Module.data.docsetup = new TableAccess({modelName: 'docsetup', url: `/documents/v1/docsetup`});
     Module.data.document = new TableAccess({modelName: 'document', url: `/documents/v1/document`});
     Module.data.docletter = new TableAccess({modelName: 'docletter', url: `/documents/v1/docletter`});
+    Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
 
     const docData = new WSDataComm('documents');                 // WS instances for this app
     const safemode = false;
@@ -48,6 +49,13 @@ let moduleStart = function() {
     Module.tableStores.docletter = new TableStore({accessor: Module.data.docletter, model, safemode});  // setup a table store in Module so all pages can access
     //dataPromises.push(Module.tableStores.docletter.getAll());
 
+    // contact table ---
+    model = `/contacts/contact`;               
+
+    docData.addModel(model);                          
+
+    Module.tableStores.contact = new TableStore({accessor: Module.data.contact, model, safemode});  // setup a table store in Module so all pages can access
+
     // start following via WS ---
     docData.start();
 
@@ -65,7 +73,7 @@ let moduleStart = function() {
   let startPages = async function() {
     // page URL data  
     const module = location.pathname.split('/')[1];  
-    const startPage = 'docsetup';
+    const startPage = 'docsend'; //'docsetup';
 
     // Start up pages.  Module.pages saved up all page references
     const pager = new Pages({root: `/${module}`, pages: Module.pages});

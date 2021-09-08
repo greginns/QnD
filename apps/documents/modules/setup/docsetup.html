@@ -75,6 +75,7 @@
                 <div class="toggle-radio" data-color='blue'>
                   {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='Before', value='B') }}
                   {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='After', value='A') }}
+                  {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='As Body', value='M') }}
                 </div>
 
                 <div mvc-show='errors.docsetup.ltrplace'>
@@ -85,18 +86,31 @@
 
             <div class='row'>
               <div class='col-6 col-md-3 mb-3'>
-                Document Default
+                <span class='label-color'>
+                  Document Default
+                </span>
+                <span mvc-text='defaultDoc'></span>
               </div>  
 
               <div class='col-6 col-md-3 mb-3'>
               </div>  
 
               <div class='col-6 col-md-3 mb-3'>
-                Letter Default
+                <span class='label-color'>
+                  Letter Default
+                </span>
+                
+                <span mvc-text='defaultLtr'></span>
               </div>  
 
               <div class='col-6 col-md-3 mb-3'>
               </div>  
+            </div>
+
+            <div class='row'>
+              <div class='col-12'>
+                {{ fields.Text(id=docsetup.head.id, rows='4', cols='20', mvc_value='docsetup.head', label=docsetup.head.verbose) }}
+              </div>
             </div>
           </div>
 

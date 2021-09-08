@@ -1,4 +1,5 @@
 const root = process.cwd();
+const fs = require('fs').promises;
 const uuidv1 = require('uuid/v1');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
@@ -27,10 +28,68 @@ const makeCSRF = async function(database, pgschema, user) {
   return CSRFToken;
 }
 
+// Services override class
+class ModelService1 extends ModelService {
+  async getOne({database = '', pgschema = '', rec = {}} = {}) {
+    // Get specific row
+    if ('id' in rec && rec.id == '_default') {
+      let tm = new TravelMessage();
+
+      tm.data = this.model.getColumnDefaults();
+      tm.type = 'json';
+
+      return tm;
+    }
+
+    // Get doctypes
+    if ('id' in rec && rec.id == '_doctypes') {
+      let tm = new TravelMessage();
+
+      let file = root + '/apps/documents/examples/doctypes.json';
+      let text = '';
+
+      try {
+        text = await fs.readFile(file);
+      }
+      catch(e) {
+        console.log(e)
+      }
+
+      tm.data = text.toString();
+      tm.type = 'text';
+
+      return tm;
+    }
+
+    // Get example
+    if ('id' in rec && rec.id.substr(0,1) == '_') {
+      let tm = new TravelMessage();
+
+      let doctype = rec.id.substr(1);
+      let file = root + '/apps/documents/examples/' + doctype + '.html';
+      let text = '';
+
+      try {
+        text = await fs.readFile(file);
+      }
+      catch(e) {
+        console.log(e)
+      }
+
+      tm.data = text.toString();
+      tm.type = 'text';
+
+      return tm;
+    }
+
+    return await this.model.selectOne({database, pgschema, pks: [rec.id] });
+  }
+}
+
 // Model services
 services.docsetup = new ModelService({model: models.Docsetup});
-services.document = new ModelService({model: models.Document});
-services.docletter = new ModelService({model: models.Docletter});
+services.document = new ModelService1({model: models.Document});
+services.docletter = new ModelService1({model: models.Docletter});
 
 // Any other needed services
 services.query = function({database = '', pgschema = '', query = '', values = []}) {

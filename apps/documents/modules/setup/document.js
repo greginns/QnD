@@ -1,13 +1,14 @@
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
-import {TableView} from '/~static/lib/client/core/data.js';
-import {Editor} from '/~static/project/editor.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
 
 class Document extends Verror {
-  constructor(element) {
+  constructor(element, docOrLetter) {
     super(element);
+
+    this.docOrLetter = docOrLetter;
+    this.modelName = (this.docOrLetter == 'letter') ? 'docletter' : 'document';
   }
 
   createModel() {
@@ -22,7 +23,6 @@ class Document extends Verror {
 
     this.documentOrig = {};
     this.defaults = {};
-    this.model.haveDoc = false;
     
     this.docgroups = [
       {label: 'Reservations', items: [
@@ -59,43 +59,34 @@ class Document extends Verror {
       ]},
     ];
 
-    let editorEl = this._section.querySelector('div.editor-container');
-    let toolbarEl = this._section.querySelector('div.toolbar-container');
-    this.editor = new Editor(editorEl, toolbarEl);
+    this.docUl = this._section.querySelector('ul.docul');
 
     //this.ready(); //  use if not in router
   }
 
   async ready() {
     return new Promise(async function(resolve) {
-      this.defaults.document = await Module.data.document.getDefault();      
+      this.defaults.document = await Module.data[this.modelName].getDefault();      
 
       resolve();
     }.bind(this));
   }
   
   async inView(params) {
-    this.docsetup = params.docsetup;
-    this.doctype = '';
+    this.docsetupID = params.docsetup;
     this.model.docDesc = '';
 
     this.getAllDocs();
-    let res = await Module.data.docsetup.getOne(this.docsetup);
+    let res = await Module.data.docsetup.getOne(this.docsetupID);
     
     if (res.status == 200) {
-      this.doctype = res.data.doctype;
-
-      for (let group of this.docgroups) {
-        for (let item of group.items) {
-          if (item.value == this.doctype) {
-            this.model.docDesc = item.text;
-          }
-        }
-      }
+      this.docsetup = res.data;
+      this.getDocDesc();
     }
 
     this.clearErrors();
     this.setDefaults();
+    this.newDoc();
   }
 
   outView() {
@@ -107,9 +98,12 @@ class Document extends Verror {
     let document = this.model.document.toJSON();
     let diffs;
 
-    document.text = this.editor.getText();
-
     this.clearErrors();
+
+    if (!document.name) {
+      this.model.badMessage = 'No Document Name';
+      return;
+    }
           
     if (this.model.existingEntry) {
       diffs = utils.object.diff(this.documentOrig, document);
@@ -129,21 +123,69 @@ class Document extends Verror {
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.document.update(document.id, diffs) : await Module.tableStores.document.insert(document);
+    let res = (this.model.existingEntry) ? await Module.tableStores[this.modelName].update(document.id, diffs) : await Module.tableStores[this.modelName].insert(document);
 
-    if (res.status == 200) {
-      utils.modals.toast('document', ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
-   
-      this.getdocument();  // re-get data to set statuses, etc
-    }
-    else {
-      this.displayErrors(res);
-    }
+    this.handleSaveResponse(res);
     
     utils.modals.overlay(false);
     utils.modals.buttonSpinner(ev.target, false, spinner);
   }
   
+  async saveQuiet() {
+    let document = this.model.document.toJSON();
+
+    if (!document.name) {
+      return;
+    }
+
+    // new (post) or old (put)?
+    let res = (this.model.existingEntry) ? await Module.tableStores[this.modelName].update(document.id, diffs) : await Module.tableStores[this.modelName].insert(document);
+
+    this.handleSaveResponse(res);
+  }
+    
+  handleSaveResponse(res) {
+    if (res.status == 200) {
+      utils.modals.toast(res.data.name, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+
+      let document = res.data;
+   
+      if (this.model.existingEntry) {
+        this.updateDocList(document);
+      }
+      else {
+        this.model.existingEntry = true;
+        this.insertDocList(document);
+      }
+      
+      this.activateLi(document.id);
+      this.model.document = document;
+      this.documentOrig = document;
+
+      if (document.default) this.handleDefaults(document);
+    }
+    else {
+      this.displayErrors(res);
+    }
+  }
+
+  async handleDefaults(doc) {
+    // make sure only this one is the default document.
+    let filters = {docsetup: this.docsetupID, default: true};
+    let res = await Module.data[this.modelName].getMany({filters});
+
+    if (res.status == 200) {
+      for (let rec of res.data) {
+        if (rec.id != doc.id && rec.default === true) {
+          rec.default = false;
+
+          await Module.tableStores[this.modelName].update(rec.id, {default: rec.default});
+          this.updateDocList(rec);          
+        }
+      }
+    }
+  }
+
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
@@ -157,10 +199,10 @@ class Document extends Verror {
 
     this.clearErrors();
     
-    let res = await Module.tableStores.document.delete(document.id);
+    let res = await Module.tableStores[this.modelName].delete(document.id);
 
     if (res.status == 200) {
-      utils.modals.toast('document', 'document Removed', 1000);
+      utils.modals.toast(document.name, 'Removed', 1000);
     }
     else {
       this.displayErrors(res);
@@ -175,6 +217,7 @@ class Document extends Verror {
   // Clearing
   async clear() {
     if (await this.canClear()) {
+      this.clearLIs();
       this.newEntry();
     }
   }
@@ -182,14 +225,62 @@ class Document extends Verror {
   async canClear(ev) {
     let document = this.model.document.toJSON();
     let orig = this.documentOrig;
-    let diffs = utils.object.diff(orig, document);
     let ret = true;
 
+    let diffs = utils.object.diff(orig, document);
+
     if (Object.keys(diffs).length > 0) {
-      ret = await utils.modals.confirm('Abandon changes?');
+      ret = await Module.modal.confirm('Abandon changes?');
+
+      if (ret == 0) ret = true;
     }
 
     return ret;
+  }
+
+  clearLIs() {
+    let lis = this.docUl.querySelectorAll('li');
+
+    for (let li of Array.from(lis)) {
+      li.classList.remove('active');
+    }
+  }
+
+  activateLi(id) {
+    let sel = `li[data-id="${id}"]`;
+    let li = Array.from(this.docUl.querySelectorAll(sel))[0];
+
+    li.classList.add('active');
+  }
+
+  insertDocList(doc) {
+    let docs = this.model.documents.toJSON();
+    docs.push(doc);
+
+    this.sortDocList(docs);
+
+    this.model.documents = docs;
+  }
+
+  updateDocList(doc) {
+    let docs = this.model.documents.toJSON();
+
+    for (let l=0; l<docs.length; l++) {
+      if (doc.id == docs[l].id) {
+        docs[l] = doc;
+        break;
+      }
+    }
+
+    this.sortDocList(docs);
+
+    this.model.documents = docs;
+  }
+
+  sortDocList(docs) {
+    docs.sort(function(a,b) {
+      return (a.name < b.name) ? -1 : (a.name > b.name) ? 1 : 0;
+    })
   }
 
   async newDoc() {
@@ -198,46 +289,43 @@ class Document extends Verror {
     }
   }
 
-  async oldDoc(ev) {
-console.log(ev)    
+  async oldDoc(obj) {
     if (await this.canClear()) {
-      let ul = ev.target.closest('ul');
-      let lis = ul.querySelectorAll('li');
+      this.clearLIs();
 
-      for (let li of ArrayFrom(lis)) {
-        li.classList.remove('active');
-      }
+      let id = obj.attrs['data-id'];
 
-      let li = ev.target.closest('li');
-      let idx = li.getAttribute('data-index');
-      li.classList.add('active');
-
-      this.existingEntry(this.documents[idx]);
+      this.activateLi(id);
+      this.getDocument(id);
     }
   }
 
   async getAllDocs() {
     this.model.documents = [];
 
-    let filters = {docsetup: this.docsetup};
-    let res = await Module.data.document.getMany({filters});
+    let filters = {docsetup: this.docsetupID};
+    let res = await Module.data[this.modelName].getMany({filters});
 
     if (res.status == 200) {
+      this.sortDocList(res.data);
       this.model.documents = res.data;
     }
   }
 
-  async getDocument(ev) {
-    console.log(ev)
+  async getDocument(id) {
+    let res = await Module.data[this.modelName].getOne(id);
+
+    if (res.status == 200) {
+      let doc = res.data;
+      this.existingEntry(doc);
+    }
   }
 
-  newEntry(doc) {
-    this.model.document = doc;
+  newEntry() {
+    this.model.document = {};
     this.model.existingEntry = false;
-    this.model.haveDoc = true;
     this.setDefaults();
-    this.model.haveDoc = true;
-    this.editor.setText('');
+    this.$focus('document.name');
 
     this.documentOrig = this.model.document.toJSON();
   }
@@ -245,7 +333,6 @@ console.log(ev)
   async existingEntry(doc) {
     this.model.document = doc;
     this.model.existingEntry = true;
-    this.editor.setText(doc.text);
 
     this.documentOrig = this.model.document.toJSON();
   }
@@ -258,16 +345,78 @@ console.log(ev)
       this.model.document[k] = this.defaults.document[k];
     }
 
-    this.model.document.docsetup = this.docsetup;
+    this.model.document.docsetup = this.docsetupID;
+    delete this.model.document.id;
 
     this.documentOrig = this.model.document.toJSON();
+  }
+
+  getDocDesc() {
+    let data = this.docsetup;
+    this.doctype = data.doctype;
+
+    for (let group of this.docgroups) {
+      for (let item of group.items) {
+        if (item.value == this.doctype) {
+          this.model.docDesc = item.text;
+
+          if (this.docOrLetter == 'letter') this.model.docDesc += ' Letter'
+        }
+      }
+    }
+  }
+
+  view() {
+    let head = this.docsetup.head;
+    let body = this.model.document.body;
+    let win = window.open('about:blank', '_testview');
+
+    let doc = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          ${head}
+        </head>
+        <body>
+          ${body}
+        </body>
+      </html>
+    `;
+
+    win.document.write(doc);
+    win.document.close();
+  }
+
+  async getExample() {
+    if (!await this.canClear()) return;
+
+    this.clear();
+
+    let doctype = (this.docOrLetter == 'letter') ? 'letter' : this.doctype;
+
+    let res = await Module.data[this.modelName].getOne('_'+doctype);
+
+    if (res.status == 200) {
+      this.model.document.body = res.data;
+    }    
+  }
+
+  go() {
+    Module.pager.go('/docsetup')
   }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('documents-document');   // page html
-let document1 = new Document('documents-document-section');
+let document1 = new Document('documents-document-section', 'document');
 let section1 = new Section({mvc: document1});
 let page1 = new Page({el: el1, path: '/document/:docsetup', title: 'Document Design', sections: [section1]});
 
+let el2 = document.getElementById('documents-docletter');   // page html
+let document2 = new Document('documents-docletter-section', 'letter');
+let section2 = new Section({mvc: document2});
+let page2 = new Page({el: el2, path: '/docletter/:docsetup', title: 'Letter Design', sections: [section2]});
+
 Module.pages.push(page1);
+Module.pages.push(page2);

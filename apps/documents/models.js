@@ -22,9 +22,8 @@ const Docsetup = class extends Model {
         bccaddr: new Fields.Char({maxLength: 500, verbose: 'BCC'}),
         subjlist: new Fields.Char({maxLength: 500, verbose: 'Subject List'}),
         subject: new Fields.Char({maxLength: 100, verbose: 'Subject'}),
-        document: new Fields.Integer({default: 0, verbose: 'Doc ID'}),
-        docletter: new Fields.Integer({default: 0, verbose: 'Ltr ID'}),
         ltrplace: new Fields.Char({notNull: true, default: 'B', maxLength: 1, verbose: 'Ltr Place'}),
+        head: new Fields.Text({verbose: 'HTML <head>'}),
       },
       
       constraints: {
@@ -52,10 +51,10 @@ const Document = class extends Model {
     return {
       schema: {
         id: new Fields.Serial({verbose: 'ID'}),
-        name: new Fields.Char({maxLength: 50, verbose: 'Doc Name'}),
+        name: new Fields.Char({maxLength: 50, verbose: 'Name'}),
         active: new Fields.Boolean({default: true, verbose: 'Active'}),
-        default: new Fields.Boolean({default: true, verbose: 'Default'}),
-        text: new Fields.Text({verbose: 'Document HTML'}),
+        default: new Fields.Boolean({default: false, verbose: 'Default'}),
+        body: new Fields.Text({verbose: 'Document Body'}),
         docsetup: new Fields.Integer({verbose: 'Docsetup ID'}),
       },
       
@@ -86,10 +85,10 @@ const Docletter = class extends Model {
     return {
       schema: {
         id: new Fields.Serial({verbose: 'ID'}),
-        name: new Fields.Char({maxLength: 50, verbose: 'Doc Name'}),
+        name: new Fields.Char({maxLength: 50, verbose: 'Name'}),
         active: new Fields.Boolean({default: true, verbose: 'Active'}),
-        default: new Fields.Boolean({default: true, verbose: 'Default'}),
-        text: new Fields.Text({verbose: 'Document HTML'}),
+        default: new Fields.Boolean({default: false, verbose: 'Default'}),
+        body: new Fields.Text({verbose: 'Document Body'}),
         docsetup: new Fields.Integer({verbose: 'Docsetup ID'}),
       },
       

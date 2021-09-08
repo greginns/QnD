@@ -19,7 +19,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'modules',
   version,
-  path: ['/docpage', '/docpage/:etc', '/docpage/:etc/:etc', '/docpage/:etc/:etc/:etc'], 
+  path: ['/docpage', '/docpage/:etc', '/docpage/:etc/:etc', '/docpage/:etc/:etc/:etc', '/docpage/:etc/:etc/:etc/:etc', '/docpage/:etc/:etc/:etc/:etc/:etc'], 
   rewrite: true,
   id: 'documents',
   level: ACCESS,

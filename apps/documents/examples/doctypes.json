@@ -1,0 +1,34 @@
+[
+  {"label": "Reservations", "items": [
+    {"text": "Customer Invoice", "value": "invoiceA"},
+    {"text": "In-House Invoice", "value": "invoiceB"},
+    {"text": "Itinerary", "value": "itinerary"},
+    {"text": "Quotation", "value": "quote"},
+    {"text": "Cancellation", "value": "cancel"},
+    {"text": "Payment Receipt", "value": "receipt"},
+    {"text": "CC Receipt", "value": "ccreceipt"}
+  ]},
+  {"label": "Online", "items": [
+    {"text": "Token", "value": "token"},
+    {"text": "Lost Password", "value": "pswdlost"},
+    {"text": "Temp Password", "value": "pswdtemp"},
+    {"text": "Signup", "value": "signup"}
+  ]},
+  {"label": "Accounts", "items": [
+    {"text": "Payment Receipt", "value": "accreceipt"},
+    {"text": "CC Receipt", "value": "accccreceipt"}
+  ]},
+  {"label": "Gift Certificates", "items": [
+    {"text": "Gift Certificate", "value": "giftcert"},
+    {"text": "Payment Receipt", "value": "gcreceipt"},
+    {"text": "CC Receipt", "value": "gcccreceipt"}
+  ]},
+  {"label": "Point of Sale", "items": [
+    {"text": "Receipt", "value": "posreceipt"},
+    {"text": "CC Receipt", "value": "posccreceipt"}
+  ]},
+  {"label": "Other", "items": [
+    {"text": "Letter", "value": "letter"},
+    {"text": "Voucher", "value": "raincheck"}
+  ]}
+]
