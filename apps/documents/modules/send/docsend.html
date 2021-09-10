@@ -1,7 +1,7 @@
 <page id='documents-send' style='display: none;'>
   <section id='documents-send-section'>
-    <div class='row justify-content-center'>
-      <div class='col-12'>
+    <div class='row'>
+      <div class='col-12 mb-3'>
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
@@ -60,7 +60,7 @@
                 <div class='row'>
                   <div class='col-12 col-md-8 mb-3'>
                     <div class="form-label-group">
-                      <select size='1' mvc-value="docsend.document" mvc-each='documents' class="form-select">
+                      <select size='1' mvc-value="docsend.document" mvc-each='documents' mvc-on='{change: "docChanged()"}' class="form-select">
                         <option mvc-option='{"text": "documents[$index].name", "value": "documents[$index].id"}'></option>
                       </select>
                       <label>Document</label>
@@ -71,7 +71,7 @@
                 <div class='row'>
                   <div class='col-12 col-md-8 mb-3'>
                     <div class="form-label-group">
-                      <select size='1' mvc-value="docsend.docletter" mvc-each='docletters' class="form-select">
+                      <select size='1' mvc-value="docsend.docletter" mvc-each='docletters' mvc-on='{change: "ltrChanged()"}' class="form-select">
                         <option mvc-option='{"text": "docletters[$index].name", "value": "docletters[$index].id"}'></option>
                       </select>
                       <label>Letter</label>
@@ -132,7 +132,6 @@
 
             </div>
           </div>
-
           
           <div class='card-footer'>
             <div class='row'>
@@ -155,5 +154,18 @@
         </div>
       </div>
     </div>
+
+    <div class='row'>
+      <div class='col-12 mb-3'>
+        {{ fields.Text(id='docsource', cols='40', rows='10', mvc_value='docsend.docsource', mvc_enabled='', label='Document HTML') }}
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 mb-3'>
+        {{ fields.Text(id='ltrsource', cols='40', rows='10', mvc_value='docsend.ltrsource', mvc_enabled='', label='Letter HTML') }}
+      </div>
+    </div>
+
   </section>
 </page>

@@ -709,7 +709,7 @@ this.model.contact.notes = this.model.contact.notes || [];
       Associate: {
         columns: ['id', 'contact', 'desc', 'assoc'],
         leftJoin: [
-          {Contact: {columns: ['first', 'last'], name: 'contact'}}
+          {Contact: {columns: ['first', 'last'], fkname: 'contact'}}
         ],
         where: '"contacts_Associate"."contact"=$1'
       }
@@ -719,7 +719,7 @@ this.model.contact.notes = this.model.contact.notes || [];
       Associate: {
         columns: ['id', 'contact', 'desc', 'assoc'],
         leftJoin: [
-          {Contact: {columns: ['first', 'last'], name: 'assoc'}}
+          {Contact: {columns: ['first', 'last'], fkname: 'assoc'}}
         ],
         where: '"contacts_Associate"."assoc"=$1'
       }

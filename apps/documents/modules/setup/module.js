@@ -77,6 +77,7 @@ let moduleStart = function() {
 
     // Start up pages.  Module.pages saved up all page references
     const pager = new Pages({root: `/${module}`, pages: Module.pages});
+    Module.pager = pager.router;
 
     try {
       // fire off init method in each section of each page.

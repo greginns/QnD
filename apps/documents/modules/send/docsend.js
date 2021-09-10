@@ -1,5 +1,5 @@
+import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
-import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
 
@@ -30,6 +30,8 @@ class Docsend extends Verror {
   }
 
   async ready() {
+    nunjucks.configure({ autoescape: true });
+
     return new Promise(async function(resolve) {
       let ret = await Module.data.document.getOne('_doctypes');   
 
@@ -55,10 +57,83 @@ class Docsend extends Verror {
     this.model.contact = await this.getContact();
     this.getDocumentDefaults();
     this.getEmailDefaults();
+
+    let docEl = this.$getElement('docsend.document');
+    let ltrEl = this.$getElement('docsend.docletter');
+    let ev = new Event('change');
+
+    docEl.dispatchEvent(ev);
+    ltrEl.dispatchEvent(ev);
   }
 
   outView() {
     return true;  
+  }
+
+  async send() {
+    // test all email fields.
+    this.clearErrors();
+    let anyErrors = false;
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$/;
+
+    for (let fld of ['fromaddr', 'toaddr', 'subject']) {
+      if (!this.model.docsend[fld]) {
+        this.model.errors.docsend[fld] = 'Required';
+        anyErrors = true;
+      }
+    }
+
+    if (anyErrors) return;
+
+    for (let fld of ['fromaddr', 'toaddr', 'ccaddr', 'bccaddr']) {
+      for (let addr of this.model.docsend[fld].split(',')) {
+        if (addr) {
+          if (addr.indexOf('>') > -1) addr = addr.substr(addr.indexOf('>')+1);
+          addr = addr.trim();
+
+          if (!re.test(addr)) {
+            this.model.errors.docsend[fld] = 'Invalid Email Address: ' + addr;
+            anyErrors = true;
+          }
+        }
+      }
+    }
+
+    if (anyErrors) return;
+
+    
+    let query1 = {
+      contacts_Contact: {
+        columns: ['id', 'first', 'last'],
+        leftJoin: [
+          {contacts_Region: {
+            columns: ['name'], 
+            fkname: 'region',
+            leftJoin: [
+              {contacts_Country: {
+                columns: ['name'],
+                fkname: 'country'
+              }}
+            ]
+          }},
+        ],
+      }
+    };
+
+    let values = []
+    let res = await Module.data.document.query({query: query1, values})    
+    let data = res.data;
+console.log(data)
+
+    let text = `
+    {% for row in data %}
+      Hello {{ row.first }} {{ row.last }}. You live in {{row.region.name}} in {{row.region.country.name}}
+    {% endfor %}
+    `
+
+    let txt = nunjucks.renderString(text, {data});
+    console.log(txt)
+
   }
 
   async getCompanyFromDoc() {
@@ -169,17 +244,41 @@ class Docsend extends Verror {
     }
 
     this.model.docsend['subjlist'] = this.docsetup.subjlist.split('\n');
+
+    if (!this.docsetup.fromaddr) this.model.docsend.fromaddr = `<${App.USER.name}> ${App.USER.email}`;
+    if (!this.docsetup.toaddr) this.model.docsend.toaddr = this.model.contact.email;
+  }
+
+  docChanged(obj) {
+    let docID = this.model.docsend.document;
+    let docs = this.model.documents;
+
+    for (let doc of docs) {
+      if (doc.id == docID) {
+        this.model.docsend.docsource = doc.body;
+        break;
+      }
+    }
+  }
+
+  ltrChanged(obj) {
+    let docID = this.model.docsend.docletter;
+    let docs = this.model.docletters;
+
+    for (let doc of docs) {
+      if (doc.id == docID) {
+        this.model.docsend.ltrsource = doc.body;
+        break;
+      }
+    }
   }
 
 };
-
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('documents-send');   // page html
 let docsend1 = new Docsend('documents-send-section');
 let section1 = new Section({mvc: docsend1});
-let page1 = new Page({el: el1, path: '/docsend/:doctype/:ref1/:ref2', title: 'Document send', sections: [section1]});
-//let page2 = new Page({el: el1, path: '/docsend/:doctype/:ref1', title: 'Document send', sections: [section1]});
+let page1 = new Page({el: el1, path: ['/docsend/:doctype/:ref1/:ref2', '/docsend/:doctype/:ref1'], title: 'Document send', sections: [section1]});
 
 Module.pages.push(page1);
-//Module.pages.push(page2);
