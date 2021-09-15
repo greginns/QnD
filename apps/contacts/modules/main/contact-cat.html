@@ -1,5 +1,12 @@
 <fieldset class="border px-2 contact-cat">
   <legend class="w-auto fieldset-legend">Categorization</legend>
+
+  <div class='row'>
+    <div class='col-12 mb-3'>
+      {{ fields.SelectMVC(id=contact.company.id, size='1', mvc_value='contact.company', mvc_each='companies', textField='name', valueField='id', label=contact.company.verbose) }}
+    </div>
+  </div>
+
   <div class='row'>
     <div class='col-12 mb-3'>
       <label class='label-color'>Category</label>

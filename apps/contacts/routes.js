@@ -19,7 +19,7 @@ Router.add(new RouterMessage({
   app,
   subapp: 'modules',
   version,
-  path: ['/contactpage', '/contactpage/:etc', '/contactpage/:etc/:etc', '/contactpage/:etc/:etc/:etc'], 
+  path: ['/contactpage', '/contactpage/:etc', '/contactpage/:etc/:etc', '/contactpage/:etc/:etc/:etc', '/contactpage/:etc/:etc/:etc/:etc'], 
   rewrite: true,
   id: 'contacts',
   level: ACCESS,
@@ -38,7 +38,7 @@ Router.add(new RouterMessage({
   }
 }));
 
-// Query route
+// Query routes
 Router.add(new RouterMessage({
   method: 'get',
   app,
@@ -67,11 +67,43 @@ Router.add(new RouterMessage({
   }
 }));
 
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'contact',
+  version,
+  path: ['/query/:qid'], 
+  rewrite: true,
+  id: 'contactsQueryNo',
+  level: ACCESS,
+  desc: 'Contact Stored Query',
+  inAPI: false,
+  fn: async function(req) {
+    let {values} = urlQueryParse(req.query);
+    let qid = req.params.qid;
+    let database = req.session.data.database;
+    let pgschema = req.session.data.pgschema;
+
+    let tm = await services.storedQuery({database, pgschema, qid, values});
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: true}},
+    ],
+  }
+}));
+
+
 // Model Routes
 new Routes({app, subapp: 'associate', version, allowCORS: true, model: models.Associate, services: services.associate});
+new Routes({app, subapp: 'company', version, allowCORS: true, model: models.Company, services: services.company});
 new Routes({app, subapp: 'config', version, allowCORS: true, model: models.Config, services: services.config});
 new Routes({app, subapp: 'contact', version, allowCORS: true, model: models.Contact, services: services.contact});
 new Routes({app, subapp: 'country', version, allowCORS: true, model: models.Country, services: services.country});
+new Routes({app, subapp: 'emailhist', version, allowCORS: true, model: models.Emailhist, services: services.emailhist});
 new Routes({app, subapp: 'egroup', version, allowCORS: true, model: models.Egroup, services: services.egroup});
 new Routes({app, subapp: 'group', version, allowCORS: true, model: models.Group, services: services.group});
 new Routes({app, subapp: 'postcode', version, allowCORS: true, model: models.Postcode, services: services.postcode});

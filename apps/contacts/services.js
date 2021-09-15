@@ -29,10 +29,12 @@ const makeCSRF = async function(database, pgschema, user) {
 
 // Model services
 services.associate = new ModelService({model: models.Associate});
+services.company = new ModelService({model: models.Company});
 services.config = new ModelService({model: models.Config});
 services.contact = new ModelService({model: models.Contact});
 services.country = new ModelService({model: models.Country});
 services.egroup = new ModelService({model: models.Egroup});
+services.emailhist = new ModelService({model: models.Emailhist});
 services.group = new ModelService({model: models.Group});
 services.postcode = new ModelService({model: models.Postcode});
 services.region = new ModelService({model: models.Region});
@@ -42,6 +44,54 @@ services.title = new ModelService({model: models.Title});
 
 // Any other needed services
 services.query = function({database = '', pgschema = '', query = '', values = []}) {
+  return jsonQueryExecify({database, pgschema, query, app, values});
+}
+
+services.storedQuery = function({database = '', pgschema = '', qid = '', values = []}) {
+  let query;
+
+  switch(qid) {
+    case 'contact-basic':
+      query = {
+        contacts_Contact: {
+          columns: ['*'],
+          leftJoin: [
+            {contacts_Country: {
+              columns: ['name', 'id'],
+              fkname: 'country'
+            }}
+          ],
+
+          where: `"contacts_Contact"."id" = $1`
+        }
+      };
+      break;
+
+      case 'emailhist-basic':
+        query = {
+          contacts_Emailhist: {
+            columns: ['*'],
+            leftJoin: [
+              {documents_Document: {
+                columns: ['name'],
+                fkname: 'document'
+              }},
+              {documents_Docletter: {
+                columns: ['name'],
+                fkname: 'docletter'
+              }},
+              {login_User: {
+                columns: ['name'],
+                fkname: 'user'
+              }}
+            ],
+  
+            where: `"contacts_Emailhist"."contact" = $1`
+          }
+        };
+        break;      
+  }
+
   return jsonQueryExecify({database, pgschema, query, app, values});
 }
 

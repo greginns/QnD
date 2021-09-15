@@ -17,11 +17,6 @@ class Docsetup extends Verror {
       message: ''
     };
 
-    this.model.companies = [
-      {text: 'Company-1', value: '1'},
-      {text: 'Company-2', value: '2'}
-    ];
-
     this.docsetupOrig = {};
     this.defaults = {};
 
@@ -30,8 +25,9 @@ class Docsetup extends Verror {
 
   async ready() {
     return new Promise(async function(resolve) {
-      this.defaults.docsetup = await Module.data.docsetup.getDefault();    
-      
+      this.defaults.docsetup = await Module.data.docsetup.getDefault();   
+      this.model.companies = await Module.tableStores.company.getAll(); 
+
       let ret = await Module.data.document.getOne('_doctypes');   
 
       if (ret.status == 200) {
@@ -72,6 +68,8 @@ class Docsetup extends Verror {
         return;
       }
     }      
+
+    if (!this.model.existingEntry) delete docsetup.id;
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
     utils.modals.overlay(true);

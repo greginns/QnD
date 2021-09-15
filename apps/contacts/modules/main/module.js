@@ -9,6 +9,7 @@ import '/~static/apps/contacts/modules/main/navbar.js';
 import '/~static/apps/contacts/modules/main/contact.js';
 import '/~static/apps/contacts/modules/main/contact-search.js';
 import '/~static/apps/contacts/modules/main/contact-results.js';
+import '/~static/apps/contacts/modules/main/contact-emailhistory.js';
 import '/~static/apps/contacts/modules/main/setup.js';
 import '/~static/apps/contacts/modules/main/titles.js';
 import '/~static/apps/contacts/modules/main/groups.js';
@@ -24,6 +25,7 @@ let moduleStart = function() {
     // setup data table access
     // gets us access to raw data.
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
+    Module.data.emailhist = new TableAccess({modelName: 'emailhist', url: `/contacts/v1/emailhist`});
     Module.data.associate = new TableAccess({modelName: 'associate', url: `/contacts/v1/associate`});
     Module.data.title = new TableAccess({modelName: 'title', url: `/contacts/v1/title`});
     Module.data.group = new TableAccess({modelName: 'group', url: `/contacts/v1/group`});
@@ -34,6 +36,7 @@ let moduleStart = function() {
     Module.data.region = new TableAccess({modelName: 'region', url: `/contacts/v1/region`});
     Module.data.postcode = new TableAccess({modelName: 'postcode', url: `/contacts/v1/postcode`});
     Module.data.config = new TableAccess({modelName: 'config', url: `/contacts/v1/config`});
+    Module.data.company = new TableAccess({modelName: 'company', url: `/contacts/v1/company`});
 
     const contactData = new WSDataComm('contacts');                 // WS instances for this app
     const safemode = false;
@@ -57,6 +60,13 @@ let moduleStart = function() {
 
     Module.tableStores.associate = new TableStore({accessor: Module.data.associate, model, safemode});  // setup a table store in Module so all pages can access
     //getAllPromises.push(Module.tableStores.associate.getAll());
+
+    // emailhist table ---
+    model = `/contacts/emailhist`;
+
+    contactData.addModel(model);                          
+
+    Module.tableStores.emailhist = new TableStore({accessor: Module.data.emailhist, model, safemode});  // setup a table store in Module so all pages can access
 
     // Title table ---
     model = `/contacts/title`;               
@@ -113,6 +123,14 @@ let moduleStart = function() {
 
     Module.tableStores.config = new TableStore({accessor: Module.data.config, model, safemode});  // setup a table store in Module so all pages can access
     getAllPromises.push(Module.tableStores.config.getAll());
+
+    // company table ---
+    model = `/contacts/company`;
+
+    contactData.addModel(model);                          
+
+    Module.tableStores.company = new TableStore({accessor: Module.data.company, model, safemode});  // setup a table store in Module so all pages can access
+    getAllPromises.push(Module.tableStores.company.getMany({filters: {active: true}}));
 
     // start following via WS ---
     contactData.start();

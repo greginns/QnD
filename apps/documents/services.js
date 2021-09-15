@@ -1,6 +1,7 @@
 const root = process.cwd();
 const fs = require('fs').promises;
 const uuidv1 = require('uuid/v1');
+const puppeteer = require('puppeteer');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
 const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
@@ -130,6 +131,23 @@ services.output = {
 
     return tm;
   },
+};
+
+services.puppeteer = {
+  html2pdf: async function(req) {
+    const tm = new TravelMessage();
+    const html = req.body.html;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    page.setContent(html);
+    let pdf = await page.pdf();
+
+    tm.data = pdf;
+    tm.type = 'pdf';
+
+    return tm;    
+  }
 }
 
 module.exports = services;

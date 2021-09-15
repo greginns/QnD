@@ -12,7 +12,7 @@
 
             <div class='row'>
               <div class='col-12 col-md-6 col-xl-3 mb-3'>
-                {{ fields.SelectMVC(id=docsetup.company.id, size='1', mvc_value='docsetup.company', mvc_each='companies', mvc_on='{"change": "getDocsetup()"}', label=docsetup.company.verbose) }}
+                {{ fields.SelectMVC(id=docsetup.company.id, size='1', mvc_value='docsetup.company', mvc_each='companies', textField='name', valueField='id', mvc_on='{"change": "getDocsetup()"}', label=docsetup.company.verbose) }}
               </div>
             
               <div class='col-12 col-md-6 col-xl-3 mb-3'>
@@ -75,7 +75,8 @@
                 <div class="toggle-radio" data-color='blue'>
                   {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='Before', value='B') }}
                   {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='After', value='A') }}
-                  {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='As Body', value='M') }}
+                  {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='Merged', value='M') }}
+                  {{ fields.Segment(id=docsetup.ltrplace.id, mvc_checked='docsetup.ltrplace', mvc_enabled='docsetup.company != "" && docsetup.doctype != ""', name='document-ltrplace', label='As Body', value='X') }}
                 </div>
 
                 <div mvc-show='errors.docsetup.ltrplace'>
@@ -129,7 +130,7 @@
                 {{ buttons.btn(class='warning', mvc_click='clear()', text='Clear') }}
                 <span mvc-show='existingEntry'>
                   {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='doc()', text='Documents') }}
-                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='letter()', text='Letters') }}
+                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='letter()', text='Letters', mvc_disabled='docsetup.doctype=="letter"') }}
                 </span>
               </div>
             </div>            

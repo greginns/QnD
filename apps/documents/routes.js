@@ -67,6 +67,31 @@ Router.add(new RouterMessage({
   }
 }));
 
+// Page route
+Router.add(new RouterMessage({
+  method: 'post',
+  app,
+  subapp: 'puppeteer',
+  version,
+  path: ['/html2pdf'], 
+  rewrite: false,
+  id: 'html2pdf',
+  level: ACCESS,
+  desc: 'Convert HTML to PDF',
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.puppeteer.html2pdf(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+      {basic: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+    ],
+  }
+}));
+
 // Model Routes
 new Routes({app, subapp: 'docsetup', version, allowCORS: true, model: models.Docsetup, services: services.docsetup});
 new Routes({app, subapp: 'document', version, allowCORS: true, model: models.Document, services: services.document});

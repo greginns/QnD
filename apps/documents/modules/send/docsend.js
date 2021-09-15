@@ -2,6 +2,7 @@ import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
+import {io} from '/~static/lib/client/core/io.js';
 
 class Docsend extends Verror {
   constructor(element) {
@@ -9,7 +10,6 @@ class Docsend extends Verror {
   }
 
   async createModel() {
-    this.contactID = 444;
     this.model.docsend = {};
     this.model.documents = [];
     this.model.docletters = [];
@@ -21,10 +21,8 @@ class Docsend extends Verror {
       message: ''
     };
 
-    this.model.companies = [
-      {text: 'Company-1', value: '1'},
-      {text: 'Company-2', value: '2'}
-    ];
+    this.document = {};
+    this.docletter = {};
 
     //this.ready(); //  use if not in router
   }
@@ -54,7 +52,7 @@ class Docsend extends Verror {
     this.docsetup = await this.getDocsetup();
     this.model.documents = await this.getDocuments();
     this.model.docletters = await this.getDocletters();
-    this.model.contact = await this.getContact();
+    
     this.getDocumentDefaults();
     this.getEmailDefaults();
 
@@ -73,71 +71,169 @@ class Docsend extends Verror {
   async send() {
     // test all email fields.
     this.clearErrors();
-    let anyErrors = false;
-    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$/;
 
-    for (let fld of ['fromaddr', 'toaddr', 'subject']) {
-      if (!this.model.docsend[fld]) {
-        this.model.errors.docsend[fld] = 'Required';
-        anyErrors = true;
-      }
+    if (this.testEmailFields1()) return;
+    if (this.testEmailFields2()) return;
+
+    // all good
+    let doc = await this.buildDoc();
+    let obj = {};
+    let [from, fromName] = this.splitFromAddress(this.model.docsend.fromaddr);
+
+    obj.from = from;
+    if (fromName) obj.fromName = fromName;
+    obj.msgTo = this.model.docsend.toaddr;
+    if (this.model.docsend.ccaddr) obj.msgCC = this.model.docsend.ccaddr;
+    if (this.model.docsend.bccaddr) obj.msgBCC = this.model.docsend.bccaddr;
+    obj.subject = this.model.docsend.subject;
+    obj.bodyHTML = doc;
+    obj.attachments = [];
+
+    let res = await App.utils.ee.sendOne({config: App.config, obj});
+
+    if (res.success) {
+      await this.recordEmailHistory(res.data);
+      Module.modal.alert('Email Sent');
     }
-
-    if (anyErrors) return;
-
-    for (let fld of ['fromaddr', 'toaddr', 'ccaddr', 'bccaddr']) {
-      for (let addr of this.model.docsend[fld].split(',')) {
-        if (addr) {
-          if (addr.indexOf('>') > -1) addr = addr.substr(addr.indexOf('>')+1);
-          addr = addr.trim();
-
-          if (!re.test(addr)) {
-            this.model.errors.docsend[fld] = 'Invalid Email Address: ' + addr;
-            anyErrors = true;
-          }
-        }
-      }
+    else {
+      alert(res.message);
     }
+  }
 
-    if (anyErrors) return;
+  async previewHTML() {
+    let win = window.open('about:blank', '_preview');
+    let doc = await this.buildDoc();
 
+    win.document.write(doc);
+    win.document.close();
+  }
+
+  async previewPDF() {
+    let doc = await this.buildDoc();
+
+    var f = document.createElement('form');
+    f.setAttribute('method', 'post');
+    f.setAttribute('target', 'new');
+    f.setAttribute('action', '/documents/v1/puppeteer/html2pdf');
+    f.setAttribute('name', 'html2pdf');
+
+    var inp = document.createElement('input');
+    inp.setAttribute('name', 'html');
+    inp.setAttribute('type', 'hidden');
+    inp.value = doc;
+
+    f.appendChild(inp);
+    document.body.appendChild(f);
+
+    f.submit();
+
+    //let res = await io.post({html: doc}, '/documents/v1/puppeteer/html2pdf');
+    //console.log(res)
+  }
+
+  async buildDoc() {
+    let body = await this.doMerge();
+    let head = this.docsetup.head;
+    let doc = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          ${head}
+        </head>
+        <body>
+          ${body}
+        </body>
+      </html>
+    `;
+
+    return doc;
+  }
+
+  async doMerge() {
+    let context = {};
+    let doc = this.model.docsend.docsource;
+    let ltr = this.model.docsend.ltrsource;
+    let html;
+
+    context.letter = ltr;
     
-    let query1 = {
-      contacts_Contact: {
-        columns: ['id', 'first', 'last'],
-        leftJoin: [
-          {contacts_Region: {
-            columns: ['name'], 
-            fkname: 'region',
-            leftJoin: [
-              {contacts_Country: {
-                columns: ['name'],
-                fkname: 'country'
-              }}
-            ]
-          }},
-        ],
-      }
-    };
+    switch (this.docsetup.ltrplace) {
+      case 'A':
+        html = doc + '<br>' + ltr;
+        break;
+      case 'B':
+        html = ltr + '<br>' + doc;
+        break;
+      case 'X':
+        // not sure yet.
+        html = ltr;
+        break;
+    }
 
-    let values = []
-    let res = await Module.data.document.query({query: query1, values})    
-    let data = res.data;
-console.log(data)
+    await this.getMergeData(context);
 
-    let text = `
-    {% for row in data %}
-      Hello {{ row.first }} {{ row.last }}. You live in {{row.region.name}} in {{row.region.country.name}}
-    {% endfor %}
-    `
+    let txt = nunjucks.renderString(html, context);
+    
+    return txt;
+  }
 
-    let txt = nunjucks.renderString(text, {data});
-    console.log(txt)
+  async getMergeData(context) {
+    switch (this.model.docsend.doctype) {
+      case 'invoiceA':
+      case 'invoiceB':
+      case 'quote':
+      case 'cancel':
+      case 'receipt':
+      case 'ccreceipt':
+      case 'posreceipt':
+      case 'posccreceipt':
+        // get from rsv 
+        co = '';
+        contact = '';
+        break;
 
+      case 'letter':
+      case 'accreceipt':
+      case 'accccreceipt':
+        // get from Contact
+        let values = [this.model.docsend.contact];
+        let res = await Module.data.contact.storedQuery({qid: 'contact-basic', values});
+
+        if (res.status == 200) {
+          context.contact = res.data[0];
+        }
+        break;
+
+      case 'giftcert':
+      case 'gcreceipt':
+      case 'gcccreceipt':
+        // get from GC
+        co = '';
+        contact = '';
+        break;
+
+      case 'rainchek':
+        // get from RC
+        co = '';
+        contact = '';
+        break;
+    }
+  }
+
+  splitFromAddress(addr) {
+    // <Send Name> emailaddress
+    // return [email address, send name]
+    let parts = addr.split('>');
+
+    if (parts.length == 1) return [parts[0].trim(), ''];
+
+    return [parts[1].trim(), parts[0].substr(1).trim()];
   }
 
   async getCompanyFromDoc() {
-    let co = '1';
+    // get company, set contact
+    let co, contact;
 
     switch (this.model.docsend.doctype) {
       case 'invoiceA':
@@ -149,23 +245,38 @@ console.log(data)
       case 'posreceipt':
       case 'posccreceipt':
         // get from rsv 
+        co = '';
+        contact = '';
         break;
 
       case 'letter':
       case 'accreceipt':
       case 'accccreceipt':
-        // get from contact 
+        // get from Contact
+        co = '';
+        contact = this.model.docsend.ref1;
         break;
 
       case 'giftcert':
       case 'gcreceipt':
       case 'gcccreceipt':
         // get from GC
+        co = '';
+        contact = '';
         break;
 
       case 'rainchek':
         // get from RC
+        co = '';
+        contact = '';
         break;
+    }
+
+    this.model.docsend.contact = contact;
+    this.model.contact = await this.getContact();
+
+    if (!co) {
+      co = this.model.contact.company;
     }
 
     return co;
@@ -173,11 +284,10 @@ console.log(data)
 
   async getContact() {
     let contact = {};
-    let res = await Module.data.contact.getOne(this.contactID);
+    let res = await Module.data.contact.getOne(this.model.docsend.contact);
 
     if (res.status == 200) {
       contact = res.data;
-      this.model.docsend.custno = contact.id;
     }
 
     return contact;
@@ -249,28 +359,94 @@ console.log(data)
     if (!this.docsetup.toaddr) this.model.docsend.toaddr = this.model.contact.email;
   }
 
-  docChanged(obj) {
+  async docChanged(obj) {
     let docID = this.model.docsend.document;
-    let docs = this.model.documents;
+    this.document = {};
 
-    for (let doc of docs) {
-      if (doc.id == docID) {
-        this.model.docsend.docsource = doc.body;
-        break;
+    if (docID) {
+      let ret = await Module.data.document.getOne(docID);
+
+      if (ret.status == 200) {
+        this.document = ret.data;
+        this.model.docsend.docsource = ret.data.body;
       }
+    }
+    else {
+      this.model.docsend.docsource = '';
     }
   }
 
-  ltrChanged(obj) {
+  async ltrChanged(obj) {
     let docID = this.model.docsend.docletter;
-    let docs = this.model.docletters;
+    this.docletter = {};
 
-    for (let doc of docs) {
-      if (doc.id == docID) {
-        this.model.docsend.ltrsource = doc.body;
-        break;
+    if (docID) {
+      let ret = await Module.data.docletter.getOne(docID);
+
+      if (ret.status == 200) {
+        this.docletter = ret.data;
+        this.model.docsend.ltrsource = ret.data.body;
       }
     }
+    else {
+      this.model.docsend.ltrsource = '';
+    }
+  }
+  
+  testEmailFields1() {
+    let anyErrors = false;
+
+    for (let fld of ['fromaddr', 'toaddr', 'subject']) {
+      if (!this.model.docsend[fld]) {
+        this.model.errors.docsend[fld] = 'Required';
+        anyErrors = true;
+      }
+    }
+
+    return anyErrors;
+  }
+
+  testEmailFields2() {
+    let anyErrors = false;
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$/;
+
+    for (let fld of ['fromaddr', 'toaddr', 'ccaddr', 'bccaddr']) {
+      for (let addr of this.model.docsend[fld].split(',')) {
+        if (addr) {
+          if (addr.indexOf('>') > -1) addr = addr.substr(addr.indexOf('>')+1);
+          addr = addr.trim();
+
+          if (!re.test(addr)) {
+            this.model.errors.docsend[fld] = 'Invalid Email Address Format: ' + addr;
+            anyErrors = true;
+          }
+        }
+      }
+    }
+
+    return anyErrors;
+  }
+
+  async recordEmailHistory(data) {
+    let tid = data.transactionid;
+    let hist = {};
+    
+    hist.contact = this.model.docsend.contact;
+    hist.ref1 = this.model.docsend.ref1;
+    hist.ref2 = this.model.docsend.ref2;
+    hist.transid = tid;
+    hist.datesent = (new Date()).toJSON();
+    hist.doctype = this.model.docsend.doctype;
+    hist.document = this.document.id;
+    hist.docletter = this.docletter.id;
+    hist.subject = this.model.docsend.subject;
+    hist.from = this.model.docsend.fromaddr;
+    hist.to = this.model.docsend.toaddr;
+    hist.cc = this.model.docsend.ccaddr;
+    hist.bcc = this.model.docsend.bccaddr;
+    hist.user = App.USER.code;
+
+    let res = await Module.data.emailhist.insert(hist);
   }
 
 };

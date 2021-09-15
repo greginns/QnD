@@ -1,0 +1,6 @@
+Documents
+  All doc types other than letter
+
+Contacts
+  emailhistory
+    make ref clickable, except for contact#s

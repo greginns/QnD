@@ -4,6 +4,8 @@ const Fields = require(root + '/lib/server/model/modelFields');
 const Model = require(root + '/lib/server/model/modelRun.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const app = getAppName(__dirname);
+const {User} = require(root + '/apps/login/models.js');
+const {Document, Docletter} = require(root + '/apps/documents/models.js');
 const egroupChoices = [
   {value: 'D', text: 'Daily'},
   {value: 'W', text: 'Weekly'},
@@ -58,6 +60,7 @@ const Contact = class extends Model {
         acctexp: new Fields.Char({null: true, maxLength: 5, verbose: 'Card Expiration'}), 
         acctver: new Fields.Date({null: true, verbose: 'Date Card Last Verified'}),
 
+        company: new Fields.Char({null: true, maxLength: 1, verbose: 'Company'}),
         grptype: new Fields.Char({null: true, maxLength: 4, verbose: 'Group Type'}),
         cat: new Fields.Char({null: true, default: 'F', maxLength: 1, verbose: 'Category'}),
         tags: new Fields.Json({verbose: 'Tags'}),
@@ -70,7 +73,9 @@ const Contact = class extends Model {
         allowrsv: new Fields.Boolean({default: true, verbose: 'Reservations'}),
         allowbill: new Fields.Boolean({default: false, verbose: 'Direct Bill'}),
 
-        fullname: new Fields.Derived({defn: 'concat("first",\' \',"last")', verbose: 'Contact Name'}) 
+        fullname: new Fields.Derived({defn: 'concat("first",\' \',"last")', verbose: 'Contact Name'}),
+        state: new Fields.Derived({defn: 'substring("contacts_Contact"."region" from 4 for 2)', verbose: 'State'}),
+        _pk: new Fields.Derived({defn: 'concat("contacts_Contact"."id")', verbose: 'PK'}) 
       },
       
       constraints: {
@@ -81,6 +86,7 @@ const Contact = class extends Model {
           {name: 'region', columns: ['region'], app, table: Region, tableColumns: ['id'], onDelete: 'NO ACTION'},
           {name: 'country', columns: ['country'], app, table: Country, tableColumns: ['id'], onDelete: 'NO ACTION'},
           {name: 'agentno', columns: ['agentno'], app, table: Contact, tableColumns: ['id'], onDelete: 'NO ACTION'},
+          {name: 'company', columns: ['company'], app, table: Company, tableColumns: ['id'], onDelete: 'NO ACTION'},
         ],
         unique: [
           {name: 'email', columns: ['email']},
@@ -94,6 +100,55 @@ const Contact = class extends Model {
       dbschema: '',
       app,
       desc: 'Contact Master'
+    }
+  }
+};
+
+const Emailhist = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.Serial({verbose: 'ID'}),
+        contact: new Fields.Char({notNull: true, maxLength: 10, verbose: 'Contact'}),
+        ref1: new Fields.Char({notNull: true, maxLength: 10, verbose: 'Reference-1'}),
+        ref2: new Fields.Char({null: true, maxLength: 10, verbose: 'Reference-2'}),
+        transid: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Trans ID'}),
+        datesent: new Fields.DateTime({notNull: true, verbose: 'Date Sent'}),
+        doctype: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Doc Type'}),
+        document: new Fields.Integer({notNull: true, verbose: 'Document'}),
+        docletter: new Fields.Integer({null: true, verbose: 'Letter'}),
+        subject: new Fields.Char({notNull: true, maxLength: 100, verbose: 'Subject'}),
+        from: new Fields.Char({notNull: true, maxLength: 100, verbose: 'From Address'}),
+        to: new Fields.Text({verbose: 'To address(es)'}),
+        cc: new Fields.Text({verbose: 'CC address(es)'}),
+        bcc: new Fields.Text({verbose: 'BCC address(es)'}),
+        user: new Fields.Char({notNull: true, maxLength: 20, verbose: 'User'}),
+      },
+
+      constraints: {
+        pk: ['id'],
+        fk: [
+          {name: 'contact', columns: ['contact'], app, table: Contact, tableColumns: ['id'], onDelete: 'NO ACTION'},
+          {name: 'user', columns: ['user'], app: 'login', table: User, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'document', columns: ['document'], app: 'document', table: Document, tableColumns: ['id'], onDelete: 'NO ACTION'},
+          {name: 'docletter', columns: ['docletter'], app: 'document', table: Docletter, tableColumns: ['id'], onDelete: 'NO ACTION'},
+        ],
+        index: [
+          {name: 'contact', columns: ['contact']},
+        ]
+      },
+      
+      hidden: [],
+      
+      orderBy: ['contact','datesent'],
+      
+      dbschema: '',
+      app,
+      desc: 'Email sending history'
     }
   }
 };
@@ -400,4 +455,32 @@ const Config = class extends Model {
   }
 };
 
-module.exports = {Contact, Associate, Title, Group, Country, Region, Postcode, Egroup, Tagcat, Tag, Config};
+const Company = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        id: new Fields.Char({notNull: true, maxLength: 1, verbose: 'ID'}),
+        name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active?'})
+      },
+
+      constraints: {
+        pk: ['id'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['id'],
+      
+      dbschema: '',
+      app,
+      desc: 'Companies'
+    }
+  }
+};
+
+module.exports = {Contact, Emailhist, Associate, Title, Group, Country, Region, Postcode, Egroup, Tagcat, Tag, Config, Company};

@@ -1,0 +1,74 @@
+<page id='contacts-contact-emailhistory' style='display: none;'>
+  <section id='contacts-contact-emailhistory-section'>
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <button class='btn btn-primary' mvc-click='close()'>
+              Close
+            </button>
+          </div>
+
+          <div class='card-body'>
+            <table class='table'>
+              <thead>
+                <tr>
+                  <th>Date Sent</th>
+                  <th>Doc Type</th>
+                  <th>Reference</th>
+                  <th>Document/Letter</th>
+                  <th>From</th>
+                  <th>To/CC/BCC</th>
+                  <th>Subject</th>
+                  <th>Transaction</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='hists'>
+                <tr>
+                  <td mvc-text='hists[$index].datesent' mvc-filter='datetime'></td>
+                  <td mvc-text='hists[$index].doctype'></td>
+                  <td>
+                    <span mvc-text='hists[$index].ref1'></span>
+                    <br>
+                    <span mvc-text='hists[$index].ref2'></span>
+                  </td>
+                  <td>
+                    <span mvc-text='hists[$index].document.name'></span>
+                    <br>
+                    <span mvc-text='hists[$index].docletter.name'></span>
+                  </td>
+                  <td>
+                    <span mvc-text='hists[$index].from'></span>
+                    <br>
+                    <span mvc-text='hists[$index].user.name'></span>
+                  </td>
+                  <td> 
+                    <span mvc-text='hists[$index].to'></span>
+                    <br>
+                    <span mvc-text='hists[$index].cc'></span>
+                    <br>
+                    <span mvc-text='hists[$index].bcc'></span>
+                  </td>
+                  <td mvc-text='hists[$index].subject'></td>
+                  <td style='text-decoration: underline; cursor: pointer' mvc-text='hists[$index].transid' mvc-click='getEE()' mvc-attr='{eid: "hists[$index].transid"}'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row'>
+              <div class='col-12 mb-3'>
+                <button class='btn btn-primary' mvc-click='close()'>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>    
+
+    {% include "./contact-emailhistory-details.html" %} 
+  </section>
+</page> 

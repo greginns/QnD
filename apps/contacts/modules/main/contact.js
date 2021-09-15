@@ -26,6 +26,7 @@ class Contact extends ContactWithAddress {
     this.model.regions = [];
     this.model.postcodes = [];
     this.model.config = [];
+    this.model.companies = [];
     this.model.tag = '';
     this.model.dymo = '';
     this.model.dymos = [];
@@ -94,6 +95,7 @@ class Contact extends ContactWithAddress {
       Module.tableStores.tagcat.addView(new TableView({proxy: this.model.tagcats}));
       Module.tableStores.tag.addView(new TableView({proxy: this.model.tags}));
       Module.tableStores.country.addView(new TableView({proxy: this.model.countries}));
+      Module.tableStores.company.addView(new TableView({proxy: this.model.companies, filterFunc}));
 
       this.defaults.contact = await Module.data.contact.getDefault();
 
@@ -617,8 +619,8 @@ this.model.contact.notes = this.model.contact.notes || [];
 
     this.assocInit();
 
-    this.dymoModal = new bootstrap.Modal(this._section.querySelectorAll('div.contacts-contact-assoc')[0]);
-    this.dymoModal.show();    
+    this.assModal = new bootstrap.Modal(this._section.querySelectorAll('div.contacts-contact-assoc')[0]);
+    this.assModal.show();    
   }
 
   assocInit() {
@@ -826,6 +828,13 @@ this.model.contact.notes = this.model.contact.notes || [];
         this.$focus('contact2.email');
       }
     }
+  }
+
+  // Email History
+  async emailHistory() {
+    let contact = this.model.contact.id;
+
+    Module.pager.go('/contact/update/' + contact + '/emailhistory')
   }
 
   // GOTOs

@@ -17,6 +17,8 @@ let moduleStart = function() {
     Module.data.document = new TableAccess({modelName: 'document', url: `/documents/v1/document`});
     Module.data.docletter = new TableAccess({modelName: 'docletter', url: `/documents/v1/docletter`});
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
+    Module.data.company = new TableAccess({modelName: 'company', url: `/contacts/v1/company`});
+    Module.data.emailhist = new TableAccess({modelName: 'emailhist', url: `/contacts/v1/emailhist`});
 
     const docData = new WSDataComm('documents');                 // WS instances for this app
     const safemode = false;
@@ -55,6 +57,21 @@ let moduleStart = function() {
     docData.addModel(model);                          
 
     Module.tableStores.contact = new TableStore({accessor: Module.data.contact, model, safemode});  // setup a table store in Module so all pages can access
+
+    // company table ---
+    model = `/contacts/company`;
+
+    docData.addModel(model);                          
+
+    Module.tableStores.company = new TableStore({accessor: Module.data.company, model, safemode});  // setup a table store in Module so all pages can access
+    dataPromises.push(Module.tableStores.company.getMany({filters: {active: true}}));
+
+    // emailhist table ---
+    model = `/contacts/emailhist`;
+
+    docData.addModel(model);                          
+
+    Module.tableStores.emailhist = new TableStore({accessor: Module.data.emailhist, model, safemode});  // setup a table store in Module so all pages can access
 
     // start following via WS ---
     docData.start();
