@@ -26,7 +26,7 @@ MVC.timeFormat = App.timeFormat;
 App.config.ee = {
   "email": "greg@reservation-net.com",
   "name": "Greg Miller",
-  "apikey": "383DF1EB320CAFD12EE7982B0FD958A318E9091D94F127542AB13DD00FFC6FCFE653B997A120F574D57850287042C399",
+  "apikey": "",
   "domain": "https://api.elasticemail.com/v2/"
 },
 

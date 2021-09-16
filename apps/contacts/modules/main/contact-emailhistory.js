@@ -40,8 +40,9 @@ class Emailhistory extends MVC {
     return true;  
   }
 
-  async getEE(ev) {
-    let eid = ev.attrs.eid;
+  async getEE(click) {
+    let el = click.target.closest('tr');
+    let eid = el.getAttribute('eid');
     let obj = {};
     let config = App.config;
 

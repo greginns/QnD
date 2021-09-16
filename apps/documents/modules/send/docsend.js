@@ -110,25 +110,29 @@ class Docsend extends Verror {
 
   async previewPDF() {
     let doc = await this.buildDoc();
+    let name = `${this.model.docsend.doctype}-${this.model.docsend.ref1}.pdf`;
 
-    var f = document.createElement('form');
+    let f = document.createElement('form');
     f.setAttribute('method', 'post');
     f.setAttribute('target', 'new');
     f.setAttribute('action', '/documents/v1/puppeteer/html2pdf');
-    f.setAttribute('name', 'html2pdf');
+    f.setAttribute('name', 'makePDF');
 
-    var inp = document.createElement('input');
+    let inp = document.createElement('input');
     inp.setAttribute('name', 'html');
     inp.setAttribute('type', 'hidden');
     inp.value = doc;
+    f.appendChild(inp);
+
+    inp = document.createElement('input');
+    inp.setAttribute('name', 'name');
+    inp.setAttribute('type', 'hidden');
+    inp.value = name;
 
     f.appendChild(inp);
     document.body.appendChild(f);
 
     f.submit();
-
-    //let res = await io.post({html: doc}, '/documents/v1/puppeteer/html2pdf');
-    //console.log(res)
   }
 
   async buildDoc() {
@@ -157,6 +161,7 @@ class Docsend extends Verror {
     let html;
 
     context.letter = ltr;
+    context.remarks = this.model.docsend.remarks;
     
     switch (this.docsetup.ltrplace) {
       case 'A':

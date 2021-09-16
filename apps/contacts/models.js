@@ -144,7 +144,7 @@ const Emailhist = class extends Model {
       
       hidden: [],
       
-      orderBy: ['contact','datesent'],
+      orderBy: ['contact','-datesent'],
       
       dbschema: '',
       app,

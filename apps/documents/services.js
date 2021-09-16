@@ -137,6 +137,7 @@ services.puppeteer = {
   html2pdf: async function(req) {
     const tm = new TravelMessage();
     const html = req.body.html;
+    const name = req.body.name;
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
@@ -145,6 +146,7 @@ services.puppeteer = {
 
     tm.data = pdf;
     tm.type = 'pdf';
+    tm.filename = name;
 
     return tm;    
   }

@@ -25,7 +25,7 @@
                 <div class='row'>
                   <div class='col-12 col-md-6 col-lg-4 mb-3'>
                     <div class="form-label-group">
-                      <select size='1' mvc-value="docsend.doctype" mvc-each='docgroups' class="form-select" mvc-on='{"change": "getDocsetup()"}'>
+                      <select size='1' mvc-value="docsend.doctype" mvc-each='docgroups' class="form-select" mvc-on='{"change": "getDocsetup()"}' disabled>
                         <optgroup mvc-optgroup='docgroups[$index].label' mvc-each='docgroups[$index].items' mvc-index='$index1'>
                           <option mvc-option='{"text": "docgroups[$index].items[$index1].text", "value": "docgroups[$index].items[$index1].value"}'></option>
                         <optgroup>
@@ -37,13 +37,13 @@
 
                 <div class='row'>
                   <div class='col-12 col-md-6 col-lg-4 mb-3'>
-                    {{ fields.Char(id='ref1', maxlength='10', mvc_value='docsend.ref1', mvc_enabled='', label='Reference') }}
+                    {{ fields.Char(id='ref1', maxlength='10', mvc_value='docsend.ref1', mvc_disabled='true', label='Reference') }}
                   </div>
                 </div>
 
                 <div class='row'>
                   <div class='col-12 col-md-6 col-lg-4 mb-3'>
-                    {{ fields.Char(id='ref2', maxlength='10', mvc_value='docsend.ref2', mvc_enabled='', label='Reference') }}
+                    {{ fields.Char(id='ref2', maxlength='10', mvc_value='docsend.ref2', mvc_disabled='true', label='Reference') }}
                   </div>
                 </div>
 
