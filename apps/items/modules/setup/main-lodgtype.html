@@ -1,0 +1,54 @@
+<page id='items-main-lodgtype' style='display: none;'>
+  <section id='items-main-lodgtype-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-md-0'>
+                {{ fields.Char(id=lodgtype.code.id, maxlength=lodgtype.code.maxlength, mvc_value='lodgtype.code', label=lodgtype.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='upper') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=lodgtype.active.id, mvc_checked='lodgtype.active', label=lodgtype.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 order-md-2'>
+                {{ fields.Char(id=lodgtype.name.id, maxlength=lodgtype.name.maxlength, mvc_value='lodgtype.name', label=lodgtype.name.verbose) }}
+              </div>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <button class='btn btn-primary' mvc-click='backToStart()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

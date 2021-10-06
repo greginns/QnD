@@ -1,0 +1,60 @@
+<page id='items-main-waiver' style='display: none;'>
+  <section id='items-main-waiver-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-md-0'>
+                {{ fields.Char(id=waiver.code.id, maxlength=waiver.code.maxlength, mvc_value='waiver.code', label=waiver.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_helptext=waiver.code.helptext, mvc_edit='upper') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=waiver.active.id, mvc_checked='waiver.active', label=waiver.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Char(id=waiver.name.id, maxlength=waiver.name.maxlength, mvc_value='waiver.name', label=waiver.name.verbose) }}
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Text(id=waiver.text.id, maxlength=waiver.text.maxlength, mvc_value='waiver.text', label=waiver.text.verbose) }}
+              </div>
+            </div>            
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <button class='btn btn-primary' mvc-click='backToStart()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

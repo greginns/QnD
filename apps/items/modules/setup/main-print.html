@@ -1,0 +1,42 @@
+<page id='items-main-print' style='display: none;'>
+  <section id='items-main-print-section'>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-secondary text-white">
+      <div class="container-fluid">
+        <div class="navbar-brand text-white pointer" mvc-click='goBack()'>
+          <i class="fas fa-chevron-left"></i>
+          <span style='font-size: 20px'>
+            Back
+          </span>
+        </div>
+        <div>
+          <span style='font-size: 20px' mvc-text='title'>
+          </span>          
+        </div>
+        <div>
+          <button class='btn btn-sm btn-outline-light' mvc-click='print()'>
+            Print
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class='row'>
+      <div class='col-12'>
+        <table class='table table-sm table-responsive'>
+          <thead>
+            <tr mvc-each='columns'>
+              <th mvc-text='columns[$index][1]'></th>
+            </tr>
+          </thead>
+
+          <tbody mvc-each='data'>
+            <tr mvc-each='data[$index]' mvc-index='$index1'>
+              <td mvc-text='data[$index][$index1]'></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+</page>

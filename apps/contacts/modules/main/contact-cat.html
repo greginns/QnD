@@ -9,17 +9,11 @@
 
   <div class='row'>
     <div class='col-12 mb-3'>
-      <label class='label-color'>Category</label>
-
-      <div class="toggle-radio" data-color='blue'>
+      {{ fields.SegmentStart(label='Category') }}
         {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Family', value='F') }}
         {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Non-Profit', value='G') }}
         {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Corp', value='C') }}
-      </div>
-
-      <div mvc-show='errors.contact.cat'>
-        <small class='text-danger' mvc-text='errors.contact.cat'></small>
-      </div>
+      {{ fields.SegmentEnd(mvc_value='contact.cat', mvc_helptext=contact.cat.helptext) }}
     </div>
   </div>                         
 

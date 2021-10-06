@@ -1,0 +1,356 @@
+<page id='items-start' style='display: none;'>
+  <section id='items-start-section'>
+    <div class='fixed-top bg-secondary'>
+			<div class='row'>
+				<div class='col-12 text-center text-white'>
+					<h3>
+						Item Setup
+					</h3>
+				</div>
+			</div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Activity
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("activity")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("activity","code")'>Code</th>
+                  <th mvc-click='sortItems("activity","name")'>Name</th>
+                  <th mvc-click='sortItems("activity","group")'>Group</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='activity'>
+                <tr mvc-click='editItem("activity", "$index")'>
+                  <td mvc-text='activity[$index].code'></td>
+                  <td mvc-text='activity[$index].name'></td>
+                  <td mvc-text='activity[$index].actgroup'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Lodging
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodging")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("lodging","code")'>Code</th>
+                  <th mvc-click='sortItems("lodging","name")'>Name</th>
+                  <th mvc-click='sortItems("lodging","locn")'>Location</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='lodging'>
+                <tr mvc-click='editItem("lodging", "$index")'>
+                  <td mvc-text='lodging[$index].code'></td>
+                  <td mvc-text='lodging[$index].name'></td>
+                  <td mvc-text='lodging[$index].locn'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>              
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Activity Groups
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actgroup")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("actgroup","code")'>Code</th>
+                  <th mvc-click='sortItems("actgroup","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='actgroup'>
+                <tr mvc-click='editItem("actgroup", "$index")'>
+                  <td mvc-text='actgroup[$index].code'></td>
+                  <td mvc-text='actgroup[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Lodging Locations
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodglocn")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("lodglocn","code")'>Code</th>
+                  <th mvc-click='sortItems("lodglocn","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='lodglocn'>
+                <tr mvc-click='editItem("lodglocn", "$index")'>
+                  <td mvc-text='lodglocn[$index].code'></td>
+                  <td mvc-text='lodglocn[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Lodging Types
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodgtype")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("lodgtype","code")'>Code</th>
+                  <th mvc-click='sortItems("lodgtype","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='lodgtype'>
+                <tr mvc-click='editItem("lodgtype", "$index")'>
+                  <td mvc-text='lodgtype[$index].code'></td>
+                  <td mvc-text='lodgtype[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Companies
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("company")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("company","id")'>Code</th>
+                  <th mvc-click='sortItems("company","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='company'>
+                <tr mvc-click='editItem("company", "$index")'>
+                  <td mvc-text='company[$index].id'></td>
+                  <td mvc-text='company[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Areas
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("area")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("area","code")'>Code</th>
+                  <th mvc-click='sortItems("area","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='area'>
+                <tr mvc-click='editItem("area", "$index")'>
+                  <td mvc-text='area[$index].code'></td>
+                  <td mvc-text='area[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                GL Codes
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("glcode")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("glcode","code")'>Code</th>
+                  <th mvc-click='sortItems("glcode","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='glcode'>
+                <tr mvc-click='editItem("glcode", "$index")'>
+                  <td mvc-text='glcode[$index].code'></td>
+                  <td mvc-text='glcode[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>  
+    </div>
+      
+    <div class='row'>
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Taxes/Service Charges
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("tax")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("tax","code")'>Code</th>
+                  <th mvc-click='sortItems("tax","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='tax'>
+                <tr mvc-click='editItem("tax", "$index")'>
+                  <td mvc-text='tax[$index].code'></td>
+                  <td mvc-text='tax[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Waivers
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("waiver")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("waiver","code")'>Code</th>
+                  <th mvc-click='sortItems("waiver","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='waiver'>
+                <tr mvc-click='editItem("waiver", "$index")'>
+                  <td mvc-text='waiver[$index].code'></td>
+                  <td mvc-text='waiver[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</page>

@@ -1,7 +1,22 @@
 Documents
   All doc types other than letter
   Move ee routines out of App
+  Separate Send from Setup in Module.
 
 Contacts
+  Segments need unique id for create/update
+  Notes
   emailhistory
     make ref clickable, except for contact#s
+
+Overall Setup
+Define ages for infants, children, youth, adults, seniors - and which to use/not
+Probably what email system to use, API keys, etc.
+
+Migration
+  One migration file for all pgschemas
+  Use _master as main pgschema
+  Make SQL with ${pgschema} so can be used for all
+  Eventually create a startup sql file
+  New pgschems would run all migration files from startup to last.
+  Snapshot the models after each migration - like now.  But just for _master 

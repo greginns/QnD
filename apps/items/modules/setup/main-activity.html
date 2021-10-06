@@ -1,0 +1,291 @@
+<page id='items-main-activity' style='display: none;'>
+  <section id='items-main-activity-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 order-1 mb-3 mb-md-0'>
+                {{ fields.Char(id=activity.code.id, maxlength=activity.code.maxlength, mvc_value='activity.code', label=activity.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='upper') }}
+              </div>
+
+              <div class='col-12 col-md-6 order-3 order-md-2'>
+                {{ fields.Char(id=activity.name.id, maxlength=activity.name.maxlength, mvc_value='activity.name', label=activity.name.verbose) }}
+              </div>
+
+              <div class='col-4 col-md-4 order-2 mb-3 mb-md-0'>
+                {{ fields.Switch(id=activity.active.id, mvc_checked='activity.active', label=activity.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-defn">
+                  <legend class="w-auto fieldset-legend">Definition</legend>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.actgroup.id, size='1', mvc_value='activity.actgroup', mvc_each='actgroups', textField='name', valueField='code', label=activity.actgroup.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-6 mb-3'>
+                    </div>
+                  </div>
+                
+                  <div class='row'>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Integer(id=activity.durdays.id, min='1', max='9', step='1', maxlength=activity.durdays.maxlength, mvc_value='activity.durdays', label=activity.durdays.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Switch(id=activity.multi.id, mvc_checked='activity.multi', label=activity.multi.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Integer(id=activity.durhours.id, min='1', max='9', step='1', maxlength=activity.durhours.maxlength, mvc_value='activity.durhours', label=activity.durhours.verbose) }}
+                    </div>
+                  </div>           
+                
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.company.id, size='1', mvc_value='activity.company', mvc_each='companies', textField='name', valueField='id', label=activity.company.verbose) }}
+                    </div>                    
+                    <div class='col-lg-2'>
+                    </div>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Integer(id=activity.minage.id, min='1', max='9', step='1', maxlength=activity.minage.maxlength, mvc_value='activity.minage', label=activity.minage.verbose) }}
+                    </div>
+                  </div>           
+                  
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.areaphy.id, size='1', mvc_value='activity.areaphy', mvc_each='areas', textField='name', valueField='code', label=activity.areaphy.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.areadir.id, size='1', mvc_value='activity.areadir', mvc_each='areas', textField='name', valueField='code', label=activity.areadir.verbose) }}
+                    </div>
+                  </div>    
+                  
+                  <div class='row'>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Float(id=activity.arroffset.id, min='0', max='12', step='.1', maxlength=activity.arroffset.maxlength, mvc_value='activity.arroffset', label=activity.arroffset.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SegmentStart(label=activity.assign.verbose) }}
+                      {{ fields.Segment(id=activity.assign.id, mvc_checked='activity.assign', name='activity-assign', label='Arrival', value='A') }}
+                      {{ fields.Segment(id=activity.assign.id, mvc_checked='activity.assign', name='activity-assign', label='Booking', value='B') }}
+                      {{ fields.Segment(id=activity.assign.id, mvc_checked='activity.assign', name='activity-assign', label='Either', value='E') }}
+                      {{ fields.SegmentEnd(mvc_value='activity.assign', mvc_helptext=activity.assign.helptext) }}
+                    </div>
+                  </div>                  
+                </fieldset>
+              </div>
+
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-online">
+                  <legend class="w-auto fieldset-legend">Online</legend>
+                  <div class='row'>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Switch(id=activity.online.id, mvc_checked='activity.online', label=activity.online.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-8 mb-3'>
+                      {{ fields.Char(id=activity.homepage.id, maxlength=activity.homepage.maxlength, mvc_value='activity.homepage', label=activity.homepage.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Integer(id=activity.lastday.id, min='0', max='9', step='1', maxlength=activity.lastday.maxlength, mvc_value='activity.lastday', label=activity.lastday.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Time(id=activity.lasttime.id, maxlength=activity.lasttime.maxlength, mvc_value='activity.lasttime', label=activity.lasttime.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Float(id=activity.lastoffset.id, min='0', max='12', step='.1', maxlength=activity.lastoffset.maxlength, mvc_value='activity.lastoffset', label=activity.lastoffset.verbose) }}
+                    </div>
+                  </div>
+                  
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.waiver.id, size='1', mvc_value='activity.waiver', mvc_each='waivers', textField='name', valueField='code', label=activity.waiver.verbose) }}
+                    </div>
+                  </div>           
+                  
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Text(id=activity.tandc.id, rows='4', mvc_value='activity.tandc', label=activity.tandc.verbose) }}
+                    </div>
+                  </div>           
+                </fieldset>
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-msgs">
+                  <legend class="w-auto fieldset-legend">Messages</legend>
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Text(id=activity.rsvmsg.id, rows='4', mvc_value='activity.rsvmsg', label=activity.rsvmsg.verbose) }}
+                    </div>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Text(id=activity.invmsg.id, rows='4', mvc_value='activity.invmsg', label=activity.invmsg.verbose) }}
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-flags">
+                  <legend class="w-auto fieldset-legend">Indicators</legend>
+                  <div class='row'>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=activity.allowinf.id, mvc_checked='activity.allowinf', label=activity.allowinf.verbose) }}
+                    </div>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=activity.allowchl.id, mvc_checked='activity.allowchl', label=activity.allowchl.verbose) }}
+                    </div>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=activity.allowyth.id, mvc_checked='activity.allowyth', label=activity.allowyth.verbose) }}
+                    </div>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=activity.allowadl.id, mvc_checked='activity.allowadl', label=activity.allowadl.verbose) }}
+                    </div>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=activity.allowsen.id, mvc_checked='activity.allowsen', label=activity.allowsen.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=activity.oninv.id, mvc_checked='activity.oninv', label=activity.oninv.verbose) }}
+                    </div>
+                  </div>
+                </fieldset>
+              </div>              
+            </div> 
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-fin">
+                  <legend class="w-auto fieldset-legend">Financial</legend>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.gl1.id, size='1', mvc_value='activity.gl1', mvc_each='glcodes', textField='name', valueField='code', label=activity.gl1.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Float(id=activity.gl1amt.id, min='0', max='100', step='.1', maxlength=activity.gl1amt.maxlength, mvc_value='activity.gl1amt', label=activity.gl1amt.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Switch(id=activity.gl1perc.id, mvc_checked='activity.gl1perc', label=activity.gl1perc.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.gl2.id, size='1', mvc_value='activity.gl2', mvc_each='glcodes', textField='name', valueField='code', label=activity.gl2.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Float(id=activity.gl2amt.id, min='0', max='100', step='.1', maxlength=activity.gl2amt.maxlength, mvc_value='activity.gl2amt', label=activity.gl2amt.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Switch(id=activity.gl2perc.id, mvc_checked='activity.gl2perc', label=activity.gl2perc.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.gl3.id, size='1', mvc_value='activity.gl3', mvc_each='glcodes', textField='name', valueField='code', label=activity.gl3.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Float(id=activity.gl3amt.id, min='0', max='100', step='.1', maxlength=activity.gl3amt.maxlength, mvc_value='activity.gl3amt', label=activity.gl3amt.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Switch(id=activity.gl3perc.id, mvc_checked='activity.gl3perc', label=activity.gl3perc.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.gl4.id, size='1', mvc_value='activity.gl4', mvc_each='glcodes', textField='name', valueField='code', label=activity.gl4.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Float(id=activity.gl4amt.id, min='0', max='100', step='.1', maxlength=activity.gl4amt.maxlength, mvc_value='activity.gl4amt', label=activity.gl4amt.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Switch(id=activity.gl4perc.id, mvc_checked='activity.gl4perc', label=activity.gl4perc.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.commgl.id, size='1', mvc_value='activity.commgl', mvc_each='glcodes', textField='name', valueField='code', label=activity.commgl.verbose) }}
+                    </div>
+                  </div>
+
+                </fieldset>
+              </div>
+
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-taxes">
+                  <legend class="w-auto fieldset-legend">Taxes</legend>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.tax1.id, size='1', mvc_value='activity.tax1', mvc_each='taxes', textField='name', valueField='code', label=activity.tax1.verbose) }}
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.tax2.id, size='1', mvc_value='activity.tax2', mvc_each='taxes', textField='name', valueField='code', label=activity.tax2.verbose) }}
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.tax3.id, size='1', mvc_value='activity.tax3', mvc_each='taxes', textField='name', valueField='code', label=activity.tax3.verbose) }}
+                    </div>
+                  </div>           
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.tax4.id, size='1', mvc_value='activity.tax4', mvc_each='taxes', textField='name', valueField='code', label=activity.tax4.verbose) }}
+                    </div>
+                  </div>                                
+                </fieldset>
+              </div>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <span mvc-show='existingEntry'>
+                  <button class='btn btn-secondary' mvc-click='daily()'>
+                    Daily
+                  </button>
+                  <button class='btn btn-secondary' mvc-click='rates()'>
+                    Rates
+                  </button>
+                  <button class='btn btn-secondary' mvc-click='schedule()'>
+                    Schedule
+                  </button>
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

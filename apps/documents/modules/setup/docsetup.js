@@ -18,7 +18,9 @@ class Docsetup extends Verror {
     };
 
     this.docsetupOrig = {};
-    this.defaults = {};
+    this.defaults = {
+      docsetup: {}
+    };
 
     //this.ready(); //  use if not in router
   }
@@ -176,7 +178,7 @@ class Docsetup extends Verror {
     this.docsetupOrig = this.model.docsetup.toJSON();
   }
 
-  async existingEntry(doc) {
+  existingEntry(doc) {
     this.model.docsetup = doc;
     this.model.existingEntry = true;
 

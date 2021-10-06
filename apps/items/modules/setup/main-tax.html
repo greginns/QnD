@@ -1,0 +1,140 @@
+<page id='items-main-tax' style='display: none;'>
+  <section id='items-main-tax-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-md-0'>
+                {{ fields.Char(id=tax.code.id, maxlength=tax.code.maxlength, mvc_value='tax.code', label=tax.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='upper') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=tax.active.id, mvc_checked='tax.active', label=tax.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-md-3'>
+                {{ fields.Char(id=tax.name.id, maxlength=tax.name.maxlength, mvc_value='tax.name', label=tax.name.verbose) }}
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-3'>
+                {{ fields.SelectChoices(id=tax.base.id, size='1', mvc_value='tax.base', label=tax.base.verbose, choices=tax.base.choices) }}
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-3'>
+                <label class='label-color'>Effective</label>
+
+                <div class="toggle-radio" data-color='blue'>
+                  {{ fields.Segment(id=tax.effwhen.id, mvc_checked='tax.effwhen', name='tax-effwhen', label='Arrival', value='A') }}
+                  {{ fields.Segment(id=tax.effwhen.id, mvc_checked='tax.effwhen', name='tax-effwhen', label='Booking', value='B') }}
+                </div>
+          
+                <div mvc-show='errors.tax.effwhen'>
+                  <small class='text-danger' mvc-text='errors.tax.effwhen'></small>
+                </div>
+               </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-3'>
+                {{ fields.SelectMVC(id=tax.gl.id, size='1', mvc_value='tax.gl', mvc_each='glcodes', valueField='code', textField='name', label=tax.gl.verbose ) }}
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-2'>
+                {{ fields.Switch(id=tax.isgovt.id, mvc_checked='tax.isgovt', label=tax.isgovt.verbose) }}
+              </div>
+              <div class='col-12 col-md-2'>
+                {{ fields.Switch(id=tax.exemptable.id, mvc_checked='tax.exemptable', label=tax.exemptable.verbose) }}
+              </div>
+            </div>
+
+            <div mvc-show='tax.base == "X" || tax.base == "Y" || tax.base == "Z"'>
+              <div class='row pt-2'>
+                <div class='col-12 col-md-1 label-color mb-3'>
+                  Tier 1
+                </div>
+                <div class='col-6 col-md-2 mb-3'>
+                  {{ fields.Float(id=tax.tier1min.id, min='0', max='99999', step='.1', maxlength=tax.tier1min.maxlength, mvc_value='tax.tier1min', label=tax.tier1min.verbose) }}
+                </div>
+                <div class='col-6 col-md-2 mb-3'>
+                  {{ fields.Float(id=tax.tier1max.id, min='0', max='99999', step='.1', maxlength=tax.tier1max.maxlength, mvc_value='tax.tier1max', label=tax.tier1max.verbose) }}
+                </div>
+              </div>
+              
+              <div class='row pt-2'>
+                <div class='col-12 col-md-1 label-color mb-3'>
+                  Tier 2
+                </div>
+                <div class='col-6 col-md-2 mb-3'>
+                  {{ fields.Float(id=tax.tier2min.id, min='0', max='99999', step='.1', maxlength=tax.tier2min.maxlength, mvc_value='tax.tier2min', label=tax.tier2min.verbose) }}
+                </div>
+                <div class='col-6 col-md-2 mb-3'>
+                  {{ fields.Float(id=tax.tier2max.id, min='0', max='99999', step='.1', maxlength=tax.tier2max.maxlength, mvc_value='tax.tier2max', label=tax.tier2max.verbose) }}
+                </div>
+              </div>
+
+              <div class='row pt-2'>
+                <div class='col-12 col-md-1 label-color mb-3'>
+                  Tier 3
+                </div>
+                <div class='col-6 col-md-2 mb-3'>
+                  {{ fields.Float(id=tax.tier3min.id, min='0', max='99999', step='.1', maxlength=tax.tier3min.maxlength, mvc_value='tax.tier3min', label=tax.tier3min.verbose) }}
+                </div>
+                <div class='col-6 col-md-2 mb-3'>
+                  {{ fields.Float(id=tax.tier3max.id, min='0', max='99999', step='.1', maxlength=tax.tier3max.maxlength, mvc_value='tax.tier3max', label=tax.tier3max.verbose) }}
+                </div>
+              </div>
+              
+              <div class='row pt-2'>
+                <div class='col-12 col-md-1 label-color mb-3'>
+                  Tier 4
+                </div>
+                <div class='col-6 col-md-2 mb-3'>
+                  {{ fields.Float(id=tax.tier4min.id, min='0', max='99999', step='.1', maxlength=tax.tier4min.maxlength, mvc_value='tax.tier4min', label=tax.tier4min.verbose) }}
+                </div>
+                <div class='col-6 col-md-2 mb-3'>
+                  {{ fields.Float(id=tax.tier4max.id, min='0', max='99999', step='.1', maxlength=tax.tier4max.maxlength, mvc_value='tax.tier4max', label=tax.tier4max.verbose) }}
+                </div>
+              </div>            
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <button class='btn btn-primary' mvc-click='backToStart()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

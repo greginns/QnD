@@ -1,6 +1,7 @@
 import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
+import {datetimer} from '/~static/lib/client/core/datetime.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 import {Multisel} from '/~static/lib/client/widgets/multisel.js';
@@ -50,7 +51,7 @@ class Contact extends ContactWithAddress {
     this.$addWatched('contact.country', this.countryChanged.bind(this));
         
     this.contactOrig = {};
-    this.defaults = {doe: window.dayjs(), notes: []};
+    this.defaults = {doe: datetimer().format('YYYY-MM-DD')}; //, notes: []};
     this.contactListEl = document.getElementById('contactList');
     
     this.notesInst = new Notes();
@@ -219,7 +220,7 @@ class Contact extends ContactWithAddress {
 
     this.model.existingEntry = true;
     this.model.contact = contact;
-this.model.contact.notes = this.model.contact.notes || [];
+//this.model.contact.notes = this.model.contact.notes || [];
     this.contactOrig = this.model.contact.toJSON();
   }
   
@@ -248,7 +249,7 @@ this.model.contact.notes = this.model.contact.notes || [];
     let textspan = document.createElement('span');
     let xspan = document.createElement('span');
 
-    let dt = dayjs(entry.date);
+    let dt = datetimer(entry.date);
     let dtx = dt.format(App.dateFormat);
     let tmx = dt.format(App.timeFormat);
 
@@ -370,7 +371,7 @@ this.model.contact.notes = this.model.contact.notes || [];
     let textspan = document.createElement('span');
     let xspan = document.createElement('span');
 
-    let dt = dayjs(entry.date);
+    let dt = datetimer(entry.date);
     let dtx = dt.format(App.dateFormat);
     let tmx = dt.format(App.timeFormat);
 
