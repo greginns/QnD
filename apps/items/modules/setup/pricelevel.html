@@ -1,0 +1,148 @@
+<page id='items-main-pricelevel' style='display: none;'>
+  <section id='items-main-pricelevel-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-md-0'>
+                {{ fields.Char(id=pricelevel.code.id, maxlength=pricelevel.code.maxlength, mvc_value='pricelevel.code', label=pricelevel.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_helptext=pricelevel.code.helptext, mvc_edit='upper') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=pricelevel.active.id, mvc_checked='pricelevel.active', label=pricelevel.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Char(id=pricelevel.name.id, maxlength=pricelevel.name.maxlength, mvc_value='pricelevel.name', label=pricelevel.name.verbose) }}
+              </div>
+
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.SegmentChoices(id=pricelevel.type.id, mvc_checked='pricelevel.type', mvc_helptext=pricelevel.type.helptext, choices=pricelevel.type.choices, name='pricelevel-type', label=pricelevel.text.verbose) }}
+              </div>
+            </div>            
+
+            <div class='row'>
+              <div class='col-12 col-md-3 mb-3'>
+                {{ fields.Char(id=pricelevel.desc1.id, maxlength=pricelevel.desc1.maxlength, mvc_value='pricelevel.desc1', label=pricelevel.desc1.verbose) }}
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier1min.id, min='1', max='999', step='1', maxlength=pricelevel.tier1min.maxlength, mvc_value='pricelevel.tier1min', label=pricelevel.tier1min.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(1)"}') }}
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier1max.id, min='1', max='999', step='1', maxlength=pricelevel.tier1max.maxlength, mvc_value='pricelevel.tier1max', label=pricelevel.tier1max.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(1)"}') }}                
+              </div>              
+            </div>           
+            
+            <div class='row'>
+              <div class='col-12 col-md-3 mb-3'>
+                {{ fields.Char(id=pricelevel.desc2.id, maxlength=pricelevel.desc2.maxlength, mvc_value='pricelevel.desc2', label=pricelevel.desc2.verbose) }}
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier2min.id, min='1', max='999', step='1', maxlength=pricelevel.tier2min.maxlength, mvc_value='pricelevel.tier2min', label=pricelevel.tier2min.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(2)"}') }}                
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier2max.id, min='1', max='999', step='1', maxlength=pricelevel.tier2max.maxlength, mvc_value='pricelevel.tier2max', label=pricelevel.tier2max.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(2)"}') }}                
+              </div>              
+            </div>                       
+
+            <div class='row'>
+              <div class='col-12 col-md-3 mb-3'>
+                {{ fields.Char(id=pricelevel.desc3.id, maxlength=pricelevel.desc3.maxlength, mvc_value='pricelevel.desc3', label=pricelevel.desc3.verbose) }}
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier3min.id, min='1', max='999', step='1', maxlength=pricelevel.tier3min.maxlength, mvc_value='pricelevel.tier3min', label=pricelevel.tier3min.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(3)"}') }}                
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier3max.id, min='1', max='999', step='1', maxlength=pricelevel.tier3max.maxlength, mvc_value='pricelevel.tier3max', label=pricelevel.tier3max.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(3)"}') }}                
+              </div>              
+            </div>           
+
+            <div class='row'>
+              <div class='col-12 col-md-3 mb-3'>
+                {{ fields.Char(id=pricelevel.desc4.id, maxlength=pricelevel.desc4.maxlength, mvc_value='pricelevel.desc4', label=pricelevel.desc4.verbose) }}
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier1min.id, min='1', max='999', step='1', maxlength=pricelevel.tier4min.maxlength, mvc_value='pricelevel.tier4min', label=pricelevel.tier4min.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(4)"}') }}                
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier4max.id, min='1', max='999', step='1', maxlength=pricelevel.tier4max.maxlength, mvc_value='pricelevel.tier4max', label=pricelevel.tier4max.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(4)"}') }}                
+              </div>              
+            </div>       
+            
+            <div class='row'>
+              <div class='col-12 col-md-3 mb-3'>
+                {{ fields.Char(id=pricelevel.desc5.id, maxlength=pricelevel.desc5.maxlength, mvc_value='pricelevel.desc5', label=pricelevel.desc5.verbose) }}
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier5min.id, min='1', max='999', step='1', maxlength=pricelevel.tier5min.maxlength, mvc_value='pricelevel.tier5min', label=pricelevel.tier5min.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(5)"}') }}                
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier5max.id, min='1', max='999', step='1', maxlength=pricelevel.tier5max.maxlength, mvc_value='pricelevel.tier5max', label=pricelevel.tier5max.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(5)"}') }}                
+              </div>              
+            </div>                       
+
+            <div class='row'>
+              <div class='col-12 col-md-3 mb-3'>
+                {{ fields.Char(id=pricelevel.desc6.id, maxlength=pricelevel.desc6.maxlength, mvc_value='pricelevel.desc6', label=pricelevel.desc6.verbose) }}
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier6min.id, min='1', max='999', step='1', maxlength=pricelevel.tier6min.maxlength, mvc_value='pricelevel.tier6min', label=pricelevel.tier6min.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(6)"}') }}                
+              </div>
+
+              <div class='col-12 col-md-3 col-lg-2 mb-3'>
+                {{ fields.Integer(id=pricelevel.tier6max.id, min='1', max='999', step='1', maxlength=pricelevel.tier6max.maxlength, mvc_value='pricelevel.tier6max', label=pricelevel.tier6max.verbose, mvc_disabled='pricelevel.type=="R"', mvc_on='{"blur": "makeDesc(6)"}') }}                
+              </div>              
+            </div>                       
+
+            <div class='row'>
+              <div class='col-12 col-md-3 mb-3'>
+                {{ fields.Char(id=pricelevel.addl.id, maxlength=pricelevel.addl.maxlength, mvc_value='pricelevel.addl', label=pricelevel.addl.verbose) }}
+              </div>
+            </div>                       
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <button class='btn btn-primary' mvc-click='backToStart()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

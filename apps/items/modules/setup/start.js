@@ -15,6 +15,8 @@ class Item extends Verror {
     this.model.activity = [];
     this.model.lodging = [];
     this.model.actgroup = [];
+    this.model.actres = [];
+    this.model.actttot = [];
     this.model.lodglocn = [];
     this.model.lodgtype = [];
     this.model.company = [];
@@ -22,6 +24,8 @@ class Item extends Verror {
     this.model.glcode = [];
     this.model.tax = [];
     this.model.waiver = [];
+    this.model.pricelevel = [];
+    this.model.pmtterms = [];
   }
 
   async ready() {
@@ -29,6 +33,8 @@ class Item extends Verror {
       Module.tableStores.activity.addView(new TableView({proxy: this.model.activity}));
       Module.tableStores.lodging.addView(new TableView({proxy: this.model.lodging}));
       Module.tableStores.actgroup.addView(new TableView({proxy: this.model.actgroup}));
+      Module.tableStores.actres.addView(new TableView({proxy: this.model.actres}));
+      Module.tableStores.actttot.addView(new TableView({proxy: this.model.actttot}));
       Module.tableStores.lodglocn.addView(new TableView({proxy: this.model.lodglocn}));
       Module.tableStores.lodgtype.addView(new TableView({proxy: this.model.lodgtype}));
       Module.tableStores.company.addView(new TableView({proxy: this.model.company}));
@@ -36,6 +42,8 @@ class Item extends Verror {
       Module.tableStores.glcode.addView(new TableView({proxy: this.model.glcode}));
       Module.tableStores.tax.addView(new TableView({proxy: this.model.tax}));
       Module.tableStores.waiver.addView(new TableView({proxy: this.model.waiver}));
+      Module.tableStores.pricelevel.addView(new TableView({proxy: this.model.pricelevel}));
+      Module.tableStores.pmtterms.addView(new TableView({proxy: this.model.pmtterms}));
 
       resolve();
     }.bind(this));

@@ -1,0 +1,114 @@
+<page id='items-main-actdaily' style='display: none;'>
+  <section id='items-main-actdaily-section'>
+    {% include "./navbar-item.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <h5>Resources and Time Totals</h5>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='table-responsive'>
+          <table class='table table-sm' id='actdailies' style='min-width: 600px'>
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>
+                  Resource-1<br>
+                  Time Total-1
+                </th>
+                <th>
+                  Resource-2<br>
+                  Time Total-2
+                </th>
+                <th>
+                  Resource-3<br>
+                  Time Total-3
+                </th>
+                <th>
+                  Resource-4<br>
+                  Time Total-4
+                </th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody mvc-each='dailies' class='edittable-source'>
+              <tr data-edittable-index='$index'>
+                <td mvc-text='dailies[$index].dayno'></td>
+                <td>
+                  <span mvc-text='dailies[$index].resdesc1'></span><br>
+                  <span mvc-text='dailies[$index].totdesc1'></span>
+                </td>
+                <td>
+                  <span mvc-text='dailies[$index].resdesc2'></span><br>
+                  <span mvc-text='dailies[$index].totdesc2'></span>
+                </td>
+                <td>
+                  <span mvc-text='dailies[$index].resdesc3'></span><br>
+                  <span mvc-text='dailies[$index].totdesc3'></span>
+                </td>
+                <td>
+                  <span mvc-text='dailies[$index].resdesc4'></span><br>
+                  <span mvc-text='dailies[$index].totdesc4'></span>
+                </td>
+                <td>
+                  <span class='pointer' mvc-click='editTable.edit()'>
+                    <i class="fa-thin fa-pen"></i>
+                  </span>                        
+                </td>
+              </tr>
+            </tbody>
+
+            <tbody style='display: none' class='edittable-editor' data-edittable-dest='actdaily'>
+              <tr>
+                <td>
+                  <span mvc-text='actdaily.dayno'></span>
+                </td>
+                <td>
+                  {{ fields.SelectMVC(id=actdaily.actres1.id, size='1', mvc_value='actdaily.actres1', mvc_each='actress', mvc_nonetext='None', textField='name', valueField='code', label='') }}
+                  <br>
+                  {{ fields.SelectMVC(id=actdaily.acttot1.id, size='1', mvc_value='actdaily.acttot1', mvc_each='actttots', mvc_nonetext='None', textField='name', valueField='code', label='') }}
+                </td>
+                <td>
+                  {{ fields.SelectMVC(id=actdaily.actres2.id, size='1', mvc_value='actdaily.actres2', mvc_each='actress', mvc_nonetext='None', textField='name', valueField='code', label='') }}
+                  <br>
+                  {{ fields.SelectMVC(id=actdaily.acttot2.id, size='1', mvc_value='actdaily.acttot2', mvc_each='actttots', mvc_nonetext='None', textField='name', valueField='code', label='') }}
+                </td>
+                <td>
+                  {{ fields.SelectMVC(id=actdaily.actres3.id, size='1', mvc_value='actdaily.actres3', mvc_each='actress', mvc_nonetext='None', textField='name', valueField='code', label='') }}
+                  <br>
+                  {{ fields.SelectMVC(id=actdaily.acttot3.id, size='1', mvc_value='actdaily.acttot3', mvc_each='actttots', mvc_nonetext='None', textField='name', valueField='code', label='') }}
+                </td>
+                <td>
+                  {{ fields.SelectMVC(id=actdaily.actres4.id, size='1', mvc_value='actdaily.actres4', mvc_each='actress', mvc_nonetext='None', textField='name', valueField='code', label='') }}
+                  <br>
+                  {{ fields.SelectMVC(id=actdaily.acttot4.id, size='1', mvc_value='actdaily.acttot4', mvc_each='actttots', mvc_nonetext='None', textField='name', valueField='code', label='') }}
+                </td>
+                <td>
+                  <span class='pointer' mvc-click='editTable.save()'>
+                    <i class="fa-light fa-floppy-disk"></i>
+                  </span>
+                  <span class='pointer' mvc-click='editTable.cancel()'>
+                    <i class="fa-light fa-xmark"></i>  
+                  </span>                        
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12'>
+        <button class='btn btn-primary' mvc-click='goBack()'>
+          Exit
+        </button>
+      </div>
+    </div>
+
+  </section>
+</page>

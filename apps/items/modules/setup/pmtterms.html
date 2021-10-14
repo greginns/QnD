@@ -1,0 +1,133 @@
+<page id='items-main-pmtterms' style='display: none;'>
+  <section id='items-main-pmtterms-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-md-0'>
+                {{ fields.Char(id=pmtterms.code.id, maxlength=pmtterms.code.maxlength, mvc_value='pmtterms.code', label=pmtterms.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_helptext=pmtterms.code.helptext, mvc_edit='upper') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=pmtterms.active.id, mvc_checked='pmtterms.active', label=pmtterms.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Char(id=pmtterms.name.id, maxlength=pmtterms.name.maxlength, mvc_value='pmtterms.name', label=pmtterms.name.verbose) }}
+              </div>
+            </div>            
+
+            <div class='row'>
+              <div class='table-responsive'>
+                <table class='table'>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th colspan='2'>What to Pay</th>
+                      <th colspan="3">When to Pay</th>
+                    </tr>
+                    <tr>
+                      <th></th>
+                      <th>Basis</th>
+                      <th>Value</th>
+                      <th>Basis</th>
+                      <th>Value</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <th>Payment 1</th>
+                      <td>
+                        {{ fields.SelectChoices(id=pmtterms.pmtbase1.id, size='1', mvc_value='pmtterms.pmtbase1', mvc_enabled='', mvc_disabled='', choices=pmtterms.pmtbase1.choices, label=pmtterms.pmtbase1.verbose) }}
+                      </td>
+                      <td>
+                        {{ fields.Float(id=pmtterms.amt1.id, min='0', max='999999', step='1', maxlength=pmtterms.amt1.maxlength, mvc_value='pmtterms.amt1', label=pmtterms.amt1.verbose) }}
+                      </td>
+                      <td>
+                        {{ fields.SelectChoices(id=pmtterms.datebase1.id, size='1', mvc_value='pmtterms.datebase1', mvc_enabled='', mvc_disabled='', choices=pmtterms.datebase1.choices, label=pmtterms.datebase1.verbose) }}
+                      </td>
+                      <td>
+                        {{ fields.Integer(id=pmtterms.days1.id, min='0', max='99', step='1', maxlength=pmtterms.days1.maxlength, mvc_value='pmtterms.days1', label=pmtterms.days1.verbose, mvc_disabled='pmtterms.datebase1=="S"') }}
+                      </td>
+                      <td>
+                        {{ fields.Date(id=pmtterms.date1.id, maxlength=pmtterms.date1.maxlength, mvc_value='pmtterms.date1', label=pmtterms.date1.verbose, mvc_enabled='pmtterms.datebase1=="S"') }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Payment 2</th>
+                      <td>
+                        {{ fields.SelectChoices(id=pmtterms.pmtbase2.id, size='1', mvc_value='pmtterms.pmtbase2', mvc_enabled='', mvc_disabled='', choices=pmtterms.pmtbase2.choices, label=pmtterms.pmtbase2.verbose) }}
+                      </td>
+                      <td>
+                        {{ fields.Float(id=pmtterms.amt2.id, min='0', max='999999', step='1', maxlength=pmtterms.amt2.maxlength, mvc_value='pmtterms.amt2', label=pmtterms.amt2.verbose) }}
+                      </td>
+                      <td>
+                        {{ fields.SelectChoices(id=pmtterms.datebase2.id, size='1', mvc_value='pmtterms.datebase2', mvc_enabled='', mvc_disabled='', choices=pmtterms.datebase2.choices, label=pmtterms.datebase2.verbose) }}
+                      </td>
+                      <td>
+                        {{ fields.Integer(id=pmtterms.days2.id, min='0', max='99', step='1', maxlength=pmtterms.days2.maxlength, mvc_value='pmtterms.days2', label=pmtterms.days2.verbose, mvc_disabled='pmtterms.datebase2=="S"') }}
+                      </td>
+                      <td>
+                        {{ fields.Date(id=pmtterms.date2.id, maxlength=pmtterms.date2.maxlength, mvc_value='pmtterms.date2', label=pmtterms.date2.verbose, mvc_enabled='pmtterms.datebase2=="S"') }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Payment 3</th>
+                      <td>
+                        {{ fields.SelectChoices(id=pmtterms.pmtbase3.id, size='1', mvc_value='pmtterms.pmtbase3', mvc_enabled='', mvc_disabled='', choices=pmtterms.pmtbase3.choices, label=pmtterms.pmtbase3.verbose) }}
+                      </td>
+                      <td>
+                        {{ fields.Float(id=pmtterms.amt3.id, min='0', max='999999', step='1', maxlength=pmtterms.amt3.maxlength, mvc_value='pmtterms.amt3', label=pmtterms.amt3.verbose) }}
+                      </td>
+                      <td>
+                        {{ fields.SelectChoices(id=pmtterms.datebase3.id, size='1', mvc_value='pmtterms.datebase3', mvc_enabled='', mvc_disabled='', choices=pmtterms.datebase3.choices, label=pmtterms.datebase3.verbose) }}
+                      </td>
+                      <td>
+                        {{ fields.Integer(id=pmtterms.days3.id, min='0', max='99', step='1', maxlength=pmtterms.days3.maxlength, mvc_value='pmtterms.days3', label=pmtterms.days3.verbose, mvc_disabled='pmtterms.datebase3=="S"') }}
+                      </td>
+                      <td>
+                        {{ fields.Date(id=pmtterms.date3.id, maxlength=pmtterms.date3.maxlength, mvc_value='pmtterms.date3', label=pmtterms.date3.verbose, mvc_enabled='pmtterms.datebase3=="S"') }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <button class='btn btn-primary' mvc-click='backToStart()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

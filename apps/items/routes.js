@@ -1,8 +1,9 @@
 const root = process.cwd();
 
 const {Router, RouterMessage, Routes} = require(root + '/lib/server/utils/router.js');
+const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {Authentication} = require(root + '/lib/server/utils/authentication.js');
-const {ACCESS} = require(root + '/lib/server/utils/authorization.js');
+const {VIEW, UPDATE, DELETE, ACCESS} = require(root + '/lib/server/utils/authorization.js');
 const loginServices = require(root + '/apps/login/services.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {urlQueryParse} = require(root + '/lib/server/utils/url.js');
@@ -71,14 +72,23 @@ Router.add(new RouterMessage({
 new Routes({app, subapp: 'activity', version, allowCORS: true, model: models.Activity, services: services.activity});
 new Routes({app, subapp: 'lodging', version, allowCORS: true, model: models.Lodging, services: services.lodging});
 
+new Routes({app, subapp: 'actdaily', version, allowCORS: true, model: models.Actdaily, services: services.actdaily});
+new Routes({app, subapp: 'actrates', version, allowCORS: true, model: models.Actrates, services: services.actrates});
 new Routes({app, subapp: 'actgroup', version, allowCORS: true, model: models.Actgroup, services: services.actgroup});
+new Routes({app, subapp: 'actres', version, allowCORS: true, model: models.Actres, services: services.actres});
+new Routes({app, subapp: 'actttot', version, allowCORS: true, model: models.Actttot, services: services.actttot});
+
+new Routes({app, subapp: 'lodgunit', version, allowCORS: true, model: models.Lodgunit, services: services.lodgunit});
+new Routes({app, subapp: 'lodgrates', version, allowCORS: true, model: models.Actrates, services: services.lodgrates});
 new Routes({app, subapp: 'lodglocn', version, allowCORS: true, model: models.Lodglocn, services: services.lodglocn});
 new Routes({app, subapp: 'lodgtype', version, allowCORS: true, model: models.Lodgtype, services: services.lodgtype});
 
-new Routes({app, subapp: 'area', version, allowCORS: true, model: models.area, services: services.area});
-new Routes({app, subapp: 'glcode', version, allowCORS: true, model: models.glcode, services: services.glcode});
-new Routes({app, subapp: 'tax', version, allowCORS: true, model: models.tax, services: services.tax});
-new Routes({app, subapp: 'waiver', version, allowCORS: true, model: models.waiver, services: services.waiver});
+new Routes({app, subapp: 'area', version, allowCORS: true, model: models.Area, services: services.area});
+new Routes({app, subapp: 'glcode', version, allowCORS: true, model: models.Glcode, services: services.glcode});
+new Routes({app, subapp: 'tax', version, allowCORS: true, model: models.Tax, services: services.tax});
+new Routes({app, subapp: 'waiver', version, allowCORS: true, model: models.Waiver, services: services.waiver});
+new Routes({app, subapp: 'pricelevel', version, allowCORS: true, model: models.Pricelevel, services: services.pricelevel});
+new Routes({app, subapp: 'pmtterms', version, allowCORS: true, model: models.Pmtterms, services: services.pmtterms});
 
 //strategy rtns
 Authentication.add(app, 'session', async function(req, security, strategy) {

@@ -17,6 +17,7 @@
             <div class='row'>
               <div class='col-6'>
                 Activity
+                <span class="badge rounded-pill bg-secondary" mvc-text='activity.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("activity")'>
@@ -52,6 +53,7 @@
             <div class='row'>
               <div class='col-6'>
                 Lodging
+                <span class="badge rounded-pill bg-secondary" mvc-text='lodging.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodging")'>
@@ -89,6 +91,7 @@
             <div class='row'>
               <div class='col-6'>
                 Activity Groups
+                <span class="badge rounded-pill bg-secondary" mvc-text='actgroup.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actgroup")'>
@@ -121,7 +124,79 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6'>
+                Activity Resources
+                <span class="badge rounded-pill bg-secondary" mvc-text='actres.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actres")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("actres","code")'>Code</th>
+                  <th mvc-click='sortItems("actres","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='actres'>
+                <tr mvc-click='editItem("actres", "$index")'>
+                  <td mvc-text='actres[$index].code'></td>
+                  <td mvc-text='actres[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Activity Time Totals
+                <span class="badge rounded-pill bg-secondary" mvc-text='actttot.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actttot")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("actttot","code")'>Code</th>
+                  <th mvc-click='sortItems("actttot","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='actttot'>
+                <tr mvc-click='editItem("actttot", "$index")'>
+                  <td mvc-text='actttot[$index].code'></td>
+                  <td mvc-text='actttot[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
                 Lodging Locations
+                <span class="badge rounded-pill bg-secondary" mvc-text='lodglocn.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodglocn")'>
@@ -155,6 +230,7 @@
             <div class='row'>
               <div class='col-6'>
                 Lodging Types
+                <span class="badge rounded-pill bg-secondary" mvc-text='lodgtype.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodgtype")'>
@@ -190,6 +266,7 @@
             <div class='row'>
               <div class='col-6'>
                 Companies
+                <span class="badge rounded-pill bg-secondary" mvc-text='company.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("company")'>
@@ -223,6 +300,7 @@
             <div class='row'>
               <div class='col-6'>
                 Areas
+                <span class="badge rounded-pill bg-secondary" mvc-text='area.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("area")'>
@@ -256,6 +334,7 @@
             <div class='row'>
               <div class='col-6'>
                 GL Codes
+                <span class="badge rounded-pill bg-secondary" mvc-text='glcode.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("glcode")'>
@@ -291,6 +370,7 @@
             <div class='row'>
               <div class='col-6'>
                 Taxes/Service Charges
+                <span class="badge rounded-pill bg-secondary" mvc-text='tax.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("tax")'>
@@ -324,6 +404,7 @@
             <div class='row'>
               <div class='col-6'>
                 Waivers
+                <span class="badge rounded-pill bg-secondary" mvc-text='waiver.length'></span>
               </div>
               <div class='col-6'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("waiver")'>
@@ -344,6 +425,77 @@
                 <tr mvc-click='editItem("waiver", "$index")'>
                   <td mvc-text='waiver[$index].code'></td>
                   <td mvc-text='waiver[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      
+    <div class='row'>
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Pricing Levels
+                <span class="badge rounded-pill bg-secondary" mvc-text='pricelevel.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("pricelevel")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("pricelevel","code")'>Code</th>
+                  <th mvc-click='sortItems("pricelevel","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='pricelevel'>
+                <tr mvc-click='editItem("pricelevel", "$index")'>
+                  <td mvc-text='pricelevel[$index].code'></td>
+                  <td mvc-text='pricelevel[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Payment Terms
+                <span class="badge rounded-pill bg-secondary" mvc-text='pmtterms.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("pmtterms")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("pmtterms","code")'>Code</th>
+                  <th mvc-click='sortItems("pmtterms","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='pmtterms'>
+                <tr mvc-click='editItem("pmtterms", "$index")'>
+                  <td mvc-text='pmtterms[$index].code'></td>
+                  <td mvc-text='pmtterms[$index].name'></td>
                 </tr>
               </tbody>
             </table>

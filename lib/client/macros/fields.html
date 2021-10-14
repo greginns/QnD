@@ -153,14 +153,34 @@
 </div>
 {% endmacro %}
 
-{% macro Integer(id='', min='1', max='999', step='1', mvc_value='', mvc_edit='integer', label='') %}
+
+{% macro SegmentChoices(id='', mvc_checked='', mvc_enabled='', mvc_disabled='', mvc_helptext, mvc_on='', choices=[], name='', label='') %} 
+<label class='label-color'>{{label}}</label>
+<div class="toggle-radio" data-color='blue'>
+  {% for choice in choices %}
+    <input type="radio" name="{{name}}" id="{{id}}-{{choice.value}}" mvc-checked='{{mvc_checked}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' mvc-on='{{mvc_on}}' value="{{choice.value}}">
+    <label for="{{id}}-{{choice.value}}">{{choice.text}}</label>
+  {% endfor %}
+</div>
+  
+<div>
+  <small class='text-success helptext d-none'>{{mvc_helptext}}</small>
+</div>
+
+<div mvc-show='errors.{{mvc_checked}}'>
+  <small class='text-danger' mvc-text='errors.{{mvc_checked}}'></small>
+</div>
+{% endmacro %}
+
+
+{% macro Integer(id='', min='1', max='999', step='1', mvc_value='', mvc_edit='integer', mvc_enabled='', mvc_disabled='', mvc_on='', label='') %}
 <div class="form-label-group">
   <div class='input-group'>
     <span style='font-size: 18px; line-height: 18px; user-select: none;' mvc-role='stepperadj' dir='-' class="input-group-text">
       <i class="fas fa-minus"></i>
     </span>
 
-    <input type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' placeholder='{{label}}' class="form-control" />
+    <input type="text" xid='{{id}}' min='{{min}}' max='{{max}}' step='{{step}}' mvc-value='{{mvc_value}}' mvc-edit='{{mvc_edit}}' mvc-role='stepper' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' mvc-on='{{mvc_on}}' placeholder='{{label}}' class="form-control" />
 
     <span style='font-size: 18px; line-height: 18px; user-select: none;' mvc-role='stepperadj' dir='+' class="input-group-text">
       <i class="fas fa-plus"></i>
@@ -220,9 +240,9 @@
 </div>
 {% endmacro %}
 
-{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', mvc_on='{}', mvc_enabled='', mvc_disabled='', valueField='value', textField='text', label='', multiple='') %}
+{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', mvc_nonetext='', mvc_nonevalue='', mvc_on='{}', mvc_enabled='', mvc_disabled='', valueField='value', textField='text', label='', multiple='') %}
 <div class="form-label-group">
-  <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-select" {{multiple}}>
+  <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' mvc-nonetext='{{mvc_nonetext}}' mvc-nonevalue='{{mvc_nonevalue}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-select" {{multiple}}>
     <option mvc-option='{value: "{{mvc_each}}.$index.{{valueField}}", text: "{{mvc_each}}.$index.{{textField}}"}'></option>
   </select>
   <label>{{label}}</label>

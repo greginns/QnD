@@ -6,6 +6,10 @@ const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {Company} = require(root + '/apps/contacts/models.js');
 const app = getAppName(__dirname);
 
+const nullify = function(x) {
+  return (x == '') ? null : x;
+}
+
 const TAXBASE = [
   {value: '%', text: 'Percent'},
   {value: 'P', text: 'Per Person'},
@@ -28,6 +32,56 @@ const ASSIGN = [
   {value: 'B', text: 'Booking'},
   {value: 'E', text: 'Either'}
 ];
+
+const CURRENCIES = [
+  {value: 'CAD', text: 'Canadian Dollar'},
+  {value: 'USD', text: 'United States Dollar'},
+];
+
+const RATEBASE1 = [
+  {value: 'F', text: 'Flat'},
+  {value: 'P', text: 'Per Person'},
+  {value: 'C', text: 'Combined'},
+]
+
+const RATEBASE2 = [
+  {value: 'F', text: 'Fixed'},
+  {value: 'D', text: 'Daily'},
+  {value: 'H', text: 'Hourly'},
+  {value: 'W', text: 'Weekly'},
+]
+
+const PRIVILEGES = [
+  {value: 'admin', text: 'Administrator', level: 9},
+  {value: 'mgmt', text: 'Management', level: 8},
+  {value: 'acct', text: 'Accounting', level: 7},
+  {value: 'ops', text: 'Operations', level: 6},
+  {value: 'rsvsA', text: 'Reservations-A', level: 5},
+  {value: 'rsvsB', text: 'Reservations-B', level: 4},
+  {value: 'rsvsC', text: 'Reservations-C', level: 3},
+  {value: 'guest', text: 'Reservations-A', level: 1},
+];
+
+const PRICETYPES = [
+  {value: 'R', text: 'Regular'},
+  {value: 'T1', text: 'Tiered'},
+  {value: 'T2', text: 'Tiered Adult/Youth'},
+]
+
+const PMTBASE = [
+  {value: 'F', text: 'Flat Amount'},
+  {value: 'P', text: 'Per Person'},
+  {value: '%', text: '% of Charge'},
+  {value: 'Q', text: 'Per Item'},
+  {value: 'U', text: 'User Day'},
+  {value: 'D', text: 'Per Day/Per Item'},
+];
+
+const PMTDATE = [
+  {value: 'B', text: 'Before Arrival'},
+  {value: 'A', text: 'After Booking'},
+  {value: 'S', text: 'Specific Date'},
+]
 
 const upper = function(x) {
   return String(x).toUpperCase();
@@ -113,6 +167,45 @@ const Items = class extends Model {
   }
 };
 
+const Rates = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static parent() {
+    return {
+      schema: {
+        rateno: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),
+        pricelevel: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Price Bkdn'}),
+        pmtterms: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Payment Terms'}),
+        privilege: new Fields.Char({notNull: true, maxLength: 5, default: 'rsvsA', choices: PRIVILEGES, verbose: 'Privilege'}),
+        ratebase1: new Fields.Char({notNull: true, maxLength: 5, default: 'P', choices: RATEBASE1, verbose: 'Rate Base-1'}),
+        ratebase2: new Fields.Char({notNull: true, maxLength: 5, default: 'F', choices: RATEBASE2, verbose: 'Rate Base-2'}),
+        currency: new Fields.Char({notNull: true, maxLength: 3, default: 'CAD', choices: CURRENCIES, verbose: 'Currency'}),
+        addlppl: new Fields.Integer({notNull: true, default: 0, maxLength: 2, verbose: 'Addl Ppl'}),
+        minppl: new Fields.Integer({notNull: true, default: 0, maxLength: 2, verbose: 'Min Ppl'}),
+      },
+
+      constraints: {
+        fk: [
+          {name: 'pricelevel', columns: ['pricelevel'], app, table: Pricelevel, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'pmtterms', columns: ['pmtterms'], app, table: Pmtterms, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ],
+
+        index: [],
+      },
+      
+      hidden: [],
+      
+      dbschema: '',
+      app,
+      desc: 'Rates prototype'
+    }      
+  }
+};
+
 // Activities
 const Activity = class extends Items {
   constructor(obj, opts) {
@@ -122,7 +215,7 @@ const Activity = class extends Items {
   static child() {
     return {
       schema: {
-        actgroup: new Fields.Char({null: true, maxLength: 10, verbose: 'Group'}),
+        actgroup: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Group'}),
         durdays: new Fields.Integer({null: true, default: 1, verbose: 'Days'}),
         durhours: new Fields.Integer({null: true, default: 6, verbose: 'Hours'}),
         multi: new Fields.Boolean({default: false, verbose: 'Daily Starts'}),
@@ -138,7 +231,7 @@ const Activity = class extends Items {
       },
 
       hidden: [],
-      
+
       dbschema: '',
       app,
       desc: 'Activities'
@@ -148,7 +241,41 @@ const Activity = class extends Items {
   static definition() {
     return this.mergeSchemas(this.parent(), this.child());
   }
-}
+};
+
+const Actrates = class extends Rates {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        activity: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Activity'}),
+      },
+
+      constraints: {
+        pk: ['activity', 'rateno'],
+
+        fk: [
+          {name: 'activity', columns: ['activity'], app, table: Activity, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['activity', 'rateno'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Rates'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+};
 
 const Actgroup = class extends Model {
   constructor(obj, opts) {
@@ -179,6 +306,111 @@ const Actgroup = class extends Model {
   }
 };
 
+const Actdaily = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        activity: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Code'}),
+        dayno: new Fields.Integer({notNull: true, verbose: 'Day#'}),
+        actres1: new Fields.Char({null: true, maxLength: 8, onBeforeUpsert: nullify, verbose: 'Resource-1'}),
+        actres2: new Fields.Char({null: true, maxLength: 8, onBeforeUpsert: nullify, verbose: 'Resource-2'}),
+        actres3: new Fields.Char({null: true, maxLength: 8, onBeforeUpsert: nullify, verbose: 'Resource-3'}),
+        actres4: new Fields.Char({null: true, maxLength: 8, onBeforeUpsert: nullify, verbose: 'Resource-4'}),
+        acttot1: new Fields.Char({null: true, maxLength: 8, onBeforeUpsert: nullify, verbose: 'Time Total-1'}),
+        acttot2: new Fields.Char({null: true, maxLength: 8, onBeforeUpsert: nullify, verbose: 'Time Total-2'}),
+        acttot3: new Fields.Char({null: true, maxLength: 8, onBeforeUpsert: nullify, verbose: 'Time Total-3'}),
+        acttot4: new Fields.Char({null: true, maxLength: 8, onBeforeUpsert: nullify, verbose: 'Time Total-4'}),
+      },
+      
+      constraints: {
+        pk: ['activity', 'dayno'],
+        fk: [
+          {name: 'activity', columns: ['activity'], app, table: Activity, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actres1', columns: ['actres1'], app, table: Actres, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actres2', columns: ['actres2'], app, table: Actres, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actres3', columns: ['actres3'], app, table: Actres, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actres4', columns: ['actres4'], app, table: Actres, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actttot1', columns: ['acttot1'], app, table: Actttot, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actttot2', columns: ['acttot2'], app, table: Actttot, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actttot3', columns: ['acttot3'], app, table: Actttot, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actttot4', columns: ['acttot4'], app, table: Actttot, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['activity', 'dayno'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Daily'
+    }
+  }
+};
+
+const Actres = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Resource Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),      
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['-active', 'name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Resource Totals'
+    }
+  }
+};
+
+const Actttot = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Time Total Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),      
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['-active', 'name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Time Totals'
+    }
+  }
+};
+
+
 // Lodging
 const Lodging = class extends Items {
   constructor(obj, opts) {
@@ -197,6 +429,7 @@ const Lodging = class extends Items {
         unitinv: new Fields.Boolean({null: true, default: true, verbose: 'Units on Invoice'}),
         bookbeds: new Fields.Boolean({null: true, default: true, verbose: 'Book Beds'}),
         assign: new Fields.Char({null: true, maxLength: 1, default: 'B', choices: ASSIGN, verbose: 'Assign unit'}),
+        lastoffset: new Fields.Float({null: true, default: 0, verbose: 'Last Time Offset'}),
       },
 
       constraints: {
@@ -216,6 +449,76 @@ const Lodging = class extends Items {
 
   static definition() {
     return this.mergeSchemas(this.parent(), this.child());
+  }
+};
+
+const Lodgrates = class extends Rates {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        lodging: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Lodging'}),
+        minnts: new Fields.Integer({notNull: true, default: 1, verbose: 'Min Nights'}),
+        minchg: new Fields.Float({notNull: true, default: 0, verbose: 'Min Charge'}),
+      },
+
+      constraints: {
+        pk: ['lodging', 'rateno'],
+
+        fk: [
+          {name: 'lodging', columns: ['lodging'], app, table: Lodging, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['lodging', 'rateno'],
+      
+      dbschema: '',
+      app,
+      desc: 'Lodging Rates'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+}
+
+const Lodgunit = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        lodging: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Code'}),
+        seq: new Fields.Integer({null: true, verbose: 'Seq'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Unit Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),
+        qtybeds: new Fields.Integer({null: true, default: '0', verbose: '# of Beds'}),
+        desc: new Fields.Text({null: true, verbose: 'Description'}),
+      },
+      
+      constraints: {
+        pk: ['lodging', 'seq'],
+        fk: [
+          {name: 'lodging', columns: ['lodging'], app, table: Lodging, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['lodging', 'name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Lodging Units'
+    }
   }
 };
 
@@ -413,6 +716,107 @@ const Waiver = class extends Model {
   }
 };
 
-//console.log(Activity.definition())
-//console.log(Lodging.definition())
-module.exports = {Activity, Lodging, Actgroup, Lodglocn, Lodgtype, Area, Waiver, Glcode, Tax}
+const Pricelevel = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code', helptext: '1-8 character code to identify this waiver'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),   
+        type: new Fields.Char({null: true, maxLength: 2, default: 'R', choices: PRICETYPES, verbose: 'Type'}),
+        desc1: new Fields.Char({null: true, maxLength: 15, verbose: 'Desc-1'}),
+        desc2: new Fields.Char({null: true, maxLength: 15, verbose: 'Desc-2'}),
+        desc3: new Fields.Char({null: true, maxLength: 15, verbose: 'Desc-3'}),
+        desc4: new Fields.Char({null: true, maxLength: 15, verbose: 'Desc-4'}),
+        desc5: new Fields.Char({null: true, maxLength: 15, verbose: 'Desc-5'}),
+        desc6: new Fields.Char({null: true, maxLength: 15, verbose: 'Desc-6'}),
+        addl: new Fields.Char({null: true, maxLength: 15, verbose: 'Addl'}),
+        tier1min: new Fields.Integer({null: true, default: 1, verbose: 'Min'}),
+        tier1max: new Fields.Integer({null: true, default: 19, verbose: 'Max'}),
+        tier2min: new Fields.Integer({null: true, default: 20, verbose: 'Min'}),
+        tier2max: new Fields.Integer({null: true, default: 39, verbose: 'Max'}),
+        tier3min: new Fields.Integer({null: true, default: 40, verbose: 'Min'}),
+        tier3max: new Fields.Integer({null: true, default: 59, verbose: 'Max'}),
+        tier4min: new Fields.Integer({null: true, default: 60, verbose: 'Min'}),
+        tier4max: new Fields.Integer({null: true, default: 79, verbose: 'Max'}),
+        tier5min: new Fields.Integer({null: true, default: 80, verbose: 'Min'}),
+        tier5max: new Fields.Integer({null: true, default: 99, verbose: 'Max'}),
+        tier6min: new Fields.Integer({null: true, default: 100, verbose: 'Min'}),
+        tier6max: new Fields.Integer({null: true, default: 999, verbose: 'Max'}),
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['-active', 'name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Price Breakdowns'
+    }
+  }
+};
+
+const Pmtterms = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code', helptext: '1-8 character code to identify this waiver'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),   
+        pmtbase1: new Fields.Char({notNull: true, maxLength: 2, default: 'P', choices: PMTBASE, verbose: 'Pmt Basis'}),
+        amt1: new Fields.Float({notNull: true, default: 0, verbose: 'Amount'}),
+        datebase1: new Fields.Char({notNull: true, maxLength: 2, default: 'B', choices: PMTDATE, verbose: 'Date Basis'}),
+        days1: new Fields.Integer({notNull: true, default: 0, verbose: 'Days'}),
+        date1: new Fields.Date({null: true, verbose: 'Actual Date'}),
+        pmtbase2: new Fields.Char({notNull: true, maxLength: 2, default: 'P', choices: PMTBASE, verbose: 'Pmt Basis'}),
+        amt2: new Fields.Float({notNull: true, default: 0, verbose: 'Amount'}),
+        datebase2: new Fields.Char({notNull: true, maxLength: 2, default: 'B', choices: PMTDATE, verbose: 'Date Basis'}),
+        days2: new Fields.Integer({notNull: true, default: 0, verbose: 'Days'}),
+        date2: new Fields.Date({null: true, verbose: 'Actual Date'}),
+        pmtbase3: new Fields.Char({notNull: true, maxLength: 2, default: 'P', choices: PMTBASE, verbose: 'Pmt Basis'}),
+        amt3: new Fields.Float({notNull: true, default: 0, verbose: 'Amount'}),
+        datebase3: new Fields.Char({notNull: true, maxLength: 2, default: 'B', choices: PMTDATE, verbose: 'Date Basis'}),
+        days3: new Fields.Integer({notNull: true, default: 0, verbose: 'Days'}),
+        date3: new Fields.Date({null: true, verbose: 'Actual Date'}),
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['-active', 'name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Payment Terms'
+    }
+  }
+};       
+
+
+module.exports = {
+  Activity, 
+  Actdaily, Actrates,
+  Actgroup, Actres, Actttot, 
+  Lodging,
+  Lodgunit, Lodgrates,
+  Lodglocn, Lodgtype, 
+  Area, Waiver, Glcode, Tax,
+  Pricelevel, Pmtterms
+}

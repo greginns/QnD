@@ -1,0 +1,99 @@
+<page id='items-main-lodgunit' style='display: none;'>
+  <section id='items-main-lodgunit-section'>
+    {% include "./navbar-item.html" %}
+
+    <div class='row'>
+      <div class='col-6'>
+        <h5>Units/Rooms</h5>
+      </div>
+      <div class='col-6'>
+        <button class='btn btn-outline-primary float-end' mvc-click='newUnit()'>
+          Add Unit
+        </button>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='table-responsive'>
+          <table class='table table-sm' id='lodgunits' style='min-width: 600px'>
+            <thead>
+              <tr>
+                <th>
+                  Unit Name
+                </th>
+                <th>
+                  Active
+                </th>
+                <th>
+                  Description
+                </th>
+                <th>
+                  # of Beds
+                </th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody style='display: none' class='edittable-editor' data-edittable-dest='lodgunit'>
+              <tr>
+                <td>
+                  {{ fields.Char(id=lodgunit.name.id, maxlength=lodgunit.name.maxlength, mvc_value='lodgunit.name', label=lodgunit.name.verbose) }}
+                </td>
+                <td>
+                  {{ fields.Switch(id=lodgunit.active.id, mvc_checked='lodgunit.active', label=lodgunit.active.verbose) }}
+                </td>
+                <td>
+                  {{ fields.Text(id=lodgunit.desc.id, rows='4', mvc_value='lodgunit.desc', label=lodgunit.desc.verbose) }}                        
+                </td>
+                <td>
+                  {{ fields.Integer(id=lodgunit.qtybeds.id, min='0', max='99', step='1', maxlength=lodgunit.qtybeds.maxlength, mvc_value='lodgunit.qtybeds', label=lodgunit.qtybeds.verbose, mvc_enabled='lodging.bookbeds') }}
+                </td>
+                <td>
+                  <span class='pointer' mvc-click='editTable.save()'>
+                    <i class="fa-light fa-floppy-disk"></i>
+                  </span>
+                  <span class='pointer' mvc-click='editTable.cancel()'>
+                    <i class="fa-light fa-xmark"></i>  
+                  </span>                        
+                </td>
+              </tr>
+            </tbody>
+
+            <tbody mvc-each='units' class='edittable-source'>
+              <tr data-edittable-index='$index'>
+                <td>
+                  <span mvc-text='units[$index].name'></span>
+                </td>
+                <td>
+                  <span mvc-text='units[$index].active'></span>
+                </td>
+                <td>
+                  <span mvc-text='units[$index].desc'></span>
+                </td>
+                <td>
+                  <span mvc-text='units[$index].qtybeds'></span>
+                </td>
+                <td>
+                  <span class='pointer' mvc-click='editTable.edit()'>
+                    <i class="fa-thin fa-pen"></i>
+                  </span>                        
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <div class='row'>
+      <div class='col-12'>
+        <button class='btn btn-primary' mvc-click='goBack()'>
+          Exit
+        </button>
+      </div>
+    </div>
+
+  </section>
+</page>
