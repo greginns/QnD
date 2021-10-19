@@ -143,7 +143,7 @@ class Activity extends Main {
   }
 
   rates(ev) {
-    console.log(ev)
+    Module.pager.go(`/activity/${this.model.activity.code}/rates`)
   }
 
   schedule(ev) {

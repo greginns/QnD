@@ -1,0 +1,93 @@
+<page id='items-rate-activity' style='display: none;'>
+  <section id='items-rate-activity-section'>
+    {% include "./navbar-item.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-md-0'>
+                {{ fields.Char(id=actrates.rateno.id, mvc_value='actrates.rateno', label=actrates.rateno.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='integer') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=actrates.active.id, mvc_checked='actrates.active', label=actrates.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.Char(id=actrates.name.id, maxlength=actrates.name.maxlength, mvc_value='actrates.name', label=actrates.name.verbose) }}
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectMVC(id=actrates.pricelevel.id, mvc_value='actrates.pricelevel', mvc_each='pricelevel', valueField='code', textField='name', size='1', label=actrates.pricelevel.verbose) }}
+              </div>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectMVC(id=actrates.pmtterms.id, mvc_value='actrates.pmtterms', mvc_each='pmtterms', valueField='code', textField='name', size='1', label=actrates.pmtterms.verbose) }}
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectChoices(id=actrates.ratebase1.id, mvc_value='actrates.ratebase1', choices=actrates.ratebase1.choices, size='1', label=actrates.ratebase1.verbose) }}
+              </div>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectChoices(id=actrates.ratebase2.id, mvc_value='actrates.ratebase2', choices=actrates.ratebase2.choices, size='1', label=actrates.ratebase2.verbose) }}
+              </div>
+            </div>           
+            
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectChoices(id=actrates.currency.id, mvc_value='actrates.currency', choices=actrates.currency.choices, size='1', label=actrates.currency.verbose) }}
+              </div>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectChoices(id=actrates.privilege.id, mvc_value='actrates.privilege', choices=actrates.privilege.choices, size='1', label=actrates.privilege.verbose) }}
+              </div>
+            </div>        
+            
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-2'>
+                {{ fields.Integer(id=actrates.addlppl.id, min=0, max=99, step=1, mvc_value='actrates.addlppl', label=actrates.addlppl.verbose) }}
+              </div>
+            </div>            
+
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <span mvc-show='existingEntry'>
+                  <button class='btn btn-secondary' mvc-click='prices()'>
+                    Prices
+                  </button>
+                </span>
+                <button class='btn btn-primary' mvc-click='goBack()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

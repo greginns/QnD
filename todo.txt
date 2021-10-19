@@ -1,3 +1,6 @@
+Items
+  Show inactive as red
+  
 Documents
   All doc types other than letter
   Move ee routines out of App

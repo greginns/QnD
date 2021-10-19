@@ -1,0 +1,102 @@
+<page id='items-rate-lodging' style='display: none;'>
+  <section id='items-rate-lodging-section'>
+    {% include "./navbar-item.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-md-0'>
+                {{ fields.Char(id=lodgrates.rateno.id, mvc_value='lodgrates.rateno', label=lodgrates.rateno.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='integer') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=lodgrates.active.id, mvc_checked='lodgrates.active', label=lodgrates.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.Char(id=lodgrates.name.id, maxlength=lodgrates.name.maxlength, mvc_value='lodgrates.name', label=lodgrates.name.verbose) }}
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectMVC(id=lodgrates.pricelevel.id, mvc_value='lodgrates.pricelevel', mvc_each='pricelevel', valueField='code', textField='name', size='1', label=lodgrates.pricelevel.verbose) }}
+              </div>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectMVC(id=lodgrates.pmtterms.id, mvc_value='lodgrates.pmtterms', mvc_each='pmtterms', valueField='code', textField='name', size='1', label=lodgrates.pmtterms.verbose) }}
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectChoices(id=lodgrates.ratebase1.id, mvc_value='lodgrates.ratebase1', choices=lodgrates.ratebase1.choices, size='1', label=lodgrates.ratebase1.verbose) }}
+              </div>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectChoices(id=lodgrates.ratebase2.id, mvc_value='lodgrates.ratebase2', choices=lodgrates.ratebase2.choices, size='1', label=lodgrates.ratebase2.verbose) }}
+              </div>
+            </div>           
+            
+            <div class='row'>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectChoices(id=lodgrates.currency.id, mvc_value='lodgrates.currency', choices=lodgrates.currency.choices, size='1', label=lodgrates.currency.verbose) }}
+              </div>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.SelectChoices(id=lodgrates.privilege.id, mvc_value='lodgrates.privilege', choices=lodgrates.privilege.choices, size='1', label=lodgrates.privilege.verbose) }}
+              </div>
+            </div>        
+            
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-2'>
+                {{ fields.Integer(id=lodgrates.addlppl.id, min=0, max=99, step=1, mvc_value='lodgrates.addlppl', label=lodgrates.addlppl.verbose) }}
+              </div>
+              <div class='col-8 col-md-2 mb-3 mb-2'>
+                {{ fields.Integer(id=lodgrates.minppl.id, min=0, max=99, step=1, mvc_value='lodgrates.minppl', label=lodgrates.minppl.verbose) }}
+              </div>
+            </div>           
+            
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-2'>
+                {{ fields.Float(id=lodgrates.minchg.id, min=0, max=999, step=1, mvc_value='lodgrates.minchg', label=lodgrates.minchg.verbose) }}
+              </div>
+            </div>
+
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <span mvc-show='existingEntry'>
+                  <button class='btn btn-secondary' mvc-click='prices()'>
+                    Prices
+                  </button>
+                </span>
+                <button class='btn btn-primary' mvc-click='goBack()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

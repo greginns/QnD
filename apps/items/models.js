@@ -87,6 +87,8 @@ const upper = function(x) {
   return String(x).toUpperCase();
 }
 
+
+// PARENT MODELS
 const Items = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -178,7 +180,7 @@ const Rates = class extends Model {
         rateno: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
         name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
         active: new Fields.Boolean({default: true, verbose: 'Active'}),
-        pricelevel: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Price Bkdn'}),
+        pricelevel: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Pricing Levels'}),
         pmtterms: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Payment Terms'}),
         privilege: new Fields.Char({notNull: true, maxLength: 5, default: 'rsvsA', choices: PRIVILEGES, verbose: 'Privilege'}),
         ratebase1: new Fields.Char({notNull: true, maxLength: 5, default: 'P', choices: RATEBASE1, verbose: 'Rate Base-1'}),
@@ -202,6 +204,36 @@ const Rates = class extends Model {
       dbschema: '',
       app,
       desc: 'Rates prototype'
+    }      
+  }
+};
+
+const Prices = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static parent() {
+    return {
+      schema: {
+        rateno: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
+        year: new Fields.Integer({notNull: true, maxLength: 4, verbose: 'Year'}),
+        month: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Month'}),
+        prices: new Fields.Jsonb({null: true, default: '[]', verbose: 'Prices'})        
+      },
+
+      constraints: {
+        fk: [
+        ],
+
+        index: [],
+      },
+      
+      hidden: [],
+      
+      dbschema: '',
+      app,
+      desc: 'Prices prototype'
     }      
   }
 };
@@ -269,6 +301,42 @@ const Actrates = class extends Rates {
       dbschema: '',
       app,
       desc: 'Activity Rates'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+};
+
+const Actprices = class extends Prices {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        activity: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Activity'}),
+        hour: new Fields.Integer({null: true, maxLength: 2, verbose: 'Hour'}),
+        minute: new Fields.Integer({null: true, maxLength: 2, verbose: 'Minute'}),
+      },
+
+      constraints: {
+        pk: ['activity', 'rateno', 'year', 'month', 'hour', 'minute'],
+
+        fk: [
+          {name: 'activity', columns: ['activity'], app, table: Activity, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['activity', 'rateno', 'year', 'month', 'hour', 'minute'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Prices'
     }
   }
 
@@ -487,6 +555,40 @@ const Lodgrates = class extends Rates {
     return this.mergeSchemas(this.parent(), this.child());
   }
 }
+
+const Lodgprices = class extends Prices {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        lodging: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Lodging'}),
+      },
+
+      constraints: {
+        pk: ['lodging', 'rateno', 'year', 'month'],
+
+        fk: [
+          {name: 'lodging', columns: ['lodging'], app, table: Lodging, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['lodging', 'rateno', 'year', 'month', 'hour', 'minute'],
+      
+      dbschema: '',
+      app,
+      desc: 'Lodging Prices'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+};
 
 const Lodgunit = class extends Model {
   constructor(obj, opts) {
@@ -812,10 +914,10 @@ const Pmtterms = class extends Model {
 
 module.exports = {
   Activity, 
-  Actdaily, Actrates,
+  Actdaily, Actrates, Actprices,
   Actgroup, Actres, Actttot, 
   Lodging,
-  Lodgunit, Lodgrates,
+  Lodgunit, Lodgrates, Lodgprices,
   Lodglocn, Lodgtype, 
   Area, Waiver, Glcode, Tax,
   Pricelevel, Pmtterms

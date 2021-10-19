@@ -147,6 +147,17 @@ class Lodging extends Main {
 
     Module.pager.go(`/lodging/${code}/units`)
   }
+
+  rates(ev) {
+    let code = this.model.lodging.code;
+
+    Module.pager.go(`/lodging/${code}/rates`)
+  }
+
+  schedule(ev) {
+    console.log(ev)
+  }
+
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

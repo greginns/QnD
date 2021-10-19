@@ -34,12 +34,14 @@ services.lodging = new ModelService({model: models.Lodging});
 
 services.actdaily = new ModelService({model: models.Actdaily});
 services.actrates = new ModelService({model: models.Actrates});
+services.actprices = new ModelService({model: models.Actprices});
 services.actgroup = new ModelService({model: models.Actgroup});
 services.actres = new ModelService({model: models.Actres});
 services.actttot = new ModelService({model: models.Actttot});
 
 services.lodgunit = new ModelService({model: models.Lodgunit});
 services.lodgrates = new ModelService({model: models.Lodgrates});
+services.lodgprices = new ModelService({model: models.Lodgprices});
 services.lodglocn = new ModelService({model: models.Lodglocn});
 services.lodgtype = new ModelService({model: models.Lodgtype});
 
@@ -106,6 +108,31 @@ services.output = {
 
     return tm;
   },
+
+  test: async function(req) {
+    // main admin manage page.  Needs a user so won't get here without one
+    const tm = new TravelMessage();
+
+    try {
+      let ctx = {};
+      let tmpl = 'apps/items/modules/setup/test.html';
+
+      try {
+        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+        tm.type = 'html';
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+    }
+    catch(err) {
+      tm.status = 500;
+      tm.message = err.toString();
+    }
+
+    return tm;
+  },  
 };
 
 module.exports = services;

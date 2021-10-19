@@ -39,6 +39,30 @@ Router.add(new RouterMessage({
   }
 }));
 
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'modules',
+  version,
+  path: ['/test'], 
+  rewrite: true,
+  id: 'test',
+  level: ACCESS,
+  desc: 'Test Page',
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.output.test(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+      {basic: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+    ],
+  }
+}));
+
 // Query route
 Router.add(new RouterMessage({
   method: 'get',
@@ -74,12 +98,14 @@ new Routes({app, subapp: 'lodging', version, allowCORS: true, model: models.Lodg
 
 new Routes({app, subapp: 'actdaily', version, allowCORS: true, model: models.Actdaily, services: services.actdaily});
 new Routes({app, subapp: 'actrates', version, allowCORS: true, model: models.Actrates, services: services.actrates});
+new Routes({app, subapp: 'actprices', version, allowCORS: true, model: models.Actprices, services: services.actprices});
 new Routes({app, subapp: 'actgroup', version, allowCORS: true, model: models.Actgroup, services: services.actgroup});
 new Routes({app, subapp: 'actres', version, allowCORS: true, model: models.Actres, services: services.actres});
 new Routes({app, subapp: 'actttot', version, allowCORS: true, model: models.Actttot, services: services.actttot});
 
 new Routes({app, subapp: 'lodgunit', version, allowCORS: true, model: models.Lodgunit, services: services.lodgunit});
-new Routes({app, subapp: 'lodgrates', version, allowCORS: true, model: models.Actrates, services: services.lodgrates});
+new Routes({app, subapp: 'lodgrates', version, allowCORS: true, model: models.Lodgrates, services: services.lodgrates});
+new Routes({app, subapp: 'lodgprices', version, allowCORS: true, model: models.Lodgprices, services: services.lodgprices});
 new Routes({app, subapp: 'lodglocn', version, allowCORS: true, model: models.Lodglocn, services: services.lodglocn});
 new Routes({app, subapp: 'lodgtype', version, allowCORS: true, model: models.Lodgtype, services: services.lodgtype});
 

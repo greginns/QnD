@@ -11,15 +11,15 @@
 
 
 <style>
-  div#qndPages {
-    padding-top: 65px;
-  }
-
   .fieldset-legend {
     position: relative;
     top: -22px;
     background-color: white;
     margin-bottom: -15px;
+  }
+
+  div#qndPages {
+    padding-top: 130px;
   }
 
   @media (min-width: 575px) {
@@ -31,6 +31,9 @@
   @media (min-width: 768px) {
     div.bottom-spacer {
       padding-bottom: 60px;
+    }
+    div#qndPages {
+      padding-top: 65px;
     }
   }  
 
@@ -58,27 +61,40 @@
   <div class="container-fluid">
     <div id='qndPages'>
       {% include "./start.html" %}
+
       {% include "./activity.html" %}
-      {% include "./actgroup.html" %}
       {% include "./activity-daily.html" %}
+      {% include "./activity-rates.html" %}
+      {% include "./activity-rate.html" %}
+      {% include "./activity-prices.html" %}
+
+      {% include "./actgroup.html" %}
       {% include "./actres.html" %}
       {% include "./actttot.html" %}
+
       {% include "./lodging.html" %}
       {% include "./lodging-units.html" %}
+      {% include "./lodging-rates.html" %}
+      {% include "./lodging-rate.html" %}
+
       {% include "./lodglocn.html" %}
       {% include "./lodgtype.html" %}
+
       {% include "./area.html" %}
       {% include "./glcode.html" %}
       {% include "./tax.html" %}
       {% include "./waiver.html" %}
       {% include "./pricelevel.html" %}
       {% include "./pmtterms.html" %}
+
       {% include "./util-print.html" %}
       {% include "./util-import.html" %}
     </div>
   </div>
   
+  
   {% include "lib/client/widgets/modal.html" %}
+  {% include "lib/client/widgets/mdate.html" %}
   {% include "lib/client/widgets/mtime.html" %}
 
   {% include "apps/login/views/relogin.html" %}

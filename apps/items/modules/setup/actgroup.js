@@ -16,13 +16,10 @@ class Actgroup extends Setup {
     this.model.title = 'Activity Groups'
     this.model.actgroup = {};
     this.model.errors.actgroup = {};
-
-    this.model.actgroups = [];
   }
 
   async ready() {
     return new Promise(async function(resolve) {
-      Module.tableStores.actgroup.addView(new TableView({proxy: this.model.actgroups}));
       this.defaults = await Module.tableStores.actgroup.getDefault();   
 
       resolve();

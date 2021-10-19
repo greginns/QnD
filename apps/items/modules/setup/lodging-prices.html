@@ -1,0 +1,157 @@
+<page id='items-price-lodging' style='display: none;'>
+  <section id='items-price-lodging-section'>
+    {% include "./navbar-item.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6 col-md-4 col-lg-3'>
+                {{ fields.SelectMVC(id='month', mvc_value='month', mvc_each='months', valueField='value', textField='text', size='1', label='Month') }}
+              </div>  
+              <div class='col-6 col-md-2 col-lg-1'>
+                {{ fields.SelectMVC(id='year', mvc_value='year', mvc_each='years', valueField='value', textField='text', size='1', label='Year') }}
+              </div>
+              <div class='col-6 col-md-2'>
+                <button class='btn btn-primary' mvc-click='getPrices()'>
+                  Get Prices
+                </button>
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='table-responsive'>
+              <table class='table table-sm' id='actprices' style='min-width: 1000px'>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th mvc-text='pdesc[0]'></th>
+                    <th mvc-text='pdesc[1]'></th>
+                    <th mvc-text='pdesc[2]'></th>
+                    <th mvc-text='pdesc[3]'></th>
+                    <th mvc-text='pdesc[4]'></th>
+                    <th mvc-text='pdesc[5]'></th>
+                    <th mvc-text='pdesc[6]'></th>
+                  </tr>
+                </thead>
+
+                <tbody mvc-each='prices' class='edittable-source'>
+                  <tr data-edittable-index='$index' mvc-attrclass='{"bg-light": "prices[$index].weekend"}'>
+                    <th mvc-text='prices[$index].date'></th>
+                    <td>
+                      <span mvc-text='prices[$index].price0'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='prices[$index].price1'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='prices[$index].price2'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='prices[$index].price3'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='prices[$index].price4'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='prices[$index].price5'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='prices[$index].price6'></span>
+                    </td>
+                    <td>
+                      <span class='pointer' mvc-click='editTable.edit()'>
+                        <i class="fa-thin fa-pen"></i>
+                      </span>                        
+                    </td>
+                  </tr>
+                </tbody>
+
+                <tbody style='display: none' class='edittable-editor' data-edittable-dest='actprices'>
+                  <tr>
+                    <th>
+                      <span mvc-text='actprices.date'></span>
+                    </th>
+                    <td>
+                      <span mvc-show='pdesc[0]'>
+                        {{ fields.Char(id='actprices0', maxlength='10', mvc_value='actprices.price0', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                      </span>
+                    </td>
+                    <td>
+                      <span mvc-show='pdesc[1]'>
+                        {{ fields.Char(id='actprices1', maxlength='10', mvc_value='actprices.price1', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                      </span> 
+                    </td>
+                    <td>
+                      <span mvc-show='pdesc[2]'>
+                        {{ fields.Char(id='actprices2', maxlength='10', mvc_value='actprices.price2', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                      </span>
+                    </td>
+                    <td>
+                      <span mvc-show='pdesc[3]'>
+                        {{ fields.Char(id='actprices3', maxlength='10', mvc_value='actprices.price3', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                      </span>
+                    </td>
+                    <td>
+                      <span mvc-show='pdesc[4]'>
+                        {{ fields.Char(id='actprices4', maxlength='10', mvc_value='actprices.price4', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                      </span>
+                    </td>
+                    <td>
+                      <span mvc-show='pdesc[5]'>
+                        {{ fields.Char(id='actprices5', maxlength='10', mvc_value='actprices.price5', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                      </span>
+                    </td>
+                    <td>
+                      <span mvc-show='pdesc[6]'>
+                        {{ fields.Char(id='actprices6', maxlength='10', mvc_value='actprices.price6', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class='pointer' mvc-click='editTable.save()'>
+                        <i class="fa-light fa-floppy-disk"></i>
+                      </span>
+                      <span class='pointer' mvc-click='editTable.cancel()'>
+                        <i class="fa-light fa-xmark"></i>  
+                      </span>                        
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <span mvc-show='existingEntry'>
+                  <button class='btn btn-secondary' mvc-click='prices()'>
+                    Prices
+                  </button>
+                </span>
+                <button class='btn btn-primary' mvc-click='goBack()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>
