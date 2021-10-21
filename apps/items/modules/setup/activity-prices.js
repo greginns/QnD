@@ -40,6 +40,8 @@ class Actprices extends Setup {
     this.model.month = '';
     this.model.year = '';
     this.model.time = '';
+    this.model.times = [];
+
     this.hour = '0';
     this.minute = '0';
 
@@ -47,7 +49,17 @@ class Actprices extends Setup {
       fromdate: '2021-10-01',
       todate: '2021-10-31',
       time: '',
-      prices: [[1.49, 1.59]]
+      prices: [
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null]
+      ],
+      dowall: true,
+      dow: [true, true, true, true, true, true, true]
     };
 
     this.model.errors = {range: {}};
@@ -84,7 +96,7 @@ class Actprices extends Setup {
     this.actrates = await Module.tableStores.actrates.getOne([this.code, this.rateno]);
     this.pricelevel = await Module.tableStores.pricelevel.getOne(this.actrates.pricelevel);
 
-    this.model.title = this.activity.name + ' Rate ' + this.rateno;
+    this.model.title = this.activity.name + ', Rate ' + this.rateno;
 
     for (let i=1; i<=6; i++) {
       if (this.pricelevel['desc'+i]) pdesc[i-1] = this.pricelevel['desc'+i];
@@ -203,6 +215,38 @@ class Actprices extends Setup {
     return await Module.tableStores.actprices.getOne([act, rateno, yy, mm, hh, mins]);
   }
 
+  async getTimes() {
+    // get list of times for this act/rate
+    let times = [];
+    let yy = this.model.year;
+    let mm = this.model.month;
+
+    if (!yy || !mm) return;
+
+    let filters = {activity: this.code, rateno: this.rateno, year: yy, month: mm};
+    let res = await Module.data.actprices.getMany({filters});
+    
+    if (res.status == 200) {
+      for (let data of res.data) {
+        let text, value;
+
+        if (data.hour) {
+          value = data.hour + ':' + data.minute + ':00.000';
+          let dt = utils.datetime.pgTimeToDatetime(value);
+          text = dt.format('h:mm A');
+        }
+        else {
+          value = '';
+          text = 'No Time';
+        }
+
+        times.push({text, value});
+      }
+    }
+
+    this.model.times = times;
+  }
+
   async canClear(ev) {
     let data = this.model.actrates.toJSON();
     return super.canClear(ev, data);
@@ -234,7 +278,7 @@ class Actprices extends Setup {
     let lods = dt1.listOfDays(dt2);   // [[yr, mo, [days]], [yr, mo, [days]]]
 
     if (lods.length > 12) {
-      this.model.errors.range.todate = 'Too big of a date range';
+      this.model.errors.range.todate = 'Too long of a date range';
       return;
     }
 
@@ -255,14 +299,27 @@ class Actprices extends Setup {
       
       if (!existingEntry) {
         prices = this.createRangePrices(dsim);
-        this.updateRangePrices(prices);
+        this.updateRangePrices(prices, yy, mm, dds);
       }
       else {
         prices = res.prices;
         this.updateRangePrices(prices, yy, mm, dds);
       }
-
-      console.log(prices)
+  
+      let data = {activity: act, rateno: rateno, year: yy, month: mm, hour: hh, minute: mins, prices};
+  
+      data.prices = JSON.stringify(data.prices);
+  
+        // new (post) or old (put)?
+      res = (existingEntry) ? await Module.tableStores.actprices.update([data.activity, data.rateno, data.year, data.month, data.hour, data.minute], {prices: data.prices}) : await Module.tableStores.actprices.insert(data);
+  
+      if (res.status == 200) {
+        utils.modals.toast('Rate ' + data.rateno, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+     
+      }
+      else {
+        this.displayErrors(res);
+      }
     }
   }
 
@@ -277,14 +334,26 @@ class Actprices extends Setup {
   }
 
   updateRangePrices(prices, yy, mm, dds) {
-console.log(this.model.range.prices.toJSON())    
-    for (let dd of dds) {
+    let rangePrices = this.model.range.prices.toJSON();
+    let dows = this.model.range.dow;
+
+    for (let dd of dds) {   // for each day of the month
       let dt = utils.datetime.make([yy, mm, dd]);
       let dow = dt.dow();
-console.log(dd, dow)
-      for (let idx=0; idx<7; idx++) {
-        prices[dd-1][idx] = this.model.range.prices[idx, dow];
+
+      if (dows[dow]) {
+        for (let idx=0; idx<7; idx++) {   // for each price desc
+          prices[dd-1][idx] = (rangePrices[idx]) ? rangePrices[idx][dow] || null : null;
+        }
       }
+    }
+  }
+
+  dowallChanged() {
+    let dowall = this.model.range.dowall;
+
+    for(let i=0; i<7; i++) {
+      this.model.range.dow[i] = dowall;
     }
   }
 

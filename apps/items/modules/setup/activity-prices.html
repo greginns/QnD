@@ -37,6 +37,33 @@
                     </span>
                   </div>
                 </div>
+
+                <div class='row'>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-all', mvc_checked='range.dowall', label='All', mvc_on='{"change": "dowallChanged()"}') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-sun', mvc_checked='range.dow[0]', label='Sunday') }}
+                  </div>
+                  <div class='col'>  
+                    {{ fields.Boolean(id='range-mon', mvc_checked='range.dow[1]', label='Monday') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-tue', mvc_checked='range.dow[2]', label='Tuesday') }}
+                  </div>
+                  <div class='col'>                  
+                    {{ fields.Boolean(id='range-wed', mvc_checked='range.dow[3]', label='Wednesday') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-thu', mvc_checked='range.dow[4]', label='Thursday') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-fri', mvc_checked='range.dow[5]', label='Friday') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-sat', mvc_checked='range.dow[6]', label='Saturday') }}
+                  </div>
+                </div>
               </div>
               <div class='card-body'>
                 <div class='row'>
@@ -59,25 +86,25 @@
                           <tr mvc-show='pdesc[$index]'>
                             <th mvc-text='pdesc[$index]'></th>
                             <td>
-                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,0]', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='', mvc_on='{"change": "test()"}') }}
+                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,0]', label='', mvc_enabled='range.dow[0]', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='', mvc_on='{"change": "test()"}') }}
                             </td>
                             <td>
-                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,1]', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,1]', label='', mvc_enabled='range.dow[1]', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='', mvc_on='{"change": "test()"}') }}
                             </td>
                             <td>
-                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,2]', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,2]', label='', mvc_enabled='range.dow[2]', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='', mvc_on='{"change": "test()"}') }}
                             </td>
                             <td>
-                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,3]', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,3]', label='', mvc_enabled='range.dow[3]', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='', mvc_on='{"change": "test()"}') }}
                             </td>
                             <td>
-                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,4]', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,4]', label='', mvc_enabled='range.dow[4]', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='', mvc_on='{"change": "test()"}') }}
                             </td>
                             <td>
-                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,5]', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,5]', label='', mvc_enabled='range.dow[5]', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='', mvc_on='{"change": "test()"}') }}
                             </td>
                               <td>
-                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,6]', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                              {{ fields.Char(id='', maxlength='10', mvc_value='range.prices[$index,6]', label='', mvc_enabled='range.dow[6]', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='', mvc_on='{"change": "test()"}') }}
                             </td>
                           </tr>
                         </tbody>
@@ -108,18 +135,26 @@
             <div class='card'>
               <div class='card-header'>
                 <div class='row'>
-                  <div class='col-6 col-md-4 col-lg-3'>
+                  <div class='col-12 col-md-4 col-lg-2 mb-3'>
                     {{ fields.SelectMVC(id='month', mvc_value='month', mvc_each='months', valueField='value', textField='text', size='1', label='Month') }}
                   </div>  
-                  <div class='col-6 col-md-2 col-lg-1'>
+                  <div class='col-12 col-md-2 col-lg-1 mb-3'>
                     {{ fields.SelectMVC(id='year', mvc_value='year', mvc_each='years', valueField='value', textField='text', size='1', label='Year') }}
                   </div>
-                  <div class='col-6 col-md-2'>
+                  <div class='col-12 col-md-2 mb-3'>
                     {{ fields.Time(id='time', mvc_value='time', mvc_role='time', label='Time') }}
                   </div>
-                  <div class='col-6 col-md-2'>
+                  <div class='col-12 col-md-2 mb-3'>
                     <button class='btn btn-primary' mvc-click='getPrices()'>
                       Get Prices
+                    </button>
+                  </div>
+                  <div class='col-12 col-md-2 mb-3'>
+                    {{ fields.SelectMVC(id='times', mvc_value='time', mvc_each='times', valueField='value', textField='text', size='1', label='List of Times') }}
+                  </div>
+                  <div class='col-12 col-md-2 mb-3'>
+                    <button class='btn btn-secondary' mvc-click='getTimes()'>
+                      Get Pricing Times
                     </button>
                   </div>
                 </div>       

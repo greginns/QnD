@@ -3,17 +3,113 @@
   <head>
     <meta charset="utf-8">
     <script type="module">
-      import {App} from '/~static/project/app.js';
+      //import {App} from '/~static/project/app.js';
     </script>
-    <script type="module" src="/~static/apps/items/modules/setup/test.js"></script>
+    <!--script type="module" src="/~static/apps/items/modules/setup/test.js"></script-->
+      <style>
+.multiselect {
+  width: 200px;
+}
+
+.selectBox {
+  position: relative;
+}
+
+.selectBox select {
+  width: 100%;
+  font-weight: bold;
+}
+
+.overSelect {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+#checkboxes {
+  display: none;
+  border: 1px #dadada solid;
+}
+
+#checkboxes label {
+  display: block;
+}
+
+#checkboxes label:hover {
+  background-color: #1e90ff;
+}        
+      </style>
   </head>
   <body>
-    <section id='test'>
+    <form>
+      <div class="multiselect">
+        <div class="selectBox">
+          <select>
+            <option>Select an option</option>
+          </select>
+          <div class="overSelect"></div>
+        </div>
+
+        <div id="checkboxes" style='max-height: 100px; overflow-x: auto;'>
+          <label>
+            <input type="checkbox" />
+            First checkbox
+          </label>
+            
+          <label>
+            <input type="checkbox" />
+            Second checkbox
+          </label>
+
+          <label>
+            <input type="checkbox" />
+            Third checkbox
+          </label>
+
+          <label>
+            <input type="checkbox" />
+            Forth checkbox
+          </label>
+            
+          <label>
+            <input type="checkbox" />
+            Fifth checkbox
+          </label>
+
+          <label>
+            <input type="checkbox" />
+            Sixth checkbox
+          </label>          
+
+          <label>
+            <input type="checkbox" />
+            Seventh checkbox
+          </label>
+            
+          <label>
+            <input type="checkbox" />
+            Eighth checkbox
+          </label>
+
+          <label>
+            <input type="checkbox" />
+            Ninth checkbox
+          </label>          
+        </div>
+      </div>
+    </form>
+
+    <!--section id='test'>
       <table>
-        <tbody mvc-each='range.prices[0]'>
+        <tbody mvc-each='range.prices'>
           <tr>
             <td>
-              <input mvc-value='range.prices[0, $index]'>
+              <input mvc-value='range.prices[$index, 0]'>
+            </td>
+            <td>
+              <input mvc-value='range.prices[$index, 1]'>
             </td>
           </tr>
         </tbody>
@@ -22,7 +118,40 @@
         Show
       </button>
       <br>
-      <span mvc-text='range.prices[0,0]'></span-->
-    </section>
+      <span mvc-text='range.prices[0,0]'></span>
+      <br><br>
+      <select>
+        <option value='1'>
+          <input type='checkbox'>Option 1
+        </option>
+        <option value='2'>
+          <input type='checkbox'>Option 2
+        </option>
+      </select>
+    </section-->
+
+    <script>
+      let expanded = false;
+      const multiSelect = document.querySelector('.multiselect');
+      
+      multiSelect.addEventListener('click', function(e) {
+        const checkboxes = document.getElementById("checkboxes");
+          if (!expanded) {
+          checkboxes.style.display = "block";
+          expanded = true;
+        } else {
+          checkboxes.style.display = "none";
+          expanded = false;
+        }
+        e.stopPropagation();
+      }, true)
+      
+      document.addEventListener('click', function(e){
+        if (expanded) {
+          checkboxes.style.display = "none";
+          expanded = false;
+        }
+      }, false)
+    </script>    
   </body>
 </html>

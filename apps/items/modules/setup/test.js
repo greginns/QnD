@@ -7,7 +7,7 @@ class C extends MVC {
 
   createModel() {
     this.model.range = {
-      prices: [[45, 52]],
+      prices: [[45],[52],[]],
       names: {
         first: 'Greg'
       }

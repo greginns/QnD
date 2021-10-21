@@ -21,6 +21,7 @@ import '/~static/apps/items/modules/setup/lodging.js';
 import '/~static/apps/items/modules/setup/lodging-units.js';
 import '/~static/apps/items/modules/setup/lodging-rates.js';
 import '/~static/apps/items/modules/setup/lodging-rate.js';
+import '/~static/apps/items/modules/setup/lodging-prices.js';
 
 import '/~static/apps/items/modules/setup/lodglocn.js';
 import '/~static/apps/items/modules/setup/lodgtype.js';

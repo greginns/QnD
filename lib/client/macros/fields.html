@@ -1,3 +1,5 @@
+<!-- https://codepen.io/davidysoards/pen/QXYYYa multi-select -->
+
 {% macro Char(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') %}
 <div class="form-label-group">
   <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
@@ -89,11 +91,11 @@
 </div>
 {% endmacro %}
 
-{% macro Boolean(id='', mvc_checked='', label='', mvc_enabled='', mvc_disabled='') %}
+{% macro Boolean(id='', mvc_checked='', label='', mvc_enabled='', mvc_disabled='', mvc_on='') %}
 <div class='checkbox-container'>
   <label class="checkbox-label label-color">
     {{label}}
-    <input type="checkbox" mvc-checked="{{mvc_checked}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}'>
+    <input type="checkbox" mvc-checked="{{mvc_checked}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' mvc-on='{{mvc_on}}'>
     <span class="checkmark"></span>
   </label>
 </div>

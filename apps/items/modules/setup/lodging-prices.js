@@ -16,7 +16,7 @@ class Lodgprices extends Setup {
     this.model.catname = 'lodgprices';
     this.model.itemType = 'Rate'
     this.model.lodging = {};
-    this.model.actrates = {};
+    this.model.lodgrates = {};
     this.model.pricelevel = {};
     this.model.lodgprices = {};
     this.model.years = [];
@@ -39,9 +39,24 @@ class Lodgprices extends Setup {
     this.model.pdesc = [];
     this.model.month = '';
     this.model.year = '';
-    this.model.time = '';
-    this.hour = '0';
-    this.minute = '0';
+
+    this.model.range = {
+      fromdate: '2021-10-01',
+      todate: '2021-10-31',
+      prices: [
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null]
+      ],
+      dowall: true,
+      dow: [true, true, true, true, true, true, true]
+    };
+
+    this.model.errors = {range: {}};
 
     this.model.existingEntry = false;
   }
@@ -72,10 +87,10 @@ class Lodgprices extends Setup {
     this.code = params.code;
     this.rateno = params.rateno || '';
     this.lodging = await Module.tableStores.lodging.getOne(this.code);
-    this.actrates = await Module.tableStores.actrates.getOne([this.code, this.rateno]);
-    this.pricelevel = await Module.tableStores.pricelevel.getOne(this.actrates.pricelevel);
+    this.lodgrates = await Module.tableStores.lodgrates.getOne([this.code, this.rateno]);
+    this.pricelevel = await Module.tableStores.pricelevel.getOne(this.lodgrates.pricelevel);
 
-    this.model.title = this.lodging.name + ' Rate ' + this.rateno;
+    this.model.title = this.lodging.name + ', Rate ' + this.rateno;
 
     for (let i=1; i<=6; i++) {
       if (this.pricelevel['desc'+i]) pdesc[i-1] = this.pricelevel['desc'+i];
@@ -104,7 +119,7 @@ class Lodgprices extends Setup {
 
     let lodgprices = this.model.lodgprices.toJSON();
     let prices = this.model.prices;
-    let data = {lodging: this.lodging.code, rateno: this.actrates.rateno, year: this.model.year, month: this.model.month, prices: []};
+    let data = {lodging: this.lodging.code, rateno: this.lodgrates.rateno, year: this.model.year, month: this.model.month, prices: []};
 
     prices[lodgprices.dayno] = lodgprices;
 
@@ -117,7 +132,7 @@ class Lodgprices extends Setup {
     //let spinner = this.startSpinner(ev);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.lodgprices.update([data.lodging, data.rateno, data.year, data.month, data.hour, data.minute], {prices: data.prices}) : await Module.tableStores.lodgprices.insert(data);
+    let res = (this.model.existingEntry) ? await Module.tableStores.lodgprices.update([data.lodging, data.rateno, data.year, data.month], {prices: data.prices}) : await Module.tableStores.lodgprices.insert(data);
 
     if (res.status == 200) {
       utils.modals.toast('Rate ' + data.rateno, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
@@ -138,7 +153,7 @@ class Lodgprices extends Setup {
     let dsim = dt.getDaysInMonth();
     let prices = [];
 
-    let record = await this.getLodgprices();
+    let record = await this.getlodgprices();
 
     if (Object.keys(record).length == 0) {
       // new record
@@ -165,20 +180,121 @@ class Lodgprices extends Setup {
     this.model.prices = prices;
   }
 
-  async getLodgprices() {
+  async getlodgprices() {
     let act = this.lodging.code;
-    let rateno = this.actrates.rateno;
+    let rateno = this.lodgrates.rateno;
     let yy = this.model.year;
     let mm = this.model.month;
-    let hh = this.hour;
-    let mins = this.minute;
 
-    return await Module.tableStores.lodgprices.getOne([act, rateno, yy, mm, hh, mins]);
+    return await Module.tableStores.lodgprices.getOne([act, rateno, yy, mm]);
   }
 
   async canClear(ev) {
-    let data = this.model.actrates.toJSON();
+    let data = this.model.lodgrates.toJSON();
     return super.canClear(ev, data);
+  }
+
+  async saveRange(obj) {
+    this.model.errors.range = {};
+
+    let range =  this.model.range.toJSON();
+
+    if (!range.fromdate) {
+      this.model.errors.range.fromdate = 'Required';
+      return;
+    }
+
+    if (!range.todate) {
+      this.model.errors.range.todate = 'Required';
+      return;
+    }
+
+    let dt1 = utils.datetime.pgDateToDatetime(this.model.range.fromdate);
+    let dt2 = utils.datetime.pgDateToDatetime(this.model.range.todate);
+
+    if (!dt1.isBefore(dt2)) {
+      this.model.errors.range.todate = 'Must be after From Date';
+      return;
+    }
+
+    let lods = dt1.listOfDays(dt2);   // [[yr, mo, [days]], [yr, mo, [days]]]
+
+    if (lods.length > 12) {
+      this.model.errors.range.todate = 'Too long of a date range';
+      return;
+    }
+
+    let act = this.lodging.code;
+    let rateno = this.lodgrates.rateno;
+
+    for (let entry of lods) {
+      let yy = entry[0], mm = entry[1], dds = entry[2];
+      let dt = utils.datetime.make([yy, mm]);
+      let dsim = dt.getDaysInMonth();
+
+      let res = await Module.tableStores.lodgprices.getOne([act, rateno, yy, mm]);
+      let existingEntry = Object.keys(res).length > 0;
+
+      let prices;
+      
+      if (!existingEntry) {
+        prices = this.createRangePrices(dsim);
+        this.updateRangePrices(prices, yy, mm, dds);
+      }
+      else {
+        prices = res.prices;
+        this.updateRangePrices(prices, yy, mm, dds);
+      }
+  
+      let data = {lodging: act, rateno: rateno, year: yy, month: mm};
+  
+      data.prices = JSON.stringify(data.prices);
+  
+        // new (post) or old (put)?
+      res = (existingEntry) ? await Module.tableStores.lodgprices.update([data.lodging, data.rateno, data.year, data.month], {prices: data.prices}) : await Module.tableStores.lodgprices.insert(data);
+  
+      if (res.status == 200) {
+        utils.modals.toast('Rate ' + data.rateno, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+     
+      }
+      else {
+        this.displayErrors(res);
+      }
+    }
+  }
+
+  createRangePrices(dsim) {
+    let prices = [];
+
+    for (let i=0; i<dsim; i++) {
+      prices.push([null, null, null, null, null, null, null]);
+    }
+
+    return prices;
+  }
+
+  updateRangePrices(prices, yy, mm, dds) {
+    let rangePrices = this.model.range.prices.toJSON();
+    let dows = this.model.range.dow;
+
+    for (let dd of dds) {   // for each day of the month
+      let dt = utils.datetime.make([yy, mm, dd]);
+      let dow = dt.dow();
+
+      if (dows[dow]) {
+        for (let idx=0; idx<7; idx++) {   // for each price desc
+          prices[dd-1][idx] = (rangePrices[idx]) ? rangePrices[idx][dow] || null : null;
+        }
+      }
+    }
+  }
+
+  dowallChanged() {
+    let dowall = this.model.range.dowall;
+
+    for(let i=0; i<7; i++) {
+      this.model.range.dow[i] = dowall;
+    }
   }
 
   goBack() {
