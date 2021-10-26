@@ -345,6 +345,38 @@ const Actprices = class extends Prices {
   }
 };
 
+const Actsched = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        activity: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
+        year: new Fields.Integer({notNull: true, maxLength: 4, verbose: 'Year'}),
+        month: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Month'}),
+        sched: new Fields.Jsonb({null: true, array: 1, verbose: 'Schedule'}) 
+      },
+      
+      constraints: {
+        pk: ['activity', 'year', 'month'],
+        fk: [
+          {name: 'activity', columns: ['activity'], app, table: Activity, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['activity', 'year', 'month'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Schedule'
+    }
+  }
+};
+
 const Actgroup = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -914,7 +946,7 @@ const Pmtterms = class extends Model {
 
 module.exports = {
   Activity, 
-  Actdaily, Actrates, Actprices,
+  Actdaily, Actrates, Actprices, Actsched,
   Actgroup, Actres, Actttot, 
   Lodging,
   Lodgunit, Lodgrates, Lodgprices,

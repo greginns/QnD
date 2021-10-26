@@ -1,0 +1,220 @@
+<page id='items-sched-activity' style='display: none;'>
+  <section id='items-sched-activity-section'>
+    {% include "./navbar-item.html" %}
+
+    <nav>
+      <div class="nav nav-tabs" role="tablist">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#nav-actsched-range" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
+          Schedule by Date Range
+        </button>
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#nav-actsched-month" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">
+          Schedule by Day
+        </button>
+      </div>
+    </nav>
+
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="nav-actsched-range" role="tabpanel">
+        <br>
+
+        <div class='row'>
+          <div class='col-12'>
+            <div class='card'>
+              <div class='card-header'>
+                <div class='row'>
+                  <div class='col-6 col-md-3 col-lg-2'>
+                    {{ fields.Date(id='range-fromdate', mvc_value='range.fromdate', mvc_role='date', label='From Date') }}
+                  </div>
+                  <div class='col-6 col-md-3 col-lg-2'>
+                    {{ fields.Date(id='range-todate', mvc_value='range.todate', mvc_role='date', label='To Date') }}
+                  </div>
+                </div>
+
+                <div class='row'>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-all', mvc_checked='range.dowall', label='All', mvc_on='{"change": "dowallChanged()"}') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-sun', mvc_checked='range.dow[0]', label='Sunday') }}
+                  </div>
+                  <div class='col'>  
+                    {{ fields.Boolean(id='range-mon', mvc_checked='range.dow[1]', label='Monday') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-tue', mvc_checked='range.dow[2]', label='Tuesday') }}
+                  </div>
+                  <div class='col'>                  
+                    {{ fields.Boolean(id='range-wed', mvc_checked='range.dow[3]', label='Wednesday') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-thu', mvc_checked='range.dow[4]', label='Thursday') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-fri', mvc_checked='range.dow[5]', label='Friday') }}
+                  </div>
+                  <div class='col'>
+                    {{ fields.Boolean(id='range-sat', mvc_checked='range.dow[6]', label='Saturday') }}
+                  </div>
+                </div>
+
+              </div>
+              <div class='card-body'>
+                <div class='row'>
+                  <div class='col-6 col-md-2 mb-3'>
+                    {{ fields.Time(id='range-time', mvc_value='range.time', mvc_role='time', label='Time') }}
+                  </div>
+                  <div class='col-6 col-md-2 mb-3'>
+                    {{ fields.Integer(id='range-limit', min=0, max=9999, step=1, mvc_value='range.limit', label='Limit') }}
+                  </div>
+                </div>
+
+                <div class='row'>
+                  <div class='col-6 col-md-2'>
+                    {{ fields.SelectMVC(id='range-boo', mvc_value='range.boo', mvc_each='bowo', size='1', label='Booking Order - Office') }}
+                  </div>
+                  <div class='col-6 col-md-2'>
+                    {{ fields.SelectMVC(id='range-bow', mvc_value='range.bow', mvc_each='bowo', size='1', label='Booking Order - Online') }}
+                  </div>
+                </div>
+              </div>
+
+              <div class='card-footer'>
+                <div class='row'>
+                  <div class='col-6 col-md-1'>
+                    <button class='btn btn-success' mvc-click='saveRange()'>
+                      Create
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="nav-actsched-month" role="tabpanel">
+        <br>
+
+        <div class='row'>
+          <div class='col-12'>
+            <div class='card'>
+              <div class='card-header'>
+                <div class='row'>
+                  <div class='col-12 col-md-4 col-lg-2 mb-3'>
+                    {{ fields.SelectMVC(id='month', mvc_value='month', mvc_each='months', valueField='value', textField='text', size='1', label='Month') }}
+                  </div>  
+                  <div class='col-12 col-md-2 col-lg-1 mb-3'>
+                    {{ fields.SelectMVC(id='year', mvc_value='year', mvc_each='years', valueField='value', textField='text', size='1', label='Year') }}
+                  </div>
+                  <div class='col-12 col-md-2 mb-3'>
+                    <button class='btn btn-primary' mvc-click='getScheds()'>
+                      Get Schedule
+                    </button>
+                  </div>
+                </div>       
+              </div>   
+    
+              <div class='card-body'>
+                <div class='table-responsive'>
+                  <table class='table table-sm' id='actsched' style='min-width: 1000px'>
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Time</th>
+                        <th>Limit</th>
+                        <th>Order-Office</th>
+                        <th>Order-Online</th>
+                      </tr>
+                    </thead>
+    
+                    <tbody mvc-each='scheds' class='edittable-source'>
+                      <tr data-edittable-index='$index' mvc-attrclass='{"bg-light": "scheds[$index].weekend"}'>
+                        <th mvc-text='scheds[$index].date'></th>
+                        <td>
+                          <span mvc-text='scheds[$index].time' mvc-filter='time'></span>
+                        </td>
+                        <td>
+                          <span mvc-text='scheds[$index].limit'></span>
+                        </td>
+                        <td>
+                          <span mvc-text='scheds[$index].boo'></span>
+                        </td>
+                        <td>
+                          <span mvc-text='scheds[$index].bow'></span>
+                        </td>
+                        <td>
+                          <span class='pointer' mvc-click='editTable.edit()'>
+                            <i class="fa-thin fa-pen"></i>
+                          </span>                        
+                        </td>
+                      </tr>
+                    </tbody>
+    
+                    <tbody style='display: none' class='edittable-editor' data-edittable-dest='actsched'>
+                      <tr>
+                        <th>
+                          <span mvc-text='actsched.date'></span>
+                        </th>
+                        <td>
+                          <span>
+                            {{ fields.Time(id='actsched-time', maxlength='10', mvc_value='actsched.time', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_role='time', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                          </span>
+                        </td>
+                        <td>
+                          <span>
+                            {{ fields.Integer(id='actsched-limit', min=0, max=9999, step = 1, mvc_value='actsched.limit', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                          </span> 
+                        </td>
+                        <td>
+                          <span>
+                            {{ fields.SelectMVC(id='actsched-boo', size='1', mvc_value='actsched.boo', label='', mvc_each='bowo', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                          </span>
+                        </td>
+                        <td>
+                          <span>
+                            {{ fields.SelectMVC(id='actsched-bow', size='1', mvc_value='actsched.bow', label='', mvc_each='bowo', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                          </span>
+                        </td>
+                        <td>
+                          <span class='pointer' mvc-click='editTable.save()'>
+                            <i class="fa-light fa-floppy-disk"></i>
+                          </span>
+                          <span class='pointer' mvc-click='editTable.cancel()'>
+                            <i class="fa-light fa-xmark"></i>  
+                          </span>                        
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+    
+              <div class='card-footer'>
+                <div class='row' mvc-show='badMessage'>
+                  <div class='col-12'>
+                    <div class="alert alert-danger" role="alert">
+                      <span mvc-text='badMessage'></span>  
+                    </div>
+                  </div>
+                </div>         
+    
+                <div class='row'>
+                  <div class='col-12'>
+                    <button class='btn btn-primary' mvc-click='goBack()'>
+                      Exit
+                    </button>
+                  </div>
+                </div>
+    
+              </div>
+            </div>
+          </div>
+    
+        </div>
+    
+      </div>
+    </div>
+  
+
+  </section>
+</page>

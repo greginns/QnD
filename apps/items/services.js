@@ -35,6 +35,7 @@ services.lodging = new ModelService({model: models.Lodging});
 services.actdaily = new ModelService({model: models.Actdaily});
 services.actrates = new ModelService({model: models.Actrates});
 services.actprices = new ModelService({model: models.Actprices});
+services.actsched = new ModelService({model: models.Actsched});
 services.actgroup = new ModelService({model: models.Actgroup});
 services.actres = new ModelService({model: models.Actres});
 services.actttot = new ModelService({model: models.Actttot});

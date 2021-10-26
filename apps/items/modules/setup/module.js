@@ -12,6 +12,7 @@ import '/~static/apps/items/modules/setup/activity-daily.js';
 import '/~static/apps/items/modules/setup/activity-rates.js';
 import '/~static/apps/items/modules/setup/activity-rate.js';
 import '/~static/apps/items/modules/setup/activity-prices.js';
+import '/~static/apps/items/modules/setup/activity-sched.js';
 
 import '/~static/apps/items/modules/setup/actgroup.js';
 import '/~static/apps/items/modules/setup/actres.js';
@@ -46,6 +47,7 @@ let moduleStart = function() {
     Module.data.actdaily = new TableAccess({modelName: 'actdaily', url: `/items/v1/actdaily`});
     Module.data.actrates = new TableAccess({modelName: 'actrates', url: `/items/v1/actrates`});
     Module.data.actprices = new TableAccess({modelName: 'actprices', url: `/items/v1/actprices`});
+    Module.data.actsched = new TableAccess({modelName: 'actsched', url: `/items/v1/actsched`});
     Module.data.actgroup = new TableAccess({modelName: 'actgroup', url: `/items/v1/actgroup`});
     Module.data.actres = new TableAccess({modelName: 'actres', url: `/items/v1/actres`});
     Module.data.actttot = new TableAccess({modelName: 'actttot', url: `/items/v1/actttot`});
@@ -101,6 +103,13 @@ let moduleStart = function() {
     itemData.addModel(model);                          
 
     Module.tableStores.actprices = new TableStore({accessor: Module.data.actprices, model, safemode});  // setup a table store in Module so all pages can access
+
+    // Actsched
+    model = `/items/actsched`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.actsched = new TableStore({accessor: Module.data.actsched, model, safemode});  // setup a table store in Module so all pages can access
 
     // Actgroup
     model = `/items/actgroup`;               

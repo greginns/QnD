@@ -147,7 +147,7 @@ class Activity extends Main {
   }
 
   schedule(ev) {
-    console.log(ev)
+    Module.pager.go(`/activity/${this.model.activity.code}/sched`)
   }
 }
 

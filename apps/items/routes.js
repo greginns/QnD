@@ -99,6 +99,7 @@ new Routes({app, subapp: 'lodging', version, allowCORS: true, model: models.Lodg
 new Routes({app, subapp: 'actdaily', version, allowCORS: true, model: models.Actdaily, services: services.actdaily});
 new Routes({app, subapp: 'actrates', version, allowCORS: true, model: models.Actrates, services: services.actrates});
 new Routes({app, subapp: 'actprices', version, allowCORS: true, model: models.Actprices, services: services.actprices});
+new Routes({app, subapp: 'actsched', version, allowCORS: true, model: models.Actsched, services: services.actsched});
 new Routes({app, subapp: 'actgroup', version, allowCORS: true, model: models.Actgroup, services: services.actgroup});
 new Routes({app, subapp: 'actres', version, allowCORS: true, model: models.Actres, services: services.actres});
 new Routes({app, subapp: 'actttot', version, allowCORS: true, model: models.Actttot, services: services.actttot});

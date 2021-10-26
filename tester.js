@@ -1,4 +1,10 @@
 const root = process.cwd();
-const models = require(root + '/apps/items/models.js');
+const {exec} = require(root + '/lib/server/utils/db.js');
 
-console.log(models.Actrates.definition().constraints)
+(async function() {
+  let sql = "SELECT * FROM information_schema.columns WHERE table_schema = 'gm' AND table_name = 'documents_Docsetup'";
+
+  let res = await exec('qnd',sql)
+
+  console.log(res)
+})()
