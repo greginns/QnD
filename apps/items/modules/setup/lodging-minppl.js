@@ -5,7 +5,7 @@ import {Edittable} from '/~static/lib/client/core/tables.js';
 import {Datetime} from '/~static/lib/client/core/datetime.js';
 import {Setup} from '/~static/apps/items/modules/setup/baseclasses.js';
 
-class Lodgprices extends Setup {
+class Lodgminppl extends Setup {
   constructor(element) {
     super(element);
   }
@@ -13,12 +13,10 @@ class Lodgprices extends Setup {
   createModel() {
     super.createModel();
 
-    this.model.catname = 'lodgprices';
+    this.model.catname = 'lodgminppl';
     this.model.itemType = 'Rate'
     this.model.lodging = {};
-    this.model.lodgrates = {};
-    this.model.pricelevel = {};
-    this.model.lodgprices = {};
+    this.model.lodgminppl = {};
     this.model.years = [];
     this.model.months = [
       {value: '1', text: 'January'},
@@ -35,23 +33,13 @@ class Lodgprices extends Setup {
       {value: '12', text: 'December'},
     ];
 
-    this.model.prices = [];
-    this.model.pdesc = [];
     this.model.month = '';
     this.model.year = '';
 
     this.model.range = {
       fromdate: '2021-10-01',
       todate: '2021-10-31',
-      prices: [
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null]
-      ],
+      minppl: 0,
       dowall: true,
       dow: [true, true, true, true, true, true, true]
     };
@@ -75,30 +63,18 @@ class Lodgprices extends Setup {
       this.model.year = yr;
       this.model.month = dt.getMonth()+1;
 
-      this.editTable = new Edittable('#lodgprices', this, this.saver)
+      this.editTable = new Edittable('#lodgminppl', this, this.saver)
 
       resolve();
     }.bind(this));
   }
   
   async inView(params) {
-    let pdesc = ['','','','','','',''];
-
     this.code = params.code;
-    this.rateno = params.rateno || '';
+    this.rateno = params.rateno;
     this.lodging = await Module.tableStores.lodging.getOne(this.code);
-    this.lodgrates = await Module.tableStores.lodgrates.getOne([this.code, this.rateno]);
-    this.pricelevel = await Module.tableStores.pricelevel.getOne(this.lodgrates.pricelevel);
 
     this.model.title = this.lodging.name + ', Rate ' + this.rateno;
-
-    for (let i=1; i<=6; i++) {
-      if (this.pricelevel['desc'+i]) pdesc[i-1] = this.pricelevel['desc'+i];
-    }
-
-    if (this.pricelevel.addl) pdesc[6] = this.pricelevel.addl;
-
-    this.model.pdesc = pdesc;
   }
 
   outView() {
@@ -107,35 +83,31 @@ class Lodgprices extends Setup {
 
   async saver() {
     // called from editTable
+
     return await this.save();
   }
 
   async save(ev) {
-    // prices has our array of prices
-    // lodgprices is the entry just edited
-    const nullify = function(val) {
-      return (val == '') ? null : val;
-    }
+    // minppls has our array of minppls
+    // one entry per day/time.  Need to repack into [[day1], [day2]], where each day can have x times
+    // lodgminppl is the entry just edited
+    let lodgminppl = this.model.lodgminppl.toJSON();
+    let minppl = this.model.minppls.toJSON();
 
-    let lodgprices = this.model.lodgprices.toJSON();
-    let prices = this.model.prices;
-    let data = {lodging: this.lodging.code, rateno: this.lodgrates.rateno, year: this.model.year, month: this.model.month, prices: []};
+    // update the one being edited
+    minppl[lodgminppl.dayno] = {minppl: lodgminppl.minppl};
 
-    prices[lodgprices.dayno] = lodgprices;
+    minppl = JSON.stringify(minppl);
 
-    for (let entry of prices) {
-      data.prices.push([nullify(entry.price0), nullify(entry.price1), nullify(entry.price2), nullify(entry.price3), nullify(entry.price4), nullify(entry.price5), nullify(entry.price6)]);
-    }
+    let data = {lodging: this.lodging.code, rateno: this.rateno, year: this.model.year, month: this.model.month, minppl};
 
-    data.prices = JSON.stringify(data.prices);
-    
     //let spinner = this.startSpinner(ev);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.lodgprices.update([data.lodging, data.rateno, data.year, data.month], {prices: data.prices}) : await Module.tableStores.lodgprices.insert(data);
+    let res = (this.model.existingEntry) ? await Module.tableStores.lodgminp.update([data.lodging, data.rateno, data.year, data.month], {minppl: data.minppl}) : await Module.tableStores.lodgminp.insert(data);
 
     if (res.status == 200) {
-      utils.modals.toast('Rate ' + data.rateno, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+      utils.modals.toast('Minimum', ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
    
     }
     else {
@@ -144,16 +116,17 @@ class Lodgprices extends Setup {
     
     //this.stopSpinner(ev, spinner); 
     
-    this.getPrices();
+    this.getMinppls();
     return true;
   }
 
-  async getPrices() {
+  async getMinppls() {
+    // need a one level array, so [[{time1, time2}], [day2]]
     let dt = new Datetime([this.model.year, this.model.month, 1]);
     let dsim = dt.getDaysInMonth();
-    let prices = [];
+    let minppls = [];
 
-    let record = await this.getlodgprices();
+    let record = await this.getMinppl();
 
     if (Object.keys(record).length == 0) {
       // new record
@@ -163,34 +136,35 @@ class Lodgprices extends Setup {
         let dt2 = (new Datetime(dt)).add(d, 'day');
         let dow = dt2.day();
 
-        prices.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), price0: null, price1: null, price2: null, price3: null, price4: null, price5: null, price6: null, price7: null});
+        minppls.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), minppl: 0});
       }
     }
     else {
       this.model.existingEntry = true;
 
-      for (let d=0; d<dsim; d++) {
+      for (let d=0; d<dsim; d++) {    // for each day
         let dt2 = (new Datetime(dt)).add(d, 'day');
         let dow = dt2.day();
+        let rec = record.minppl[d];
 
-        prices.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), price0: record.prices[d][0], price1: record.prices[d][1], price2: record.prices[d][2], price3: record.prices[d][3], price4: record.prices[d][4], price5: record.prices[d][5], price6: record.prices[d][6], price7: record.prices[d][7]});        
+        minppls.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), minppl: rec.minppl});
       }
     }
 
-    this.model.prices = prices;
+    this.model.minppls = minppls;
   }
 
-  async getlodgprices() {
-    let act = this.lodging.code;
-    let rateno = this.lodgrates.rateno;
+  async getMinppl() {
+    let lodge = this.lodging.code;
+    let rateno = this.rateno;
     let yy = this.model.year;
     let mm = this.model.month;
 
-    return await Module.tableStores.lodgprices.getOne([act, rateno, yy, mm]);
+    return await Module.tableStores.lodgminp.getOne([lodge, rateno, yy, mm]);
   }
 
   async canClear(ev) {
-    let data = this.model.lodgrates.toJSON();
+    let data = this.model.lodgminppl.toJSON();
     return super.canClear(ev, data);
   }
 
@@ -224,37 +198,37 @@ class Lodgprices extends Setup {
       return;
     }
 
-    let act = this.lodging.code;
-    let rateno = this.lodgrates.rateno;
+    let lodge = this.lodging.code;
+    let rateno = this.rateno;
 
     for (let entry of lods) {
       let yy = entry[0], mm = entry[1], dds = entry[2];
       let dt = utils.datetime.make([yy, mm]);
       let dsim = dt.getDaysInMonth();
 
-      let res = await Module.tableStores.lodgprices.getOne([act, rateno, yy, mm]);
+      let res = await Module.tableStores.lodgminp.getOne([lodge, rateno, yy, mm]);
       let existingEntry = Object.keys(res).length > 0;
 
-      let prices;
+      let minppl;
       
       if (!existingEntry) {
-        prices = this.createRangePrices(dsim);
-        this.updateRangePrices(prices, yy, mm, dds);
+        minppl = this.createRangeMinppl(dsim);
+        this.updateRangeMinppl(minppl, yy, mm, dds);
       }
       else {
-        prices = res.prices;
-        this.updateRangePrices(prices, yy, mm, dds);
+        minppl = res.minppl;
+        this.updateRangeMinppl(minppl, yy, mm, dds);
       }
 
-      prices = JSON.stringify(prices);
-
-      let data = {lodging: act, rateno: rateno, year: yy, month: mm};
+      minppl = JSON.stringify(minppl);
+  
+      let data = {lodging: lodge, rateno, year: yy, month: mm, minppl};
   
       // new (post) or old (put)?
-      res = (existingEntry) ? await Module.tableStores.lodgprices.update([data.lodging, data.rateno, data.year, data.month], {prices: data.prices}) : await Module.tableStores.lodgprices.insert(data);
+      res = (existingEntry) ? await Module.tableStores.lodgminp.update([data.lodging, data.rateno, data.year, data.month], {minppl: data.minppl}) : await Module.tableStores.lodgminp.insert(data);
   
       if (res.status == 200) {
-        utils.modals.toast('Rate ' + data.rateno, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+        utils.modals.toast('Minimum', ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
      
       }
       else {
@@ -263,28 +237,27 @@ class Lodgprices extends Setup {
     }
   }
 
-  createRangePrices(dsim) {
-    let prices = [];
+  createRangeMinppl(dsim) {
+    let minppl = [];
 
     for (let i=0; i<dsim; i++) {
-      prices.push([null, null, null, null, null, null, null]);
+      minppl.push({minppl: 0});
     }
 
-    return prices;
+    return minppl;
   }
 
-  updateRangePrices(prices, yy, mm, dds) {
-    let rangePrices = this.model.range.prices.toJSON();
-    let dows = this.model.range.dow;
+  updateRangeMinppl(minppl, yy, mm, dds) {
+    // minppl has one entry per date.  
+    let range =  this.model.range.toJSON();
+    let dows = range.dow;
 
     for (let dd of dds) {   // for each day of the month
       let dt = utils.datetime.make([yy, mm, dd]);
       let dow = dt.dow();
 
       if (dows[dow]) {
-        for (let idx=0; idx<7; idx++) {   // for each price desc
-          prices[dd-1][idx] = (rangePrices[idx]) ? rangePrices[idx][dow] || null : null;
-        }
+        minppl[dd-1] = {minppl: range.minppl};
       }
     }
   }
@@ -297,15 +270,19 @@ class Lodgprices extends Setup {
     }
   }
 
+  test(ev) {
+    console.log(this.model.range.toJSON())
+  }
+
   goBack() {
     Module.pager.go(`/lodging/${this.code}/rate/${this.rateno}`);
   }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('items-price-lodging');   // page html
-let setup1 = new Lodgprices('items-price-lodging-section');
+let el1 = document.getElementById('items-minppl-lodging');   // page html
+let setup1 = new Lodgminppl('items-minppl-lodging-section');
 let section1 = new Section({mvc: setup1});
-let page1 = new Page({el: el1, path: ['/lodging/:code/rate/:rateno/prices'], title: 'Lodging Prices', sections: [section1]});
+let page1 = new Page({el: el1, path: ['/lodging/:code/rate/:rateno/minppl'], title: 'Lodging Minimum People', sections: [section1]});
 
 Module.pages.push(page1);

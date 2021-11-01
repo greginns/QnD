@@ -81,7 +81,43 @@
             </table>
           </div>
         </div>
-      </div>              
+      </div>    
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Meals
+                <span class="badge rounded-pill bg-secondary" mvc-text='meals.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("meals")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("meals","code")'>Code</th>
+                  <th mvc-click='sortItems("meals","name")'>Name</th>
+                  <th mvc-click='sortItems("meals","group")'>Location</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='meals'>
+                <tr mvc-click='editItem("meals", "$index")'>
+                  <td mvc-text='meals[$index].code'></td>
+                  <td mvc-text='meals[$index].name'></td>
+                  <td mvc-text='meals[$index].meallocn'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>                
     </div>
 
     <div class='row'>
@@ -251,6 +287,76 @@
                 <tr mvc-click='editItem("lodgtype", "$index")'>
                   <td mvc-text='lodgtype[$index].code'></td>
                   <td mvc-text='lodgtype[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class='row'>
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Meal Locations
+                <span class="badge rounded-pill bg-secondary" mvc-text='meallocn.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("meallocn")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("meallocn","code")'>Code</th>
+                  <th mvc-click='sortItems("meallocn","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='meallocn'>
+                <tr mvc-click='editItem("meallocn", "$index")'>
+                  <td mvc-text='meallocn[$index].code'></td>
+                  <td mvc-text='meallocn[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Meal Types
+                <span class="badge rounded-pill bg-secondary" mvc-text='mealtype.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("mealtype")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("mealtype","code")'>Code</th>
+                  <th mvc-click='sortItems("mealtype","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='mealtype'>
+                <tr mvc-click='editItem("mealtype", "$index")'>
+                  <td mvc-text='mealtype[$index].code'></td>
+                  <td mvc-text='mealtype[$index].name'></td>
                 </tr>
               </tbody>
             </table>

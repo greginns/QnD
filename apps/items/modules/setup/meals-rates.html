@@ -1,0 +1,49 @@
+<page id='items-rates-meals' style='display: none;'>
+  <section id='items-rates-meals-section'>
+    {% include "./navbar-item.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                <span mvc-text='meals.name'></span>
+                Rates
+                <span class="badge rounded-pill bg-secondary" mvc-text='mealrates.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem()'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("code")'>Rate#</th>
+                  <th mvc-click='sortItems("name")'>Name</th>
+                  <th mvc-click='sortItems("active")'>Active</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='mealrates'>
+                <tr>
+                  <td mvc-click='editItem("$index")' mvc-text='mealrates[$index].rateno'></td>
+                  <td mvc-click='editItem("$index")' mvc-text='mealrates[$index].name'></td>
+                  <td mvc-click='editItem("$index")' mvc-text='mealrates[$index].active'></td>
+                  <td mvc-click='toPrices($index)' class='pointer'>
+                    Prices
+                    <i class="fa-solid fa-right-long"></i>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</page>

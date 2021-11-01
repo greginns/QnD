@@ -35,7 +35,15 @@
     div#qndPages {
       padding-top: 65px;
     }
-  }  
+  }
+
+  .list-hovered:hover {
+    background-color: #e9ecef;
+  }
+
+  .list-hovered > label {
+    display: block;
+  }
 
 </style>
 {% endblock %}
@@ -62,26 +70,43 @@
     <div id='qndPages'>
       {% include "./start.html" %}
 
+    {# Activities #}
       {% include "./activity.html" %}
       {% include "./activity-daily.html" %}
       {% include "./activity-rates.html" %}
       {% include "./activity-rate.html" %}
       {% include "./activity-prices.html" %}
+      {% include "./activity-minppl.html" %}
       {% include "./activity-sched.html" %}
 
       {% include "./actgroup.html" %}
       {% include "./actres.html" %}
       {% include "./actttot.html" %}
 
+    {# Lodging #}
       {% include "./lodging.html" %}
       {% include "./lodging-units.html" %}
       {% include "./lodging-rates.html" %}
       {% include "./lodging-rate.html" %}
       {% include "./lodging-prices.html" %}
+      {% include "./lodging-minppl.html" %}
+      {% include "./lodging-sched.html" %}
 
       {% include "./lodglocn.html" %}
       {% include "./lodgtype.html" %}
 
+    {# Meals #}
+      {% include "./meals.html" %}
+      {% include "./meals-rates.html" %}
+      {% include "./meals-rate.html" %}
+      {% include "./meals-prices.html" %}
+      {% include "./meals-minppl.html" %}
+      {% include "./meals-sched.html" %}
+
+      {% include "./meallocn.html" %}
+      {% include "./mealtype.html" %}
+
+    {# General #}  
       {% include "./area.html" %}
       {% include "./glcode.html" %}
       {% include "./tax.html" %}
@@ -89,6 +114,7 @@
       {% include "./pricelevel.html" %}
       {% include "./pmtterms.html" %}
 
+    {# Utilities #}
       {% include "./util-print.html" %}
       {% include "./util-import.html" %}
     </div>

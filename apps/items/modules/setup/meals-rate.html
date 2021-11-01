@@ -1,5 +1,5 @@
-<page id='items-rate-activity' style='display: none;'>
-  <section id='items-rate-activity-section'>
+<page id='items-rate-meals' style='display: none;'>
+  <section id='items-rate-meals-section'>
     {% include "./navbar-item.html" %}
 
     <div class='row'>
@@ -8,11 +8,11 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-8 col-md-2 mb-3 mb-md-0'>
-                {{ fields.Char(id=actrates.rateno.id, mvc_value='actrates.rateno', label=actrates.rateno.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='integer') }}
+                {{ fields.Char(id=mealrates.rateno.id, mvc_value='mealrates.rateno', label=mealrates.rateno.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='integer') }}
               </div>
 
               <div class='col-4 col-md-4 mb-3 mb-md-0'>
-                {{ fields.Switch(id=actrates.active.id, mvc_checked='actrates.active', label=actrates.active.verbose) }}
+                {{ fields.Switch(id=mealrates.active.id, mvc_checked='mealrates.active', label=mealrates.active.verbose) }}
               </div>
             </div>       
           </div>   
@@ -20,40 +20,40 @@
           <div class='card-body'>
             <div class='row'>
               <div class='col-12 col-md-6 mb-2'>
-                {{ fields.Char(id=actrates.name.id, maxlength=actrates.name.maxlength, mvc_value='actrates.name', label=actrates.name.verbose) }}
+                {{ fields.Char(id=mealrates.name.id, maxlength=mealrates.name.maxlength, mvc_value='mealrates.name', label=mealrates.name.verbose) }}
               </div>
             </div>
 
             <div class='row'>
               <div class='col-12 col-md-6 mb-2'>
-                {{ fields.SelectMVC(id=actrates.pricelevel.id, mvc_value='actrates.pricelevel', mvc_each='pricelevel', valueField='code', textField='name', size='1', label=actrates.pricelevel.verbose) }}
+                {{ fields.SelectMVC(id=mealrates.pricelevel.id, mvc_value='mealrates.pricelevel', mvc_each='pricelevel', valueField='code', textField='name', size='1', label=mealrates.pricelevel.verbose) }}
               </div>
               <div class='col-12 col-md-6 mb-2'>
-                {{ fields.SelectMVC(id=actrates.pmtterms.id, mvc_value='actrates.pmtterms', mvc_each='pmtterms', valueField='code', textField='name', size='1', label=actrates.pmtterms.verbose) }}
+                {{ fields.SelectMVC(id=mealrates.pmtterms.id, mvc_value='mealrates.pmtterms', mvc_each='pmtterms', valueField='code', textField='name', size='1', label=mealrates.pmtterms.verbose) }}
               </div>
             </div>
 
             <div class='row'>
               <div class='col-12 col-md-6 mb-2'>
-                {{ fields.SelectChoices(id=actrates.ratebase1.id, mvc_value='actrates.ratebase1', choices=actrates.ratebase1.choices, size='1', label=actrates.ratebase1.verbose) }}
+                {{ fields.SelectChoices(id=mealrates.ratebase1.id, mvc_value='mealrates.ratebase1', choices=mealrates.ratebase1.choices, size='1', label=mealrates.ratebase1.verbose) }}
               </div>
               <div class='col-12 col-md-6 mb-2'>
-                {{ fields.SelectChoices(id=actrates.ratebase2.id, mvc_value='actrates.ratebase2', choices=actrates.ratebase2.choices, size='1', label=actrates.ratebase2.verbose) }}
+                {{ fields.SelectChoices(id=mealrates.ratebase2.id, mvc_value='mealrates.ratebase2', choices=mealrates.ratebase2.choices, size='1', label=mealrates.ratebase2.verbose) }}
               </div>
             </div>           
             
             <div class='row'>
               <div class='col-12 col-md-6 mb-2'>
-                {{ fields.SelectChoices(id=actrates.currency.id, mvc_value='actrates.currency', choices=actrates.currency.choices, size='1', label=actrates.currency.verbose) }}
+                {{ fields.SelectChoices(id=mealrates.currency.id, mvc_value='mealrates.currency', choices=mealrates.currency.choices, size='1', label=mealrates.currency.verbose) }}
               </div>
               <div class='col-12 col-md-6 mb-2'>
-                {{ fields.SelectChoices(id=actrates.privilege.id, mvc_value='actrates.privilege', choices=actrates.privilege.choices, size='1', label=actrates.privilege.verbose) }}
+                {{ fields.SelectChoices(id=mealrates.privilege.id, mvc_value='mealrates.privilege', choices=mealrates.privilege.choices, size='1', label=mealrates.privilege.verbose) }}
               </div>
             </div>        
             
             <div class='row'>
               <div class='col-8 col-md-2 mb-3 mb-2'>
-                {{ fields.Integer(id=actrates.addlppl.id, min=0, max=99, step=1, mvc_value='actrates.addlppl', label=actrates.addlppl.verbose) }}
+                {{ fields.Integer(id=mealrates.addlppl.id, min=0, max=99, step=1, mvc_value='mealrates.addlppl', label=mealrates.addlppl.verbose) }}
               </div>
             </div>            
 

@@ -7,26 +7,43 @@ import {Modal} from '/~static/lib/client/widgets/modal.js';
 // js for pages
 import '/~static/apps/items/modules/setup/start.js';
 
+// Activities
 import '/~static/apps/items/modules/setup/activity.js';
 import '/~static/apps/items/modules/setup/activity-daily.js';
 import '/~static/apps/items/modules/setup/activity-rates.js';
 import '/~static/apps/items/modules/setup/activity-rate.js';
 import '/~static/apps/items/modules/setup/activity-prices.js';
+import '/~static/apps/items/modules/setup/activity-minppl.js';
 import '/~static/apps/items/modules/setup/activity-sched.js';
 
 import '/~static/apps/items/modules/setup/actgroup.js';
 import '/~static/apps/items/modules/setup/actres.js';
 import '/~static/apps/items/modules/setup/actttot.js';
 
+// Lodging
 import '/~static/apps/items/modules/setup/lodging.js';
 import '/~static/apps/items/modules/setup/lodging-units.js';
 import '/~static/apps/items/modules/setup/lodging-rates.js';
 import '/~static/apps/items/modules/setup/lodging-rate.js';
 import '/~static/apps/items/modules/setup/lodging-prices.js';
+import '/~static/apps/items/modules/setup/lodging-minppl.js';
+import '/~static/apps/items/modules/setup/lodging-sched.js';
 
 import '/~static/apps/items/modules/setup/lodglocn.js';
 import '/~static/apps/items/modules/setup/lodgtype.js';
 
+// Meals
+import '/~static/apps/items/modules/setup/meals.js';
+import '/~static/apps/items/modules/setup/meals-rates.js';
+import '/~static/apps/items/modules/setup/meals-rate.js';
+import '/~static/apps/items/modules/setup/meals-prices.js';
+import '/~static/apps/items/modules/setup/meals-minppl.js';
+import '/~static/apps/items/modules/setup/meals-sched.js';
+
+import '/~static/apps/items/modules/setup/meallocn.js';
+import '/~static/apps/items/modules/setup/mealtype.js';
+
+// General
 import '/~static/apps/items/modules/setup/area.js';
 import '/~static/apps/items/modules/setup/glcode.js';
 import '/~static/apps/items/modules/setup/tax.js';
@@ -34,6 +51,7 @@ import '/~static/apps/items/modules/setup/waiver.js';
 import '/~static/apps/items/modules/setup/pricelevel.js';
 import '/~static/apps/items/modules/setup/pmtterms.js';
 
+// Utilities
 import '/~static/apps/items/modules/setup/util-print.js';
 import '/~static/apps/items/modules/setup/util-import.js';
 
@@ -43,10 +61,12 @@ let moduleStart = function() {
     // gets us access to raw data.
     Module.data.activity = new TableAccess({modelName: 'activity', url: `/items/v1/activity`});
     Module.data.lodging = new TableAccess({modelName: 'lodging', url: `/items/v1/lodging`});
+    Module.data.meals = new TableAccess({modelName: 'meals', url: `/items/v1/meals`});
 
     Module.data.actdaily = new TableAccess({modelName: 'actdaily', url: `/items/v1/actdaily`});
     Module.data.actrates = new TableAccess({modelName: 'actrates', url: `/items/v1/actrates`});
     Module.data.actprices = new TableAccess({modelName: 'actprices', url: `/items/v1/actprices`});
+    Module.data.actminp = new TableAccess({modelName: 'actminp', url: `/items/v1/actminp`});
     Module.data.actsched = new TableAccess({modelName: 'actsched', url: `/items/v1/actsched`});
     Module.data.actgroup = new TableAccess({modelName: 'actgroup', url: `/items/v1/actgroup`});
     Module.data.actres = new TableAccess({modelName: 'actres', url: `/items/v1/actres`});
@@ -55,8 +75,17 @@ let moduleStart = function() {
     Module.data.lodgunit = new TableAccess({modelName: 'lodgunit', url: `/items/v1/lodgunit`});
     Module.data.lodgrates = new TableAccess({modelName: 'lodgrates', url: `/items/v1/lodgrates`});
     Module.data.lodgprices = new TableAccess({modelName: 'lodgprices', url: `/items/v1/lodgprices`});
+    Module.data.lodgminp = new TableAccess({modelName: 'lodgminp', url: `/items/v1/lodgminp`});
+    Module.data.lodgsched = new TableAccess({modelName: 'lodgsched', url: `/items/v1/lodgsched`});
     Module.data.lodglocn = new TableAccess({modelName: 'lodglocn', url: `/items/v1/lodglocn`});
     Module.data.lodgtype = new TableAccess({modelName: 'lodgtype', url: `/items/v1/lodgtype`});
+
+    Module.data.mealrates = new TableAccess({modelName: 'mealrates', url: `/items/v1/mealrates`});
+    Module.data.mealprices = new TableAccess({modelName: 'mealprices', url: `/items/v1/mealprices`});
+    Module.data.mealminp = new TableAccess({modelName: 'mealminp', url: `/items/v1/mealminp`});
+    Module.data.mealsched = new TableAccess({modelName: 'mealsched', url: `/items/v1/mealsched`});
+    Module.data.meallocn = new TableAccess({modelName: 'meallocn', url: `/items/v1/meallocn`});
+    Module.data.mealtype = new TableAccess({modelName: 'mealtype', url: `/items/v1/mealtype`});
 
     Module.data.area = new TableAccess({modelName: 'area', url: `/items/v1/area`});
     Module.data.glcode = new TableAccess({modelName: 'glcode', url: `/items/v1/glcode`});
@@ -103,6 +132,13 @@ let moduleStart = function() {
     itemData.addModel(model);                          
 
     Module.tableStores.actprices = new TableStore({accessor: Module.data.actprices, model, safemode});  // setup a table store in Module so all pages can access
+
+    // Actminp
+    model = `/items/actminp`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.actminp = new TableStore({accessor: Module.data.actminp, model, safemode});  // setup a table store in Module so all pages can access
 
     // Actsched
     model = `/items/actsched`;
@@ -164,6 +200,20 @@ let moduleStart = function() {
 
     Module.tableStores.lodgprices = new TableStore({accessor: Module.data.lodgprices, model, safemode});  // setup a table store in Module so all pages can access
 
+    // lodgminp
+    model = `/items/lodgminp`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.lodgminp = new TableStore({accessor: Module.data.lodgminp, model, safemode});  // setup a table store in Module so all pages can access
+
+    // Lodgsched
+    model = `/items/lodgsched`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.lodgsched = new TableStore({accessor: Module.data.lodgsched, model, safemode});  // setup a table store in Module so all pages can access
+
     // Lodglocn
     model = `/items/lodglocn`;               
 
@@ -179,6 +229,60 @@ let moduleStart = function() {
 
     Module.tableStores.lodgtype = new TableStore({accessor: Module.data.lodgtype, model, safemode});  // setup a table store in Module so all pages can access    
     dataPromises.push(Module.tableStores.lodgtype.getAll());
+
+    // Meals
+    model = `/items/meals`;                      
+
+    itemData.addModel(model);                    
+                                                      
+    Module.tableStores.meals = new TableStore({accessor: Module.data.meals, model, safemode});  // setup a table store in Module so all pages can access
+    dataPromises.push(Module.tableStores.meals.getAll());               // seed the table store
+
+    // Mealrates
+    model = `/items/mealrates`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.mealrates = new TableStore({accessor: Module.data.mealrates, model, safemode});  // setup a table store in Module so all pages can access
+
+    // Mealprices
+    model = `/items/mealprices`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.mealprices = new TableStore({accessor: Module.data.mealprices, model, safemode});  // setup a table store in Module so all pages can access
+
+    // Mealminp
+    model = `/items/mealminp`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.mealminp = new TableStore({accessor: Module.data.mealminp, model, safemode});  // setup a table store in Module so all pages can access
+
+    // Mealsched
+    model = `/items/mealsched`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.mealsched = new TableStore({accessor: Module.data.mealsched, model, safemode});  // setup a table store in Module so all pages can access
+
+    // Meallocn
+    model = `/items/meallocn`;               
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.meallocn = new TableStore({accessor: Module.data.meallocn, model, safemode});  // setup a table store in Module so all pages can access
+    dataPromises.push(Module.tableStores.meallocn.getAll());
+
+    // Mealtype
+    model = `/items/mealtype`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.mealtype = new TableStore({accessor: Module.data.mealtype, model, safemode});  // setup a table store in Module so all pages can access
+    dataPromises.push(Module.tableStores.mealtype.getAll());
+
+    //GENERAL
 
     // Area
     model = `/items/area`;

@@ -187,7 +187,6 @@ const Rates = class extends Model {
         ratebase2: new Fields.Char({notNull: true, maxLength: 5, default: 'F', choices: RATEBASE2, verbose: 'Rate Base-2'}),
         currency: new Fields.Char({notNull: true, maxLength: 3, default: 'CAD', choices: CURRENCIES, verbose: 'Currency'}),
         addlppl: new Fields.Integer({notNull: true, default: 0, maxLength: 2, verbose: 'Addl Ppl'}),
-        minppl: new Fields.Integer({notNull: true, default: 0, maxLength: 2, verbose: 'Min Ppl'}),
       },
 
       constraints: {
@@ -219,7 +218,7 @@ const Prices = class extends Model {
         rateno: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
         year: new Fields.Integer({notNull: true, maxLength: 4, verbose: 'Year'}),
         month: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Month'}),
-        prices: new Fields.Jsonb({null: true, default: '[]', verbose: 'Prices'})        
+        prices: new Fields.Jsonb({null: true, verbose: 'Prices'})        
       },
 
       constraints: {
@@ -234,6 +233,36 @@ const Prices = class extends Model {
       dbschema: '',
       app,
       desc: 'Prices prototype'
+    }      
+  }
+};
+
+const Minppl = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static parent() {
+    return {
+      schema: {
+        rateno: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
+        year: new Fields.Integer({notNull: true, maxLength: 4, verbose: 'Year'}),
+        month: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Month'}),
+        minppl: new Fields.Jsonb({null: true, verbose: 'Min Ppl'})        
+      },
+
+      constraints: {
+        fk: [
+        ],
+
+        index: [],
+      },
+      
+      hidden: [],
+      
+      dbschema: '',
+      app,
+      desc: 'Min Ppl prototype'
     }      
   }
 };
@@ -345,6 +374,40 @@ const Actprices = class extends Prices {
   }
 };
 
+const Actminp = class extends Minppl {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        activity: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Activity'}),
+      },
+
+      constraints: {
+        pk: ['activity', 'rateno', 'year', 'month'],
+
+        fk: [
+          {name: 'activity', columns: ['activity'], app, table: Activity, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['activity', 'rateno', 'year', 'month'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Minimum People'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+};
+
 const Actsched = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -356,7 +419,7 @@ const Actsched = class extends Model {
         activity: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
         year: new Fields.Integer({notNull: true, maxLength: 4, verbose: 'Year'}),
         month: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Month'}),
-        sched: new Fields.Jsonb({null: true, array: 1, verbose: 'Schedule'}) 
+        sched: new Fields.Jsonb({null: true, verbose: 'Schedule'}) 
       },
       
       constraints: {
@@ -376,6 +439,45 @@ const Actsched = class extends Model {
     }
   }
 };
+
+const Actinclm = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static definition() {
+    return {
+      schema: {
+        activity: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Activity'}),
+        rateno: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
+        seq: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Seq'}),
+        day: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Day'}),
+        dur: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Duration'}),
+        offset: new Fields.Integer({notNull: true, maxLength: 3, verbose: 'Offset Minutes'}),
+        meal: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Meal'}),
+        mealrate: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
+      },
+      
+      constraints: {
+        pk: ['activity', 'rateno', 'seq'],
+        fk: [
+          {name: 'activity', columns: ['activity'], app, table: Activity, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actrates', columns: ['activity', 'rateno'], app, table: Actrates, tableColumns: ['activity', 'rateno'], onDelete: 'NO ACTION'},
+          {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'mealrates', columns: ['meal', 'mealrate'], app, table: Mealrates, tableColumns: ['meal', 'rateno'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['activity', 'rateno', 'day', 'meal'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Included Meals'
+    }
+  }  
+}
 
 const Actgroup = class extends Model {
   constructor(obj, opts) {
@@ -622,6 +724,77 @@ const Lodgprices = class extends Prices {
   }
 };
 
+const Lodgminp = class extends Minppl {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        lodging: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Lodging'}),
+      },
+
+      constraints: {
+        pk: ['lodging', 'rateno', 'year', 'month'],
+
+        fk: [
+          {name: 'lodging', columns: ['lodging'], app, table: Lodging, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['lodging', 'rateno', 'year', 'month'],
+      
+      dbschema: '',
+      app,
+      desc: 'Lodging Minimum People'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+};
+
+const Lodginclm = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static definition() {
+    return {
+      schema: {
+        lodging: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Lodging'}),
+        rateno: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
+        seq: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Seq'}),
+        day: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Day'}),
+        dur: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Duration'}),
+        meal: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Meal'}),
+        mealrate: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
+      },
+      
+      constraints: {
+        pk: ['lodging', 'rateno', 'seq'],
+        fk: [
+          {name: 'lodging', columns: ['lodging'], app, table: Lodging, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'lodgrates', columns: ['lodging', 'rateno'], app, table: Lodgrates, tableColumns: ['lodging', 'rateno'], onDelete: 'NO ACTION'},
+          {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'mealrates', columns: ['meal', 'mealrate'], app, table: Mealrates, tableColumns: ['meal', 'rateno'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['lodging', 'rateno', 'day', 'meal'],
+      
+      dbschema: '',
+      app,
+      desc: 'Lodging Included Meals'
+    }
+  }  
+}
 const Lodgunit = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -652,6 +825,38 @@ const Lodgunit = class extends Model {
       dbschema: '',
       app,
       desc: 'Lodging Units'
+    }
+  }
+};
+
+const Lodgsched = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        lodging: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
+        year: new Fields.Integer({notNull: true, maxLength: 4, verbose: 'Year'}),
+        month: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Month'}),
+        sched: new Fields.Jsonb({null: true, verbose: 'Schedule'}),  // [day1, day2]  day1 = {unitseq: qty, ...} or {-1: qty} for non-unitized
+      },
+      
+      constraints: {
+        pk: ['lodging', 'year', 'month'],
+        fk: [
+          {name: 'lodging', columns: ['lodging'], app, table: Lodging, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['lodging', 'year', 'month'],
+      
+      dbschema: '',
+      app,
+      desc: 'Lodging Schedule'
     }
   }
 };
@@ -710,6 +915,236 @@ const Lodgtype = class extends Model {
       dbschema: '',
       app,
       desc: 'Lodging Types'
+    }
+  }
+};
+
+// Meals
+const Meals = class extends Items {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        meallocn: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Location'}),
+        mealtype: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Type'}),
+        durdays: new Fields.Integer({null: true, default: 1, verbose: 'Days'}),
+        arroffset: new Fields.Integer({null: true, default: 0, verbose: 'Arrival Offset'}),
+        lastoffset: new Fields.Float({null: true, default: 0, verbose: 'Last Time Offset'}),
+        tipgl: new Fields.Char({null: true, maxLength: 20, verbose: 'Tip GL'}),
+      },
+
+      constraints: {
+        fk: [
+          {name: 'meallocn', columns: ['meallocn'], app, table: Meallocn, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'mealtype', columns: ['mealtype'], app, table: Mealtype, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'tipgl', columns: ['tipgl'], app, table: Glcode, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      dbschema: '',
+      app,
+      desc: 'Meals'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+};
+
+const Mealrates = class extends Rates {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        meal: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Meal'}),
+      },
+
+      constraints: {
+        pk: ['meal', 'rateno'],
+
+        fk: [
+          {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['meal', 'rateno'],
+      
+      dbschema: '',
+      app,
+      desc: 'Meal Rates'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+};
+
+const Mealprices = class extends Prices {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        meal: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Meal'}),
+      },
+
+      constraints: {
+        pk: ['meal', 'rateno', 'year', 'month'],
+
+        fk: [
+          {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['activity', 'rateno', 'year', 'month'],
+      
+      dbschema: '',
+      app,
+      desc: 'Meal Prices'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+};
+
+const Mealminp = class extends Minppl {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        meal: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Meal'}),
+      },
+
+      constraints: {
+        pk: ['meal', 'rateno', 'year', 'month'],
+
+        fk: [
+          {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['meal', 'rateno', 'year', 'month'],
+      
+      dbschema: '',
+      app,
+      desc: 'Meals Minimum People'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+};
+
+const Mealsched = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        meal: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
+        year: new Fields.Integer({notNull: true, maxLength: 4, verbose: 'Year'}),
+        month: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Month'}),
+        sched: new Fields.Jsonb({null: true, verbose: 'Schedule'}) 
+      },
+      
+      constraints: {
+        pk: ['meal', 'year', 'month'],
+        fk: [
+          {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['meal', 'year', 'month'],
+      
+      dbschema: '',
+      app,
+      desc: 'Meal Schedule'
+    }
+  }
+};
+
+const Meallocn = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Location Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),      
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['-active', 'name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Meal Locations'
+    }
+  }
+};
+
+const Mealtype = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Type Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),      
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['-active', 'name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Meal Types'
     }
   }
 };
@@ -946,11 +1381,22 @@ const Pmtterms = class extends Model {
 
 module.exports = {
   Activity, 
-  Actdaily, Actrates, Actprices, Actsched,
+  Actdaily, Actrates, Actprices, Actminp, 
+  Actsched,
+  Actinclm,
   Actgroup, Actres, Actttot, 
+
   Lodging,
-  Lodgunit, Lodgrates, Lodgprices,
+  Lodgunit, Lodgrates, Lodgprices, Lodgminp, 
+  Lodgsched,
+  Lodginclm,
   Lodglocn, Lodgtype, 
+
+  Meals,
+  Mealrates, Mealprices, Mealminp,
+  Mealsched,
+  Meallocn, Mealtype,
+
   Area, Waiver, Glcode, Tax,
   Pricelevel, Pmtterms
 }

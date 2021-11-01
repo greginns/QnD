@@ -134,7 +134,7 @@ class Actprices extends Setup {
     }
 
     data.prices = JSON.stringify(data.prices);
-
+    
     //let spinner = this.startSpinner(ev);
 
     // new (post) or old (put)?
@@ -306,11 +306,11 @@ class Actprices extends Setup {
         this.updateRangePrices(prices, yy, mm, dds);
       }
   
+      prices = JSON.stringify(prices);
+
       let data = {activity: act, rateno: rateno, year: yy, month: mm, hour: hh, minute: mins, prices};
-  
-      data.prices = JSON.stringify(data.prices);
-  
-        // new (post) or old (put)?
+
+      // new (post) or old (put)?
       res = (existingEntry) ? await Module.tableStores.actprices.update([data.activity, data.rateno, data.year, data.month, data.hour, data.minute], {prices: data.prices}) : await Module.tableStores.actprices.insert(data);
   
       if (res.status == 200) {

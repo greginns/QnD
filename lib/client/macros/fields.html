@@ -111,7 +111,7 @@
     <input type="checkbox" mvc-checked="{{mvc_checked}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}'>
     <span class="slider round"></span>
   </label>
-  <span class='label-color'>{{label}}</span>
+  <span class='label-color'>{{label}}</span>  
 </div>
   
 <div>
@@ -277,6 +277,36 @@
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>
 {% endmacro %}            
+
+{% macro SelectMulti(id='', maxlength='', mvc_value='', mvc_each='', mvc_filter='checked2text', label='', placeholder='') %}
+<div mvc-multiselect>
+  <div class='form-label-group'>
+    <div class='input-group'>
+      <input class='form-control' mvc-value='{{mvc_value}}' mvc-filter='{{mvc_filter}}' data-source='{{mvc_each}}' placeholder='{{placeholder}}' style='text-overflow:ellipsis'>
+      <span class='input-group-text'>
+        <i class="fa-thin fa-caret-down"></i>
+      </span>            
+    </div>
+
+    <label>{{label}}</label>
+  </div>
+  
+  <div mvc-show='errors.{{mvc_value}}'>
+    <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
+  </div>
+
+  <div class='dropdown-menu' style='max-height: 200px; overflow-y: auto' tabindex=-'1'>
+    <div mvc-each='{{mvc_each}}'>
+      <div class='list-hovered ms-2 me-2 px-2'>
+        <label>
+          <input type='checkbox' mvc-checked='{{mvc_each}}[$index].checked' mvc-event-change='$checked2text("{{mvc_each}}", "{{mvc_value}}")' />
+          <span mvc-text='{{mvc_each}}[$index].text'></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>               
+{% endmacro %}
 
 {% macro Editor(toolbar='toolbar-container', editor='editor-container', errors='editor.errors') %}
 <div class="{{toolbar}}">

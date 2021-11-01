@@ -5,7 +5,7 @@ import {Edittable} from '/~static/lib/client/core/tables.js';
 import {Datetime} from '/~static/lib/client/core/datetime.js';
 import {Setup} from '/~static/apps/items/modules/setup/baseclasses.js';
 
-class Actsched extends Setup {
+class Mealsched extends Setup {
   constructor(element) {
     super(element);
   }
@@ -13,10 +13,10 @@ class Actsched extends Setup {
   createModel() {
     super.createModel();
 
-    this.model.catname = 'actsched';
-    this.model.itemType = 'Activity'
-    this.model.activity = {};
-    this.model.actsched = {};
+    this.model.catname = 'mealsched';
+    this.model.itemType = 'Meal'
+    this.model.meals = {};
+    this.model.mealsched = {};
     this.model.years = [];
     this.model.months = [
       {value: '1', text: 'January'},
@@ -41,27 +41,9 @@ class Actsched extends Setup {
       todate: '2021-10-31',
       time: '',
       limit: 0,
-      boo: 1,
-      bow: 1,
       dowall: true,
       dow: [true, true, true, true, true, true, true]
     };
-
-    this.model.bowo = [
-      {text: 'N/A', value: '0'},
-      {text: '1', value: '1'},
-      {text: '2', value: '2'},
-      {text: '3', value: '3'},
-      {text: '4', value: '4'},
-      {text: '5', value: '5'},
-      {text: '6', value: '6'},
-      {text: '7', value: '7'},
-      {text: '8', value: '8'},
-      {text: '9', value: '9'},
-      {text: '10', value: '10'},
-      {text: '11', value: '11'},
-      {text: '12', value: '12'},
-    ];
 
     this.model.errors = {range: {}};
 
@@ -82,7 +64,7 @@ class Actsched extends Setup {
       this.model.year = yr;
       this.model.month = dt.getMonth()+1;
 
-      this.editTable = new Edittable('#actsched', this, this.saver)
+      this.editTable = new Edittable('#mealsched', this, this.saver)
 
       resolve();
     }.bind(this));
@@ -90,9 +72,9 @@ class Actsched extends Setup {
   
   async inView(params) {
     this.code = params.code;
-    this.activity = await Module.tableStores.activity.getOne(this.code);
+    this.meals = await Module.tableStores.meals.getOne(this.code);
 
-    this.model.title = this.activity.name + ', Schedule';
+    this.model.title = this.meals.name + ', Schedule';
   }
 
   outView() {
@@ -108,8 +90,8 @@ class Actsched extends Setup {
   async save(ev) {
     // scheds has our array of scheds
     // one entry per day/time.  Need to repack into [[day1], [day2]], where each day can have x times
-    // actsched is the entry just edited
-    let actsched = this.model.actsched.toJSON();
+    // mealsched is the entry just edited
+    let mealsched = this.model.mealsched.toJSON();
     let scheds = this.model.scheds.toJSON();
     let sched = [];
     let dt = new Datetime([this.model.year, this.model.month, 1]);
@@ -121,20 +103,20 @@ class Actsched extends Setup {
     }
 
     for (let entry of scheds) {
-      sched[entry.dayno][entry.posn] = {time: entry.time, limit: entry.limit, boo: entry.boo, bow: entry.bow};
+      sched[entry.dayno][entry.posn] = {time: entry.time, limit: entry.limit};
     }
 
     // update the one being edited
-    sched[actsched.dayno][actsched.posn] = {time: actsched.time, limit: actsched.limit, boo: actsched.boo, bow: actsched.bow};
+    sched[mealsched.dayno][mealsched.posn] = {time: mealsched.time, limit: mealsched.limit};
 
     sched = JSON.stringify(sched);
 
-    let data = {activity: this.activity.code, year: this.model.year, month: this.model.month, sched};
+    let data = {meal: this.meals.code, year: this.model.year, month: this.model.month, sched};
 
     //let spinner = this.startSpinner(ev);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.actsched.update([data.activity, data.year, data.month], {sched: data.sched}) : await Module.tableStores.actsched.insert(data);
+    let res = (this.model.existingEntry) ? await Module.tableStores.mealsched.update([data.meal, data.year, data.month], {sched: data.sched}) : await Module.tableStores.mealsched.insert(data);
 
     if (res.status == 200) {
       utils.modals.toast('Schedule', ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
@@ -156,7 +138,7 @@ class Actsched extends Setup {
     let dsim = dt.getDaysInMonth();
     let scheds = [];
 
-    let record = await this.getActsched();
+    let record = await this.getmealsched();
 
     if (Object.keys(record).length == 0) {
       // new record
@@ -166,7 +148,7 @@ class Actsched extends Setup {
         let dt2 = (new Datetime(dt)).add(d, 'day');
         let dow = dt2.day();
 
-        scheds.push({posn: 0, dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time: null, limit: 0, boo: 1, bow: 1});
+        scheds.push({posn: 0, dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time: null, limit: 0});
       }
     }
     else {
@@ -179,7 +161,7 @@ class Actsched extends Setup {
 
         for (let idx=0; idx<record.sched[d].length; idx++) {    // for each entry in day
           let rec = record.sched[d][idx];
-          scheds.push({posn: idx, dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time: rec.time, limit: rec.limit, boo: rec.boo, bow: rec.bow});
+          scheds.push({posn: idx, dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time: rec.time, limit: rec.limit});
         }
       }
     }
@@ -187,16 +169,16 @@ class Actsched extends Setup {
     this.model.scheds = scheds;
   }
 
-  async getActsched() {
-    let act = this.activity.code;
+  async getmealsched() {
+    let act = this.meals.code;
     let yy = this.model.year;
     let mm = this.model.month;
 
-    return await Module.tableStores.actsched.getOne([act, yy, mm]);
+    return await Module.tableStores.mealsched.getOne([act, yy, mm]);
   }
 
   async canClear(ev) {
-    let data = this.model.actrates.toJSON();
+    let data = this.model.mealrates.toJSON();
     return super.canClear(ev, data);
   }
 
@@ -235,14 +217,14 @@ class Actsched extends Setup {
       return;
     }
 
-    let act = this.activity.code;
+    let act = this.meals.code;
 
     for (let entry of lods) {
       let yy = entry[0], mm = entry[1], dds = entry[2];
       let dt = utils.datetime.make([yy, mm]);
       let dsim = dt.getDaysInMonth();
 
-      let res = await Module.tableStores.actsched.getOne([act, yy, mm]);
+      let res = await Module.tableStores.mealsched.getOne([act, yy, mm]);
       let existingEntry = Object.keys(res).length > 0;
 
       let sched;
@@ -258,10 +240,10 @@ class Actsched extends Setup {
 
       sched = JSON.stringify(sched);
   
-      let data = {activity: act, year: yy, month: mm, sched};
+      let data = {meal: act, year: yy, month: mm, sched};
   
       // new (post) or old (put)?
-      res = (existingEntry) ? await Module.tableStores.actsched.update([data.activity, data.year, data.month], {sched: data.sched}) : await Module.tableStores.actsched.insert(data);
+      res = (existingEntry) ? await Module.tableStores.mealsched.update([data.meal, data.year, data.month], {sched: data.sched}) : await Module.tableStores.mealsched.insert(data);
   
       if (res.status == 200) {
         utils.modals.toast('Schedule', ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
@@ -302,15 +284,13 @@ class Actsched extends Setup {
           if (timeData.time == range.time || timeData.time == null) {
             timeData.time = range.time;
             timeData.limit = range.limit;
-            timeData.boo = range.boo;
-            timeData.bow = range.bow;
             found = true;
             break;
           }
         }
 
         if (!found) {
-          dayEntry.push({time: range.time, limit: range.limit, boo: range.boo, bow: range.bow});
+          dayEntry.push({time: range.time, limit: range.limit});
         }
       }
     }
@@ -329,14 +309,14 @@ class Actsched extends Setup {
   }
 
   goBack() {
-    Module.pager.go(`/activity/${this.code}`);
+    Module.pager.go(`/meal/${this.code}`);
   }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('items-sched-activity');   // page html
-let setup1 = new Actsched('items-sched-activity-section');
+let el1 = document.getElementById('items-sched-meals');   // page html
+let setup1 = new Mealsched('items-sched-meals-section');
 let section1 = new Section({mvc: setup1});
-let page1 = new Page({el: el1, path: ['/activity/:code/sched'], title: 'Activity Schedule', sections: [section1]});
+let page1 = new Page({el: el1, path: ['/meals/:code/sched'], title: 'Meal Schedule', sections: [section1]});
 
 Module.pages.push(page1);

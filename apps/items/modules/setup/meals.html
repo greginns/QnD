@@ -1,0 +1,279 @@
+<page id='items-main-meals' style='display: none;'>
+  <section id='items-main-meals-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 order-1 mb-3 mb-md-0'>
+                {{ fields.Char(id=meals.code.id, maxlength=meals.code.maxlength, mvc_value='meals.code', label=meals.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='upper') }}
+              </div>
+
+              <div class='col-12 col-md-6 order-3 order-md-2'>
+                {{ fields.Char(id=meals.name.id, maxlength=meals.name.maxlength, mvc_value='meals.name', label=meals.name.verbose) }}
+              </div>
+
+              <div class='col-4 col-md-4 order-2 mb-3 mb-md-0'>
+                {{ fields.Switch(id=meals.active.id, mvc_checked='meals.active', label=meals.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-defn">
+                  <legend class="w-auto fieldset-legend">Definition</legend>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.meallocn.id, size='1', mvc_value='meals.meallocn', mvc_each='meallocns', textField='name', valueField='code', label=meals.meallocn.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.mealtype.id, size='1', mvc_value='meals.mealtype', mvc_each='mealtypes', textField='name', valueField='code', label=meals.mealtype.verbose) }}
+                    </div>
+                  </div>
+                
+                  <div class='row'>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Integer(id=meals.durdays.id, min='1', max='9', step='1', maxlength=meals.durdays.maxlength, mvc_value='meals.durdays', label=meals.durdays.verbose) }}
+                    </div>
+                  </div>           
+                
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.company.id, size='1', mvc_value='meals.company', mvc_each='companies', textField='name', valueField='id', label=meals.company.verbose) }}
+                    </div>                    
+                    <div class='col-lg-2'>
+                    </div>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Integer(id=meals.minage.id, min='1', max='9', step='1', maxlength=meals.minage.maxlength, mvc_value='meals.minage', label=meals.minage.verbose) }}
+                    </div>
+                  </div>           
+                  
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.areaphy.id, size='1', mvc_value='meals.areaphy', mvc_each='areas', textField='name', valueField='code', label=meals.areaphy.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.areadir.id, size='1', mvc_value='meals.areadir', mvc_each='areas', textField='name', valueField='code', label=meals.areadir.verbose) }}
+                    </div>
+                  </div>    
+                  
+                  <div class='row'>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Float(id=meals.arroffset.id, min='0', max='600', step='1', maxlength=meals.arroffset.maxlength, mvc_value='meals.arroffset', label=meals.arroffset.verbose) }}
+                    </div>
+                  </div>                  
+                </fieldset>
+              </div>
+
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-online">
+                  <legend class="w-auto fieldset-legend">Online</legend>
+                  <div class='row'>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Switch(id=meals.online.id, mvc_checked='meals.online', label=meals.online.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-8 mb-3'>
+                      {{ fields.Char(id=meals.homepage.id, maxlength=meals.homepage.maxlength, mvc_value='meals.homepage', label=meals.homepage.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Integer(id=meals.lastday.id, min='0', max='9', step='1', maxlength=meals.lastday.maxlength, mvc_value='meals.lastday', label=meals.lastday.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Time(id=meals.lasttime.id, maxlength=meals.lasttime.maxlength, mvc_value='meals.lasttime', label=meals.lasttime.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-4 mb-3'>
+                      {{ fields.Float(id=meals.lastoffset.id, min='0', max='12', step='.1', maxlength=meals.lastoffset.maxlength, mvc_value='meals.lastoffset', label=meals.lastoffset.verbose) }}
+                    </div>
+                  </div>
+                  
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.waiver.id, size='1', mvc_value='meals.waiver', mvc_each='waivers', textField='name', valueField='code', label=meals.waiver.verbose) }}
+                    </div>
+                  </div>           
+                  
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Text(id=meals.tandc.id, rows='4', mvc_value='meals.tandc', label=meals.tandc.verbose) }}
+                    </div>
+                  </div>           
+                </fieldset>
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-msgs">
+                  <legend class="w-auto fieldset-legend">Messages</legend>
+                  <div class='row'>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Text(id=meals.rsvmsg.id, rows='4', mvc_value='meals.rsvmsg', label=meals.rsvmsg.verbose) }}
+                    </div>
+                    <div class='col-12 mb-3'>
+                      {{ fields.Text(id=meals.invmsg.id, rows='4', mvc_value='meals.invmsg', label=meals.invmsg.verbose) }}
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-flags">
+                  <legend class="w-auto fieldset-legend">Indicators</legend>
+                  <div class='row'>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=meals.allowinf.id, mvc_checked='meals.allowinf', label=meals.allowinf.verbose) }}
+                    </div>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=meals.allowchl.id, mvc_checked='meals.allowchl', label=meals.allowchl.verbose) }}
+                    </div>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=meals.allowyth.id, mvc_checked='meals.allowyth', label=meals.allowyth.verbose) }}
+                    </div>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=meals.allowadl.id, mvc_checked='meals.allowadl', label=meals.allowadl.verbose) }}
+                    </div>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=meals.allowsen.id, mvc_checked='meals.allowsen', label=meals.allowsen.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-md-4 mb-3'>
+                      {{ fields.Switch(id=meals.oninv.id, mvc_checked='meals.oninv', label=meals.oninv.verbose) }}
+                    </div>
+                  </div>
+                </fieldset>
+              </div>              
+            </div> 
+
+            <div class='row pt-2'>
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-fin">
+                  <legend class="w-auto fieldset-legend">Financial</legend>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.gl1.id, size='1', mvc_value='meals.gl1', mvc_each='glcodes', textField='name', valueField='code', label=meals.gl1.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Float(id=meals.gl1amt.id, min='0', max='100', step='.1', maxlength=meals.gl1amt.maxlength, mvc_value='meals.gl1amt', label=meals.gl1amt.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Switch(id=meals.gl1perc.id, mvc_checked='meals.gl1perc', label=meals.gl1perc.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.gl2.id, size='1', mvc_value='meals.gl2', mvc_each='glcodes', textField='name', valueField='code', label=meals.gl2.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Float(id=meals.gl2amt.id, min='0', max='100', step='.1', maxlength=meals.gl2amt.maxlength, mvc_value='meals.gl2amt', label=meals.gl2amt.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Switch(id=meals.gl2perc.id, mvc_checked='meals.gl2perc', label=meals.gl2perc.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.gl3.id, size='1', mvc_value='meals.gl3', mvc_each='glcodes', textField='name', valueField='code', label=meals.gl3.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Float(id=meals.gl3amt.id, min='0', max='100', step='.1', maxlength=meals.gl3amt.maxlength, mvc_value='meals.gl3amt', label=meals.gl3amt.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Switch(id=meals.gl3perc.id, mvc_checked='meals.gl3perc', label=meals.gl3perc.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.gl4.id, size='1', mvc_value='meals.gl4', mvc_each='glcodes', textField='name', valueField='code', label=meals.gl4.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Float(id=meals.gl4amt.id, min='0', max='100', step='.1', maxlength=meals.gl4amt.maxlength, mvc_value='meals.gl4amt', label=meals.gl4amt.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-3 mb-3'>
+                      {{ fields.Switch(id=meals.gl4perc.id, mvc_checked='meals.gl4perc', label=meals.gl4perc.verbose) }}
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.commgl.id, size='1', mvc_value='meals.commgl', mvc_each='glcodes', textField='name', valueField='code', label=meals.commgl.verbose) }}
+                    </div>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.tipgl.id, size='1', mvc_value='meals.tipgl', mvc_each='glcodes', textField='name', valueField='code', label=meals.tipgl.verbose) }}
+                    </div>
+                  </div>
+
+                </fieldset>
+              </div>
+
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-taxes">
+                  <legend class="w-auto fieldset-legend">Taxes</legend>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.tax1.id, size='1', mvc_value='meals.tax1', mvc_each='taxes', textField='name', valueField='code', label=meals.tax1.verbose) }}
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.tax2.id, size='1', mvc_value='meals.tax2', mvc_each='taxes', textField='name', valueField='code', label=meals.tax2.verbose) }}
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.tax3.id, size='1', mvc_value='meals.tax3', mvc_each='taxes', textField='name', valueField='code', label=meals.tax3.verbose) }}
+                    </div>
+                  </div>           
+                  <div class='row'>
+                    <div class='col-12 col-lg-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.tax4.id, size='1', mvc_value='meals.tax4', mvc_each='taxes', textField='name', valueField='code', label=meals.tax4.verbose) }}
+                    </div>
+                  </div>                                
+                </fieldset>
+              </div>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <span mvc-show='existingEntry'>
+                  <button class='btn btn-secondary' mvc-click='rates()'>
+                    Rates
+                  </button>
+                  <button class='btn btn-secondary' mvc-click='schedule()'>
+                    Schedule
+                  </button>
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

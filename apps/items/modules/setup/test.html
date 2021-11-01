@@ -24,34 +24,13 @@
   <body>
     <div class='container-fluid' id='test'>
       <div class='row'>
-        <div class='col-2'>
-          <input class='form-control'>
-        </div>
-
-        <div class='col-2'>
-          <div mvc-multiselect>
-            <div class='input-group'>
-              <input class='form-control' mvc-value='states' mvc-filter='checked2text' data-source='statelist' style='text-overflow:ellipsis'>
-              <span class='input-group-text'>
-                <i class="fa-thin fa-caret-down"></i>
-              </span>            
-            </div>
-
-            <div class='dropdown-menu' style='max-height: 200px; overflow-y: auto' tabindex=-'1'>
-              <div mvc-each='statelist'>
-                <div class='list-hovered ms-2 me-2 px-2'>
-                  <label>
-                    <input type='checkbox' mvc-checked='statelist[$index].checked' mvc-event-change='$checked2text("statelist", "states")' />
-                    <span mvc-text='statelist[$index].text'></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class='col-2'>
-          <input class='form-control'>
+        <div class='col-12'>
+          <span mvc-show='lodging.unitized || lodging.bookbeds'>
+            Unitized
+          </span>
+          <!--span mvc-show='lodging.bookbeds'>
+            Bookbeds
+          </span-->
         </div>
       </div>
     </div>

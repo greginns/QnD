@@ -68,7 +68,7 @@
                   
                   <div class='row'>
                     <div class='col-12 col-lg-4 mb-3'>
-                      {{ fields.Float(id=activity.arroffset.id, min='0', max='12', step='.1', maxlength=activity.arroffset.maxlength, mvc_value='activity.arroffset', label=activity.arroffset.verbose) }}
+                      {{ fields.Float(id=activity.arroffset.id, min='0', max='600', step='1', maxlength=activity.arroffset.maxlength, mvc_value='activity.arroffset', label=activity.arroffset.verbose) }}
                     </div>
                     <div class='col-12 col-lg-6 mb-3'>
                       {{ fields.SegmentStart(label=activity.assign.verbose) }}

@@ -5,7 +5,7 @@ import {Edittable} from '/~static/lib/client/core/tables.js';
 import {Datetime} from '/~static/lib/client/core/datetime.js';
 import {Setup} from '/~static/apps/items/modules/setup/baseclasses.js';
 
-class Actsched extends Setup {
+class Mealminppl extends Setup {
   constructor(element) {
     super(element);
   }
@@ -13,10 +13,10 @@ class Actsched extends Setup {
   createModel() {
     super.createModel();
 
-    this.model.catname = 'actsched';
-    this.model.itemType = 'Activity'
-    this.model.activity = {};
-    this.model.actsched = {};
+    this.model.catname = 'mealminppl';
+    this.model.itemType = 'Rate'
+    this.model.meals = {};
+    this.model.mealminppl = {};
     this.model.years = [];
     this.model.months = [
       {value: '1', text: 'January'},
@@ -39,29 +39,10 @@ class Actsched extends Setup {
     this.model.range = {
       fromdate: '2021-10-01',
       todate: '2021-10-31',
-      time: '',
-      limit: 0,
-      boo: 1,
-      bow: 1,
+      minppl: 0,
       dowall: true,
       dow: [true, true, true, true, true, true, true]
     };
-
-    this.model.bowo = [
-      {text: 'N/A', value: '0'},
-      {text: '1', value: '1'},
-      {text: '2', value: '2'},
-      {text: '3', value: '3'},
-      {text: '4', value: '4'},
-      {text: '5', value: '5'},
-      {text: '6', value: '6'},
-      {text: '7', value: '7'},
-      {text: '8', value: '8'},
-      {text: '9', value: '9'},
-      {text: '10', value: '10'},
-      {text: '11', value: '11'},
-      {text: '12', value: '12'},
-    ];
 
     this.model.errors = {range: {}};
 
@@ -82,7 +63,7 @@ class Actsched extends Setup {
       this.model.year = yr;
       this.model.month = dt.getMonth()+1;
 
-      this.editTable = new Edittable('#actsched', this, this.saver)
+      this.editTable = new Edittable('#mealminppl', this, this.saver)
 
       resolve();
     }.bind(this));
@@ -90,9 +71,10 @@ class Actsched extends Setup {
   
   async inView(params) {
     this.code = params.code;
-    this.activity = await Module.tableStores.activity.getOne(this.code);
+    this.rateno = params.rateno;
+    this.meals = await Module.tableStores.meals.getOne(this.code);
 
-    this.model.title = this.activity.name + ', Schedule';
+    this.model.title = this.meals.name + ', Rate ' + this.rateno;
   }
 
   outView() {
@@ -106,38 +88,26 @@ class Actsched extends Setup {
   }
 
   async save(ev) {
-    // scheds has our array of scheds
+    // minppls has our array of minppls
     // one entry per day/time.  Need to repack into [[day1], [day2]], where each day can have x times
-    // actsched is the entry just edited
-    let actsched = this.model.actsched.toJSON();
-    let scheds = this.model.scheds.toJSON();
-    let sched = [];
-    let dt = new Datetime([this.model.year, this.model.month, 1]);
-    let dsim = dt.getDaysInMonth();
-
-    // repack sched
-    for (let dayno=0; dayno<dsim; dayno++) {
-      sched.push([]);
-    }
-
-    for (let entry of scheds) {
-      sched[entry.dayno][entry.posn] = {time: entry.time, limit: entry.limit, boo: entry.boo, bow: entry.bow};
-    }
+    // mealminppl is the entry just edited
+    let mealminppl = this.model.mealminppl.toJSON();
+    let minppl = this.model.minppls.toJSON();
 
     // update the one being edited
-    sched[actsched.dayno][actsched.posn] = {time: actsched.time, limit: actsched.limit, boo: actsched.boo, bow: actsched.bow};
+    minppl[mealminppl.dayno] = {minppl: mealminppl.minppl};
 
-    sched = JSON.stringify(sched);
+    minppl = JSON.stringify(minppl);
 
-    let data = {activity: this.activity.code, year: this.model.year, month: this.model.month, sched};
+    let data = {meal: this.meals.code, rateno: this.rateno, year: this.model.year, month: this.model.month, minppl};
 
     //let spinner = this.startSpinner(ev);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.actsched.update([data.activity, data.year, data.month], {sched: data.sched}) : await Module.tableStores.actsched.insert(data);
+    let res = (this.model.existingEntry) ? await Module.tableStores.mealminp.update([data.meal, data.rateno, data.year, data.month], {minppl: data.minppl}) : await Module.tableStores.mealminp.insert(data);
 
     if (res.status == 200) {
-      utils.modals.toast('Schedule', ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+      utils.modals.toast('Minimum', ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
    
     }
     else {
@@ -146,17 +116,17 @@ class Actsched extends Setup {
     
     //this.stopSpinner(ev, spinner); 
     
-    this.getScheds();
+    this.getMinppls();
     return true;
   }
 
-  async getScheds() {
+  async getMinppls() {
     // need a one level array, so [[{time1, time2}], [day2]]
     let dt = new Datetime([this.model.year, this.model.month, 1]);
     let dsim = dt.getDaysInMonth();
-    let scheds = [];
+    let minppls = [];
 
-    let record = await this.getActsched();
+    let record = await this.getMinppl();
 
     if (Object.keys(record).length == 0) {
       // new record
@@ -166,37 +136,35 @@ class Actsched extends Setup {
         let dt2 = (new Datetime(dt)).add(d, 'day');
         let dow = dt2.day();
 
-        scheds.push({posn: 0, dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time: null, limit: 0, boo: 1, bow: 1});
+        minppls.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), minppl: 0});
       }
     }
     else {
-      // unpack array entries into multiple entries, one per day/time
       this.model.existingEntry = true;
 
       for (let d=0; d<dsim; d++) {    // for each day
         let dt2 = (new Datetime(dt)).add(d, 'day');
         let dow = dt2.day();
+        let rec = record.minppl[d];
 
-        for (let idx=0; idx<record.sched[d].length; idx++) {    // for each entry in day
-          let rec = record.sched[d][idx];
-          scheds.push({posn: idx, dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time: rec.time, limit: rec.limit, boo: rec.boo, bow: rec.bow});
-        }
+        minppls.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), minppl: rec.minppl});
       }
     }
 
-    this.model.scheds = scheds;
+    this.model.minppls = minppls;
   }
 
-  async getActsched() {
-    let act = this.activity.code;
+  async getMinppl() {
+    let act = this.meals.code;
+    let rateno = this.rateno;
     let yy = this.model.year;
     let mm = this.model.month;
 
-    return await Module.tableStores.actsched.getOne([act, yy, mm]);
+    return await Module.tableStores.mealminp.getOne([act, rateno, yy, mm]);
   }
 
   async canClear(ev) {
-    let data = this.model.actrates.toJSON();
+    let data = this.model.mealminppl.toJSON();
     return super.canClear(ev, data);
   }
 
@@ -215,11 +183,6 @@ class Actsched extends Setup {
       return;
     }
 
-    if (!range.time) {
-      this.model.errors.range.time = 'Required';
-      return;
-    }
-
     let dt1 = utils.datetime.pgDateToDatetime(this.model.range.fromdate);
     let dt2 = utils.datetime.pgDateToDatetime(this.model.range.todate);
 
@@ -235,36 +198,37 @@ class Actsched extends Setup {
       return;
     }
 
-    let act = this.activity.code;
+    let act = this.meals.code;
+    let rateno = this.rateno;
 
     for (let entry of lods) {
       let yy = entry[0], mm = entry[1], dds = entry[2];
       let dt = utils.datetime.make([yy, mm]);
       let dsim = dt.getDaysInMonth();
 
-      let res = await Module.tableStores.actsched.getOne([act, yy, mm]);
+      let res = await Module.tableStores.mealminp.getOne([act, rateno, yy, mm]);
       let existingEntry = Object.keys(res).length > 0;
 
-      let sched;
+      let minppl;
       
       if (!existingEntry) {
-        sched = this.createRangeSched(dsim);
-        this.updateRangeSched(sched, yy, mm, dds);
+        minppl = this.createRangeMinppl(dsim);
+        this.updateRangeMinppl(minppl, yy, mm, dds);
       }
       else {
-        sched = res.sched;
-        this.updateRangeSched(sched, yy, mm, dds);
+        minppl = res.minppl;
+        this.updateRangeMinppl(minppl, yy, mm, dds);
       }
 
-      sched = JSON.stringify(sched);
+      minppl = JSON.stringify(minppl);
   
-      let data = {activity: act, year: yy, month: mm, sched};
+      let data = {meal: act, rateno, year: yy, month: mm, minppl};
   
       // new (post) or old (put)?
-      res = (existingEntry) ? await Module.tableStores.actsched.update([data.activity, data.year, data.month], {sched: data.sched}) : await Module.tableStores.actsched.insert(data);
+      res = (existingEntry) ? await Module.tableStores.mealminp.update([data.meal, data.rateno, data.year, data.month], {minppl: data.minppl}) : await Module.tableStores.mealminp.insert(data);
   
       if (res.status == 200) {
-        utils.modals.toast('Schedule', ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+        utils.modals.toast('Minimum', ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
      
       }
       else {
@@ -273,19 +237,18 @@ class Actsched extends Setup {
     }
   }
 
-  createRangeSched(dsim) {
-    let sched = [];
+  createRangeMinppl(dsim) {
+    let minppl = [];
 
     for (let i=0; i<dsim; i++) {
-      sched.push([]);
+      minppl.push({minppl: 0});
     }
 
-    return sched;
+    return minppl;
   }
 
-  updateRangeSched(sched, yy, mm, dds) {
-    // sched has one entry per date.  Each daily entry has X time entries
-    // go through each day and either replace or add an entry with the new range data
+  updateRangeMinppl(minppl, yy, mm, dds) {
+    // minppl has one entry per date.  
     let range =  this.model.range.toJSON();
     let dows = range.dow;
 
@@ -294,24 +257,7 @@ class Actsched extends Setup {
       let dow = dt.dow();
 
       if (dows[dow]) {
-        // have one, what to do with it?
-        let dayEntry = sched[dd-1];   // that day's entry
-        let found = false;
-
-        for (let timeData of dayEntry) {
-          if (timeData.time == range.time || timeData.time == null) {
-            timeData.time = range.time;
-            timeData.limit = range.limit;
-            timeData.boo = range.boo;
-            timeData.bow = range.bow;
-            found = true;
-            break;
-          }
-        }
-
-        if (!found) {
-          dayEntry.push({time: range.time, limit: range.limit, boo: range.boo, bow: range.bow});
-        }
+        minppl[dd-1] = {minppl: range.minppl};
       }
     }
   }
@@ -329,14 +275,14 @@ class Actsched extends Setup {
   }
 
   goBack() {
-    Module.pager.go(`/activity/${this.code}`);
+    Module.pager.go(`/meals/${this.code}/rate/${this.rateno}`);
   }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('items-sched-activity');   // page html
-let setup1 = new Actsched('items-sched-activity-section');
+let el1 = document.getElementById('items-minppl-meals');   // page html
+let setup1 = new Mealminppl('items-minppl-meals-section');
 let section1 = new Section({mvc: setup1});
-let page1 = new Page({el: el1, path: ['/activity/:code/sched'], title: 'Activity Schedule', sections: [section1]});
+let page1 = new Page({el: el1, path: ['/meals/:code/rate/:rateno/minppl'], title: 'meals Minimum People', sections: [section1]});
 
 Module.pages.push(page1);

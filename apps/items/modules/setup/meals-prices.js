@@ -5,7 +5,7 @@ import {Edittable} from '/~static/lib/client/core/tables.js';
 import {Datetime} from '/~static/lib/client/core/datetime.js';
 import {Setup} from '/~static/apps/items/modules/setup/baseclasses.js';
 
-class Lodgprices extends Setup {
+class Mealprices extends Setup {
   constructor(element) {
     super(element);
   }
@@ -13,12 +13,12 @@ class Lodgprices extends Setup {
   createModel() {
     super.createModel();
 
-    this.model.catname = 'lodgprices';
+    this.model.catname = 'mealprices';
     this.model.itemType = 'Rate'
-    this.model.lodging = {};
-    this.model.lodgrates = {};
+    this.model.meals = {};
+    this.model.mealrates = {};
     this.model.pricelevel = {};
-    this.model.lodgprices = {};
+    this.model.mealprices = {};
     this.model.years = [];
     this.model.months = [
       {value: '1', text: 'January'},
@@ -75,7 +75,7 @@ class Lodgprices extends Setup {
       this.model.year = yr;
       this.model.month = dt.getMonth()+1;
 
-      this.editTable = new Edittable('#lodgprices', this, this.saver)
+      this.editTable = new Edittable('#mealprices', this, this.saver)
 
       resolve();
     }.bind(this));
@@ -86,11 +86,11 @@ class Lodgprices extends Setup {
 
     this.code = params.code;
     this.rateno = params.rateno || '';
-    this.lodging = await Module.tableStores.lodging.getOne(this.code);
-    this.lodgrates = await Module.tableStores.lodgrates.getOne([this.code, this.rateno]);
-    this.pricelevel = await Module.tableStores.pricelevel.getOne(this.lodgrates.pricelevel);
+    this.meals = await Module.tableStores.meals.getOne(this.code);
+    this.mealrates = await Module.tableStores.mealrates.getOne([this.code, this.rateno]);
+    this.pricelevel = await Module.tableStores.pricelevel.getOne(this.mealrates.pricelevel);
 
-    this.model.title = this.lodging.name + ', Rate ' + this.rateno;
+    this.model.title = this.meals.name + ', Rate ' + this.rateno;
 
     for (let i=1; i<=6; i++) {
       if (this.pricelevel['desc'+i]) pdesc[i-1] = this.pricelevel['desc'+i];
@@ -112,16 +112,16 @@ class Lodgprices extends Setup {
 
   async save(ev) {
     // prices has our array of prices
-    // lodgprices is the entry just edited
+    // mealprices is the entry just edited
     const nullify = function(val) {
       return (val == '') ? null : val;
     }
 
-    let lodgprices = this.model.lodgprices.toJSON();
+    let mealprices = this.model.mealprices.toJSON();
     let prices = this.model.prices;
-    let data = {lodging: this.lodging.code, rateno: this.lodgrates.rateno, year: this.model.year, month: this.model.month, prices: []};
+    let data = {meal: this.meals.code, rateno: this.mealrates.rateno, year: this.model.year, month: this.model.month, prices: []};
 
-    prices[lodgprices.dayno] = lodgprices;
+    prices[mealprices.dayno] = mealprices;
 
     for (let entry of prices) {
       data.prices.push([nullify(entry.price0), nullify(entry.price1), nullify(entry.price2), nullify(entry.price3), nullify(entry.price4), nullify(entry.price5), nullify(entry.price6)]);
@@ -132,7 +132,7 @@ class Lodgprices extends Setup {
     //let spinner = this.startSpinner(ev);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.lodgprices.update([data.lodging, data.rateno, data.year, data.month], {prices: data.prices}) : await Module.tableStores.lodgprices.insert(data);
+    let res = (this.model.existingEntry) ? await Module.tableStores.mealprices.update([data.meal, data.rateno, data.year, data.month], {prices: data.prices}) : await Module.tableStores.mealprices.insert(data);
 
     if (res.status == 200) {
       utils.modals.toast('Rate ' + data.rateno, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
@@ -153,7 +153,7 @@ class Lodgprices extends Setup {
     let dsim = dt.getDaysInMonth();
     let prices = [];
 
-    let record = await this.getlodgprices();
+    let record = await this.getMealprices();
 
     if (Object.keys(record).length == 0) {
       // new record
@@ -180,17 +180,17 @@ class Lodgprices extends Setup {
     this.model.prices = prices;
   }
 
-  async getlodgprices() {
-    let act = this.lodging.code;
-    let rateno = this.lodgrates.rateno;
+  async getMealprices() {
+    let act = this.meals.code;
+    let rateno = this.mealrates.rateno;
     let yy = this.model.year;
     let mm = this.model.month;
 
-    return await Module.tableStores.lodgprices.getOne([act, rateno, yy, mm]);
+    return await Module.tableStores.mealprices.getOne([act, rateno, yy, mm]);
   }
 
   async canClear(ev) {
-    let data = this.model.lodgrates.toJSON();
+    let data = this.model.mealrates.toJSON();
     return super.canClear(ev, data);
   }
 
@@ -224,15 +224,15 @@ class Lodgprices extends Setup {
       return;
     }
 
-    let act = this.lodging.code;
-    let rateno = this.lodgrates.rateno;
+    let act = this.meals.code;
+    let rateno = this.mealrates.rateno;
 
     for (let entry of lods) {
       let yy = entry[0], mm = entry[1], dds = entry[2];
       let dt = utils.datetime.make([yy, mm]);
       let dsim = dt.getDaysInMonth();
 
-      let res = await Module.tableStores.lodgprices.getOne([act, rateno, yy, mm]);
+      let res = await Module.tableStores.mealprices.getOne([act, rateno, yy, mm]);
       let existingEntry = Object.keys(res).length > 0;
 
       let prices;
@@ -245,13 +245,13 @@ class Lodgprices extends Setup {
         prices = res.prices;
         this.updateRangePrices(prices, yy, mm, dds);
       }
-
+  
       prices = JSON.stringify(prices);
 
-      let data = {lodging: act, rateno: rateno, year: yy, month: mm};
-  
+      let data = {meal: act, rateno: rateno, year: yy, month: mm, prices};
+
       // new (post) or old (put)?
-      res = (existingEntry) ? await Module.tableStores.lodgprices.update([data.lodging, data.rateno, data.year, data.month], {prices: data.prices}) : await Module.tableStores.lodgprices.insert(data);
+      res = (existingEntry) ? await Module.tableStores.mealprices.update([data.meal, data.rateno, data.year, data.month], {prices: data.prices}) : await Module.tableStores.mealprices.insert(data);
   
       if (res.status == 200) {
         utils.modals.toast('Rate ' + data.rateno, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
@@ -297,15 +297,19 @@ class Lodgprices extends Setup {
     }
   }
 
+  test(ev) {
+    console.log(this.model.range.toJSON())
+  }
+
   goBack() {
-    Module.pager.go(`/lodging/${this.code}/rate/${this.rateno}`);
+    Module.pager.go(`/meals/${this.code}/rate/${this.rateno}`);
   }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('items-price-lodging');   // page html
-let setup1 = new Lodgprices('items-price-lodging-section');
+let el1 = document.getElementById('items-price-meals');   // page html
+let setup1 = new Mealprices('items-price-meals-section');
 let section1 = new Section({mvc: setup1});
-let page1 = new Page({el: el1, path: ['/lodging/:code/rate/:rateno/prices'], title: 'Lodging Prices', sections: [section1]});
+let page1 = new Page({el: el1, path: ['/meals/:code/rate/:rateno/prices'], title: 'Meal Prices', sections: [section1]});
 
 Module.pages.push(page1);

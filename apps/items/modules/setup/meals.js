@@ -4,7 +4,7 @@ import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 import {Main} from '/~static/apps/items/modules/setup/baseclasses.js';
 
-class Lodging extends Main {
+class Meals extends Main {
   constructor(element) {
     super(element);
   }
@@ -12,13 +12,13 @@ class Lodging extends Main {
   createModel() {
     super.createModel();
 
-    this.model.catname = 'lodging';
-    this.model.title = 'Lodging';
-    this.model.lodging = {};
-    this.model.errors.lodging = {};
+    this.model.catname = 'meals';
+    this.model.title = 'Meals';
+    this.model.meals = {};
+    this.model.errors.meals = {};
 
-    this.model.lodglocns = [];
-    this.model.lodgtypes = [];
+    this.model.meallocns = [];
+    this.model.mealtypes = [];
   }
 
   async ready() {
@@ -30,10 +30,10 @@ class Lodging extends Main {
     await super.ready();
 
     return new Promise(async function(resolve) {
-      Module.tableStores.lodglocn.addView(new TableView({proxy: this.model.lodglocns, filterFunc}));
-      Module.tableStores.lodgtype.addView(new TableView({proxy: this.model.lodgtypes, filterFunc}));
+      Module.tableStores.meallocn.addView(new TableView({proxy: this.model.meallocns, filterFunc}));
+      Module.tableStores.mealtype.addView(new TableView({proxy: this.model.mealtypes, filterFunc}));
 
-      this.defaults = await Module.tableStores.lodging.getDefault();   
+      this.defaults = await Module.tableStores.meals.getDefault();   
 
       resolve();
     }.bind(this));
@@ -48,31 +48,30 @@ class Lodging extends Main {
   }
 
   async save(ev) {
-    let data = this.model.lodging.toJSON();
+    let data = this.model.meals.toJSON();
     let diffs;
-    console.log(data.assign, this.origData.assign)          
+
     this.clearErrors();
 
     if (this.model.existingEntry) {
       diffs = this.checkDiff(this.origData, data);
-
       if (diffs === false) return;
     }      
 
     let spinner = this.startSpinner(ev);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.lodging.update(data.code, diffs) : await Module.tableStores.lodging.insert(data);
+    let res = (this.model.existingEntry) ? await Module.tableStores.meals.update(data.code, diffs) : await Module.tableStores.meals.insert(data);
 
     if (res.status == 200) {
-      utils.modals.toast('Lodging ' + data.code, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+      utils.modals.toast('Meal ' + data.code, ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
    
       if (!this.model.existingEntry) {
         this.editEntry(data.code);
         return;
       }
-      
-      this.origData = this.model.lodging.toJSON();
+
+      this.origData = this.model.meals.toJSON();
     }
     else {
       this.displayErrors(res);
@@ -82,42 +81,42 @@ class Lodging extends Main {
   }
 
   async canClear(ev) {
-    let data = this.model.lodging.toJSON();
+    let data = this.model.meals.toJSON();
     return super.canClear(ev, data);
   }
 
   setDefaults() {
     // set entry to default value
-    this.model.lodging = {};
+    this.model.meals = {};
 
     for (let k in this.defaults) {
-      this.model.lodging[k] = this.defaults[k];
+      this.model.meals[k] = this.defaults[k];
     }
   }
 
   async testCode() {
-    let code = this.model.lodging.code;
-    let res = await Module.tableStores.lodging.getOne(code);
+    let code = this.model.meals.code
+    let res = await Module.tableStores.meals.getOne(code);
     
     if (Object.keys(res).length == 0) return;
 
-    this.model.lodging.code = '';
+    this.model.meals.code = '';
 
     let options = {text: code + ' already exists.  Do you wish to edit?', buttons: [{text: 'Yes', class: 'btn-primary'}, {text: 'No', class: 'btn-danger'}], defaultButton: 1, okayButton: 0};
     let btn = await Module.modal.confirm(options);
 
     if (btn == 0) {
       // edit
-      this.editEntry(code)
+      this.editEntry(code);
     }
     else {
       // retry
-      this.$focus('lodging.code');
+      this.$focus('meals.code');
     }
   }
 
   async getEntry(code) {
-    let res = await Module.tableStores.lodging.getOne(code);
+    let res = await Module.tableStores.meals.getOne(code);
 
     if (Object.keys(res).length == 0) {
       await Module.modal.alert(code + ' Does not exist');
@@ -132,40 +131,29 @@ class Lodging extends Main {
     this.model.existingEntry = false;
 
     this.setDefaults();
-    this.origData = this.model.lodging.toJSON();
+    this.origData = this.model.meals.toJSON();
   }
 
   existingEntry(data) {
     this.model.existingEntry = true;
 
-    this.model.lodging = data;
-    this.origData = this.model.lodging.toJSON();
-  }
-
-  units() {
-    let code = this.model.lodging.code;
-
-    Module.pager.go(`/lodging/${code}/units`);
+    this.model.meals = data;
+    this.origData = this.model.meals.toJSON();
   }
 
   rates(ev) {
-    let code = this.model.lodging.code;
-
-    Module.pager.go(`/lodging/${code}/rates`);
+    Module.pager.go(`/meals/${this.model.meals.code}/rates`)
   }
 
   schedule(ev) {
-    let code = this.model.lodging.code;
-
-    Module.pager.go(`/lodging/${code}/sched`)
+    Module.pager.go(`/meals/${this.model.meals.code}/sched`)
   }
-
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('items-main-lodging');   // page html
-let setup1 = new Lodging('items-main-lodging-section');
+let el1 = document.getElementById('items-main-meals');   // page html
+let setup1 = new Meals('items-main-meals-section');
 let section1 = new Section({mvc: setup1});
-let page1 = new Page({el: el1, path: ['/lodging', '/lodging/:code'], title: 'Lodging', sections: [section1]});
+let page1 = new Page({el: el1, path: ['/meals', '/meals/:code'], title: 'Meals', sections: [section1]});
 
 Module.pages.push(page1);

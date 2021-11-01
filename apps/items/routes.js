@@ -95,10 +95,12 @@ Router.add(new RouterMessage({
 // Model Routes
 new Routes({app, subapp: 'activity', version, allowCORS: true, model: models.Activity, services: services.activity});
 new Routes({app, subapp: 'lodging', version, allowCORS: true, model: models.Lodging, services: services.lodging});
+new Routes({app, subapp: 'meals', version, allowCORS: true, model: models.Meals, services: services.meals});
 
 new Routes({app, subapp: 'actdaily', version, allowCORS: true, model: models.Actdaily, services: services.actdaily});
 new Routes({app, subapp: 'actrates', version, allowCORS: true, model: models.Actrates, services: services.actrates});
 new Routes({app, subapp: 'actprices', version, allowCORS: true, model: models.Actprices, services: services.actprices});
+new Routes({app, subapp: 'actminp', version, allowCORS: true, model: models.Actminp, services: services.actminp});
 new Routes({app, subapp: 'actsched', version, allowCORS: true, model: models.Actsched, services: services.actsched});
 new Routes({app, subapp: 'actgroup', version, allowCORS: true, model: models.Actgroup, services: services.actgroup});
 new Routes({app, subapp: 'actres', version, allowCORS: true, model: models.Actres, services: services.actres});
@@ -107,8 +109,17 @@ new Routes({app, subapp: 'actttot', version, allowCORS: true, model: models.Actt
 new Routes({app, subapp: 'lodgunit', version, allowCORS: true, model: models.Lodgunit, services: services.lodgunit});
 new Routes({app, subapp: 'lodgrates', version, allowCORS: true, model: models.Lodgrates, services: services.lodgrates});
 new Routes({app, subapp: 'lodgprices', version, allowCORS: true, model: models.Lodgprices, services: services.lodgprices});
+new Routes({app, subapp: 'lodgminp', version, allowCORS: true, model: models.Lodgminp, services: services.lodgminp});
+new Routes({app, subapp: 'lodgsched', version, allowCORS: true, model: models.Lodgsched, services: services.lodgsched});
 new Routes({app, subapp: 'lodglocn', version, allowCORS: true, model: models.Lodglocn, services: services.lodglocn});
 new Routes({app, subapp: 'lodgtype', version, allowCORS: true, model: models.Lodgtype, services: services.lodgtype});
+
+new Routes({app, subapp: 'mealrates', version, allowCORS: true, model: models.Mealrates, services: services.mealrates});
+new Routes({app, subapp: 'mealprices', version, allowCORS: true, model: models.Mealprices, services: services.mealprices});
+new Routes({app, subapp: 'mealminp', version, allowCORS: true, model: models.Mealminp, services: services.mealminp});
+new Routes({app, subapp: 'mealsched', version, allowCORS: true, model: models.Mealsched, services: services.mealsched});
+new Routes({app, subapp: 'meallocn', version, allowCORS: true, model: models.Meallocn, services: services.meallocn});
+new Routes({app, subapp: 'mealtype', version, allowCORS: true, model: models.Mealtype, services: services.mealtype});
 
 new Routes({app, subapp: 'area', version, allowCORS: true, model: models.Area, services: services.area});
 new Routes({app, subapp: 'glcode', version, allowCORS: true, model: models.Glcode, services: services.glcode});

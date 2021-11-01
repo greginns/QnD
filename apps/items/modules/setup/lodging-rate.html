@@ -56,16 +56,9 @@
                 {{ fields.Integer(id=lodgrates.addlppl.id, min=0, max=99, step=1, mvc_value='lodgrates.addlppl', label=lodgrates.addlppl.verbose) }}
               </div>
               <div class='col-8 col-md-2 mb-3 mb-2'>
-                {{ fields.Integer(id=lodgrates.minppl.id, min=0, max=99, step=1, mvc_value='lodgrates.minppl', label=lodgrates.minppl.verbose) }}
-              </div>
-            </div>           
-            
-            <div class='row'>
-              <div class='col-8 col-md-2 mb-3 mb-2'>
                 {{ fields.Float(id=lodgrates.minchg.id, min=0, max=999, step=1, mvc_value='lodgrates.minchg', label=lodgrates.minchg.verbose) }}
               </div>
-            </div>
-
+            </div>           
           </div>
 
           <div class='card-footer'>
@@ -85,6 +78,9 @@
                 <span mvc-show='existingEntry'>
                   <button class='btn btn-secondary' mvc-click='prices()'>
                     Prices
+                  </button>
+                  <button class='btn btn-secondary' mvc-click='minppl()'>
+                    Minimum People
                   </button>
                 </span>
                 <button class='btn btn-primary' mvc-click='goBack()'>

@@ -1,20 +1,20 @@
-<page id='items-sched-activity' style='display: none;'>
-  <section id='items-sched-activity-section'>
+<page id='items-minppl-activity' style='display: none;'>
+  <section id='items-minppl-activity-section'>
     {% include "./navbar-item.html" %}
 
     <nav>
       <div class="nav nav-tabs" role="tablist">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#nav-actsched-range" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
-          Schedule by Date Range
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#nav-actminppl-range" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
+          Minimum People by Date Range
         </button>
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#nav-actsched-month" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">
-          Schedule by Day
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#nav-actminppl-month" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">
+          Minimum People by Day
         </button>
       </div>
     </nav>
 
     <div class="tab-content">
-      <div class="tab-pane fade show active" id="nav-actsched-range" role="tabpanel">
+      <div class="tab-pane fade show active" id="nav-actminppl-range" role="tabpanel">
         <br>
 
         <div class='row'>
@@ -61,17 +61,7 @@
               <div class='card-body'>
                 <div class='row'>
                   <div class='col-6 col-md-2 mb-3'>
-                    {{ fields.Time(id='range-time', mvc_value='range.time', mvc_role='time', label='Time') }}
-                  </div>
-                  <div class='col-6 col-md-2 mb-3'>
-                    {{ fields.Integer(id='range-limit', min=0, max=9999, step=1, mvc_value='range.limit', label='Limit') }}
-                  </div>
-
-                  <div class='col-6 col-md-2'>
-                    {{ fields.SelectMVC(id='range-boo', mvc_value='range.boo', mvc_each='bowo', size='1', label='Booking Order - Office') }}
-                  </div>
-                  <div class='col-6 col-md-2'>
-                    {{ fields.SelectMVC(id='range-bow', mvc_value='range.bow', mvc_each='bowo', size='1', label='Booking Order - Online') }}
+                    {{ fields.Integer(id='range-minppl', min=0, max=9999, step=1, mvc_value='range.minppl', label='Min People') }}
                   </div>
                 </div>
               </div>
@@ -90,7 +80,7 @@
         </div>
       </div>
 
-      <div class="tab-pane fade" id="nav-actsched-month" role="tabpanel">
+      <div class="tab-pane fade" id="nav-actminppl-month" role="tabpanel">
         <br>
 
         <div class='row'>
@@ -105,8 +95,8 @@
                     {{ fields.SelectMVC(id='year', mvc_value='year', mvc_each='years', valueField='value', textField='text', size='1', label='Year') }}
                   </div>
                   <div class='col-12 col-md-2 mb-3'>
-                    <button class='btn btn-primary' mvc-click='getScheds()'>
-                      Get Schedule
+                    <button class='btn btn-primary' mvc-click='getMinppls()'>
+                      Get Minimum People
                     </button>
                   </div>
                 </div>       
@@ -114,31 +104,19 @@
     
               <div class='card-body'>
                 <div class='table-responsive'>
-                  <table class='table table-sm' id='actsched' style='min-width: 1000px'>
+                  <table class='table table-sm' id='actminppl' style='min-width: 1000px'>
                     <thead>
                       <tr>
                         <th></th>
-                        <th>Time</th>
-                        <th>Limit</th>
-                        <th>Order-Office</th>
-                        <th>Order-Online</th>
+                        <th>Minimum</th>
                       </tr>
                     </thead>
     
-                    <tbody mvc-each='scheds' class='edittable-source'>
-                      <tr data-edittable-index='$index' mvc-attrclass='{"bg-light": "scheds[$index].weekend"}'>
-                        <th mvc-text='scheds[$index].date'></th>
+                    <tbody mvc-each='minppls' class='edittable-source'>
+                      <tr data-edittable-index='$index' mvc-attrclass='{"bg-light": "minppls[$index].weekend"}'>
+                        <th mvc-text='minppls[$index].date'></th>
                         <td>
-                          <span mvc-text='scheds[$index].time' mvc-filter='time'></span>
-                        </td>
-                        <td>
-                          <span mvc-text='scheds[$index].limit'></span>
-                        </td>
-                        <td>
-                          <span mvc-text='scheds[$index].boo'></span>
-                        </td>
-                        <td>
-                          <span mvc-text='scheds[$index].bow'></span>
+                          <span mvc-text='minppls[$index].minppl'></span>
                         </td>
                         <td>
                           <span class='pointer' mvc-click='editTable.edit()'>
@@ -148,30 +126,15 @@
                       </tr>
                     </tbody>
     
-                    <tbody style='display: none' class='edittable-editor' data-edittable-dest='actsched'>
+                    <tbody style='display: none' class='edittable-editor' data-edittable-dest='actminppl'>
                       <tr>
                         <th>
-                          <span mvc-text='actsched.date'></span>
+                          <span mvc-text='actminppl.date'></span>
                         </th>
                         <td>
                           <span>
-                            {{ fields.Time(id='actsched-time', maxlength='10', mvc_value='actsched.time', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_role='time', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
-                          </span>
-                        </td>
-                        <td>
-                          <span>
-                            {{ fields.Integer(id='actsched-limit', min=0, max=9999, step = 1, mvc_value='actsched.limit', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                            {{ fields.Integer(id='actminppl-minppl', min=0, max=9999, step = 1, mvc_value='actminppl.minppl', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
                           </span> 
-                        </td>
-                        <td>
-                          <span>
-                            {{ fields.SelectMVC(id='actsched-boo', size='1', mvc_value='actsched.boo', label='', mvc_each='bowo', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
-                          </span>
-                        </td>
-                        <td>
-                          <span>
-                            {{ fields.SelectMVC(id='actsched-bow', size='1', mvc_value='actsched.bow', label='', mvc_each='bowo', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='float', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
-                          </span>
                         </td>
                         <td>
                           <span class='pointer' mvc-click='editTable.save()'>
