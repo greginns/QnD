@@ -1,0 +1,75 @@
+<page id='items-meals-reseller' style='display: none;'>
+  <section id='items-meals-reseller-section'>
+    {% include "./navbar-item.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Resellers
+                <span class="badge rounded-pill bg-secondary" mvc-text='mealresellers.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem()'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class='card-body'>
+            <div class='table-responsive'>
+              <table class='table table-sm table-hover' id='mealreseller' style='min-width: 800px; max-width: 1200px'>
+                <thead>
+                  <tr>
+                    <th>Reseller</th>
+                    <th>Rate</th>
+                    <th>Commission%</th>
+                  </tr>
+                </thead>
+                <tbody mvc-each='mealresellers' class='edittable-source'>
+                  <tr data-edittable-index='$index'>
+                    <td mvc-text='mealresellers[$index].name'></td>
+                    <td mvc-text='mealresellers[$index].ratename'></td>
+                    <td mvc-text='mealresellers[$index].comm'></td>
+                    <td>
+                      <span class='pointer me-3' mvc-click='editTable.edit()'>
+                        <i class="fa-thin fa-pen"></i>
+                      </span>                        
+                      <span class='pointer' mvc-click='editTable.delete()'>
+                        <i class="fa-thin fa-trash-can text-danger"></i> 
+                      </span>                                              
+                    </td>
+                  </tr>
+                </tbody>
+                <tbody style='display: none' class='edittable-editor' data-edittable-dest='mealreseller'>
+                  <tr>
+                    <td>
+                      {{ fields.SelectMVC(id=mealreseller.reseller.id, mvc_value='mealreseller.reseller', mvc_each='resellers', valueField='code', textField='name', size='1', label='') }}
+                    </td>
+                    <td>
+                      {{ fields.SelectMVC(id=mealreseller.rateno.id, mvc_value='mealreseller.rateno', mvc_each='mealrates', valueField='rateno', textField='name', size='1', label='') }}
+                    </td>
+                    <td>
+                      {{ fields.Float(id=mealreseller.comm.id, mvc_value='mealreseller.comm', min=0, max=100, step='.1', label='') }}
+                    </td>
+                    <td>
+                      <span class='pointer me-3' mvc-click='editTable.save()'>
+                        <i class="fa-light fa-floppy-disk text-success"></i>
+                      </span>
+                      <span class='pointer' mvc-click='editTable.cancel()'>
+                        <i class="fa-light fa-xmark"></i> 
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</page>

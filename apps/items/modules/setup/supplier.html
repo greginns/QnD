@@ -1,0 +1,135 @@
+<page id='items-main-supplier' style='display: none;'>
+  <section id='items-main-supplier-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-md-0'>
+                {{ fields.Char(id=supplier.code.id, maxlength=supplier.code.maxlength, mvc_value='supplier.code', label=supplier.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='upper') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=supplier.active.id, mvc_checked='supplier.active', label=supplier.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 order-md-2'>
+                {{ fields.Char(id=supplier.name.id, maxlength=supplier.name.maxlength, mvc_value='supplier.name', label=supplier.name.verbose) }}
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 order-md-2'>
+                {{ fields.Char(id=supplier.email.id, maxlength=supplier.email.maxlength, mvc_value='supplier.email', label=supplier.email.verbose) }}
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 order-md-2'>
+                {{ fields.Char(id=supplier.apikey.id, maxlength=supplier.apikey.maxlength, mvc_value='supplier.apikey', label=supplier.apikey.verbose) }}
+              </div>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <button class='btn btn-primary' mvc-click='backToStart()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class='row' mvc-show='existingEntry'>
+          <div class='col-12'>
+            <div class='table-responsive'>
+              <table class='table table-striped' id='supplier-items'>
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Item Code</th>
+                    <th>Name</th>
+                  </tr>
+                </thead>
+
+                <tbody mvc-each='supplier.items' class='edittable-source'>
+                  <tr data-edittable-index='$index'>
+                    <td>
+                      <span mvc-text='supplier.items[$index].cat'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='supplier.items[$index].code'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='supplier.items[$index].name'></span>
+                    </td>
+                    <td>
+                      <span class='pointer' mvc-click='editTable.edit()'>
+                        <i class="fa-thin fa-pen"></i>
+                      </span>
+                      <span class='pointer' mvc-click='editTable.delete()'>
+                        <i class="fa-thin fa-trash-can text-danger"></i> 
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+
+                <tbody style='display: none' class='edittable-editor' data-edittable-dest='item'>
+                  <tr>
+                    <td>
+                      {{ fields.SelectMVC(id='itemcat',size='1', mvc_value='item.cat', mvc_each='itemcats', label='') }}
+                    </td>
+                    <td>
+                      {{ fields.Char(id='itemcode', maxlength='8', mvc_value='item.code', mvc_edit='upper', mvc_filter='upper') }}
+                    </td>
+                    <td>
+                      {{ fields.Char(id='itemname', maxlength='50', mvc_value='item.name') }}
+                    </td>
+                    <td>
+                      <span class='pointer' mvc-click='editTable.save()'>
+                        <i class="fa-light fa-floppy-disk"></i>
+                      </span>
+                      <span class='pointer' mvc-click='editTable.cancel()'>
+                        <i class="fa-light fa-xmark"></i>  
+                      </span>                        
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class='row'>
+          <div class='col-12'>
+            <button class='btn-sm btn-outline-primary' mvc-click='newItem()'>
+              New Item
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+</page>

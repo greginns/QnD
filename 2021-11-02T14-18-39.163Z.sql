@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS "gm"."items_Reseller" (
+"code" VARCHAR(65) NOT NULL,
+"name" VARCHAR(50) NOT NULL,
+"email" VARCHAR(50) NOT NULL,
+"apikey" VARCHAR(50) NOT NULL,
+PRIMARY KEY("code")
+);
+CREATE TABLE IF NOT EXISTS "gm"."items_Supplier" (
+"code" VARCHAR(65) NOT NULL,
+"name" VARCHAR(50) NOT NULL,
+"email" VARCHAR(50) NOT NULL,
+"apikey" VARCHAR(50) NOT NULL,
+PRIMARY KEY("code")
+);

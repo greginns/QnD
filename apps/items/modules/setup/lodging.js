@@ -50,7 +50,7 @@ class Lodging extends Main {
   async save(ev) {
     let data = this.model.lodging.toJSON();
     let diffs;
-    console.log(data.assign, this.origData.assign)          
+
     this.clearErrors();
 
     if (this.model.existingEntry) {
@@ -160,6 +160,9 @@ class Lodging extends Main {
     Module.pager.go(`/lodging/${code}/sched`)
   }
 
+  resellers(ev) {
+    Module.pager.go(`/lodging/${this.model.lodging.code}/resellers`)
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

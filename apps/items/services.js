@@ -38,6 +38,8 @@ services.actrates = new ModelService({model: models.Actrates});
 services.actprices = new ModelService({model: models.Actprices});
 services.actminp = new ModelService({model: models.Actminp});
 services.actsched = new ModelService({model: models.Actsched});
+services.actinclm = new ModelService({model: models.Actinclm});
+services.actreseller = new ModelService({model: models.Actreseller});
 services.actgroup = new ModelService({model: models.Actgroup});
 services.actres = new ModelService({model: models.Actres});
 services.actttot = new ModelService({model: models.Actttot});
@@ -47,6 +49,8 @@ services.lodgrates = new ModelService({model: models.Lodgrates});
 services.lodgprices = new ModelService({model: models.Lodgprices});
 services.lodgminp = new ModelService({model: models.Lodgminp});
 services.lodgsched = new ModelService({model: models.Lodgsched});
+services.lodginclm = new ModelService({model: models.Lodginclm});
+services.lodgreseller = new ModelService({model: models.Lodgreseller});
 services.lodglocn = new ModelService({model: models.Lodglocn});
 services.lodgtype = new ModelService({model: models.Lodgtype});
 
@@ -54,6 +58,7 @@ services.mealrates = new ModelService({model: models.Mealrates});
 services.mealprices = new ModelService({model: models.Mealprices});
 services.mealminp = new ModelService({model: models.Mealminp});
 services.mealsched = new ModelService({model: models.Mealsched});
+services.mealreseller = new ModelService({model: models.Mealreseller});
 services.meallocn = new ModelService({model: models.Meallocn});
 services.mealtype = new ModelService({model: models.Mealtype});
 
@@ -61,6 +66,8 @@ services.area = new ModelService({model: models.Area});
 services.glcode = new ModelService({model: models.Glcode});
 services.tax = new ModelService({model: models.Tax});
 services.waiver = new ModelService({model: models.Waiver});
+services.supplier = new ModelService({model: models.Supplier});
+services.reseller = new ModelService({model: models.Reseller});
 services.pricelevel = new ModelService({model: models.Pricelevel});
 services.pmtterms = new ModelService({model: models.Pmtterms});
 
@@ -85,12 +92,14 @@ services.output = {
 
       ctx.actdaily = models.Actdaily.getColumnDefns();
       ctx.actrates = models.Actrates.getColumnDefns();
+      ctx.actinclm = models.Actinclm.getColumnDefns();
       ctx.actgroup = models.Actgroup.getColumnDefns();
       ctx.actres = models.Actres.getColumnDefns();
       ctx.actttot = models.Actttot.getColumnDefns();
 
       ctx.lodgunit = models.Lodgunit.getColumnDefns();
       ctx.lodgrates = models.Lodgrates.getColumnDefns();
+      ctx.lodginclm = models.Lodginclm.getColumnDefns();
       ctx.lodglocn = models.Lodglocn.getColumnDefns();
       ctx.lodgtype = models.Lodgtype.getColumnDefns();
       
@@ -102,6 +111,8 @@ services.output = {
       ctx.glcode = models.Glcode.getColumnDefns();
       ctx.tax = models.Tax.getColumnDefns();
       ctx.waiver = models.Waiver.getColumnDefns();
+      ctx.supplier = models.Supplier.getColumnDefns();
+      ctx.reseller = models.Reseller.getColumnDefns();
       ctx.pricelevel = models.Pricelevel.getColumnDefns();
       ctx.pmtterms = models.Pmtterms.getColumnDefns();
 

@@ -149,6 +149,10 @@ class Activity extends Main {
   schedule(ev) {
     Module.pager.go(`/activity/${this.model.activity.code}/sched`)
   }
+
+  resellers(ev) {
+    Module.pager.go(`/activity/${this.model.activity.code}/resellers`)
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

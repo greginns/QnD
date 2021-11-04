@@ -539,7 +539,6 @@
       </div>
     </div>
 
-      
     <div class='row'>
       <div class='col-12 col-md-6 col-lg-4 mb-3'>
         <div class='card'>
@@ -610,5 +609,74 @@
       </div>
     </div>
 
+    <div class='row'>
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Suppliers
+                <span class="badge rounded-pill bg-secondary" mvc-text='supplier.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("supplier")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("supplier","code")'>Code</th>
+                  <th mvc-click='sortItems("supplier","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='supplier'>
+                <tr mvc-click='editItem("supplier", "$index")'>
+                  <td mvc-text='supplier[$index].code'></td>
+                  <td mvc-text='supplier[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Resellers
+                <span class="badge rounded-pill bg-secondary" mvc-text='reseller.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("reseller")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("reseller","code")'>Code</th>
+                  <th mvc-click='sortItems("reseller","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='reseller'>
+                <tr mvc-click='editItem("reseller", "$index")'>
+                  <td mvc-text='reseller[$index].code'></td>
+                  <td mvc-text='reseller[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </page>

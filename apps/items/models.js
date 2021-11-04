@@ -118,10 +118,10 @@ const Items = class extends Model {
         waiver: new Fields.Char({null: true, maxLength: 10, verbose: 'Waiver'}),
         lastday: new Fields.Integer({null: true, default: 0, verbose: 'Last Day to Book'}),
         lasttime: new Fields.Time({null: true, verbose: 'Last Time to Book'}),
-        gl1: new Fields.Char({null: true, maxLength: 20, verbose: 'GL'}),
-        gl2: new Fields.Char({null: true, maxLength: 20, verbose: 'GL'}),
-        gl3: new Fields.Char({null: true, maxLength: 20, verbose: 'GL'}),
-        gl4: new Fields.Char({null: true, maxLength: 20, verbose: 'GL'}),
+        gl1: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL'}),
+        gl2: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL'}),
+        gl3: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL'}),
+        gl4: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL'}),
         gl1amt: new Fields.Float({null: true, default: 0, verbose: 'Amount'}),
         gl2amt: new Fields.Float({null: true, default: 0, verbose: 'Amount'}),
         gl3amt: new Fields.Float({null: true, default: 0, verbose: 'Amount'}),
@@ -153,6 +153,7 @@ const Items = class extends Model {
           {name: 'tax3', columns: ['tax3'], app, table: Tax, tableColumns: ['code'], onDelete: 'NO ACTION'},
           {name: 'tax4', columns: ['tax4'], app, table: Tax, tableColumns: ['code'], onDelete: 'NO ACTION'},
           {name: 'waiver', columns: ['waiver'], app, table: Waiver, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'supplier', columns: ['supplier'], app, table: Supplier, tableColumns: ['code'], onDelete: 'NO ACTION'},
         ],
         index: [
         ],
@@ -263,6 +264,35 @@ const Minppl = class extends Model {
       dbschema: '',
       app,
       desc: 'Min Ppl prototype'
+    }      
+  }
+};
+
+const Itemreseller = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static parent() {
+    return {
+      schema: {
+        reseller: new Fields.Char({notNull: true, maxLength: 65, verbose: 'Reseller'}),
+        rateno: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Rate#'}),
+        comm: new Fields.Float({null: true, maxLength: 6, verbose: 'Commission%'}),
+      },
+
+      constraints: {
+        fk: [
+        ],
+
+        index: [],
+      },
+      
+      hidden: [],
+      
+      dbschema: '',
+      app,
+      desc: 'Item Reseller prototype'
     }      
   }
 };
@@ -477,6 +507,41 @@ const Actinclm = class extends Model {
       desc: 'Activity Included Meals'
     }
   }  
+}
+
+const Actreseller = class extends Itemreseller {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        activity: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Activity'}),
+      },
+      
+      constraints: {
+        pk: ['activity', 'reseller'],
+        fk: [
+          {name: 'activity', columns: ['activity'], app, table: Activity, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actrates', columns: ['activity', 'rateno'], app, table: Actrates, tableColumns: ['activity', 'rateno'], onDelete: 'NO ACTION'},
+          {name: 'reseller', columns: ['reseller'], app, table: Reseller, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['activity', 'reseller'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Resellers'
+    }
+  }  
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
 }
 
 const Actgroup = class extends Model {
@@ -795,6 +860,42 @@ const Lodginclm = class extends Model {
     }
   }  
 }
+
+const Lodgreseller = class extends Itemreseller {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        lodging: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Lodging'}),
+      },
+      
+      constraints: {
+        pk: ['lodging', 'reseller'],
+        fk: [
+          {name: 'lodging', columns: ['lodging'], app, table: Lodging, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'lodgrates', columns: ['lodging', 'rateno'], app, table: Lodgrates, tableColumns: ['lodging', 'rateno'], onDelete: 'NO ACTION'},
+          {name: 'reseller', columns: ['reseller'], app, table: Reseller, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['lodging', 'reseller'],
+      
+      dbschema: '',
+      app,
+      desc: 'Lodging Resellers'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }  
+}
+
 const Lodgunit = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -1091,6 +1192,41 @@ const Mealsched = class extends Model {
   }
 };
 
+const Mealreseller = class extends Itemreseller {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        meal: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Meal'}),
+      },
+      
+      constraints: {
+        pk: ['meal', 'reseller'],
+        fk: [
+          {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'mealrates', columns: ['meal', 'rateno'], app, table: Mealrates, tableColumns: ['meal', 'rateno'], onDelete: 'NO ACTION'},
+          {name: 'reseller', columns: ['reseller'], app, table: Reseller, tableColumns: ['code'], onDelete: 'NO ACTION'},
+        ],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['meal', 'reseller'],
+      
+      dbschema: '',
+      app,
+      desc: 'Meal Resellers'
+    }
+  }
+    
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }  
+}
+
 const Meallocn = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -1378,25 +1514,86 @@ const Pmtterms = class extends Model {
   }
 };       
 
+const Reseller = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 65, onBeforeUpsert: upper, verbose: 'Code'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
+        email: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Email'}),
+        apikey: new Fields.Char({notNull: true, maxLength: 50, verbose: 'API key'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Resellers'
+    }
+  }
+};
+
+const Supplier = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 65, onBeforeUpsert: upper, verbose: 'Code'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
+        email: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Email'}),
+        apikey: new Fields.Char({notNull: true, maxLength: 50, verbose: 'API key'}),
+        items: new Fields.Jsonb({null: true, verbose: 'Items'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Suppliers'
+    }
+  }
+};
 
 module.exports = {
   Activity, 
   Actdaily, Actrates, Actprices, Actminp, 
-  Actsched,
-  Actinclm,
+  Actsched, Actinclm, Actreseller,
   Actgroup, Actres, Actttot, 
 
   Lodging,
   Lodgunit, Lodgrates, Lodgprices, Lodgminp, 
-  Lodgsched,
-  Lodginclm,
+  Lodgsched, Lodginclm, Lodgreseller,
   Lodglocn, Lodgtype, 
 
   Meals,
   Mealrates, Mealprices, Mealminp,
-  Mealsched,
+  Mealsched, Mealreseller,
   Meallocn, Mealtype,
 
   Area, Waiver, Glcode, Tax,
-  Pricelevel, Pmtterms
+  Pricelevel, Pmtterms,
+  Reseller, Supplier
 }

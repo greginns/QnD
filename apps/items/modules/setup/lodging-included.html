@@ -1,0 +1,80 @@
+<page id='items-included-lodging-meal' style='display: none;'>
+  <section id='items-included-lodging-meal-section'>
+    {% include "./navbar-item.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-6'>
+                Included Meals
+                <span class="badge rounded-pill bg-secondary" mvc-text='lodginclms.length'></span>
+              </div>
+              <div class='col-6'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem()'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class='card-body'>
+            <div class='table-responsive'>
+              <table class='table table-sm table-hover' id='lodginclm' style='min-width: 800px; max-width: 1200px'>
+                <thead>
+                  <tr>
+                    <th>Meal</th>
+                    <th>Rate</th>
+                    <th>Day</th>
+                    <th>Duration</th>
+                  </tr>
+                </thead>
+                <tbody mvc-each='lodginclms' class='edittable-source'>
+                  <tr data-edittable-index='$index'>
+                    <td mvc-text='lodginclms[$index].name'></td>
+                    <td mvc-text='lodginclms[$index].ratename'></td>
+                    <td mvc-text='lodginclms[$index].day'></td>
+                    <td mvc-text='lodginclms[$index].dur'></td>
+                    <td>
+                      <span class='pointer me-3' mvc-click='editTableEditCaller()'>
+                        <i class="fa-thin fa-pen"></i>
+                      </span>                        
+                      <span class='pointer' mvc-click='editTable.delete()'>
+                        <i class="fa-thin fa-trash-can text-danger"></i> 
+                      </span>                                              
+                    </td>
+                  </tr>
+                </tbody>
+                <tbody style='display: none' class='edittable-editor' data-edittable-dest='lodginclm'>
+                  <tr>
+                    <td>
+                      {{ fields.SelectMVC(id=lodginclm.meal.id, mvc_value='lodginclm.meal', mvc_each='meals', mvc_on='{"change": "mealChanged()"}', valueField='code', textField='name', size='1', label='') }}
+                    </td>
+                    <td>
+                      {{ fields.SelectMVC(id=lodginclm.mealrate.id, mvc_value='lodginclm.mealrate', mvc_each='mealrates', valueField='rateno', textField='name', size='1', label='') }}
+                    </td>
+                    <td>
+                      {{ fields.SelectMVC(id=lodginclm.day.id, mvc_value='lodginclm.day', mvc_each='days', size='1', label='') }}
+                    </td>
+                    <td>
+                      {{ fields.SelectMVC(id=lodginclm.dur.id, mvc_value='lodginclm.dur', mvc_each='days', size='1', label='') }}
+                    </td>                    
+                    <td>
+                      <span class='pointer me-3' mvc-click='editTable.save()'>
+                        <i class="fa-light fa-floppy-disk text-success"></i>
+                      </span>
+                      <span class='pointer' mvc-click='editTable.cancel()'>
+                        <i class="fa-light fa-xmark"></i> 
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</page>

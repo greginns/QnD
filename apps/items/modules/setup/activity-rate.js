@@ -38,7 +38,7 @@ class actrates extends Setup {
     this.rateno = params.rateno || '';
     this.activity = await Module.tableStores.activity.getOne(this.code);
 
-    this.model.title = this.activity.name + ' Rate ' + (this.rateno || '*NEW*');
+    this.model.title = this.activity.name + ', Rate ' + (this.rateno || '*NEW*');
 
     if (params.rateno) {
       await this.getEntry(params.rateno);
@@ -149,6 +149,10 @@ class actrates extends Setup {
 
   minppl() {
     Module.pager.go(`/activity/${this.code}/rate/${this.rateno}/minppl`);
+  }
+
+  included() {
+    Module.pager.go(`/activity/${this.code}/rate/${this.rateno}/included`);
   }
 
   goBack() {

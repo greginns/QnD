@@ -309,7 +309,7 @@ class Mealsched extends Setup {
   }
 
   goBack() {
-    Module.pager.go(`/meal/${this.code}`);
+    Module.pager.go(`/meals/${this.code}`);
   }
 }
 

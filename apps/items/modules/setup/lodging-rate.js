@@ -151,6 +151,10 @@ class Lodgrates extends Setup {
     Module.pager.go(`/lodging/${this.code}/rate/${this.rateno}/minppl`);
   }
 
+  included() {
+    Module.pager.go(`/lodging/${this.code}/rate/${this.rateno}/included`);
+  }
+
   goBack() {
     Module.pager.go(`/lodging/${this.code}/rates`);
   }

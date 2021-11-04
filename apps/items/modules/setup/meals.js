@@ -148,6 +148,10 @@ class Meals extends Main {
   schedule(ev) {
     Module.pager.go(`/meals/${this.model.meals.code}/sched`)
   }
+
+  resellers(ev) {
+    Module.pager.go(`/meals/${this.model.meals.code}/resellers`)
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

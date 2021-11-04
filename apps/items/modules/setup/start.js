@@ -27,6 +27,8 @@ class Item extends Verror {
     this.model.glcode = [];
     this.model.tax = [];
     this.model.waiver = [];
+    this.model.supplier = [];
+    this.model.reseller = [];
     this.model.pricelevel = [];
     this.model.pmtterms = [];
   }
@@ -52,6 +54,8 @@ class Item extends Verror {
       Module.tableStores.glcode.addView(new TableView({proxy: this.model.glcode}));
       Module.tableStores.tax.addView(new TableView({proxy: this.model.tax}));
       Module.tableStores.waiver.addView(new TableView({proxy: this.model.waiver}));
+      Module.tableStores.supplier.addView(new TableView({proxy: this.model.supplier}));
+      Module.tableStores.reseller.addView(new TableView({proxy: this.model.reseller}));
       Module.tableStores.pricelevel.addView(new TableView({proxy: this.model.pricelevel}));
       Module.tableStores.pmtterms.addView(new TableView({proxy: this.model.pmtterms}));
 

@@ -75,7 +75,7 @@
                       {{ fields.Segment(id=lodging.assign.id, mvc_checked='lodging.assign', name='lodging-assign', label='Either', value='E') }}
                       {{ fields.SegmentEnd(mvc_value='lodging.assign', mvc_helptext=lodging.assign.helptext) }}
                     </div>
-                  </div>                  
+                  </div>       
                 </fieldset>
               </div>
 
@@ -287,6 +287,9 @@
                   </button>
                   <button class='btn btn-secondary' mvc-click='schedule()'>
                     Schedule
+                  </button>
+                  <button class='btn btn-secondary' mvc-click='resellers()'>
+                    Resellers
                   </button>
                 </span>
               </div>
