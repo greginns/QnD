@@ -150,6 +150,10 @@ class Activity extends Main {
     Module.pager.go(`/activity/${this.model.activity.code}/sched`)
   }
 
+  photos(ev) {
+    Module.pager.go(`/activity/${this.model.activity.code}/photos`)
+  }
+
   resellers(ev) {
     Module.pager.go(`/activity/${this.model.activity.code}/resellers`)
   }

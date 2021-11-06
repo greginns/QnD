@@ -297,6 +297,33 @@ const Itemreseller = class extends Model {
   }
 };
 
+const Photo = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static parent() {
+    return {
+      schema: {
+        path: new Fields.Char({notNull: true, maxLength: 200, verbose: 'Photo path'}),
+      },
+
+      constraints: {
+        fk: [
+        ],
+
+        index: [],
+      },
+      
+      hidden: [],
+      
+      dbschema: '',
+      app,
+      desc: 'Item Photo prototype'
+    }      
+  }
+};
+
 // Activities
 const Activity = class extends Items {
   constructor(obj, opts) {
@@ -467,6 +494,39 @@ const Actsched = class extends Model {
       app,
       desc: 'Activity Schedule'
     }
+  }
+};
+
+const Actphoto = class extends Photo {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        activity: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Activity'}),
+      },
+
+      constraints: {
+        pk: ['activity', 'path'],
+
+        fk: [
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['activity', 'path'],
+      
+      dbschema: '',
+      app,
+      desc: 'Activity Photos'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
   }
 };
 
@@ -962,6 +1022,39 @@ const Lodgsched = class extends Model {
   }
 };
 
+const Lodgphoto = class extends Photo {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        lodging: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Lodging'}),
+      },
+
+      constraints: {
+        pk: ['lodging', 'path'],
+
+        fk: [
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['lodging', 'path'],
+      
+      dbschema: '',
+      app,
+      desc: 'Lodging Photos'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+}
+
 const Lodglocn = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -1191,6 +1284,39 @@ const Mealsched = class extends Model {
     }
   }
 };
+
+const Mealphoto = class extends Photo {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+
+  static child() {
+    return {
+      schema: {
+        meal: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Meal'}),
+      },
+
+      constraints: {
+        pk: ['meal', 'path'],
+
+        fk: [
+        ]
+      },
+
+      hidden: [],
+
+      orderby: ['meal', 'path'],
+      
+      dbschema: '',
+      app,
+      desc: 'Meal Photos'
+    }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
+}
 
 const Mealreseller = class extends Itemreseller {
   constructor(obj, opts) {
@@ -1580,17 +1706,17 @@ const Supplier = class extends Model {
 module.exports = {
   Activity, 
   Actdaily, Actrates, Actprices, Actminp, 
-  Actsched, Actinclm, Actreseller,
+  Actsched, Actinclm, Actreseller, Actphoto,
   Actgroup, Actres, Actttot, 
 
   Lodging,
   Lodgunit, Lodgrates, Lodgprices, Lodgminp, 
-  Lodgsched, Lodginclm, Lodgreseller,
+  Lodgsched, Lodginclm, Lodgreseller, Lodgphoto,
   Lodglocn, Lodgtype, 
 
   Meals,
   Mealrates, Mealprices, Mealminp,
-  Mealsched, Mealreseller,
+  Mealsched, Mealreseller, Mealphoto,
   Meallocn, Mealtype,
 
   Area, Waiver, Glcode, Tax,

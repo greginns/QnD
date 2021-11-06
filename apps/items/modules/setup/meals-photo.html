@@ -1,0 +1,34 @@
+<page id='items-main-mealphoto' style='display: none;'>
+  <section id='items-main-mealphoto-section'>
+    {% include "./navbar-item.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='row' mvc-each='photos'>
+          <div class='col-12 col-md-6 col-lg-4 mb-3'>
+            <div data-index='$index' class='photo' style='width: 100%; height: 300px' mvc-click='delete($index)'>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12'>
+        <button class='btn btn-success' mvc-click='upload()'>
+          Upload an Image
+        </button>
+
+        <button class='btn btn-primary' mvc-click='goBack()'>
+          Exit
+        </button>
+      </div>
+    </div>
+
+  </section>
+</page>

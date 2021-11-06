@@ -12,7 +12,7 @@ class Lodging extends Main {
   createModel() {
     super.createModel();
 
-    this.model.catname = 'lodging';
+    this.model.catname = 'Lodging';
     this.model.title = 'Lodging';
     this.model.lodging = {};
     this.model.errors.lodging = {};
@@ -158,6 +158,10 @@ class Lodging extends Main {
     let code = this.model.lodging.code;
 
     Module.pager.go(`/lodging/${code}/sched`)
+  }
+
+  photos(ev) {
+    Module.pager.go(`/lodging/${this.model.lodging.code}/photos`)
   }
 
   resellers(ev) {

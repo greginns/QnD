@@ -15,6 +15,7 @@ import '/~static/apps/items/modules/setup/activity-rate.js';
 import '/~static/apps/items/modules/setup/activity-prices.js';
 import '/~static/apps/items/modules/setup/activity-minppl.js';
 import '/~static/apps/items/modules/setup/activity-sched.js';
+import '/~static/apps/items/modules/setup/activity-photo.js';
 import '/~static/apps/items/modules/setup/activity-included.js';
 import '/~static/apps/items/modules/setup/activity-resellers.js';
 
@@ -30,6 +31,7 @@ import '/~static/apps/items/modules/setup/lodging-rate.js';
 import '/~static/apps/items/modules/setup/lodging-prices.js';
 import '/~static/apps/items/modules/setup/lodging-minppl.js';
 import '/~static/apps/items/modules/setup/lodging-sched.js';
+import '/~static/apps/items/modules/setup/lodging-photo.js';
 import '/~static/apps/items/modules/setup/lodging-included.js';
 import '/~static/apps/items/modules/setup/lodging-resellers.js';
 
@@ -43,6 +45,7 @@ import '/~static/apps/items/modules/setup/meals-rate.js';
 import '/~static/apps/items/modules/setup/meals-prices.js';
 import '/~static/apps/items/modules/setup/meals-minppl.js';
 import '/~static/apps/items/modules/setup/meals-sched.js';
+import '/~static/apps/items/modules/setup/meals-photo.js';
 import '/~static/apps/items/modules/setup/meals-resellers.js';
 
 import '/~static/apps/items/modules/setup/meallocn.js';
@@ -72,6 +75,7 @@ let moduleStart = function() {
     Module.data.actprices = new TableAccess({modelName: 'actprices', url: `/items/v1/actprices`});
     Module.data.actminp = new TableAccess({modelName: 'actminp', url: `/items/v1/actminp`});
     Module.data.actsched = new TableAccess({modelName: 'actsched', url: `/items/v1/actsched`});
+    Module.data.actphoto = new TableAccess({modelName: 'actphoto', url: `/items/v1/actphoto`});
     Module.data.actinclm = new TableAccess({modelName: 'actinclm', url: `/items/v1/actinclm`});
     Module.data.actreseller = new TableAccess({modelName: 'actreseller', url: `/items/v1/actreseller`});
     Module.data.actgroup = new TableAccess({modelName: 'actgroup', url: `/items/v1/actgroup`});
@@ -84,6 +88,7 @@ let moduleStart = function() {
     Module.data.lodgprices = new TableAccess({modelName: 'lodgprices', url: `/items/v1/lodgprices`});
     Module.data.lodgminp = new TableAccess({modelName: 'lodgminp', url: `/items/v1/lodgminp`});
     Module.data.lodgsched = new TableAccess({modelName: 'lodgsched', url: `/items/v1/lodgsched`});
+    Module.data.lodgphoto = new TableAccess({modelName: 'lodgphoto', url: `/items/v1/lodgphoto`});
     Module.data.lodginclm = new TableAccess({modelName: 'lodginclm', url: `/items/v1/lodginclm`});
     Module.data.lodgreseller = new TableAccess({modelName: 'lodgreseller', url: `/items/v1/lodgreseller`});
     Module.data.lodglocn = new TableAccess({modelName: 'lodglocn', url: `/items/v1/lodglocn`});
@@ -94,6 +99,7 @@ let moduleStart = function() {
     Module.data.mealprices = new TableAccess({modelName: 'mealprices', url: `/items/v1/mealprices`});
     Module.data.mealminp = new TableAccess({modelName: 'mealminp', url: `/items/v1/mealminp`});
     Module.data.mealsched = new TableAccess({modelName: 'mealsched', url: `/items/v1/mealsched`});
+    Module.data.mealphoto = new TableAccess({modelName: 'mealphoto', url: `/items/v1/mealphoto`});
     Module.data.mealreseller = new TableAccess({modelName: 'mealreseller', url: `/items/v1/mealreseller`});
     Module.data.meallocn = new TableAccess({modelName: 'meallocn', url: `/items/v1/meallocn`});
     Module.data.mealtype = new TableAccess({modelName: 'mealtype', url: `/items/v1/mealtype`});
@@ -159,6 +165,13 @@ let moduleStart = function() {
     itemData.addModel(model);                          
 
     Module.tableStores.actsched = new TableStore({accessor: Module.data.actsched, model, safemode});  // setup a table store in Module so all pages can access
+
+    // Actphoto
+    model = `/items/actphoto`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.actphoto = new TableStore({accessor: Module.data.actphoto, model, safemode});  // setup a table store in Module so all pages can access
 
     // Actinclm
     model = `/items/actinclm`;
@@ -241,6 +254,13 @@ let moduleStart = function() {
 
     Module.tableStores.lodgsched = new TableStore({accessor: Module.data.lodgsched, model, safemode});  // setup a table store in Module so all pages can access
 
+    // Lodgphoto
+    model = `/items/lodgphoto`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.lodgphoto = new TableStore({accessor: Module.data.lodgphoto, model, safemode});  // setup a table store in Module so all pages can access
+
     // Lodginclm
     model = `/items/lodginclm`;
 
@@ -306,6 +326,13 @@ let moduleStart = function() {
     itemData.addModel(model);                          
 
     Module.tableStores.mealsched = new TableStore({accessor: Module.data.mealsched, model, safemode});  // setup a table store in Module so all pages can access
+    
+    // Mealphoto
+    model = `/items/mealphoto`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.mealphoto = new TableStore({accessor: Module.data.mealphoto, model, safemode});  // setup a table store in Module so all pages can access
 
     // Mealreseller
     model = `/items/mealreseller`;

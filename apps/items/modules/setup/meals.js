@@ -149,6 +149,10 @@ class Meals extends Main {
     Module.pager.go(`/meals/${this.model.meals.code}/sched`)
   }
 
+  photos(ev) {
+    Module.pager.go(`/meals/${this.model.meals.code}/photos`)
+  }
+
   resellers(ev) {
     Module.pager.go(`/meals/${this.model.meals.code}/resellers`)
   }

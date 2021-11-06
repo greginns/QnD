@@ -1,9 +1,12 @@
 const root = process.cwd();
 const fs = require('fs').promises;
 const uuidv1 = require('uuid/v1');
+const crypto = require('crypto');
+const config = require(root + '/config.json');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
-const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
+const {send} = require(root + '/lib/server/utils/send.js');
+const {TravelMessage, SendMessage} = require(root + '/lib/server/utils/messages.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {jsonQueryExecify} = require(root + '/lib/server/utils/sqlUtil.js');
 const {ModelService} = require(root + '/lib/server/utils/services.js');
@@ -28,6 +31,55 @@ const makeCSRF = async function(database, pgschema, user) {
   return CSRFToken;
 }
 
+class CloudService extends ModelService {
+  async delete({database = '', pgschema = '', pks = {}} = {}) {
+    // Delete row
+    let tm = new TravelMessage();
+
+    const api_key = config.cloudinary.api_key;
+    const api_secret = config.cloudinary.api_secret;
+    const url = 'https://api.cloudinary.com/v1_1/roam4/image/destroy';
+    const timestamp = (new Date()).valueOf();
+    const public_id = pks.path;
+    const sorted = `public_id=${public_id}&timestamp=${timestamp}${api_secret}`;
+    const signature = crypto.createHash('sha1').update(sorted).digest('hex');
+    const body = {
+      api_key,
+      public_id,
+      timestamp,
+      signature
+    }
+
+    let headers = {};
+
+    let options = {
+      url,
+      method: 'POST'
+    }
+
+    let sm = new SendMessage({headers, body, options});
+    let rm = await send(sm);
+
+    console.log(rm);
+
+    if (rm.status != 200) {
+      tm.status = rm.status;
+      tm.data = rm.data;
+      tm.err = rm.err;
+      return tm;
+    }
+
+    let tobj = new this.model(pks);
+    tm = await tobj.deleteOne({database, pgschema});
+
+    //if (tm.isGood()) {
+    //  zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.delete`, tm.data);
+    //}
+
+    return tm;
+  }
+}
+
 // Model services
 services.activity = new ModelService({model: models.Activity});
 services.lodging = new ModelService({model: models.Lodging});
@@ -38,6 +90,7 @@ services.actrates = new ModelService({model: models.Actrates});
 services.actprices = new ModelService({model: models.Actprices});
 services.actminp = new ModelService({model: models.Actminp});
 services.actsched = new ModelService({model: models.Actsched});
+services.actphoto = new CloudService({model: models.Actphoto});
 services.actinclm = new ModelService({model: models.Actinclm});
 services.actreseller = new ModelService({model: models.Actreseller});
 services.actgroup = new ModelService({model: models.Actgroup});
@@ -49,6 +102,7 @@ services.lodgrates = new ModelService({model: models.Lodgrates});
 services.lodgprices = new ModelService({model: models.Lodgprices});
 services.lodgminp = new ModelService({model: models.Lodgminp});
 services.lodgsched = new ModelService({model: models.Lodgsched});
+services.lodgphoto = new CloudService({model: models.Lodgphoto});
 services.lodginclm = new ModelService({model: models.Lodginclm});
 services.lodgreseller = new ModelService({model: models.Lodgreseller});
 services.lodglocn = new ModelService({model: models.Lodglocn});
@@ -58,6 +112,7 @@ services.mealrates = new ModelService({model: models.Mealrates});
 services.mealprices = new ModelService({model: models.Mealprices});
 services.mealminp = new ModelService({model: models.Mealminp});
 services.mealsched = new ModelService({model: models.Mealsched});
+services.mealphoto = new CloudService({model: models.Mealphoto});
 services.mealreseller = new ModelService({model: models.Mealreseller});
 services.meallocn = new ModelService({model: models.Meallocn});
 services.mealtype = new ModelService({model: models.Mealtype});
