@@ -19,6 +19,16 @@ class Lodging extends Main {
 
     this.model.lodglocns = [];
     this.model.lodgtypes = [];
+
+    this.model.levels = [
+      {value: 0, text: 'N/A'},
+      {value: 1, text: 'Primitive'},
+      {value: 2, text: 'Comfortable'},
+      {value: 3, text: 'Nice'},
+      {value: 4, text: 'Great'},
+      {value: 5, text: 'Luxurious'},
+    ];
+
   }
 
   async ready() {

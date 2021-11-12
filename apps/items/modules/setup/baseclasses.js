@@ -187,6 +187,7 @@ const Main = class extends Base {
     this.model.glcodes = [];
     this.model.taxes = [];
     this.model.waivers = [];
+    this.model.templates = [];
     this.model.suppliers = [];
 
     super.createModel();
@@ -204,6 +205,7 @@ const Main = class extends Base {
       Module.tableStores.glcode.addView(new TableView({proxy: this.model.glcodes, filterFunc}));
       Module.tableStores.tax.addView(new TableView({proxy: this.model.taxes, filterFunc}));
       Module.tableStores.waiver.addView(new TableView({proxy: this.model.waivers, filterFunc}));
+      Module.tableStores.template.addView(new TableView({proxy: this.model.templates, filterFunc}));
       Module.tableStores.supplier.addView(new TableView({proxy: this.model.suppliers, filterFunc}));
 
       resolve();

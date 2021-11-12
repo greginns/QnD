@@ -65,93 +65,88 @@
                     <div class='col-12 col-lg-4 mb-3'>
                       {{ fields.Float(id=meals.arroffset.id, min='0', max='600', step='1', maxlength=meals.arroffset.maxlength, mvc_value='meals.arroffset', label=meals.arroffset.verbose) }}
                     </div>
-                  </div>                  
-                </fieldset>
-              </div>
+                  </div>     
 
-              <div class='col-12 col-lg-6 mb-4'>
-                <fieldset class="border px-2 item-main-online">
-                  <legend class="w-auto fieldset-legend">Online</legend>
-                  <div class='row'>
-                    <div class='col-12 col-lg-4 mb-3'>
-                      {{ fields.Switch(id=meals.online.id, mvc_checked='meals.online', label=meals.online.verbose) }}
-                    </div>
-                    <div class='col-12 col-lg-8 mb-3'>
-                      {{ fields.Char(id=meals.homepage.id, maxlength=meals.homepage.maxlength, mvc_value='meals.homepage', label=meals.homepage.verbose) }}
-                    </div>
-                  </div>
-
-                  <div class='row'>
-                    <div class='col-12 col-lg-4 mb-3'>
-                      {{ fields.Integer(id=meals.lastday.id, min='0', max='9', step='1', maxlength=meals.lastday.maxlength, mvc_value='meals.lastday', label=meals.lastday.verbose) }}
-                    </div>
-                    <div class='col-12 col-lg-4 mb-3'>
-                      {{ fields.Time(id=meals.lasttime.id, maxlength=meals.lasttime.maxlength, mvc_value='meals.lasttime', label=meals.lasttime.verbose) }}
-                    </div>
-                    <div class='col-12 col-lg-4 mb-3'>
-                      {{ fields.Float(id=meals.lastoffset.id, min='0', max='12', step='.1', maxlength=meals.lastoffset.maxlength, mvc_value='meals.lastoffset', label=meals.lastoffset.verbose) }}
-                    </div>
-                  </div>
-                  
                   <div class='row'>
                     <div class='col-12 col-lg-6 mb-3'>
-                      {{ fields.SelectMVC(id=meals.waiver.id, size='1', mvc_value='meals.waiver', mvc_each='waivers', textField='name', valueField='code', label=meals.waiver.verbose) }}
+                      {{ fields.SelectMVC(id=meals.level.id, size='1', mvc_value='meals.level', mvc_each='levels', label='Food Level') }}
                     </div>
-                  </div>           
-                  
-                  <div class='row'>
-                    <div class='col-12 mb-3'>
-                      {{ fields.Text(id=meals.tandc.id, rows='4', mvc_value='meals.tandc', label=meals.tandc.verbose) }}
-                    </div>
-                  </div>           
+                  </div>
+
                 </fieldset>
+              </div>
+
+              <div class='col-12 col-lg-6 mb-4'>
+                <div class='row'>
+                  <div class='col-12 mb-4'>
+                    <fieldset class="border px-2 item-main-flags">
+                      <legend class="w-auto fieldset-legend">Indicators</legend>
+                      <div class='row'>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=meals.allowinf.id, mvc_checked='meals.allowinf', label=meals.allowinf.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=meals.allowchl.id, mvc_checked='meals.allowchl', label=meals.allowchl.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=meals.allowyth.id, mvc_checked='meals.allowyth', label=meals.allowyth.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=meals.allowadl.id, mvc_checked='meals.allowadl', label=meals.allowadl.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=meals.allowsen.id, mvc_checked='meals.allowsen', label=meals.allowsen.verbose) }}
+                        </div>
+                      </div>
+    
+                      <div class='row'>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=meals.oninv.id, mvc_checked='meals.oninv', label=meals.oninv.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=meals.online.id, mvc_checked='meals.online', label=meals.online.verbose) }}
+                        </div>
+                      </div>
+                    </fieldset>
+                  </div>
+                </div>
+
+                <div class='row'>
+                  <div class='col-12' mvc-show='meals.online'>
+                    <fieldset class="border px-2 item-main-online">
+                      <legend class="w-auto fieldset-legend">Online</legend>
+                      <div class='row'>
+                        <div class='col-12 mb-3'>
+                          {{ fields.Char(id=meals.homepage.id, maxlength=meals.homepage.maxlength, mvc_value='meals.homepage', label=meals.homepage.verbose) }}
+                        </div>
+                      </div>
+    
+                      <div class='row'>
+                        <div class='col-12 col-lg-4 mb-3'>
+                          {{ fields.Integer(id=meals.lastday.id, min='0', max='9', step='1', maxlength=meals.lastday.maxlength, mvc_value='meals.lastday', label=meals.lastday.verbose) }}
+                        </div>
+                        <div class='col-12 col-lg-4 mb-3'>
+                          {{ fields.Time(id=meals.lasttime.id, maxlength=meals.lasttime.maxlength, mvc_value='meals.lasttime', label=meals.lasttime.verbose) }}
+                        </div>
+                        <div class='col-12 col-lg-4 mb-3'>
+                          {{ fields.Float(id=meals.lastoffset.id, min='0', max='12', step='.1', maxlength=meals.lastoffset.maxlength, mvc_value='meals.lastoffset', label=meals.lastoffset.verbose) }}
+                        </div>
+                      </div>
+                      
+                      <div class='row'>
+                        <div class='col-12 col-lg-6 mb-3'>
+                          {{ fields.SelectMVC(id=meals.waiver.id, size='1', mvc_value='meals.waiver', mvc_each='waivers', textField='name', valueField='code', label=meals.waiver.verbose) }}
+                        </div>
+                        <div class='col-12 col-lg-6 mb-3'>
+                          {{ fields.SelectMVC(id=meals.template.id, size='1', mvc_value='meals.template', mvc_each='templates', textField='name', valueField='code', label=meals.template.verbose) }}
+                        </div>
+                      </div>           
+                    </fieldset>
+                  </div>
+                </div>
+                
               </div>
             </div>
-
-            <div class='row pt-2'>
-              <div class='col-12 col-lg-6 mb-4'>
-                <fieldset class="border px-2 item-main-msgs">
-                  <legend class="w-auto fieldset-legend">Messages</legend>
-                  <div class='row'>
-                    <div class='col-12 mb-3'>
-                      {{ fields.Text(id=meals.rsvmsg.id, rows='4', mvc_value='meals.rsvmsg', label=meals.rsvmsg.verbose) }}
-                    </div>
-                    <div class='col-12 mb-3'>
-                      {{ fields.Text(id=meals.invmsg.id, rows='4', mvc_value='meals.invmsg', label=meals.invmsg.verbose) }}
-                    </div>
-                  </div>
-                </fieldset>
-              </div>
-
-              <div class='col-12 col-lg-6 mb-4'>
-                <fieldset class="border px-2 item-main-flags">
-                  <legend class="w-auto fieldset-legend">Indicators</legend>
-                  <div class='row'>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=meals.allowinf.id, mvc_checked='meals.allowinf', label=meals.allowinf.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=meals.allowchl.id, mvc_checked='meals.allowchl', label=meals.allowchl.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=meals.allowyth.id, mvc_checked='meals.allowyth', label=meals.allowyth.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=meals.allowadl.id, mvc_checked='meals.allowadl', label=meals.allowadl.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=meals.allowsen.id, mvc_checked='meals.allowsen', label=meals.allowsen.verbose) }}
-                    </div>
-                  </div>
-
-                  <div class='row'>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=meals.oninv.id, mvc_checked='meals.oninv', label=meals.oninv.verbose) }}
-                    </div>
-                  </div>
-                </fieldset>
-              </div>              
-            </div> 
 
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 mb-4'>
@@ -165,7 +160,10 @@
                       {{ fields.Float(id=meals.gl1amt.id, min='0', max='100', step='.1', maxlength=meals.gl1amt.maxlength, mvc_value='meals.gl1amt', label=meals.gl1amt.verbose) }}
                     </div>
                     <div class='col-12 col-lg-3 mb-3'>
-                      {{ fields.Switch(id=meals.gl1perc.id, mvc_checked='meals.gl1perc', label=meals.gl1perc.verbose) }}
+                      {{ fields.SegmentStart(label='') }}
+                      {{ fields.Segment(id=meals.gl1perc.id, mvc_checked='meals.gl1perc', name='meals-gl1perc', label='%', value='%') }}
+                      {{ fields.Segment(id=meals.gl1perc.id, mvc_checked='meals.gl1perc', name='meals-gl1perc', label='$', value='$') }}
+                      {{ fields.SegmentEnd(mvc_value='meals.gl1perc', mvc_helptext=meals.gl1perc.helptext) }}
                     </div>
                   </div>
 
@@ -177,7 +175,10 @@
                       {{ fields.Float(id=meals.gl2amt.id, min='0', max='100', step='.1', maxlength=meals.gl2amt.maxlength, mvc_value='meals.gl2amt', label=meals.gl2amt.verbose) }}
                     </div>
                     <div class='col-12 col-lg-3 mb-3'>
-                      {{ fields.Switch(id=meals.gl2perc.id, mvc_checked='meals.gl2perc', label=meals.gl2perc.verbose) }}
+                      {{ fields.SegmentStart(label='') }}
+                      {{ fields.Segment(id=meals.gl2perc.id, mvc_checked='meals.gl2perc', name='meals-gl2perc', label='%', value='%') }}
+                      {{ fields.Segment(id=meals.gl2perc.id, mvc_checked='meals.gl2perc', name='meals-gl2perc', label='$', value='$') }}
+                      {{ fields.SegmentEnd(mvc_value='meals.gl2perc', mvc_helptext=meals.gl2perc.helptext) }}
                     </div>
                   </div>
 
@@ -189,7 +190,10 @@
                       {{ fields.Float(id=meals.gl3amt.id, min='0', max='100', step='.1', maxlength=meals.gl3amt.maxlength, mvc_value='meals.gl3amt', label=meals.gl3amt.verbose) }}
                     </div>
                     <div class='col-12 col-lg-3 mb-3'>
-                      {{ fields.Switch(id=meals.gl3perc.id, mvc_checked='meals.gl3perc', label=meals.gl3perc.verbose) }}
+                      {{ fields.SegmentStart(label='') }}
+                      {{ fields.Segment(id=meals.gl3perc.id, mvc_checked='meals.gl3perc', name='meals-gl3perc', label='%', value='%') }}
+                      {{ fields.Segment(id=meals.gl3perc.id, mvc_checked='meals.gl3perc', name='meals-gl3perc', label='$', value='$') }}
+                      {{ fields.SegmentEnd(mvc_value='meals.gl3perc', mvc_helptext=meals.gl3perc.helptext) }}
                     </div>
                   </div>
 
@@ -201,7 +205,10 @@
                       {{ fields.Float(id=meals.gl4amt.id, min='0', max='100', step='.1', maxlength=meals.gl4amt.maxlength, mvc_value='meals.gl4amt', label=meals.gl4amt.verbose) }}
                     </div>
                     <div class='col-12 col-lg-3 mb-3'>
-                      {{ fields.Switch(id=meals.gl4perc.id, mvc_checked='meals.gl4perc', label=meals.gl4perc.verbose) }}
+                      {{ fields.SegmentStart(label='') }}
+                      {{ fields.Segment(id=meals.gl4perc.id, mvc_checked='meals.gl4perc', name='meals-gl4perc', label='%', value='%') }}
+                      {{ fields.Segment(id=meals.gl4perc.id, mvc_checked='meals.gl4perc', name='meals-gl4perc', label='$', value='$') }}
+                      {{ fields.SegmentEnd(mvc_value='meals.gl4perc', mvc_helptext=meals.gl4perc.helptext) }}
                     </div>
                   </div>
 
@@ -240,6 +247,117 @@
                       {{ fields.SelectMVC(id=meals.tax4.id, size='1', mvc_value='meals.tax4', mvc_each='taxes', textField='name', valueField='code', label=meals.tax4.verbose) }}
                     </div>
                   </div>                                
+                </fieldset>
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 mb-4'>
+                <fieldset class="border px-2 item-main-narr">
+                  <legend class="w-auto fieldset-legend">HTML/Text Descriptions</legend>
+                  <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#meal-tab-narroff" type="button" role="tab">Office</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#meal-tab-rsvmsg" type="button" role="tab">Rsv pop-up</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#meal-tab-invmsg" type="button" role="tab">Invoice</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#meal-tab-tandc" type="button" role="tab">T&C</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#meal-tab-narrbook" type="button" role="tab">Book</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#meal-tab-narraddon" type="button" role="tab">Add-On</button>
+                    </li>
+                  </ul>
+                  <div class="tab-content">
+                    <div class="tab-pane fade active show" id="meal-tab-narroff" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Item Description - Office</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=meals.narroff.id, rows='10', mvc_value='meals.narroff', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="meal-tab-rsvmsg" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Reservation pop-up Message - Office</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=meals.rsvmsg.id, rows='10', mvc_value='meals.rsvmsg', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="meal-tab-invmsg" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Description on Invoice</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=meals.invmsg.id, rows='10', mvc_value='meals.invmsg', label='') }}
+                        </div>
+                      </div>
+                    </div>                    
+
+                    <div class="tab-pane fade" id="meal-tab-tandc" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Additional Terms and Conditions - Online</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=meals.tandc.id, rows='10', mvc_value='meals.tandc', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="meal-tab-narrbook" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Detailed Item Description - Booking Online</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=meals.narrbook.id, rows='10', mvc_value='meals.narrbook', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="meal-tab-narraddon" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Detailed Item Description - Add-on Online</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=meals.narraddon.id, rows='10', mvc_value='meals.narraddon', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                  <div class='row'>
+                    <div class='col mb-3'></div>
+                  </div>
                 </fieldset>
               </div>
             </div>

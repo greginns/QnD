@@ -76,104 +76,96 @@
                       {{ fields.SegmentEnd(mvc_value='lodging.assign', mvc_helptext=lodging.assign.helptext) }}
                     </div>
                   </div>       
-                </fieldset>
-              </div>
 
-              <div class='col-12 col-lg-6 mb-4'>
-                <fieldset class="border px-2 item-main-online">
-                  <legend class="w-auto fieldset-legend">Online</legend>
-                  <div class='row'>
-                    <div class='col-12 col-lg-4 mb-3'>
-                      {{ fields.Switch(id=lodging.online.id, mvc_checked='lodging.online', label=lodging.online.verbose) }}
-                    </div>
-                    <div class='col-12 col-lg-8 mb-3'>
-                      {{ fields.Char(id=lodging.homepage.id, maxlength=lodging.homepage.maxlength, mvc_value='lodging.homepage', label=lodging.homepage.verbose) }}
-                    </div>
-                  </div>
-
-                  <div class='row'>
-                    <div class='col-12 col-lg-4 mb-3'>
-                      {{ fields.Integer(id=lodging.lastday.id, min='0', max='9', step='1', maxlength=lodging.lastday.maxlength, mvc_value='lodging.lastday', label=lodging.lastday.verbose) }}
-                    </div>
-                    <div class='col-12 col-lg-4 mb-3'>
-                      {{ fields.Time(id=lodging.lasttime.id, maxlength=lodging.lasttime.maxlength, mvc_value='lodging.lasttime', label=lodging.lasttime.verbose) }}
-                    </div>
-                    <div class='col-12 col-lg-4 mb-3'>
-                      {{ fields.Float(id=lodging.lastoffset.id, min='0', max='12', step='.1', maxlength=lodging.lastoffset.maxlength, mvc_value='lodging.lastoffset', label=lodging.lastoffset.verbose) }}
-                    </div>
-                  </div>
-                  
                   <div class='row'>
                     <div class='col-12 col-lg-6 mb-3'>
-                      {{ fields.SelectMVC(id=lodging.waiver.id, size='1', mvc_value='lodging.waiver', mvc_each='waivers', textField='name', valueField='code', label=lodging.waiver.verbose) }}
+                      {{ fields.SelectMVC(id=lodging.level.id, size='1', mvc_value='lodging.level', mvc_each='levels', label='Quality Level') }}
                     </div>
-                  </div>           
-                  
-                  <div class='row'>
-                    <div class='col-12 mb-3'>
-                      {{ fields.Text(id=lodging.tandc.id, rows='4', mvc_value='lodging.tandc', label=lodging.tandc.verbose) }}
-                    </div>
-                  </div>           
+                  </div>
                 </fieldset>
+              </div>
+
+              <div class='col-12 col-lg-6 mb-4'>
+                <div class='row'>
+                  <div class='col-12 mb-4'>
+                    <fieldset class="border px-2 item-main-flags">
+                      <legend class="w-auto fieldset-legend">Indicators</legend>
+                      <div class='row'>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=lodging.allowinf.id, mvc_checked='lodging.allowinf', label=lodging.allowinf.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=lodging.allowchl.id, mvc_checked='lodging.allowchl', label=lodging.allowchl.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=lodging.allowyth.id, mvc_checked='lodging.allowyth', label=lodging.allowyth.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=lodging.allowadl.id, mvc_checked='lodging.allowadl', label=lodging.allowadl.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=lodging.allowsen.id, mvc_checked='lodging.allowsen', label=lodging.allowsen.verbose) }}
+                        </div>
+                      </div>
+    
+                      <div class='row'>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=lodging.oninv.id, mvc_checked='lodging.oninv', label=lodging.oninv.verbose) }}
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=lodging.unitinv.id, mvc_checked='lodging.unitinv', label=lodging.unitinv.verbose) }}
+                        </div>
+                        <div class='col-12 col-lg-4 mb-3'>
+                          {{ fields.Switch(id=lodging.online.id, mvc_checked='lodging.online', label=lodging.online.verbose) }}
+                        </div>
+                      </div>
+    
+                      <div class='row'>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=lodging.unitized.id, mvc_checked='lodging.unitized', label=lodging.unitized.verbose) }}                      
+                        </div>
+                        <div class='col-12 col-md-4 mb-3'>
+                          {{ fields.Switch(id=lodging.bookbeds.id, mvc_checked='lodging.bookbeds', mvc_enabled='lodging.unitized', label=lodging.bookbeds.verbose) }}
+                        </div>
+                      </div>                  
+                    </fieldset>
+                  </div>
+
+                  <div class='col-12 mb-4' mvc-show='lodging.online'>
+                    <fieldset class="border px-2 item-main-online">
+                      <legend class="w-auto fieldset-legend">Online</legend>
+                      <div class='row'>
+                        <div class='col-12 mb-3'>
+                          {{ fields.Char(id=lodging.homepage.id, maxlength=lodging.homepage.maxlength, mvc_value='lodging.homepage', label=lodging.homepage.verbose) }}
+                        </div>
+                      </div>
+    
+                      <div class='row'>
+                        <div class='col-12 col-lg-4 mb-3'>
+                          {{ fields.Integer(id=lodging.lastday.id, min='0', max='9', step='1', maxlength=lodging.lastday.maxlength, mvc_value='lodging.lastday', label=lodging.lastday.verbose) }}
+                        </div>
+                        <div class='col-12 col-lg-4 mb-3'>
+                          {{ fields.Time(id=lodging.lasttime.id, maxlength=lodging.lasttime.maxlength, mvc_value='lodging.lasttime', label=lodging.lasttime.verbose) }}
+                        </div>
+                        <div class='col-12 col-lg-4 mb-3'>
+                          {{ fields.Float(id=lodging.lastoffset.id, min='0', max='12', step='.1', maxlength=lodging.lastoffset.maxlength, mvc_value='lodging.lastoffset', label=lodging.lastoffset.verbose) }}
+                        </div>
+                      </div>
+                      
+                      <div class='row'>
+                        <div class='col-12 col-lg-6 mb-3'>
+                          {{ fields.SelectMVC(id=lodging.waiver.id, size='1', mvc_value='lodging.waiver', mvc_each='waivers', textField='name', valueField='code', label=lodging.waiver.verbose) }}
+                        </div>
+                        <div class='col-12 col-lg-6 mb-3'>
+                          {{ fields.SelectMVC(id=lodging.template.id, size='1', mvc_value='lodging.template', mvc_each='templates', textField='name', valueField='code', label=lodging.template.verbose) }}
+                        </div>
+                      </div>           
+                    </fieldset>                    
+                  </div>                  
+                </div>
+
               </div>
             </div>
-
-            <div class='row pt-2'>
-              <div class='col-12 col-lg-6 mb-4'>
-                <fieldset class="border px-2 item-main-msgs">
-                  <legend class="w-auto fieldset-legend">Messages</legend>
-                  <div class='row'>
-                    <div class='col-12 mb-3'>
-                      {{ fields.Text(id=lodging.rsvmsg.id, rows='4', mvc_value='lodging.rsvmsg', label=lodging.rsvmsg.verbose) }}
-                    </div>
-                    <div class='col-12 mb-3'>
-                      {{ fields.Text(id=lodging.invmsg.id, rows='4', mvc_value='lodging.invmsg', label=lodging.invmsg.verbose) }}
-                    </div>
-                  </div>
-                </fieldset>
-              </div>
-
-              <div class='col-12 col-lg-6 mb-4'>
-                <fieldset class="border px-2 item-main-flags">
-                  <legend class="w-auto fieldset-legend">Indicators</legend>
-                  <div class='row'>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=lodging.allowinf.id, mvc_checked='lodging.allowinf', label=lodging.allowinf.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=lodging.allowchl.id, mvc_checked='lodging.allowchl', label=lodging.allowchl.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=lodging.allowyth.id, mvc_checked='lodging.allowyth', label=lodging.allowyth.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=lodging.allowadl.id, mvc_checked='lodging.allowadl', label=lodging.allowadl.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-4 mb-3'>
-                      {{ fields.Switch(id=lodging.allowsen.id, mvc_checked='lodging.allowsen', label=lodging.allowsen.verbose) }}
-                    </div>
-                  </div>
-
-                  <div class='row'>
-                    <div class='col-12 col-md-6 mb-3'>
-                      {{ fields.Switch(id=lodging.oninv.id, mvc_checked='lodging.oninv', label=lodging.oninv.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-6 mb-3'>
-                      {{ fields.Switch(id=lodging.unitized.id, mvc_checked='lodging.unitized', label=lodging.unitized.verbose) }}
-                    </div>
-                  </div>
-
-                  <div class='row'>
-                    <div class='col-12 col-md-6 mb-3'>
-                      {{ fields.Switch(id=lodging.unitinv.id, mvc_checked='lodging.unitinv', label=lodging.unitinv.verbose) }}
-                    </div>
-                    <div class='col-12 col-md-6 mb-3'>
-                      {{ fields.Switch(id=lodging.bookbeds.id, mvc_checked='lodging.bookbeds', mvc_enabled='lodging.unitized', label=lodging.bookbeds.verbose) }}
-                    </div>
-                  </div>                  
-                </fieldset>
-              </div>              
-            </div> 
 
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 mb-4'>
@@ -187,7 +179,10 @@
                       {{ fields.Float(id=lodging.gl1amt.id, min='0', max='100', step='.1', maxlength=lodging.gl1amt.maxlength, mvc_value='lodging.gl1amt', label=lodging.gl1amt.verbose) }}
                     </div>
                     <div class='col-12 col-lg-3 mb-3'>
-                      {{ fields.Switch(id=lodging.gl1perc.id, mvc_checked='lodging.gl1perc', label=lodging.gl1perc.verbose) }}
+                      {{ fields.SegmentStart(label='') }}
+                      {{ fields.Segment(id=lodging.gl1perc.id, mvc_checked='lodging.gl1perc', name='lodging-gl1perc', label='%', value='%') }}
+                      {{ fields.Segment(id=lodging.gl1perc.id, mvc_checked='lodging.gl1perc', name='lodging-gl1perc', label='$', value='$') }}
+                      {{ fields.SegmentEnd(mvc_value='lodging.gl1perc', mvc_helptext=lodging.gl1perc.helptext) }}
                     </div>
                   </div>
 
@@ -199,7 +194,10 @@
                       {{ fields.Float(id=lodging.gl2amt.id, min='0', max='100', step='.1', maxlength=lodging.gl2amt.maxlength, mvc_value='lodging.gl2amt', label=lodging.gl2amt.verbose) }}
                     </div>
                     <div class='col-12 col-lg-3 mb-3'>
-                      {{ fields.Switch(id=lodging.gl2perc.id, mvc_checked='lodging.gl2perc', label=lodging.gl2perc.verbose) }}
+                      {{ fields.SegmentStart(label='') }}
+                      {{ fields.Segment(id=lodging.gl2perc.id, mvc_checked='lodging.gl2perc', name='lodging-gl2perc', label='%', value='%') }}
+                      {{ fields.Segment(id=lodging.gl2perc.id, mvc_checked='lodging.gl2perc', name='lodging-gl2perc', label='$', value='$') }}
+                      {{ fields.SegmentEnd(mvc_value='lodging.gl2perc', mvc_helptext=lodging.gl2perc.helptext) }}
                     </div>
                   </div>
 
@@ -211,7 +209,10 @@
                       {{ fields.Float(id=lodging.gl3amt.id, min='0', max='100', step='.1', maxlength=lodging.gl3amt.maxlength, mvc_value='lodging.gl3amt', label=lodging.gl3amt.verbose) }}
                     </div>
                     <div class='col-12 col-lg-3 mb-3'>
-                      {{ fields.Switch(id=lodging.gl3perc.id, mvc_checked='lodging.gl3perc', label=lodging.gl3perc.verbose) }}
+                      {{ fields.SegmentStart(label='') }}
+                      {{ fields.Segment(id=lodging.gl3perc.id, mvc_checked='lodging.gl3perc', name='lodging-gl3perc', label='%', value='%') }}
+                      {{ fields.Segment(id=lodging.gl3perc.id, mvc_checked='lodging.gl3perc', name='lodging-gl3perc', label='$', value='$') }}
+                      {{ fields.SegmentEnd(mvc_value='lodging.gl3perc', mvc_helptext=lodging.gl3perc.helptext) }}
                     </div>
                   </div>
 
@@ -223,7 +224,10 @@
                       {{ fields.Float(id=lodging.gl4amt.id, min='0', max='100', step='.1', maxlength=lodging.gl4amt.maxlength, mvc_value='lodging.gl4amt', label=lodging.gl4amt.verbose) }}
                     </div>
                     <div class='col-12 col-lg-3 mb-3'>
-                      {{ fields.Switch(id=lodging.gl4perc.id, mvc_checked='lodging.gl4perc', label=lodging.gl4perc.verbose) }}
+                      {{ fields.SegmentStart(label='') }}
+                      {{ fields.Segment(id=lodging.gl4perc.id, mvc_checked='lodging.gl4perc', name='lodging-gl4perc', label='%', value='%') }}
+                      {{ fields.Segment(id=lodging.gl4perc.id, mvc_checked='lodging.gl4perc', name='lodging-gl4perc', label='$', value='$') }}
+                      {{ fields.SegmentEnd(mvc_value='lodging.gl4perc', mvc_helptext=lodging.gl4perc.helptext) }}
                     </div>
                   </div>
 
@@ -262,6 +266,118 @@
                 </fieldset>
               </div>
             </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 mb-4'>
+                <fieldset class="border px-2 item-main-narr">
+                  <legend class="w-auto fieldset-legend">HTML/Text Descriptions</legend>
+                  <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#lodging-tab-narroff" type="button" role="tab">Office</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lodging-tab-rsvmsg" type="button" role="tab">Rsv pop-up</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lodging-tab-invmsg" type="button" role="tab">Invoice</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lodging-tab-tandc" type="button" role="tab">T&C</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lodging-tab-narrbook" type="button" role="tab">Book</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lodging-tab-narraddon" type="button" role="tab">Add-On</button>
+                    </li>
+                  </ul>
+                  <div class="tab-content">
+                    <div class="tab-pane fade active show" id="lodging-tab-narroff" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Item Description - Office</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=lodging.narroff.id, rows='10', mvc_value='lodging.narroff', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="lodging-tab-rsvmsg" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Reservation pop-up Message - Office</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=lodging.rsvmsg.id, rows='10', mvc_value='lodging.rsvmsg', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="lodging-tab-invmsg" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Description on Invoice</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=lodging.invmsg.id, rows='10', mvc_value='lodging.invmsg', label='') }}
+                        </div>
+                      </div>
+                    </div>                    
+
+                    <div class="tab-pane fade" id="lodging-tab-tandc" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Additional Terms and Conditions - Online</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=lodging.tandc.id, rows='10', mvc_value='lodging.tandc', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="lodging-tab-narrbook" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Detailed Item Description - Booking Online</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=lodging.narrbook.id, rows='10', mvc_value='lodging.narrbook', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="lodging-tab-narraddon" role="tabpanel">
+                      <div class='row'>
+                        <div class='col'>
+                          <h3>Detailed Item Description - Add-on Online</h3>
+                        </div>
+                      </div>
+                      <div class='row'>
+                        <div class='col'>
+                          {{ fields.Text(id=lodging.narraddon.id, rows='10', mvc_value='lodging.narraddon', label='') }}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                  <div class='row'>
+                    <div class='col mb-3'></div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
           </div>
 
           <div class='card-footer'>

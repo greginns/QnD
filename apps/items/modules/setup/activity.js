@@ -18,6 +18,15 @@ class Activity extends Main {
     this.model.errors.activity = {};
 
     this.model.actgroups = [];
+
+    this.model.levels = [
+      {value: 0, text: 'N/A'},
+      {value: 1, text: 'Mild'},
+      {value: 2, text: 'Mildly Exciting'},
+      {value: 3, text: 'Exciting'},
+      {value: 4, text: 'Wildly Exciting'},
+      {value: 5, text: 'Wild'},
+    ];
   }
 
   async ready() {

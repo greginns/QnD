@@ -27,10 +27,35 @@ class Item extends Verror {
     this.model.glcode = [];
     this.model.tax = [];
     this.model.waiver = [];
+    this.model.template = [];
     this.model.supplier = [];
     this.model.reseller = [];
     this.model.pricelevel = [];
     this.model.pmtterms = [];
+    this.model.lengths = {};
+
+    this.tables = [
+      'activity',
+      'lodging',
+      'meals',
+      'actgroup',
+      'actres',
+      'actttot',
+      'lodglocn',
+      'lodgtype',
+      'meallocn',
+      'mealtype',
+      'company',
+      'area',
+      'glcode',
+      'tax',
+      'waiver',
+      'template',
+      'supplier',
+      'reseller',
+      'pricelevel',
+      'pmtterms',
+    ];
   }
 
   async ready() {
@@ -54,6 +79,7 @@ class Item extends Verror {
       Module.tableStores.glcode.addView(new TableView({proxy: this.model.glcode}));
       Module.tableStores.tax.addView(new TableView({proxy: this.model.tax}));
       Module.tableStores.waiver.addView(new TableView({proxy: this.model.waiver}));
+      Module.tableStores.template.addView(new TableView({proxy: this.model.template}));
       Module.tableStores.supplier.addView(new TableView({proxy: this.model.supplier}));
       Module.tableStores.reseller.addView(new TableView({proxy: this.model.reseller}));
       Module.tableStores.pricelevel.addView(new TableView({proxy: this.model.pricelevel}));
@@ -64,6 +90,29 @@ class Item extends Verror {
   }
   
   inView(params) {
+    const self = this;
+
+    const decide = function(k, x) {
+      //let model = this.model.toJSON();
+      let data = this.model[k].toJSON();
+      let active = 0, inactive = 0;
+
+      for (let rec of data) {
+        if (rec.active) {
+          active++;
+        }
+        else {
+          inactive++;
+        }
+
+        self.model.lengths[k] = {active, inactive};
+      }
+    };
+
+    for (let k of this.tables) {
+      this.$addWatched(k+'.length', decide.bind(this, k), true);
+    }
+
     if (this.returned) {
       // bypass any setup
     }

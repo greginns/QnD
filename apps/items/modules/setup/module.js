@@ -56,6 +56,7 @@ import '/~static/apps/items/modules/setup/area.js';
 import '/~static/apps/items/modules/setup/glcode.js';
 import '/~static/apps/items/modules/setup/tax.js';
 import '/~static/apps/items/modules/setup/waiver.js';
+import '/~static/apps/items/modules/setup/template.js';
 import '/~static/apps/items/modules/setup/supplier.js';
 import '/~static/apps/items/modules/setup/reseller.js';
 import '/~static/apps/items/modules/setup/pricelevel.js';
@@ -108,6 +109,7 @@ let moduleStart = function() {
     Module.data.glcode = new TableAccess({modelName: 'glcode', url: `/items/v1/glcode`});
     Module.data.tax = new TableAccess({modelName: 'tax', url: `/items/v1/tax`});
     Module.data.waiver = new TableAccess({modelName: 'waiver', url: `/items/v1/waiver`});
+    Module.data.template = new TableAccess({modelName: 'template', url: `/items/v1/template`});
     Module.data.supplier = new TableAccess({modelName: 'supplier', url: `/items/v1/supplier`});
     Module.data.reseller = new TableAccess({modelName: 'reseller', url: `/items/v1/reseller`});
     Module.data.pricelevel = new TableAccess({modelName: 'pricelevel', url: `/items/v1/pricelevel`});
@@ -390,6 +392,14 @@ let moduleStart = function() {
 
     Module.tableStores.waiver = new TableStore({accessor: Module.data.waiver, model, safemode});  // setup a table store in Module so all pages can access    
     dataPromises.push(Module.tableStores.waiver.getAll());    
+
+    // Template
+    model = `/items/template`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.template = new TableStore({accessor: Module.data.template, model, safemode});  // setup a table store in Module so all pages can access    
+    dataPromises.push(Module.tableStores.template.getAll());    
 
     // Supplier
     model = `/items/supplier`;

@@ -84,7 +84,11 @@ Set Comments
 COMMENT ON TABLE "gm"."items_Activity" IS 'comment'
 	
 	
+https://stackoverflow.com/questions/29437650/how-can-i-ensure-that-a-materialized-view-is-always-up-to-date?noredirect=1&lq=1
 
+https://querybuilder.js.org/demo.html
+https://www.npmjs.com/package/wheresql
+https://webix.com/
 
 00000 	successful_completion
 01000 	warning

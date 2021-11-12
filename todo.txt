@@ -1,7 +1,10 @@
 Items
   Show inactive as red
   Redo badges for red/green
-
+  Finish supplier/reseller DB/schema stuff
+  Test cat/code in Suppliers, default item name  
+  Save item online page when item saved or template selected.  
+  
 Documents
   All doc types other than letter
   Move ee routines out of App
@@ -12,10 +15,6 @@ Contacts
   Notes
   emailhistory
     make ref clickable, except for contact#s
-
-Items 
-  Finish supplier/reseller DB/schema stuff
-  Test cat/code in Suppliers, default item name    
 
 Overall Setup
 Define ages for infants, children, youth, adults, seniors - and which to use/not
@@ -34,16 +33,3 @@ https://css-tricks.com/a-guide-to-the-responsive-images-syntax-in-html/
 https://www.youtube.com/watch?v=_lQvw2vSDbs
 https://codepen.io/geelen/pen/RGvQyJ  
 https://cloudinary.com/
-
-(() => {
-  const baseUrl = 'https://res.cloudinary.com/fec-demo/image/fetch'
-
-  Array.from(document.querySelectorAll('[data-bg]')).forEach(image => {
-    const { clientWidth, clientHeight } = image
-    const pixelRatio = window.devicePixelRatio || 1.0
-    const imageParams = `w_${100 * Math.round(clientWidth * pixelRatio / 100)},h_${100 * Math.round(clientHeight * pixelRatio / 100)},c_fill,g_auto,f_auto`
-    const url = `${baseUrl}/${imageParams}/${image.dataset.bg}`
-    image.style.backgroundImage = `url('${url}')`
-  })
-})()
-

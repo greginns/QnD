@@ -15,11 +15,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Activity
-                <span class="badge rounded-pill bg-secondary" mvc-text='activity.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.activity.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.activity.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("activity")'>
                   New
                 </button>
@@ -36,7 +37,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='activity'>
-                <tr mvc-click='editItem("activity", "$index")'>
+                <tr mvc-click='editItem("activity", "$index")' mvc-attrclassx='{"text-danger": "activity[$index].active"}'>
                   <td mvc-text='activity[$index].code'></td>
                   <td mvc-text='activity[$index].name'></td>
                   <td mvc-text='activity[$index].actgroup'></td>
@@ -51,11 +52,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Lodging
-                <span class="badge rounded-pill bg-secondary" mvc-text='lodging.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.lodging.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.lodging.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodging")'>
                   New
                 </button>
@@ -72,7 +74,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='lodging'>
-                <tr mvc-click='editItem("lodging", "$index")'>
+                <tr mvc-click='editItem("lodging", "$index")' mvc-attrclassx='{"text-danger": "lodging[$index].active"}'>
                   <td mvc-text='lodging[$index].code'></td>
                   <td mvc-text='lodging[$index].name'></td>
                   <td mvc-text='lodging[$index].locn'></td>
@@ -87,11 +89,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Meals
-                <span class="badge rounded-pill bg-secondary" mvc-text='meals.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.meals.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.meals.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("meals")'>
                   New
                 </button>
@@ -108,7 +111,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='meals'>
-                <tr mvc-click='editItem("meals", "$index")'>
+                <tr mvc-click='editItem("meals", "$index")' mvc-attrclassx='{"text-danger": "meals[$index].active"}'>
                   <td mvc-text='meals[$index].code'></td>
                   <td mvc-text='meals[$index].name'></td>
                   <td mvc-text='meals[$index].meallocn'></td>
@@ -125,11 +128,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Activity Groups
-                <span class="badge rounded-pill bg-secondary" mvc-text='actgroup.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.actgroup.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.actgroup.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actgroup")'>
                   New
                 </button>
@@ -145,7 +149,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='actgroup'>
-                <tr mvc-click='editItem("actgroup", "$index")'>
+                <tr mvc-click='editItem("actgroup", "$index")' mvc-attrclassx='{"text-danger": "actgroup[$index].active"}'>
                   <td mvc-text='actgroup[$index].code'></td>
                   <td mvc-text='actgroup[$index].name'></td>
                 </tr>
@@ -159,11 +163,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Activity Resources
-                <span class="badge rounded-pill bg-secondary" mvc-text='actres.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.actres.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.actres.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actres")'>
                   New
                 </button>
@@ -179,7 +184,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='actres'>
-                <tr mvc-click='editItem("actres", "$index")'>
+                <tr mvc-click='editItem("actres", "$index")' mvc-attrclassx='{"text-danger": "actres[$index].active"}'>
                   <td mvc-text='actres[$index].code'></td>
                   <td mvc-text='actres[$index].name'></td>
                 </tr>
@@ -193,11 +198,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Activity Time Totals
-                <span class="badge rounded-pill bg-secondary" mvc-text='actttot.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.actttot.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.actttot.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actttot")'>
                   New
                 </button>
@@ -213,7 +219,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='actttot'>
-                <tr mvc-click='editItem("actttot", "$index")'>
+                <tr mvc-click='editItem("actttot", "$index")' mvc-attrclassx='{"text-danger": "actttot[$index].active"}'>
                   <td mvc-text='actttot[$index].code'></td>
                   <td mvc-text='actttot[$index].name'></td>
                 </tr>
@@ -230,11 +236,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Lodging Locations
-                <span class="badge rounded-pill bg-secondary" mvc-text='lodglocn.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.lodglocn.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.lodglocn.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodglocn")'>
                   New
                 </button>
@@ -250,7 +257,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='lodglocn'>
-                <tr mvc-click='editItem("lodglocn", "$index")'>
+                <tr mvc-click='editItem("lodglocn", "$index")' mvc-attrclassx='{"text-danger": "lodglocn[$index].active"}'>
                   <td mvc-text='lodglocn[$index].code'></td>
                   <td mvc-text='lodglocn[$index].name'></td>
                 </tr>
@@ -264,11 +271,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Lodging Types
-                <span class="badge rounded-pill bg-secondary" mvc-text='lodgtype.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.lodgtype.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.lodgtype.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodgtype")'>
                   New
                 </button>
@@ -284,7 +292,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='lodgtype'>
-                <tr mvc-click='editItem("lodgtype", "$index")'>
+                <tr mvc-click='editItem("lodgtype", "$index")' mvc-attrclassx='{"text-danger": "lodgtype[$index].active"}'>
                   <td mvc-text='lodgtype[$index].code'></td>
                   <td mvc-text='lodgtype[$index].name'></td>
                 </tr>
@@ -300,11 +308,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Meal Locations
-                <span class="badge rounded-pill bg-secondary" mvc-text='meallocn.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.meallocn.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.meallocn.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("meallocn")'>
                   New
                 </button>
@@ -320,7 +329,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='meallocn'>
-                <tr mvc-click='editItem("meallocn", "$index")'>
+                <tr mvc-click='editItem("meallocn", "$index")' mvc-attrclassx='{"text-danger": "meallocn[$index].active"}'>
                   <td mvc-text='meallocn[$index].code'></td>
                   <td mvc-text='meallocn[$index].name'></td>
                 </tr>
@@ -334,11 +343,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Meal Types
-                <span class="badge rounded-pill bg-secondary" mvc-text='mealtype.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.mealtype.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.mealtype.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("mealtype")'>
                   New
                 </button>
@@ -354,7 +364,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='mealtype'>
-                <tr mvc-click='editItem("mealtype", "$index")'>
+                <tr mvc-click='editItem("mealtype", "$index")' mvc-attrclassx='{"text-danger": "mealtype[$index].active"}'>
                   <td mvc-text='mealtype[$index].code'></td>
                   <td mvc-text='mealtype[$index].name'></td>
                 </tr>
@@ -370,11 +380,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Companies
-                <span class="badge rounded-pill bg-secondary" mvc-text='company.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.company.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.company.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("company")'>
                   New
                 </button>
@@ -390,7 +401,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='company'>
-                <tr mvc-click='editItem("company", "$index")'>
+                <tr mvc-click='editItem("company", "$index")' mvc-attrclassx='{"text-danger": "company[$index].active"}'>
                   <td mvc-text='company[$index].id'></td>
                   <td mvc-text='company[$index].name'></td>
                 </tr>
@@ -404,11 +415,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Areas
-                <span class="badge rounded-pill bg-secondary" mvc-text='area.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.area.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.area.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("area")'>
                   New
                 </button>
@@ -424,7 +436,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='area'>
-                <tr mvc-click='editItem("area", "$index")'>
+                <tr mvc-click='editItem("area", "$index")' mvc-attrclassx='{"text-danger": "area[$index].active"}'>
                   <td mvc-text='area[$index].code'></td>
                   <td mvc-text='area[$index].name'></td>
                 </tr>
@@ -438,11 +450,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 GL Codes
-                <span class="badge rounded-pill bg-secondary" mvc-text='glcode.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.glcode.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.glcode.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("glcode")'>
                   New
                 </button>
@@ -458,7 +471,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='glcode'>
-                <tr mvc-click='editItem("glcode", "$index")'>
+                <tr mvc-click='editItem("glcode", "$index")' mvc-attrclassx='{"text-danger": "glcode[$index].active"}'>
                   <td mvc-text='glcode[$index].code'></td>
                   <td mvc-text='glcode[$index].name'></td>
                 </tr>
@@ -474,11 +487,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Taxes/Service Charges
-                <span class="badge rounded-pill bg-secondary" mvc-text='tax.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.tax.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.tax.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("tax")'>
                   New
                 </button>
@@ -494,7 +508,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='tax'>
-                <tr mvc-click='editItem("tax", "$index")'>
+                <tr mvc-click='editItem("tax", "$index")' mvc-attrclassx='{"text-danger": "tax[$index].active"}'>
                   <td mvc-text='tax[$index].code'></td>
                   <td mvc-text='tax[$index].name'></td>
                 </tr>
@@ -508,11 +522,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Waivers
-                <span class="badge rounded-pill bg-secondary" mvc-text='waiver.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.waiver.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.waiver.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("waiver")'>
                   New
                 </button>
@@ -528,7 +543,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='waiver'>
-                <tr mvc-click='editItem("waiver", "$index")'>
+                <tr mvc-click='editItem("waiver", "$index")' mvc-attrclassx='{"text-danger": "waiver[$index].active"}'>
                   <td mvc-text='waiver[$index].code'></td>
                   <td mvc-text='waiver[$index].name'></td>
                 </tr>
@@ -537,6 +552,42 @@
           </div>
         </div>
       </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8'>
+                Templates
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.template.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.template.inactive'></span>
+              </div>
+              <div class='col-4'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("template")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("template","code")'>Code</th>
+                  <th mvc-click='sortItems("template","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='template'>
+                <tr mvc-click='editItem("template", "$index")' mvc-attrclassx='{"text-danger": "template[$index].active"}'>
+                  <td mvc-text='template[$index].code'></td>
+                  <td mvc-text='template[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div class='row'>
@@ -544,11 +595,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Pricing Levels
-                <span class="badge rounded-pill bg-secondary" mvc-text='pricelevel.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.pricelevel.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.pricelevel.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("pricelevel")'>
                   New
                 </button>
@@ -564,7 +616,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='pricelevel'>
-                <tr mvc-click='editItem("pricelevel", "$index")'>
+                <tr mvc-click='editItem("pricelevel", "$index")' mvc-attrclassx='{"text-danger": "pricelevel[$index].active"}'>
                   <td mvc-text='pricelevel[$index].code'></td>
                   <td mvc-text='pricelevel[$index].name'></td>
                 </tr>
@@ -578,11 +630,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Payment Terms
-                <span class="badge rounded-pill bg-secondary" mvc-text='pmtterms.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.pmtterms.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.pmtterms.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("pmtterms")'>
                   New
                 </button>
@@ -598,7 +651,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='pmtterms'>
-                <tr mvc-click='editItem("pmtterms", "$index")'>
+                <tr mvc-click='editItem("pmtterms", "$index")' mvc-attrclassx='{"text-danger": "pmtterms[$index].active"}'>
                   <td mvc-text='pmtterms[$index].code'></td>
                   <td mvc-text='pmtterms[$index].name'></td>
                 </tr>
@@ -614,11 +667,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Suppliers
-                <span class="badge rounded-pill bg-secondary" mvc-text='supplier.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.supplier.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.supplier.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("supplier")'>
                   New
                 </button>
@@ -634,7 +688,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='supplier'>
-                <tr mvc-click='editItem("supplier", "$index")'>
+                <tr mvc-click='editItem("supplier", "$index")' mvc-attrclassx='{"text-danger": "supplier[$index].active"}'>
                   <td mvc-text='supplier[$index].code'></td>
                   <td mvc-text='supplier[$index].name'></td>
                 </tr>
@@ -648,11 +702,12 @@
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-8'>
                 Resellers
-                <span class="badge rounded-pill bg-secondary" mvc-text='reseller.length'></span>
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.reseller.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.reseller.inactive'></span>
               </div>
-              <div class='col-6'>
+              <div class='col-4'>
                 <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("reseller")'>
                   New
                 </button>
@@ -668,7 +723,7 @@
                 </tr>
               </thead>
               <tbody mvc-each='reseller'>
-                <tr mvc-click='editItem("reseller", "$index")'>
+                <tr mvc-click='editItem("reseller", "$index")' mvc-attrclassx='{"text-danger": "reseller[$index].active"}'>
                   <td mvc-text='reseller[$index].code'></td>
                   <td mvc-text='reseller[$index].name'></td>
                 </tr>

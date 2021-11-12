@@ -133,6 +133,7 @@ new Routes({app, subapp: 'area', version, allowCORS: true, model: models.Area, s
 new Routes({app, subapp: 'glcode', version, allowCORS: true, model: models.Glcode, services: services.glcode});
 new Routes({app, subapp: 'tax', version, allowCORS: true, model: models.Tax, services: services.tax});
 new Routes({app, subapp: 'waiver', version, allowCORS: true, model: models.Waiver, services: services.waiver});
+new Routes({app, subapp: 'template', version, allowCORS: true, model: models.Template, services: services.template});
 new Routes({app, subapp: 'supplier', version, allowCORS: true, model: models.Supplier, services: services.supplier});
 new Routes({app, subapp: 'reseller', version, allowCORS: true, model: models.Reseller, services: services.reseller});
 new Routes({app, subapp: 'pricelevel', version, allowCORS: true, model: models.Pricelevel, services: services.pricelevel});

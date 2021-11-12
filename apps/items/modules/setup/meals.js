@@ -19,6 +19,16 @@ class Meals extends Main {
 
     this.model.meallocns = [];
     this.model.mealtypes = [];
+
+    this.model.levels = [
+      {value: 0, text: 'N/A'},
+      {value: 1, text: 'Basic'},
+      {value: 2, text: 'Good'},
+      {value: 3, text: 'Better'},
+      {value: 4, text: 'Best'},
+      {value: 5, text: 'Decadent'},
+    ];
+
   }
 
   async ready() {

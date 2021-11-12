@@ -1,0 +1,60 @@
+<page id='items-main-template' style='display: none;'>
+  <section id='items-main-template-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-2 mb-3 mb-md-0'>
+                {{ fields.Char(id=template.code.id, maxlength=template.code.maxlength, mvc_value='template.code', label=template.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_helptext=template.code.helptext, mvc_edit='upper') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=template.active.id, mvc_checked='template.active', label=template.active.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Char(id=template.name.id, maxlength=template.name.maxlength, mvc_value='template.name', label=template.name.verbose) }}
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 mb-3'>
+                {{ fields.Text(id=template.text.id, maxlength=template.text.maxlength, mvc_value='template.text', label=template.text.verbose) }}
+              </div>
+            </div>            
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <button class='btn btn-primary' mvc-click='backToStart()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

@@ -104,6 +104,7 @@ const Items = class extends Model {
         areaphy: new Fields.Char({null: true, maxLength: 2, verbose: 'Physical Area'}),
         areadir: new Fields.Char({null: true, maxLength: 2, verbose: 'Arrival Area'}),
         minage: new Fields.Integer({null: true, default: 12, verbose: 'Minimum Age'}),
+        level: new Fields.Integer({null: true, default: 0, verbose: 'Level'}),
         allowinf: new Fields.Boolean({default: true, verbose: 'Infants'}),
         allowchl: new Fields.Boolean({default: true, verbose: 'Children'}),
         allowyth: new Fields.Boolean({default: true, verbose: 'Youth'}),
@@ -116,25 +117,29 @@ const Items = class extends Model {
         oninv: new Fields.Boolean({default: true, verbose: 'On Invoice'}),
         invmsg: new Fields.Text({null: true, verbose: 'Invoice Note'}),
         waiver: new Fields.Char({null: true, maxLength: 10, verbose: 'Waiver'}),
+        template: new Fields.Char({null: true, maxLength: 10, verbose: 'Template'}),
         lastday: new Fields.Integer({null: true, default: 0, verbose: 'Last Day to Book'}),
         lasttime: new Fields.Time({null: true, verbose: 'Last Time to Book'}),
-        gl1: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL'}),
-        gl2: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL'}),
-        gl3: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL'}),
-        gl4: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL'}),
+        gl1: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL-1'}),
+        gl2: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL-2'}),
+        gl3: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL-3'}),
+        gl4: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL-4'}),
         gl1amt: new Fields.Float({null: true, default: 0, verbose: 'Amount'}),
         gl2amt: new Fields.Float({null: true, default: 0, verbose: 'Amount'}),
         gl3amt: new Fields.Float({null: true, default: 0, verbose: 'Amount'}),
         gl4amt: new Fields.Float({null: true, default: 0, verbose: 'Amount'}),
-        gl1perc: new Fields.Boolean({default: true, verbose: 'Percent'}),
-        gl2perc: new Fields.Boolean({default: true, verbose: 'Percent'}),
-        gl3perc: new Fields.Boolean({default: true, verbose: 'Percent'}),
-        gl4perc: new Fields.Boolean({default: true, verbose: 'Percent'}),
+        gl1perc: new Fields.Char({default: '%', verbose: '%/$'}),
+        gl2perc: new Fields.Char({default: '%', verbose: '%/$'}),
+        gl3perc: new Fields.Char({default: '%', verbose: '%/$'}),
+        gl4perc: new Fields.Char({default: '%', verbose: '%/$'}),
         commgl: new Fields.Char({null: true, maxLength: 20, verbose: 'Commission GL'}),
         tax1: new Fields.Char({null: true, maxLength: 20, verbose: 'Tax'}),
         tax2: new Fields.Char({null: true, maxLength: 20, verbose: 'Tax'}),
         tax3: new Fields.Char({null: true, maxLength: 20, verbose: 'Tax'}),
         tax4: new Fields.Char({null: true, maxLength: 20, verbose: 'Tax'}),
+        narrbook: new Fields.Text({null: true, verbose: 'Narrative - Booking'}),
+        narraddon: new Fields.Text({null: true, verbose: 'Narrative - Add-On'}),
+        narroff: new Fields.Text({null: true, verbose: 'Narrative - Office'}),
       },
       
       constraints: {
@@ -1542,7 +1547,37 @@ const Waiver = class extends Model {
       
       dbschema: '',
       app,
-      desc: 'GL Codes'
+      desc: 'Waivers'
+    }
+  }
+};
+
+const Template = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code', helptext: '1-8 character code to identify this waiver'}),
+        name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
+        active: new Fields.Boolean({default: true, verbose: 'Active'}),   
+        html: new Fields.Text({null: true, verbose: 'HTML'}),
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['-active', 'name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Templates'
     }
   }
 };
@@ -1719,7 +1754,8 @@ module.exports = {
   Mealsched, Mealreseller, Mealphoto,
   Meallocn, Mealtype,
 
-  Area, Waiver, Glcode, Tax,
+  Area, Waiver, Template,
+  Glcode, Tax,
   Pricelevel, Pmtterms,
   Reseller, Supplier
 }

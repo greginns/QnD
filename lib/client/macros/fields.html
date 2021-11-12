@@ -3,7 +3,7 @@
 {% macro Char(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_edit='', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') %}
 <div class="form-label-group">
   <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-event-type='{{mvc_event_type}}' mvc-on='{{mvc_on}}' mvc-edit='{{mvc_edit}}' mvc-filter='{{mvc_filter}}' mvc-role='{{mvc_role}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
-  <label>{{label}}</label>
+  <label class='split-bg'>{{label}}</label>
 </div>
 
 <div>
@@ -18,7 +18,7 @@
 {% macro Text(id='', rows='10', cols='40', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
 <div class="form-label-group">
   <textarea xid="{{id}}" rows="{{rows}}" cols="{{cols}}" mvc-value="{{mvc_value}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" /></textarea>
-  <label>{{label}}</label>
+  <label class='split-bg'>{{label}}</label>
 </div>
 
 <div>
@@ -43,7 +43,7 @@
       </span>
     </span>
   </div>
-  <label>{{label}}</label>
+  <label class='split-bg'>{{label}}</label>
 </div>
 
 <div>
@@ -61,7 +61,7 @@
     <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="date" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
     <span class="input-group-text" mvc-click='date:boot()'><i class="far fa-calendar-alt"></i></span>
   </div>
-  <label>{{label}}</label>
+  <label class='split-bg'>{{label}}</label>
 </div>
 
 <div>
@@ -79,7 +79,7 @@
     <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-on="{{mvc_on}}" mvc-role="time" mvc-event-type="{{mvc_event_type}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
     <span class="input-group-text" mvc-click='time:boot()'><i class="far fa-clock"></i></span>
   </div>
-  <label>{{label}}</label>
+  <label class='split-bg'>{{label}}</label>
 </div>
 
 <div>
@@ -105,6 +105,7 @@
 </div>
 {% endmacro %}
 
+
 {% macro Switch(id='', mvc_checked='', label='', mvc_enabled='', mvc_disabled='') %}
 <div>
   <label class="switch">
@@ -118,6 +119,7 @@
   <small class='text-success helptext d-none'>{{mvc_helptext}}</small>
 </div>
 {% endmacro %}
+
 
 {% macro Radio(id='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
 <div class='radio-container'>
@@ -133,9 +135,10 @@
 </div>
 {% endmacro %}
 
+
 {% macro SegmentStart(label='') %} 
 <label class='label-color'>{{label}}</label>
-<div class="toggle-radio" data-color='blue'>
+<div class="toggle-radio" data-color='black'>
 {% endmacro %}
 
 {% macro Segment(id='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
@@ -158,7 +161,7 @@
 
 {% macro SegmentChoices(id='', mvc_checked='', mvc_enabled='', mvc_disabled='', mvc_helptext, mvc_on='', choices=[], name='', label='') %} 
 <label class='label-color'>{{label}}</label>
-<div class="toggle-radio" data-color='blue'>
+<div class="toggle-radio" data-color='black'>
   {% for choice in choices %}
     <input type="radio" name="{{name}}" id="{{id}}-{{choice.value}}" mvc-checked='{{mvc_checked}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' mvc-on='{{mvc_on}}' value="{{choice.value}}">
     <label for="{{id}}-{{choice.value}}">{{choice.text}}</label>
@@ -189,7 +192,7 @@
     </span>
   </div>
 
-  <label style='left: 50px'>{{label}}</label>
+  <label class='split-bg' style='left: 50px'>{{label}}</label>
 </div>
   
 <div>
@@ -200,6 +203,7 @@
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>
 {% endmacro %}
+
 
 {% macro Float(id='', min='1', max='99999.99', step='1', mvc_value='', mvc_edit='float', label='') %}
 <div class="form-label-group">
@@ -215,7 +219,7 @@
     </span>
   </div>
 
-  <label style='left: 50px'>{{label}}</label>
+  <label class='split-bg' style='left: 50px'>{{label}}</label>
 </div>
   
 <div>
@@ -226,11 +230,12 @@
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>
 {% endmacro %}
+
 
 {% macro Phone(type='text', id='', maxlength='', mvc_value='', label='', mvc_attr='{"ctrycode": ""}', mvc_enabled='', mvc_disabled='', mvc_event_type='input', placeholder='') %}
 <div class="form-label-group">
   <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-attr="{{mvc_attr}}" mvc-event-type='{{mvc_event_type}}' mvc-filter='phone' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
-  <label>{{label}}</label>
+  <label class='split-bg'>{{label}}</label>
 </div>
   
 <div>
@@ -241,13 +246,14 @@
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>
 {% endmacro %}
+
 
 {% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', mvc_nonetext='', mvc_nonevalue='', mvc_on='{}', mvc_enabled='', mvc_disabled='', valueField='value', textField='text', label='', multiple='') %}
 <div class="form-label-group">
   <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' mvc-nonetext='{{mvc_nonetext}}' mvc-nonevalue='{{mvc_nonevalue}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-select" {{multiple}}>
     <option mvc-option='{value: "{{mvc_each}}.$index.{{valueField}}", text: "{{mvc_each}}.$index.{{textField}}"}'></option>
   </select>
-  <label>{{label}}</label>
+  <label class='split-bg'>{{label}}</label>
 </div>
   
 <div>
@@ -257,7 +263,8 @@
 <div mvc-show='errors.{{mvc_value}}'>
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>
-{% endmacro %}            
+{% endmacro %}       
+
 
 {% macro SelectChoices(id='', size='10', mvc_value='', mvc_enabled='', mvc_disabled='', choices=[], label='', multiple='') %}
 <div class="form-label-group">
@@ -266,7 +273,7 @@
     <option value='{{choice.value}}'>{{choice.text}}</option>
     {% endfor %}
   </select>
-  <label>{{label}}</label>
+  <label class='split-bg'>{{label}}</label>
 </div>
   
 <div>
@@ -276,7 +283,8 @@
 <div mvc-show='errors.{{mvc_value}}'>
   <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
 </div>
-{% endmacro %}            
+{% endmacro %}    
+
 
 {% macro SelectMulti(id='', maxlength='', mvc_value='', mvc_each='', mvc_filter='checked2text', label='', placeholder='') %}
 <div mvc-multiselect>
@@ -288,7 +296,7 @@
       </span>            
     </div>
 
-    <label>{{label}}</label>
+    <label class='split-bg'>{{label}}</label>
   </div>
   
   <div mvc-show='errors.{{mvc_value}}'>
@@ -307,6 +315,7 @@
   </div>
 </div>               
 {% endmacro %}
+
 
 {% macro Editor(toolbar='toolbar-container', editor='editor-container', errors='editor.errors') %}
 <div class="{{toolbar}}">

@@ -11,39 +11,6 @@
 
 
 <style>
-  .fieldset-legend {
-    position: relative;
-    top: -22px;
-    background-color: white;
-    margin-bottom: -15px;
-  }
-
-  div#qndPages {
-    padding-top: 130px;
-  }
-
-  @media (min-width: 575px) {
-    div.bottom-spacer {
-      padding-bottom: 90px;
-    }
-  }
-
-  @media (min-width: 768px) {
-    div.bottom-spacer {
-      padding-bottom: 60px;
-    }
-    div#qndPages {
-      padding-top: 65px;
-    }
-  }
-
-  .list-hovered:hover {
-    background-color: #e9ecef;
-  }
-
-  .list-hovered > label {
-    display: block;
-  }
 
 </style>
 {% endblock %}
@@ -120,6 +87,7 @@
       {% include "./glcode.html" %}
       {% include "./tax.html" %}
       {% include "./waiver.html" %}
+      {% include "./template.html" %}
       {% include "./supplier.html" %}
       {% include "./reseller.html" %}
       {% include "./pricelevel.html" %}

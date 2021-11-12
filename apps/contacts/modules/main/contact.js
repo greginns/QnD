@@ -330,7 +330,7 @@ class Contact extends ContactWithAddress {
   }
 
   async addTag() {
-    let tags = this.model.contact.tags.toJSON() || [];
+    let tags = (this.model.contact.tags) ? this.model.contact.tags.toJSON() : [];
     let groups = this.reorgTags();
 
     let ms = new Multisel('Tags', groups, []);
