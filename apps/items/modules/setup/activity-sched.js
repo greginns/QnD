@@ -106,7 +106,7 @@ class Actsched extends Setup {
   }
 
   async save(ev) {
-    // scheds has our array of scheds
+    // scheds has our array of scheds for the month
     // one entry per day/time.  Need to repack into [[day1], [day2]], where each day can have x times
     // actsched is the entry just edited
     let actsched = this.model.actsched.toJSON();
@@ -117,15 +117,15 @@ class Actsched extends Setup {
 
     // repack sched
     for (let dayno=0; dayno<dsim; dayno++) {
-      sched.push([]);
+      sched.push({});
     }
 
     for (let entry of scheds) {
-      sched[entry.dayno][entry.posn] = {time: entry.time, limit: entry.limit, boo: entry.boo, bow: entry.bow};
+      sched[entry.dayno][entry.time] = {limit: entry.limit, boo: entry.boo, bow: entry.bow};
     }
 
     // update the one being edited
-    sched[actsched.dayno][actsched.posn] = {time: actsched.time, limit: actsched.limit, boo: actsched.boo, bow: actsched.bow};
+    sched[actsched.dayno][actsched.time] = {limit: actsched.limit, boo: actsched.boo, bow: actsched.bow};
 
     sched = JSON.stringify(sched);
 
@@ -151,7 +151,6 @@ class Actsched extends Setup {
   }
 
   async getScheds() {
-    // need a one level array, so [[{time1, time2}], [day2]]
     let dt = new Datetime([this.model.year, this.model.month, 1]);
     let dsim = dt.getDaysInMonth();
     let scheds = [];
@@ -166,7 +165,7 @@ class Actsched extends Setup {
         let dt2 = (new Datetime(dt)).add(d, 'day');
         let dow = dt2.day();
 
-        scheds.push({posn: 0, dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time: null, limit: 0, boo: 1, bow: 1});
+        scheds.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time: null, limit: 0, boo: 1, bow: 1});
       }
     }
     else {
@@ -176,11 +175,13 @@ class Actsched extends Setup {
       for (let d=0; d<dsim; d++) {    // for each day
         let dt2 = (new Datetime(dt)).add(d, 'day');
         let dow = dt2.day();
+        let day = record.sched[d];
 
-        for (let idx=0; idx<record.sched[d].length; idx++) {    // for each entry in day
-          let rec = record.sched[d][idx];
-          scheds.push({posn: idx, dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time: rec.time, limit: rec.limit, boo: rec.boo, bow: rec.bow});
-        }
+        for (let time in day) {  // multiple time entries for each day
+          let data = day[time];
+
+          scheds.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), time, limit: data.limit, boo: data.boo, bow: data.bow});
+        }       
       }
     }
 
@@ -277,7 +278,7 @@ class Actsched extends Setup {
     let sched = [];
 
     for (let i=0; i<dsim; i++) {
-      sched.push([]);
+      sched.push({});
     }
 
     return sched;
@@ -296,22 +297,8 @@ class Actsched extends Setup {
       if (dows[dow]) {
         // have one, what to do with it?
         let dayEntry = sched[dd-1];   // that day's entry
-        let found = false;
 
-        for (let timeData of dayEntry) {
-          if (timeData.time == range.time || timeData.time == null) {
-            timeData.time = range.time;
-            timeData.limit = range.limit;
-            timeData.boo = range.boo;
-            timeData.bow = range.bow;
-            found = true;
-            break;
-          }
-        }
-
-        if (!found) {
-          dayEntry.push({time: range.time, limit: range.limit, boo: range.boo, bow: range.bow});
-        }
+        dayEntry[range.time] = {limit: range.limit, boo: range.boo, bow: range.bow};
       }
     }
   }

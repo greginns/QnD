@@ -32,7 +32,7 @@ class Supplier extends Setup {
       Module.tableStores.supplier.addView(new TableView({proxy: this.model.suppliers}));
       this.defaults = await Module.tableStores.supplier.getDefault();   
 
-      this.editTable = new Edittable('#supplier-items', this, this.saver, this.deleter);
+      //this.editTable = new Edittable('#supplier-items', this, this.saver, this.deleter);
 
       resolve();
     }.bind(this));

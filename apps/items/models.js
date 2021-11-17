@@ -33,11 +33,6 @@ const ASSIGN = [
   {value: 'E', text: 'Either'}
 ];
 
-const CURRENCIES = [
-  {value: 'CAD', text: 'Canadian Dollar'},
-  {value: 'USD', text: 'United States Dollar'},
-];
-
 const RATEBASE1 = [
   {value: 'F', text: 'Flat'},
   {value: 'P', text: 'Per Person'},
@@ -120,6 +115,10 @@ const Items = class extends Model {
         template: new Fields.Char({null: true, maxLength: 10, verbose: 'Template'}),
         lastday: new Fields.Integer({null: true, default: 0, verbose: 'Last Day to Book'}),
         lasttime: new Fields.Time({null: true, verbose: 'Last Time to Book'}),
+        supplied: new Fields.Boolean({default: true, verbose: 'Supplied'}),
+        supplier: new Fields.Char({null: true, maxLength: 65, verbose: 'Supplier'}),
+        suppitem: new Fields.Char({null: true, maxLength: 8, verbose: 'Item'}),
+        supprate: new Fields.Integer({null: true, maxLength: 2, verbose: 'Rate#'}),
         gl1: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL-1'}),
         gl2: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL-2'}),
         gl3: new Fields.Char({null: true, maxLength: 20, verbose: 'Sales GL-3'}),
@@ -191,7 +190,7 @@ const Rates = class extends Model {
         privilege: new Fields.Char({notNull: true, maxLength: 5, default: 'rsvsA', choices: PRIVILEGES, verbose: 'Privilege'}),
         ratebase1: new Fields.Char({notNull: true, maxLength: 5, default: 'P', choices: RATEBASE1, verbose: 'Rate Base-1'}),
         ratebase2: new Fields.Char({notNull: true, maxLength: 5, default: 'F', choices: RATEBASE2, verbose: 'Rate Base-2'}),
-        currency: new Fields.Char({notNull: true, maxLength: 3, default: 'CAD', choices: CURRENCIES, verbose: 'Currency'}),
+        
         addlppl: new Fields.Integer({notNull: true, default: 0, maxLength: 2, verbose: 'Addl Ppl'}),
       },
 
@@ -1688,6 +1687,7 @@ const Reseller = class extends Model {
         email: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Email'}),
         apikey: new Fields.Char({notNull: true, maxLength: 50, verbose: 'API key'}),
         active: new Fields.Boolean({default: true, verbose: 'Active'}),
+        //items: new Fields.Jsonb({null: true, verbose: 'Items'}),
       },
       
       constraints: {
@@ -1718,7 +1718,6 @@ const Supplier = class extends Model {
         name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
         email: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Email'}),
         apikey: new Fields.Char({notNull: true, maxLength: 50, verbose: 'API key'}),
-        items: new Fields.Jsonb({null: true, verbose: 'Items'}),
         active: new Fields.Boolean({default: true, verbose: 'Active'}),
       },
       
@@ -1757,5 +1756,7 @@ module.exports = {
   Area, Waiver, Template,
   Glcode, Tax,
   Pricelevel, Pmtterms,
-  Reseller, Supplier
+  Reseller, Supplier,
+
+  PRIVILEGES,
 }

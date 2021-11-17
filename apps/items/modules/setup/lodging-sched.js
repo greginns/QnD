@@ -108,8 +108,8 @@ class Lodgsched extends Setup {
   }
 
   async save(ev) {
-    // sched has our array of days
-    // one entry per day/time.  Need to repack into [[day1], [day2]], where each day can have x times
+    // scheds has our array of days, for one unit
+    // one entry per day/time.  Need to repack into [[day1], [day2]], where each day can have x units
     // lodgsched is the entry just edited
     let lodgsched = this.model.lodgsched.toJSON();
     let scheds = this.model.scheds.toJSON();
@@ -121,13 +121,13 @@ class Lodgsched extends Setup {
       sched = record.sched || {};
     }
     else {
-      for (let entry of scheds) {
-        sched.push({unit, limit: entry.limit});
+      for (let entry of scheds) {   // for each day
+        sched.push({[unit]: {limit: entry.limit}});
       }
     }
 
     // update the one being edited
-    sched[lodgsched.dayno][unit] = lodgsched.limit;    
+    sched[lodgsched.dayno][unit] = {limit: lodgsched.limit};    
 
     sched = JSON.stringify(sched);
 
@@ -153,7 +153,6 @@ class Lodgsched extends Setup {
   }
 
   async getScheds() {
-    // need a one level array, so [[{time1, time2}], [day2]]
     let dt = new Datetime([this.model.year, this.model.month, 1]);
     let dsim = dt.getDaysInMonth();
     let unit = (this.model.lodging.unitized) ? this.model.unit : '-1';
@@ -169,7 +168,7 @@ class Lodgsched extends Setup {
         let dt2 = (new Datetime(dt)).add(d, 'day');
         let dow = dt2.day();
 
-        scheds.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), unit, limit: 0});
+        scheds.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), limit: 0});
       }
     }
     else {
@@ -179,9 +178,14 @@ class Lodgsched extends Setup {
       for (let d=0; d<dsim; d++) {    // for each day
         let dt2 = (new Datetime(dt)).add(d, 'day');
         let dow = dt2.day();
-        let rec = record.sched[d];
+        let day = record.sched[d];
 
-        scheds.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), unit, limit: rec[unit] || 0});
+        for (let xunit in day) {
+          if (xunit == unit) {
+            let data = day[xunit];
+            scheds.push({dayno: d, weekend: (dow==0 || dow==6), date: dt2.format('dddd, MMM Do, YYYY'), limit: data.limit || 0});
+          }
+        }        
       }
     }
 
@@ -189,11 +193,11 @@ class Lodgsched extends Setup {
   }
 
   async getLodgsched() {
-    let act = this.model.lodging.code;
+    let lodge = this.model.lodging.code;
     let yy = this.model.year;
     let mm = this.model.month;
 
-    return await Module.tableStores.lodgsched.getOne([act, yy, mm]);
+    return await Module.tableStores.lodgsched.getOne([lodge, yy, mm]);
   }
 
   async canClear(ev) {
@@ -236,7 +240,7 @@ class Lodgsched extends Setup {
       return;
     }
 
-    let act = this.model.lodging.code;
+    let lodge = this.model.lodging.code;
     let qty = (!this.model.lodging.unitized || this.model.lodging.bookbeds) ? range.limit : 1;
     let units = (this.model.lodging.unitized) ? range.units : [-1];
 
@@ -245,7 +249,7 @@ class Lodgsched extends Setup {
       let dt = utils.datetime.make([yy, mm]);
       let dsim = dt.getDaysInMonth();
 
-      let res = await Module.tableStores.lodgsched.getOne([act, yy, mm]);
+      let res = await Module.tableStores.lodgsched.getOne([lodge, yy, mm]);
       let existingEntry = Object.keys(res).length > 0;
 
       let sched;
@@ -261,7 +265,7 @@ class Lodgsched extends Setup {
 
       sched = JSON.stringify(sched);
   
-      let data = {lodging: act, year: yy, month: mm, sched};
+      let data = {lodging: lodge, year: yy, month: mm, sched};
   
       // new (post) or old (put)?
       res = (existingEntry) ? await Module.tableStores.lodgsched.update([data.lodging, data.year, data.month], {sched: data.sched}) : await Module.tableStores.lodgsched.insert(data);
@@ -298,8 +302,9 @@ class Lodgsched extends Setup {
       if (dows[dow]) {
         // have one, what to do with it?
         let dayEntry = sched[dd-1];   // that day's entry
+        
         for (let unit of units) {
-          dayEntry[unit] = qty;
+          dayEntry[unit] = {limit: qty};
         }
       }
     }

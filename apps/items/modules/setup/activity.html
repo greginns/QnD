@@ -11,17 +11,42 @@
                 {{ fields.Char(id=activity.code.id, maxlength=activity.code.maxlength, mvc_value='activity.code', label=activity.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='upper') }}
               </div>
 
-              <div class='col-12 col-md-6 order-3 order-md-2'>
+              <div class='col-12 col-md-6 order-3 order-md-2 mb-3'>
                 {{ fields.Char(id=activity.name.id, maxlength=activity.name.maxlength, mvc_value='activity.name', label=activity.name.verbose) }}
               </div>
 
-              <div class='col-4 col-md-4 order-2 mb-3 mb-md-0'>
+              <div class='col-4 col-md-2 order-2 mb-3 mb-md-0'>
                 {{ fields.Switch(id=activity.active.id, mvc_checked='activity.active', label=activity.active.verbose) }}
               </div>
+
+              <div class='col-4 col-md-2 order-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=activity.supplied.id, mvc_checked='activity.supplied', label=activity.supplied.verbose) }}
+              </div>              
             </div>       
           </div>   
 
           <div class='card-body'>
+            <div class='row pt-2' mvc-show='activity.supplied'>
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-supp">
+                  <legend class="w-auto fieldset-legend">Supplier</legend>
+                  <div class='row'>
+                    <div class='col-12 col-md-6 mb-3'>
+                      {{ fields.SelectMVC(id=activity.supplier.id, size='1', mvc_value='activity.supplier', mvc_each='suppliers', textField='name', valueField='code', label=activity.supplier.verbose) }}
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col-6 col-md-4 mb-3'>
+                      {{ fields.Char(id=activity.suppitem.id, maxlength=activity.suppitem.maxlength, mvc_value='activity.suppitem', label=activity.suppitem.verbose) }}
+                    </div>
+                    <div class='col-6 col-md-4 mb-3'>
+                      {{ fields.Char(id=activity.supprate.id, maxlength=activity.supprate.maxlength, mvc_value='activity.supprate', mvc_role='integer', label=activity.supprate.verbose) }}
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 mb-4'>
                 <fieldset class="border px-2 item-main-defn">

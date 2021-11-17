@@ -6,6 +6,7 @@ const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const app = getAppName(__dirname);
 const {User} = require(root + '/apps/login/models.js');
 const {Document, Docletter} = require(root + '/apps/documents/models.js');
+
 const egroupChoices = [
   {value: 'D', text: 'Daily'},
   {value: 'W', text: 'Weekly'},
@@ -13,6 +14,11 @@ const egroupChoices = [
   {value: 'O', text: 'Once'},
   {value: '', text: 'Manual'}
 ]
+
+const CURRENCIES = [
+  {value: 'CAD', text: 'Canadian Dollar'},
+  {value: 'USD', text: 'United States Dollar'},
+];
 
 const Contact = class extends Model {
   constructor(obj, opts) {
@@ -465,7 +471,8 @@ const Company = class extends Model {
       schema: {
         id: new Fields.Char({notNull: true, maxLength: 1, verbose: 'ID'}),
         name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Name'}),
-        active: new Fields.Boolean({default: true, verbose: 'Active?'})
+        active: new Fields.Boolean({default: true, verbose: 'Active?'}),
+        currency: new Fields.Char({notNull: true, maxLength: 3, default: 'CAD', choices: CURRENCIES, verbose: 'Currency'}),
       },
 
       constraints: {

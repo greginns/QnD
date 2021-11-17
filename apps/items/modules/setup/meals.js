@@ -63,6 +63,30 @@ class Meals extends Main {
 
     this.clearErrors();
 
+    if (data.supplied) {
+      let anyErrors = false;
+
+      if (!data.supplier) {
+        this.model.errors.meals.supplier='Required';
+        anyErrors = true;
+      }
+
+      if (!data.suppitem) {
+        this.model.errors.meals.suppitem='Required';
+        anyErrors = true;
+      }
+      
+      if (!data.supprate || isNaN(data.supprate) || data.supprate < 1) {
+        this.model.errors.meals.supprate='Required';
+        anyErrors = true;
+      }
+
+      if (anyErrors) {
+        this.model.badMessage = 'Please Correct errors and try again'
+        return;
+      }
+    }
+
     if (this.model.existingEntry) {
       diffs = this.checkDiff(this.origData, data);
       if (diffs === false) return;

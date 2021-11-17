@@ -11,17 +11,42 @@
                 {{ fields.Char(id=meals.code.id, maxlength=meals.code.maxlength, mvc_value='meals.code', label=meals.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='upper') }}
               </div>
 
-              <div class='col-12 col-md-6 order-3 order-md-2'>
+              <div class='col-12 col-md-6 order-3 order-md-2 mb-3'>
                 {{ fields.Char(id=meals.name.id, maxlength=meals.name.maxlength, mvc_value='meals.name', label=meals.name.verbose) }}
               </div>
 
-              <div class='col-4 col-md-4 order-2 mb-3 mb-md-0'>
+              <div class='col-4 col-md-2 order-2 mb-3 mb-md-0'>
                 {{ fields.Switch(id=meals.active.id, mvc_checked='meals.active', label=meals.active.verbose) }}
               </div>
-            </div>       
+
+              <div class='col-4 col-md-2 order-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=meals.supplied.id, mvc_checked='meals.supplied', label=meals.supplied.verbose) }}
+              </div>              
+            </div>
           </div>   
 
           <div class='card-body'>
+            <div class='row pt-2' mvc-show='meals.supplied'>
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-supp">
+                  <legend class="w-auto fieldset-legend">Supplier</legend>
+                  <div class='row'>
+                    <div class='col-12 col-md-6 mb-3'>
+                      {{ fields.SelectMVC(id=meals.supplier.id, size='1', mvc_value='meals.supplier', mvc_each='suppliers', textField='name', valueField='code', label=meals.supplier.verbose) }}
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col-6 col-md-4 mb-3'>
+                      {{ fields.Char(id=meals.suppitem.id, maxlength=meals.suppitem.maxlength, mvc_value='meals.suppitem', label=meals.suppitem.verbose) }}
+                    </div>
+                    <div class='col-6 col-md-4 mb-3'>
+                      {{ fields.Char(id=meals.supprate.id, maxlength=meals.supprate.maxlength, mvc_value='meals.supprate', mvc_role='integer', label=meals.supprate.verbose) }}
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 mb-4'>
                 <fieldset class="border px-2 item-main-defn">

@@ -11,17 +11,42 @@
                 {{ fields.Char(id=lodging.code.id, maxlength=lodging.code.maxlength, mvc_value='lodging.code', label=lodging.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='upper') }}
               </div>
 
-              <div class='col-12 col-md-6 order-3 order-md-2'>
+              <div class='col-12 col-md-6 order-3 order-md-2 mb-3'>
                 {{ fields.Char(id=lodging.name.id, maxlength=lodging.name.maxlength, mvc_value='lodging.name', label=lodging.name.verbose) }}
               </div>
 
-              <div class='col-4 col-md-4 order-2 mb-3 mb-md-0'>
+              <div class='col-4 col-md-2 order-2 mb-3 mb-md-0'>
                 {{ fields.Switch(id=lodging.active.id, mvc_checked='lodging.active', label=lodging.active.verbose) }}
               </div>
-            </div>       
+
+              <div class='col-4 col-md-2 order-4 mb-3 mb-md-0'>
+                {{ fields.Switch(id=lodging.supplied.id, mvc_checked='lodging.supplied', label=lodging.supplied.verbose) }}
+              </div>              
+            </div>           
           </div>   
 
           <div class='card-body'>
+            <div class='row pt-2' mvc-show='lodging.supplied'>
+              <div class='col-12 col-lg-6 mb-4'>
+                <fieldset class="border px-2 item-main-supp">
+                  <legend class="w-auto fieldset-legend">Supplier</legend>
+                  <div class='row'>
+                    <div class='col-12 col-md-6 mb-3'>
+                      {{ fields.SelectMVC(id=lodging.supplier.id, size='1', mvc_value='lodging.supplier', mvc_each='suppliers', textField='name', valueField='code', label=lodging.supplier.verbose) }}
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col-6 col-md-4 mb-3'>
+                      {{ fields.Char(id=lodging.suppitem.id, maxlength=lodging.suppitem.maxlength, mvc_value='lodging.suppitem', label=lodging.suppitem.verbose) }}
+                    </div>
+                    <div class='col-6 col-md-4 mb-3'>
+                      {{ fields.Char(id=lodging.supprate.id, maxlength=lodging.supprate.maxlength, mvc_value='lodging.supprate', mvc_role='integer', label=lodging.supprate.verbose) }}
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 mb-4'>
                 <fieldset class="border px-2 item-main-defn">

@@ -63,6 +63,30 @@ class Lodging extends Main {
 
     this.clearErrors();
 
+    if (data.supplied) {
+      let anyErrors = false;
+
+      if (!data.supplier) {
+        this.model.errors.lodging.supplier='Required';
+        anyErrors = true;
+      }
+
+      if (!data.suppitem) {
+        this.model.errors.lodging.suppitem='Required';
+        anyErrors = true;
+      }
+      
+      if (!data.supprate || isNaN(data.supprate) || data.supprate < 1) {
+        this.model.errors.lodging.supprate='Required';
+        anyErrors = true;
+      }
+
+      if (anyErrors) {
+        this.model.badMessage = 'Please Correct errors and try again'
+        return;
+      }
+    }
+
     if (this.model.existingEntry) {
       diffs = this.checkDiff(this.origData, data);
 
