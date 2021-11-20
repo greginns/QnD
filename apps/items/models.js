@@ -54,7 +54,7 @@ const PRIVILEGES = [
   {value: 'rsvsA', text: 'Reservations-A', level: 5},
   {value: 'rsvsB', text: 'Reservations-B', level: 4},
   {value: 'rsvsC', text: 'Reservations-C', level: 3},
-  {value: 'guest', text: 'Reservations-A', level: 1},
+  {value: 'guest', text: 'Guest', level: 1},
 ];
 
 const PRICETYPES = [

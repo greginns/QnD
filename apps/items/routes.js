@@ -79,8 +79,9 @@ Router.add(new RouterMessage({
     let {query, values} = urlQueryParse(req.query);
     let database = req.session.data.database;
     let pgschema = req.session.data.pgschema;
+    let user = req.session.user;
 
-    let tm = await services.query({database, pgschema, query, values});
+    let tm = await services.query({database, pgschema, user, query, values});
 
     return tm.toResponse();
   },

@@ -32,7 +32,7 @@ const makeCSRF = async function(database, pgschema, user) {
 }
 
 class CloudService extends ModelService {
-  async delete({database = '', pgschema = '', pks = {}} = {}) {
+  async delete({database = '', pgschema = '', user = {}, pks = {}} = {}) {
     // Delete row
     let tm = new TravelMessage();
 
@@ -70,7 +70,7 @@ class CloudService extends ModelService {
     }
 
     let tobj = new this.model(pks);
-    tm = await tobj.deleteOne({database, pgschema});
+    tm = await tobj.deleteOne({database, pgschema, user});
 
     //if (tm.isGood()) {
     //  zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.delete`, tm.data);
@@ -128,7 +128,7 @@ services.pricelevel = new ModelService({model: models.Pricelevel});
 services.pmtterms = new ModelService({model: models.Pmtterms});
 
 // Any other needed services
-services.query = function({database = '', pgschema = '', query = '', values = []}) {
+services.query = function({database = '', pgschema = '', user = {}, query = '', values = []}) {
   return jsonQueryExecify({database, pgschema, query, app, values});
 }
 

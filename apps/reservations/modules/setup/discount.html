@@ -1,0 +1,82 @@
+<page id='rsvs-setup-discount' style='display: none;'>
+  <section id='rsvs-setup-discount-section'>
+    {% include "./navbar-main.html" %}
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8 col-md-3 mb-2 mb-md-0'>
+                {{ fields.Char(id=discount.code.id, maxlength=discount.code.maxlength, mvc_value='discount.code', label=discount.code.verbose, mvc_on='{"blur": "testCode()"}', mvc_disabled='existingEntry', mvc_edit='upper') }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-2 mb-md-0'>
+                {{ fields.Switch(id=discount.active.id, mvc_checked='discount.active', label=discount.active.verbose) }}
+              </div>
+
+              <div class='col-4 col-md-4 mb-2 mb-md-0'>
+                {{ fields.Switch(id=discount.online.id, mvc_checked='discount.online', label=discount.online.verbose) }}
+              </div>
+            </div>       
+          </div>   
+
+          <div class='card-body'>
+            <div class='row pt-2'>
+              <div class='col-12 col-md-6 mb-2'>
+                {{ fields.Char(id=discount.name.id, maxlength=discount.name.maxlength, mvc_value='discount.name', label=discount.name.verbose) }}
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-2 mb-2'>
+                {{ fields.SelectChoices(id=discount.basis.id, size='1', mvc_value='discount.basis', mvc_enabled='', mvc_disabled='', choices=discount.basis.choices, label=discount.basis.verbose) }}
+              </div>
+
+              <div class='col-12 col-md-2 mb-2'>
+                {{ fields.Float(id=discount.amount.id, min='0.00', max='99999.00', step='1.0', mvc_value='discount.amount', mvc_enabled='', mvc_disabled='', mvc_role='dollar', choices=discount.amount.choices, label=discount.amount.verbose) }}
+                <small>(zero = set in reservation)</small>
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-2 mb-2'>
+                {{ fields.Float(id=discount.maxdisc.id, min='0.00', max='99999.00', step='1.0', mvc_value='discount.maxdisc', mvc_enabled='', mvc_disabled='', mvc_role='dollar', choices=discount.maxdisc.choices, label=discount.maxdisc.verbose) }}
+                <small>(zero = no maximum)</small>
+              </div>
+            </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 col-md-2 mb-2'>
+                {{ fields.SelectChoices(id=discount.privilege.id, mvc_value='discount.privilege', choices=discount.privilege.choices, size='1', label=discount.privilege.verbose) }}
+              </div>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <div class='row' mvc-show='badMessage'>
+              <div class='col-12'>
+                <div class="alert alert-danger" role="alert">
+                  <span mvc-text='badMessage'></span>  
+                </div>
+              </div>
+            </div>         
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='save()'>
+                  Save
+                </button>
+                <button class='btn btn-primary' mvc-click='backToStart()'>
+                  Exit
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</page>

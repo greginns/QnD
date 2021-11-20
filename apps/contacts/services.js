@@ -30,6 +30,7 @@ const makeCSRF = async function(database, pgschema, user) {
 // Model services
 services.associate = new ModelService({model: models.Associate});
 services.company = new ModelService({model: models.Company});
+services.currency = new ModelService({model: models.Currency});
 services.config = new ModelService({model: models.Config});
 services.contact = new ModelService({model: models.Contact});
 services.country = new ModelService({model: models.Country});

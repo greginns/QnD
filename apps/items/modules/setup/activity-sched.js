@@ -121,11 +121,11 @@ class Actsched extends Setup {
     }
 
     for (let entry of scheds) {
-      sched[entry.dayno][entry.time] = {limit: entry.limit, boo: entry.boo, bow: entry.bow};
+      sched[entry.dayno][Datetime.timeRound(entry.time)] = {limit: entry.limit, boo: entry.boo, bow: entry.bow};
     }
 
     // update the one being edited
-    sched[actsched.dayno][actsched.time] = {limit: actsched.limit, boo: actsched.boo, bow: actsched.bow};
+    sched[actsched.dayno][Datetime.timeRound(actsched.time)] = {limit: actsched.limit, boo: actsched.boo, bow: actsched.bow};
 
     sched = JSON.stringify(sched);
 
@@ -298,7 +298,7 @@ class Actsched extends Setup {
         // have one, what to do with it?
         let dayEntry = sched[dd-1];   // that day's entry
 
-        dayEntry[range.time] = {limit: range.limit, boo: range.boo, bow: range.bow};
+        dayEntry[Datetime.timeRound(range.time)] = {limit: range.limit, boo: range.boo, bow: range.bow};
       }
     }
   }

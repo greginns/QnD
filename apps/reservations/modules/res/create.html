@@ -1,0 +1,134 @@
+<page id='rsvs-rsv-create' style='display: none;'>
+  <section id='rsvs-rsv-create-section'>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-secondary text-white">
+      <div class="container-fluid">
+        <div>
+        </div>
+        <div>
+          <span style='font-size: 20px'>
+            Create New
+            <span mvc-text='title'></span>
+          </span>          
+        </div>
+        <div>
+          <span mvc-text='name'></span>
+        </div>
+      </div>
+    </nav>
+
+    <div class='row'>
+      <div class='col-12 col-md-6'>
+        <div class='row'>
+          <div class='col-8 col-md-6 mb-3'>
+            {{ fields.SelectMVC(id=main.company.id, size='1', mvc_value='main.company', mvc_each='companies', textField='name', valueField='id', label=main.company.verbose, mvc_on='{"change": "getCompany()"}') }}
+          </div>
+        </div>
+
+        <div class='row'>
+          <div class='col-8 col-md-6 mb-3'>
+            {{ fields.SelectMVC(id=main.area.id, size='1', mvc_value='main.area', mvc_each='areas', textField='name', valueField='code', label=main.area.verbose) }}
+          </div>
+        </div>       
+
+        <div class='row pt-2'>
+          <div class='col-12 col-md-6 mb-3'>
+            {{ fields.Char(id=main.client.id, maxlength=main.client.maxlength, mvc_value='main.client', label=main.client.verbose) }}
+          </div>
+        </div>
+
+        <div class='row pt-2'>
+          <div class='col-12 col-md-6 mb-3'>
+            {{ fields.Char(id=main.owner.id, maxlength=main.owner.maxlength, mvc_value='main.owner', label='Owner (employee)') }}
+          </div>
+        </div>
+
+        <div class='row pt-2'>
+          <div class='col-12 col-md-4 mb-3'>
+            {{ fields.Char(id=main.agent.id, maxlength=main.agent.maxlength, mvc_value='main.agent', label=main.agent.verbose) }}
+          </div>
+          
+          <div class='col-12 col-md-4 mb-3'>
+            {{ fields.Float(id=main.commrate.id, min='0.00', max='100.00', step='1.0', mvc_value='main.commrate', mvc_enabled='', mvc_disabled='', mvc_role='dollar', choices=main.commrate.choices, label=main.commrate.verbose) }}
+          </div>
+        </div>
+
+        <div class='row pt-2'>
+          <div class='col-12 col-md-4 mb-3'>
+            {{ fields.Switch(id=main.taxable.id, maxlength=main.taxable.maxlength, mvc_checked='main.taxable', label=main.taxable.verbose) }}
+          </div>
+          <div class='col-12 col-md-4 mb-3'>
+            {{ fields.Char(id=main.taxno.id, maxlength=main.taxno.maxlength, mvc_value='main.taxno', label=main.taxno.verbose) }}
+          </div>
+        </div>
+
+        <div class='row pt-2'>
+          <div class='col-12 col-md-4 mb-3'>
+            {{ fields.Switch(id=main.allowfup.id, maxlength=main.allowfup.maxlength, mvc_checked='main.allowfup', label=main.allowfup.verbose) }}
+          </div>
+        </div>
+
+        <div class='row' mvc-show='badMessage'>
+          <div class='col-12'>
+            <div class="alert alert-danger" role="alert">
+              <span mvc-text='badMessage'></span>  
+            </div>
+          </div>
+        </div>    
+      </div>
+      
+      <div class='col-12 col-md-6'>
+        <div class='row'>
+          <div class='col-4 col-md-4 mb-3'>
+            {{ fields.Integer(id=main.grpsize.id, mvc_value='main.grpsize', min='0', max='9999', step='1', label=main.grpsize.verbose) }}
+          </div>
+        </div>
+
+        <div class='row'>
+          <div class='col-4 col-md-4 mb-3'>
+            {{ fields.Integer(id=main.infants.id, mvc_value='main.infants', min='0', max='9999', step='1', label=main.infants.verbose) }}
+          </div>
+        </div>
+
+        <div class='row'>
+          <div class='col-4 col-md-4 mb-3'>
+            {{ fields.Integer(id=main.children.id, mvc_value='main.children', min='0', max='9999', step='1', label=main.children.verbose) }}
+          </div>
+        </div>        
+
+        <div class='row'>
+          <div class='col-4 col-md-4 mb-3'>
+            {{ fields.Integer(id=main.youth.id, mvc_value='main.youth', min='0', max='9999', step='1', label=main.youth.verbose) }}
+          </div>
+        </div>        
+
+        <div class='row'>
+          <div class='col-4 col-md-4 mb-3'>
+            {{ fields.Integer(id=main.adults.id, mvc_value='main.adults', min='0', max='9999', step='1', label=main.adults.verbose) }}
+          </div>
+        </div>        
+
+        <div class='row'>
+          <div class='col-4 col-md-4 mb-3'>
+            {{ fields.Integer(id=main.seniors.id, mvc_value='main.seniors', min='0', max='9999', step='1', label=main.seniors.verbose) }}
+          </div>
+        </div>                
+
+        <div class='row'>
+          <div class='col-4 col-md-6 mb-3'>
+            {{ fields.SelectMVC(id=main.currency.id, mvc_value='main.currency', mvc_each='currencies', size='1', textField='name', valueField='code', label=main.currency.verbose) }}
+          </div>
+        </div>                        
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12'>
+        <button class='btn btn-success' mvc-click='create()'>
+          Create
+          <span mvc-text='title'></span>
+        </button>
+      </div>
+    </div>
+
+  </section>
+</page>

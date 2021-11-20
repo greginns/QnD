@@ -3,13 +3,55 @@ const root = process.cwd();
 const Fields = require(root + '/lib/server/model/modelFields');
 const Model = require(root + '/lib/server/model/modelRun.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
-const {Contact, Company} = require(root + '/apps/contacts/models.js');
+const {Contact, Company, Currency} = require(root + '/apps/contacts/models.js');
 const {Activity, Lodging, Lodgunit, Meals, Area, Pmtterms, Tax, Glcode, Reseller, Supplier, PRIVILEGES} = require(root + '/apps/items/models.js');
 
 const app = getAppName(__dirname);
 
 const upper = function(x) {
   return String(x).toUpperCase();
+}
+
+const getRsvno = async function(col, {database='', pgschema='', user={}} = {}) {
+  let code = 'RSVNO';
+  let data;
+
+  let tm = await Sequence.selectOne({database, pgschema, user, cols: '*', pks: code});
+
+  if (tm.status == 400) {
+    data = {code, name: 'Last Reservation#', value: '1'};
+
+    let rec = new Sequence(data);
+    let res = await rec.insertOne({database, pgschema, user});
+  }
+  else {
+    data = tm.data;
+    
+    data.value++;
+
+    let rec = new Sequence(data);
+    let res = await rec.updateOne({database, pgschema});
+  }
+
+  return data.value;
+};
+
+const getCurrentDate = function() {
+  let dt = ((new Date()).toJSON()).split('T');
+
+  return dt[0];
+
+}
+
+const getCurrentTime = function() {
+  let dt = ((new Date()).toJSON()).split('T');
+  let tm = dt[1].split('-');
+
+  return tm[0];
+}
+
+const getUser = function(col, {database='', pgschema='', user={}} = {}) {
+  return user.code;
 }
 
 const STATUSES = [
@@ -243,7 +285,7 @@ const Booked = class extends Model {
   }
 };
 
-/* MAIN */
+// MAIN //
 const Main = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -252,26 +294,35 @@ const Main = class extends Model {
   static definition() {
     return {
       schema: {
-        rsvno: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Rsvno'}),
-        contact: new Fields.Integer({notNull: true, verbose: 'Contact'}),
+        rsvno: new Fields.Char({notNull: true, maxLength: 8, onBeforeInsert: getRsvno, verbose: 'Rsvno'}),
+        contact: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Contact'}),
         status: new Fields.Char({notNull: true, maxLength: 2, default: 'A', choices: STATUSES, verbose: 'Status'}),
-        cr8date: new Fields.Date({null: true, verbose: 'Create Date'}),
-        cr8time: new Fields.Time({null: true, verbose: 'Create Time'}),
-        cr8user: new Fields.Char({null: true, maxLength: 8, verbose: 'Create User'}),
-        lastdate: new Fields.Date({null: true, verbose: 'Last Accessed Date'}),
-        lasttime: new Fields.Time({null: true, verbose: 'Last Accessed Time'}),
-        lastuser: new Fields.Char({null: true, maxLength: 8, verbose: 'Last Accessed By'}),
+        
+        cr8date: new Fields.Date({null: true, onBeforeInsert: getCurrentDate, verbose: 'Create Date'}),
+        cr8time: new Fields.Time({null: true, onBeforeInsert: getCurrentTime, verbose: 'Create Time'}),
+        cr8user: new Fields.Char({null: true, maxLength: 8, onBeforeInsert: getUser, verbose: 'Create User'}),
+        lastdate: new Fields.Date({null: true, onBeforeUpsert: getCurrentDate, verbose: 'Last Accessed Date'}),
+        lasttime: new Fields.Time({null: true, onBeforeUpsert: getCurrentTime, verbose: 'Last Accessed Time'}),
+        lastuser: new Fields.Char({null: true, maxLength: 8, onBeforeUpsert: getUser, verbose: 'Last Accessed By'}),
+        
         arrdate: new Fields.Date({null: true, verbose: 'Arrival Date'}),
         depdate: new Fields.Date({null: true, verbose: 'Deprture Date'}),
         grpsize: new Fields.Integer({notNull: true, default: 1, verbose: 'Group Size'}),
         grpsizex: new Fields.Integer({notNull: true, default: 0, verbose: 'Group Size - Calced'}),
+        infants: new Fields.Integer({notNull: true, default: 0, verbose: 'Infants'}),
+        children: new Fields.Integer({notNull: true, default: 0, verbose: 'Children'}),
+        youth: new Fields.Integer({notNull: true, default: 0, verbose: 'Youth'}),
+        adults: new Fields.Integer({notNull: true, default: 0, verbose: 'Adults'}),
+        seniors: new Fields.Integer({notNull: true, default: 0, verbose: 'Seniors'}),
+        
         client: new Fields.Char({null: true, maxLength: 40, verbose: 'Client Name'}),
         owner: new Fields.Char({null: true, maxLength: 30, verbose: 'Owner'}),
         area: new Fields.Char({notNull: true, maxLength: 2, verbose: 'Area'}),
-        company: new Fields.Char({notNull: true, maxLength: 1, verbose: 'Company'}),
+        company: new Fields.Char({notNull: true, maxLength: 1, default: '1', verbose: 'Company'}),
         allowfup: new Fields.Boolean({default: true, verbose: 'Follow Up'}),
         firm: new Fields.Boolean({default: true, verbose: 'Deposit Paid'}),
         system: new Fields.Char({notNull: true, maxLength: 2, default: 'R', choices: SYSTEMS, verbose: 'System'}),
+
         cidate: new Fields.Date({null: true, verbose: 'Check-In Date'}),
         citime: new Fields.Time({null: true, verbose: 'Check-In Time'}),
         ciuser: new Fields.Char({null: true, maxLength: 8, verbose: 'Check-In User'}),
@@ -279,12 +330,15 @@ const Main = class extends Model {
         cotime: new Fields.Time({null: true, verbose: 'Check-Out Time'}),
         couser: new Fields.Char({null: true, maxLength: 8, verbose: 'Check-Out User'}),
 
+        agent: new Fields.Char({null: true, maxLength: 8, verbose: 'Agent'}),
+        commrate: new Fields.Decimal({null: true, digits: 5, decimals: 2, default: '0.00', verbose: 'Comm Rate%'}),
         taxable: new Fields.Boolean({default: true, verbose: 'Taxable'}),
         taxno: new Fields.Char({null: true, maxLength: 20, verbose: 'Tax#'}),
         pmtterms: new Fields.Char({null: true, maxLength: 8, verbose: 'Payment Terms'}),
         pmttermsx: new Fields.Char({null: true, maxLength: 8, verbose: 'Payment Terms - Calced'}),
         lockamts: new Fields.Boolean({default: false, verbose: 'Lock Pmt Amts'}),
         lockdates: new Fields.Boolean({default: false, verbose: 'Lock Pmt Dates'}),
+        currency: new Fields.Char({notNull: true, maxLength: 3, default: 'CAD', verbose: 'Guest Currency'}),
 
         pmtdate1: new Fields.Date({null: true, verbose: 'Pmt-1 Date'}),
         pmtamt1: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Pmt-1 Amount'}),
@@ -329,22 +383,25 @@ const Main = class extends Model {
         xtaxdtls: new Fields.Jsonb({verbose: 'Tax Details'}),
 
         reseller: new Fields.Char({null: true, maxLength: 8, verbose: 'Reseller'}),
-        rslrrsvno: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Reseller Rsvno'}), 
+        rslrrsvno: new Fields.Char({null: true, maxLength: 8, verbose: 'Reseller Rsvno'}), 
       },
       
       constraints: {
         pk: ['rsvno'],
         fk: [
           {name: 'contact', columns: ['contact'], app, table: Contact, tableColumns: ['id'], onDelete: 'NO ACTION'},
+          {name: 'agent', columns: ['agent'], app, table: Contact, tableColumns: ['id'], onDelete: 'NO ACTION'},
           {name: 'area', columns: ['area'], app, table: Area, tableColumns: ['code'], onDelete: 'NO ACTION'},
           {name: 'company', columns: ['company'], app, table: Company, tableColumns: ['id'], onDelete: 'NO ACTION'},
           {name: 'pmtterms', columns: ['pmtterms'], app, table: Pmtterms, tableColumns: ['code'], onDelete: 'NO ACTION'},
           {name: 'pmttermsx', columns: ['pmttermsx'], app, table: Pmtterms, tableColumns: ['code'], onDelete: 'NO ACTION'},
           {name: 'cancreas', columns: ['cancreas'], app, table: Cancreas, tableColumns: ['code'], onDelete: 'NO ACTION'},
           {name: 'reseller', columns: ['reseller'], app, table: Reseller, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'currency', columns: ['currency'], app, table: Currency, tableColumns: ['code'], onDelete: 'NO ACTION'},
         ],
         index: [
           {name: 'contact', columns: ['contact']},
+          {name: 'agent', columns: ['agent']},
           {name: 'arrdate', columns: ['arrdate']},
           {name: 'depdate', columns: ['depdate']},
         ],
@@ -433,7 +490,7 @@ const Maingls = class extends Model {
   }
 };
 
-/* ITEM LEVEL */
+// ITEM LEVEL //
 const Item = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -564,7 +621,7 @@ const Itemgls = class extends Model {
   }
 };
 
-/* ACTIVITIES */
+// ACTIVITIES //
 const Actinclude = class extends Include {
   constructor(obj, opts) {
     super(obj, opts);
@@ -617,6 +674,10 @@ const Acttaxes = class extends Includetaxes {
       app,
       desc: 'Activity Taxes'
     }
+  }
+  
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
   }
 };
 
@@ -682,10 +743,10 @@ const Actdaily = class extends Daily {
 }
 
 const Actbooked = class extends Booked {
-  /* booked:
-      31x [{time: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, }, ] 
-      one {} for all times in a day, one {} for each rsv daily
-  */
+  // booked:
+  //    31x [{time: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, }, ] 
+  //    one {} for all times in a day, one {} for each rsv daily
+  //
   constructor(obj, opts) {
     super(obj, opts);
   }
@@ -718,7 +779,7 @@ const Actbooked = class extends Booked {
   }
 };
   
-/* LODGING */
+// LODGING //
 const Lodginclude = class extends Include {
   constructor(obj, opts) {
     super(obj, opts);
@@ -772,6 +833,10 @@ const Lodgtaxes = class extends Includetaxes {
       desc: 'Activity Taxes'
     }
   }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
+  }
 };
 
 const Lodggls = class extends Includegls {
@@ -804,21 +869,21 @@ const Lodggls = class extends Includegls {
 }
 
 const Lodgdaily = class extends Daily {
-  /*
-    # one per day per qty booked.
-    # Lodging:
-    #   Unitized:
-    #       Bookbybed:
-    #           Qty = beds
-    #       Else:
-    #           Qty = 1
-    #   Else:
-    #       Qty = ppl
-    #
-    # Lodging can be unitized or not.  If so, qty = 1, else qty = ppl
-    # Lodging can be booked by bed or not.  If so, qty=beds, else qty = 1
-    # Beds belong to a unit, so beds have to have a unit and be unitized
-  */
+  //
+  //  # one per day per qty booked.
+  //  # Lodging:
+  //  #   Unitized:
+  //  #       Bookbybed:
+  //  #           Qty = beds
+  //  #       Else:
+  //  #           Qty = 1
+  //  #   Else:
+  //  #       Qty = ppl
+  //  #
+  //  # Lodging can be unitized or not.  If so, qty = 1, else qty = ppl
+  //  # Lodging can be booked by bed or not.  If so, qty=beds, else qty = 1
+  //  # Beds belong to a unit, so beds have to have a unit and be unitized
+  //
   constructor(obj, opts) {
     super(obj, opts);
   }
@@ -854,11 +919,11 @@ const Lodgdaily = class extends Daily {
 }
 
 const Lodgbooked = class extends Booked {
-  /* booked:
-      31x [{unitseq: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, seq3: xx}, ]}}, ] 
-      one {} for all units, one {} for each rsv daily
-      mostly have only one daily entry, except for non-unitized and book beds, where more than one item can be in the same unit.
-  */
+  // booked:
+  //    31x [{unitseq: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, seq3: xx}, ]}}, ] 
+  //    one {} for all units, one {} for each rsv daily
+  //    mostly have only one daily entry, except for non-unitized and book beds, where more than one item can be in the same unit.
+  //
   constructor(obj, opts) {
     super(obj, opts);
   }
@@ -891,7 +956,7 @@ const Lodgbooked = class extends Booked {
   }
 };
 
-/* MEALS */
+// MEALS //
 const Mealinclude = class extends Include {
   constructor(obj, opts) {
     super(obj, opts);
@@ -944,6 +1009,10 @@ const Mealtaxes = class extends Includetaxes {
       app,
       desc: 'Meal Taxes'
     }
+  }
+
+  static definition() {
+    return this.mergeSchemas(this.parent(), this.child());
   }
 };
 
@@ -1009,10 +1078,10 @@ const Mealdaily = class extends Daily {
 }
 
 const Mealbooked = class extends Booked {
-  /* booked:
-      31x [{time: xx, booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, ] 
-      one {} for each time, one {} for each rsv daily
-  */
+  // booked:
+  //    31x [{time: xx, booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, ] 
+  //    one {} for each time, one {} for each rsv daily
+  //
   constructor(obj, opts) {
     super(obj, opts);
   }
@@ -1045,7 +1114,7 @@ const Mealbooked = class extends Booked {
   }
 };
 
-/* GENERAL */
+// GENERAL //
 const Cancreas = class extends Model {
   constructor(obj, opts) {
     super(obj, opts);
@@ -1085,7 +1154,7 @@ const Discount = class extends Model {
       schema: {
         code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code', helptext: '1-8 character code to identify this waiver'}),
         name: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Name'}),
-        basis: new Fields.Char({notNull: true, maxLength: 2, default: '%', choices: DISCBASIS, verbose: 'Basic'}),
+        basis: new Fields.Char({notNull: true, maxLength: 2, default: '%', choices: DISCBASIS, verbose: 'Basis'}),
         amount: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Amount'}),
         maxdisc: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Maximum'}),
         privilege: new Fields.Char({notNull: true, maxLength: 5, default: 'rsvsA', choices: PRIVILEGES, verbose: 'Privilege'}),
@@ -1109,11 +1178,40 @@ const Discount = class extends Model {
   }
 };
 
+const Sequence = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 20, onBeforeUpsert: upper, verbose: 'Code'}),
+        name: new Fields.Char({null: true, maxLength: 50, verbose: 'Name'}),
+        value: new Fields.Char({notNull: true, maxLength: 50, verbose: 'Value'}),
+      },
+      
+      constraints: {
+        pk: ['code'],
+        fk: [],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Sequence'
+    }
+  }
+};
+
 module.exports = {
   Main, Maintaxes, Maingls,
   Item, Itemtaxes, Itemgls,
   Actinclude, Actdaily, Actbooked, Acttaxes, Actgls,
   Lodginclude, Lodgdaily, Lodgbooked, Lodgtaxes, Lodggls,
   Mealinclude, Mealdaily, Mealbooked, Mealtaxes, Mealgls,
-  Cancreas, Discount
+  Cancreas, Discount, Sequence
 };

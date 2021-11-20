@@ -1,0 +1,85 @@
+<page id='items-start' style='display: none;'>
+  <section id='items-start-section'>
+    <div class='fixed-top bg-secondary'>
+			<div class='row'>
+				<div class='col-12 text-center text-white'>
+					<h3>
+						Reservation Setup
+					</h3>
+				</div>
+			</div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8'>
+                Discounts
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.discount.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.discount.inactive'></span>
+              </div>
+              <div class='col-4'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("discount")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("discount","code")'>Code</th>
+                  <th mvc-click='sortItems("discount","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='discount'>
+                <tr mvc-click='editItem("discount", "$index")' mvc-attrclassx='{"text-danger": "discount[$index].active"}'>
+                  <td mvc-text='discount[$index].code'></td>
+                  <td mvc-text='discount[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-12 col-md-6 col-lg-4 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-8'>
+                Cancellation Reasons
+                <span class="badge rounded-pill bg-success" mvc-text='lengths.cancreas.active'></span>
+                <span class="badge rounded-pill bg-danger" mvc-text='lengths.cancreas.inactive'></span>
+              </div>
+              <div class='col-4'>
+                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("cancreas")'>
+                  New
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class='card-body'>
+            <table class='table table-sm table-hover'>
+              <thead>
+                <tr>
+                  <th mvc-click='sortItems("cancreas","code")'>Code</th>
+                  <th mvc-click='sortItems("cancreas","name")'>Name</th>
+                </tr>
+              </thead>
+              <tbody mvc-each='cancreas'>
+                <tr mvc-click='editItem("cancreas", "$index")' mvc-attrclassx='{"text-danger": "cancreas[$index].active"}'>
+                  <td mvc-text='cancreas[$index].code'></td>
+                  <td mvc-text='cancreas[$index].name'></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>    
+    </div>
+  </section>
+</page>

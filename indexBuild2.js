@@ -10,7 +10,7 @@ const {SendMessage} = require(root + '/lib/server/utils/messages.js');
 const database = 'qnd'; //'db4_73WakrfVbNJBaAmhQtEeDv';
 const pgschema = 'gm'; //'public';
 //const migApp = 'db4admin';
-const migApp = 'items'; //'schema';
+const migApp = 'reservations'; //'items'; // 'contacts'; // //'schema';
 
 (async function() {
   let res = await migration({database, pgschema, migApp});

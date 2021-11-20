@@ -1,0 +1,29 @@
+<nav class="navbar navbar-expand-lg navbar-light fixed-top bg-secondary text-white">
+  <div class="container-fluid">
+    <a class="navbar-brand text-white pointer" href="/start">
+      <i class="fas fa-chevron-left"></i>
+      <span style='font-size: 20px'>
+        Start
+      </span>
+    </a>
+    <div>
+      <span style='font-size: 20px' mvc-text='title'>
+      </span>          
+    </div>
+    <div style='margin-right: 60px'>
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <span class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown">
+            <i class="fal fa-cog"></i>
+          </span>
+          <ul class="dropdown-menu">
+            <li><span class="dropdown-item" mvc-click='optionsHelp()'>Toggle Help</span></li>
+            <li><span class="dropdown-item" mvc-click='optionsImport()'>Import</span></li>
+            <li><span class="dropdown-item" mvc-click='optionsExport()'>Export</span></li>
+            <li><span class="dropdown-item" mvc-click='optionsPrint()'>Print</span></li>
+          </ul>
+        </li>
+      </ul>          
+    </div>
+  </div>
+</nav>

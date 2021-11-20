@@ -100,6 +100,7 @@ Router.add(new RouterMessage({
 // Model Routes
 new Routes({app, subapp: 'associate', version, allowCORS: true, model: models.Associate, services: services.associate});
 new Routes({app, subapp: 'company', version, allowCORS: true, model: models.Company, services: services.company});
+new Routes({app, subapp: 'currency', version, allowCORS: true, model: models.Currency, services: services.currency});
 new Routes({app, subapp: 'config', version, allowCORS: true, model: models.Config, services: services.config});
 new Routes({app, subapp: 'contact', version, allowCORS: true, model: models.Contact, services: services.contact});
 new Routes({app, subapp: 'country', version, allowCORS: true, model: models.Country, services: services.country});

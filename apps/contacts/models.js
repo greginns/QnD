@@ -28,7 +28,7 @@ const Contact = class extends Model {
   static definition() {
     return {
       schema: {
-        id: new Fields.Serial({verbose: 'Contact ID'}),
+        id: new Fields.Char({notNull: true, maxLength: 10, verbose: 'Contact ID'}),
         first: new Fields.Char({notNull: true, maxLength: 40, verbose: 'First Name'}),
         last: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Last Name'}),
         group: new Fields.Char({null: true, maxLength: 40, verbose: 'Group Name'}),
@@ -472,11 +472,16 @@ const Company = class extends Model {
         id: new Fields.Char({notNull: true, maxLength: 1, verbose: 'ID'}),
         name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Name'}),
         active: new Fields.Boolean({default: true, verbose: 'Active?'}),
-        currency: new Fields.Char({notNull: true, maxLength: 3, default: 'CAD', choices: CURRENCIES, verbose: 'Currency'}),
+        currency: new Fields.Char({notNull: true, maxLength: 3, default: 'CAD', choices: CURRENCIES, verbose: 'Home Currency'}),
+        accepted: new Fields.Jsonb({verbose: 'Accepted Currencies'}),
+        surcharge: new Fields.Float({notNull: true, default: 0, verbose: 'Currency Surcharge'}),
       },
 
       constraints: {
         pk: ['id'],
+        fk: [
+          {name: 'currency', columns: ['currency'], app, table: Currency, tableColumns: ['code'], onDelete: 'NO ACTION'}
+        ]
       },
       
       hidden: [],
@@ -490,4 +495,31 @@ const Company = class extends Model {
   }
 };
 
-module.exports = {Contact, Emailhist, Associate, Title, Group, Country, Region, Postcode, Egroup, Tagcat, Tag, Config, Company};
+const Currency = class extends Model {
+  constructor(obj, opts) {
+    super(obj, opts);
+  }
+  
+  static definition() {
+    return {
+      schema: {
+        code: new Fields.Char({notNull: true, maxLength: 3, verbose: 'Code'}),
+        name: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Name'}),
+      },
+
+      constraints: {
+        pk: ['code'],
+      },
+      
+      hidden: [],
+      
+      orderBy: ['name'],
+      
+      dbschema: '',
+      app,
+      desc: 'Currencies'
+    }
+  }
+};
+
+module.exports = {Contact, Emailhist, Associate, Title, Group, Country, Region, Postcode, Egroup, Tagcat, Tag, Config, Company, Currency};

@@ -103,11 +103,11 @@ class Mealsched extends Setup {
     }
 
     for (let entry of scheds) {
-      sched[entry.dayno][entry.time] = {limit: entry.limit};
+      sched[entry.dayno][Datetime.timeRound(entry.time)] = {limit: entry.limit};
     }
 
     // update the one being edited
-    sched[mealsched.dayno][mealsched.time] = {limit: mealsched.limit};
+    sched[mealsched.dayno][Datetime.timeRound(mealsched.time)] = {limit: mealsched.limit};
 
     sched = JSON.stringify(sched);
 
@@ -281,7 +281,7 @@ class Mealsched extends Setup {
         // have one, what to do with it?
         let dayEntry = sched[dd-1];   // that day's entry
 
-        dayEntry[range.time] = {limit: range.limit};
+        dayEntry[Datetime.timeRound(range.time)] = {limit: range.limit};
       }
     }
   }
