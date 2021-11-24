@@ -50,11 +50,11 @@ class Contact extends ContactWithAddress {
   }
   
   inView() {
-    Module.navbar.setActive('search');
+    if (Module.navbar) Module.navbar.setActive('search');
   }
 
   outView() {
-    Module.navbar.setInactive('search');
+    if (Module.navbar) Module.navbar.setInactive('search');
 
     return true;  
   }

@@ -1,0 +1,71 @@
+{% extends "project/base.html" %}
+
+{% block title %}
+  Contacts
+{% endblock %}
+
+{% block css %}
+<!--link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet"-->
+
+<style>
+  .chip {
+    display: inline-block;
+    padding: 0 10px;
+    height: 40px;
+    font-size: 16px;
+    line-height: 30px;
+    border-radius: 20px;
+    margin-right: 5px;
+    background-color: #f1f1f1;
+  }
+
+  .chip .chipx {
+    cursor: pointer;
+    font-size: 24px;
+    padding-left: 5px;
+  }  
+
+</style>
+{% endblock %}
+
+{% block script %}
+  <!--script src="https://cdn.quilljs.com/1.3.6/quill.js"></script-->
+
+  <script type="module">
+    import {App} from '/~static/project/app.js';
+
+    App.CSRF = '{{CSRFToken}}';
+    App.USER = JSON.parse('{{USER|safe}}');
+    localStorage.setItem('CSRF_token', App.CSRF);
+  </script>
+
+  <script type="text/javascript">
+  </script>
+{% endblock %}
+
+{% block body %}
+  <div class="container-fluid">
+    {% include "./navbar.html" %}
+    <div id='qndPages'>
+      {% include "../main/contact-search.html" %}
+      {% include "./results.html" %}
+    </div>
+  </div>
+  
+  {% include "../../utils/address.html" %}
+  {% include "lib/client/widgets/mdate.html" %}
+  {% include "lib/client/widgets/mtime.html" %}
+  {% include "lib/client/widgets/modal.html" %}
+  {% include "lib/client/widgets/multisel.html" %}
+  {% include "lib/client/widgets/singlesel.html" %}
+  {#% include "lib/client/widgets/notes.html" %#}
+
+  {% include "apps/login/views/relogin.html" %}
+{% endblock %}
+
+{% block init %}
+<script type="module" src="/~static/apps/contacts/modules/search/module.js"></script>
+
+<script type="text/javascript">
+</script>
+{% endblock %}

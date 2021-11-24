@@ -38,6 +38,30 @@ Router.add(new RouterMessage({
   }
 }));
 
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'modules',
+  version,
+  path: ['/searchpage', '/searchpage/:etc', '/searchpage/:etc/:etc', '/searchpage/:etc/:etc/:etc', '/searchpage/:etc/:etc/:etc/:etc'], 
+  rewrite: true,
+  id: 'search',
+  level: ACCESS,
+  desc: 'Search Page',
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.output.search(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+      {basic: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+    ],
+  }
+}));
+
 // Query routes
 Router.add(new RouterMessage({
   method: 'get',

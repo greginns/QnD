@@ -1,0 +1,112 @@
+<style>
+  .row.scrollery {
+    height: calc(100vh - 220px);
+    overflow-y: scroll;
+  }
+
+  table.sticky th {
+    position: sticky !important;
+    top: 0 !important;
+    background-color: white;
+  }
+
+  table.sticky tr:hover {
+    background-color:#ddd
+  }
+
+  table.sticky td {
+    padding-right: 20px;
+  }
+
+  @media (max-width: 500px) {
+    table.respo {
+     border: 0;
+    }
+
+    table.respo thead {
+      border: none;
+      clip: rect(0 0 0 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      width: 1px;
+    }
+
+    table.respo tr {
+      border-bottom: 3px solid #ddd;
+      display: block;
+      margin-bottom: .625em;
+    }
+
+    table.respo td {
+      border-bottom: 1px solid #ddd;
+      display: block;
+      font-size: .8em;
+      text-align: right;
+    }
+
+    table.respo td::before {
+      content: attr(data-label);
+      float: left;
+      font-weight: bold;
+      text-transform: uppercase;
+      padding-right: 10px;
+    }
+
+    table.respo td:last-child {
+     border-bottom: 0;
+    }
+  }
+</style>
+
+<page id='contacts-contact-results' style='display: none;'>
+  <section id='contacts-contact-results-section'>
+    <div class='row justify-content-center'>
+      <div class='col-12'>
+        <div class='card'>
+          <div class='card-header'>
+            <div class='row'>
+              <div class='col-12'>
+                <i style='font-size: 24px' class="fas fa-chevron-left"></i>
+                <span mvc-click ='searchAgain()' class='pointer'>Search Again</span>
+              </div>
+            </div>          
+          </div>
+          
+          <div class='card-body'>
+            <div class='row scrollery'>
+              <div class='col-12'>
+                <table class='sticky respo'>
+                  <thead>
+                    <tr mvc-each='headers'>
+                      <th><span mvc-text='headers[$index]'></span></th>
+                    </tr>
+                  </thead>
+                  <tbody mvc-each='contacts' mvc-click='updateContact()'>
+                    <tr mvc-each='headers' mvc-index='$index2' data-index='$index'>
+                      <td mvc-attr='{"data-label": "headers[$index2]"}'><span mvc-text='contacts[$index][$index2]'></span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class='card-footer'>
+            <!--div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='newContact()'>
+                  + New Contact
+                </button>
+              </div>
+            </div-->            
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+</page>

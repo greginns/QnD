@@ -55,6 +55,26 @@
 </div>
 {% endmacro %}
 
+{% macro Search(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_click='', mvc_on='', placeholder='') %}
+<div class="form-label-group">
+  <div class='input-group'>
+    <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-on="{{mvc_on}}" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
+    <span class="input-group-text" mvc-click='{{mvc_click}}'>
+      <i class="fa-regular fa-magnifying-glass"></i>
+    </span>
+  </div>
+  <label class='split-bg'>{{label}}</label>
+</div>
+
+<div>
+  <small class='text-success helptext d-none'>{{mvc_helptext}}</small>
+</div>
+
+<div mvc-show='errors.{{mvc_value}}'>
+  <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
+</div>
+{% endmacro %}
+
 {% macro Date(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
 <div class="form-label-group">
   <div class='input-group'>

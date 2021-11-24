@@ -365,6 +365,8 @@ const Main = class extends Model {
         sales: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Sales'}),
         taxes: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Taxes'}),
         total: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Total'}),
+        pmts: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Payments'}),
+        baldue: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Bal Due'}),
 
         cancdate: new Fields.Date({null: true, verbose: 'Cxl Date'}),
         cancwho: new Fields.Char({null: true, maxLength: 40, verbose: 'Cxl By'}),
@@ -379,8 +381,9 @@ const Main = class extends Model {
         xcomm3: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: '3rd Party Commission'}),
         xsales: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Sales'}),
         xtaxes: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Taxes'}),
+        xpmts: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Payments'}),
+        xbaldue: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Bal Due'}),
         xtotal: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Total'}),
-        xtaxdtls: new Fields.Jsonb({verbose: 'Tax Details'}),
 
         reseller: new Fields.Char({null: true, maxLength: 8, verbose: 'Reseller'}),
         rslrrsvno: new Fields.Char({null: true, maxLength: 8, verbose: 'Reseller Rsvno'}), 

@@ -20,6 +20,7 @@ class Rescreate extends Verror {
 
     this.model.name = '';
     this.model.title = '';
+    this.model.agentName = '';
   }
 
   async ready() {
@@ -43,7 +44,7 @@ class Rescreate extends Verror {
   
   async inView(params) {
     this.status = params.status || 'A';
-    this.contact = params.contact || 819;
+    this.contact = params.contact;
 
     this.makeTitle();
     this.getContact();
@@ -68,13 +69,33 @@ class Rescreate extends Verror {
 
     if (res.status == 200) {
       utils.modals.toast('Created', 2000);
-console.log(res.data)      
+
+      let rsvno = res.data.rsvno;
+
+      Module.router.go('/' + rsvno);
     }
     else {
       this.displayErrors(res);
     }
     
     this.stopSpinner(ev, spinner);    
+  }
+
+  agentSearch(obj) {
+    window.open('/searchpage/contact/search');
+  }
+
+  agentFound(id) {
+    this.model.main.agent = id;
+    this.getAgent();
+  }
+
+  async getAgent() {
+    if (!this.model.main.agent) return;
+
+    let res = await Module.tableStores.contact.getOne(this.model.main.agent);
+
+    this.model.agentName = res.first + ' ' + res.last;    
   }
 
   setDefaults() {
@@ -132,5 +153,9 @@ let el1 = document.getElementById('rsvs-rsv-create');   // page html
 let setup1 = new Rescreate('rsvs-rsv-create-section');
 let section1 = new Section({mvc: setup1});
 let page1 = new Page({el: el1, path: ['/create'], title: 'Reservation', sections: [section1]});
+
+window.searchResults = function(id) {
+  setup1.agentFound(id);
+}
 
 Module.pages.push(page1);

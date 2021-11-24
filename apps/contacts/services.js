@@ -135,6 +135,39 @@ services.output = {
 
     return tm;
   },
+
+  search: async function(req) {
+    // main admin manage page.  Needs a user so won't get here without one
+    const tm = new TravelMessage();
+
+    try {
+      let ctx = {};
+      let tmpl = 'apps/contacts/modules/search/module.html';
+
+      ctx.CSRFToken = await makeCSRF(req.session.data.database, req.session.data.pgschema, req.session.user.code);
+      ctx.contact = models.Contact.getColumnDefns();
+
+      ctx.dateFormat = dateFormat;
+      ctx.timeFormat = timeFormat;
+      ctx.TID = req.TID;    
+      ctx.USER = JSON.stringify(req.session.user);
+
+      try {
+        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+        tm.type = 'html';
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+    }
+    catch(err) {
+      tm.status = 500;
+      tm.message = err.toString();
+    }
+
+    return tm;
+  },  
 }
 
 module.exports = services;

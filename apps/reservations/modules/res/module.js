@@ -6,12 +6,14 @@ import {Modal} from '/~static/lib/client/widgets/modal.js';
 
 // js for pages
 import '/~static/apps/reservations/modules/res/create.js';
+import '/~static/apps/reservations/modules/res/update.js';
 
 let moduleStart = function() {
   let connectToData = async function() {
     // setup data table access
     // gets us access to raw data.
     Module.data.area = new TableAccess({modelName: 'area', url: `/items/v1/area`});    
+    Module.data.pmtterms = new TableAccess({modelName: 'pmtterms', url: `/items/v1/pmtterms`});    
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});    
     Module.data.company = new TableAccess({modelName: 'company', url: `/contacts/v1/company`});    
     Module.data.currency = new TableAccess({modelName: 'currency', url: `/contacts/v1/currency`});    
@@ -33,8 +35,7 @@ let moduleStart = function() {
                                                       // First path segment must be the same as app
 
     Module.tableStores.main = new TableStore({accessor: Module.data.main, model, safemode});  // setup a table store in Module so all pages can access
-    dataPromises.push(Module.tableStores.main.getAll());               // seed the table store
-
+    
     // Area
     model = `/items/area`;
 
@@ -42,6 +43,14 @@ let moduleStart = function() {
 
     Module.tableStores.area = new TableStore({accessor: Module.data.area, model, safemode});  // setup a table store in Module so all pages can access    
     dataPromises.push(Module.tableStores.area.getAll());
+
+    // Pmt terms
+    model = `/items/pmtterms`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.pmtterms = new TableStore({accessor: Module.data.pmtterms, model, safemode});  // setup a table store in Module so all pages can access    
+    dataPromises.push(Module.tableStores.pmtterms.getAll());
 
     // Contact table ---
     model = `/contacts/contact`;

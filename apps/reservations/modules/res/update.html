@@ -1,0 +1,584 @@
+<page id='rsvs-rsv-update' style='display: none;'>
+  <section id='rsvs-rsv-update-section'>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top " style='background-color: #bbe2f1;'>
+      <div class="container-fluid">
+        <div>
+        </div>
+        <div>
+          <span style='font-size: 20px'>
+            Reservation
+            <span mvc-text='main.rsvno'></span>
+            -
+            <span mvc-text='text.contact'></span>
+          </span>          
+        </div>
+        <div>
+          <span mvc-text='name'></span>
+        </div>
+        <div class='col-2'>
+          <div class='d-block d-sm-none'>XS</div>
+          <div class='d-none d-sm-block d-md-none'>SM</div>
+          <div class='d-none d-md-block d-lg-none'>MD</div>
+          <div class='d-none d-lg-block d-xl-none'>LG</div>
+          <div class='d-none d-xl-block'>XL</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- XS only -->
+    <div class='row d-block d-sm-none mb-3'>
+      <div class='col-12'>
+        <div class='list-group shadow'>
+          <div class='list-group-item' mvc-click='editStatus()'>
+            <span class='float-start'>
+              Status
+            </span>
+            <span class='float-end' mvc-text='text.status'>
+            </span>
+          </div>
+
+          <div class='list-group-item' mvc-click='editGuest()'>
+            <span class='float-start'>
+              Guest
+            </span>
+            <span class='float-end' mvc-text='text.contact'>
+            </span>
+          </div>
+
+          <div class='list-group-item' mvc-click='viewNotifications()'>
+            Notifications
+          </div>
+
+          <div class='list-group-item' mvc-click='editFinancials()'>
+            <span class='float-start'>
+              Charges
+            </span>
+            <span class='float-end' mvc-text='main.total'>
+            </span>
+          </div>
+
+          <div class='list-group-item' mvc-click='editTerms()'>
+            <span class='float-start'>
+              Balance Due
+            </span>
+            <span class='float-end' mvc-text='main.baldue'>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SM and above -->
+    <div class='d-none d-sm-block mb-3'>
+      <div class='row'>
+        <div class='col-12 col-md-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Status</h5>
+              <button class='btn-sm btn-outline-primary float-end' data-bs-toggle="modal" data-bs-target="#editStatus">
+                Edit
+              </button>
+            </div>
+            <div class='card-body'>
+              <span mvc-text='text.status'></span>
+              <br>
+
+              <span mvc-show='main.status == "X"'>
+                <span class='text-danger' mvc-text='cancreas.name'></span>
+                <br>
+                <span class='text-danger' mvc-text='main.cancwho'></span>
+                <br>
+              </span>
+
+              <span mvc-text='company.name'></span>
+              <br>
+
+              Group of 
+              <span mvc-text='main.grpsize || main.grpsizex'></span>
+              <span mvc-show='main.arrdate'>
+                arriving on
+                <span mvc-text='main.arrdate' mvc-filter='date'></span>
+              </span>
+              at
+              <span mvc-text='area.name'></span>
+              <br>
+
+              <span mvc-show='main.owner'>
+                Managed by
+                <span mvc-text='main.owner'></span>
+                <br>
+              </span>
+
+              Follow-Up
+              <span mvc-show='main.allowfup'>Enabled</span>
+              <span mvc-show='!main.allowfup'>Disabled</span>
+              <br>
+
+              <span mvc-show='main.cidate'>
+                Checked-In:
+                <span mvc-text='main.cidate' mvc-filter='date'></span>
+                <span mvc-text='main.citime' mvc-filter='time'></span>
+                <br>
+              </span>
+
+              <span mvc-show='main.codate'>
+                Checked-Out:
+                <span mvc-text='main.codate' mvc-filter='date'></span>
+                <span mvc-text='main.cotime' mvc-filter='time'></span>
+                <br>
+              </span>
+
+            </div>
+          </div>
+        </div>
+    
+        <div class='col-12 col-md-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Guest</h5>
+              <button class='btn-sm btn-outline-primary float-end' mvc-click='editGuest()'>
+                Edit
+              </button>
+            </div>
+            <div class='card-body'>
+              <button class='btn btn-sm btn-outline-secondary' mvc-click='gotoContact()'>
+                <span mvc-text='main.contact'></span>
+              </button>
+              <br>
+              
+              <span mvc-text='contact.first'></span>
+              <span mvc-text='contact.last'></span>
+              <br>
+              <span mvc-show='contact.group'>
+                <span mvc-text='contact.group'></span>
+                <br>
+              </span>              
+
+              <span mvc-show='main.client'>
+                <span mvc-text='main.client'></span>
+                <br>
+              </span>              
+
+              <span mvc-text='contact.address1'></span>
+              <br>
+
+              <span mvc-text='contact.city'></span>
+              <span mvc-text='contact.state'></span>
+              <span mvc-text='contact.postcode'></span>
+              <br>
+
+              <span mvc-show='contact.email'>
+                <a mvc-href='mailto:${contact.email}?subject=Reservation ${main.rsvno} on ${main.arrdate}'>
+                  <span mvc-text='contact.email'></span>
+                </a>
+                <br>
+              </span>
+              
+              <span mvc-show='contact.email2'>
+                <a mvc-href='mailto:${contact.email2}?subject=Reservation ${main.rsvno} on ${main.arrdate}'>
+                  <span mvc-text='contact.email2'></span>
+                </a>
+                <br>
+              </span>              
+
+              <span mvc-show='contact.phone'>
+                <a mvc-href='tel:${contact.phone}'><span mvc-text='contact.phone'></span></a>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+  
+        <div class='col-12 col-md-6 col-xl-4 mb-4'>        
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Notifications</h5>
+            </div>
+            <div class='card-body'>
+              Created on 
+              <span mvc-text='main.cr8date' mvc-filter='date'></span>
+              at
+              <span mvc-text='main.cr8time' mvc-filter='time'></span>
+              by
+              <span mvc-text='main.cr8user'></span>
+            </div>
+          </div>        
+        </div>
+  
+        <div class='col-12 col-lg-6 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Financial</h5>
+              <button class='btn-sm btn-outline-primary float-end' mvc-click='editFinancials()'>
+                Edit
+              </button>
+            </div>
+            <div class='card-body'>
+              <div class='row'>
+                <div class='col-6'>
+                  <div class='row'>
+                    <div class='col-6'>
+                      Charges
+                    </div>
+                    <div class='col-6'>
+                      <span mvc-text='main.charges'></span>
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-6'>
+                      Complementary
+                    </div>
+                    <div class='col-6'>
+                      <span mvc-text='main.comped'></span>
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-6'>
+                      Discount
+                    </div>
+                    <div class='col-6'>
+                      <span mvc-text='main.discount'></span>
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-6'>
+                      Taxes
+                    </div>
+                    <div class='col-6'>
+                      <span mvc-text='main.taxes'></span>
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-6'>
+                      Commission
+                    </div>
+                    <div class='col-6'>
+                      <span mvc-text='main.comm'></span>
+                    </div>
+                  </div>                  
+
+                  <div class='row'>
+                    <div class='col-6'>
+                      Total
+                    </div>
+                    <div class='col-6'>
+                      <span mvc-text='main.total'></span>
+                    </div>
+                  </div>         
+                  
+                  <div class='row'>
+                    <div class='col-6'>
+                      Payments
+                    </div>
+                    <div class='col-6'>
+                      <span mvc-text='main.payments'></span>
+                    </div>
+                  </div>                  
+
+                  <div class='row'>
+                    <div class='col-6'>
+                      DUE
+                    </div>
+                    <div class='col-6'>
+                      <span mvc-text='main.baldue'></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class='col-6'>
+                  <div class='row'>
+                    <div class='col-12'>
+                      <span mvc-if='main.taxable'>
+                        Taxable
+                      </span>
+                      <span mvc-else>
+                        <span class='text-danger'>
+                          Not Taxable
+                        </span>
+                      </span>
+                    </div>
+                  </div>  
+
+                  <div class='row' mvc-show='main.taxno'>
+                    <div class='col-12'>
+                      Tax#
+                      <span mvc-text='main.taxno'></span>
+                    </div>
+                  </div>
+
+                  <div mvc-show='main.agent'>
+                    <div class='row'>
+                      <div class='col-4'>
+                        <span mvc-text='main.agent'></span>
+                      </div>
+                      <div class='col-8'>
+                        <span mvc-text='agent.first'></span>
+                        <span mvc-text='agent.last'></span>
+                      </div>
+                    </div>
+
+                    <div class='row'>
+                      <div class='col-4'>
+                        <span mvc-text='main.commrate'></span>
+                        % Commission
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class='row'>
+                    <div class='col-12'>
+                      <span mvc-text='currency.name'></span>
+                    </div>  
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>        
+        </div>
+  
+        <div class='col-12 col-lg-6 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Payment Schedule</h5>
+              <button class='btn-sm btn-outline-primary float-end' mvc-click='editTerms()'>
+                Edit
+              </button>
+            </div>
+            <div class='card-body'>
+              <div class='row'>
+                <div class='col-12'>
+                  <table class='table table-sm'>
+                    <thead>
+                      <tr>
+                        <th>Due Date</th>
+                        <th style='text-align: right'>Amount</th>
+                        <th style='text-align: right'>Applied</th>
+                        <th style='text-align: right'>Remain</th>
+                        <th style='text-align: right'>Balance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td mvc-text='main.pmtdate1' mvc-filter='date'></td>
+                        <td style='text-align: right' mvc-text='main.pmtamt1'></td>
+                        <td style='text-align: right' mvc-text='main.pmtapp1'></td>
+                        <td style='text-align: right' mvc-text='main.pmtrem1'></td>
+                        <td style='text-align: right' mvc-text='main.pmtbal1'></td>
+                      </tr>
+                      <tr>
+                        <td mvc-text='main.pmtdate2' mvc-filter='date'></td>
+                        <td style='text-align: right' mvc-text='main.pmtamt2'></td>
+                        <td style='text-align: right' mvc-text='main.pmtapp2'></td>
+                        <td style='text-align: right' mvc-text='main.pmtrem2'></td>
+                        <td style='text-align: right' mvc-text='main.pmtbal2'></td>
+                      </tr>
+                      <tr>
+                        <td mvc-text='main.pmtdate3' mvc-filter='date'></td>
+                        <td style='text-align: right' mvc-text='main.pmtamt3'></td>
+                        <td style='text-align: right' mvc-text='main.pmtapp3'></td>
+                        <td style='text-align: right' mvc-text='main.pmtrem3'></td>
+                        <td style='text-align: right' mvc-text='main.pmtbal3'></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class='row' mvc-show='main.pmtterms'>
+                <div class='col-12'>
+                  Rule
+                  <span mvc-text='main.pmtterms'></span>
+                  -
+                  <span mvc-text='pmtterms.name'></span>
+                </div>
+              </div>
+
+              <div class='row' mvc-show='main.pmttermsx'>
+                <div class='col-12'>
+                  Override Rule
+                  <span mvc-text='main.pmttermsx'></span>
+                  -
+                  <span mvc-text='pmttermsx.name'></span>
+                </div>
+              </div>
+            </div>
+          </div>        
+        </div>
+  
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12'>
+        <button class='btn btn-success' mvc-click='create()'>
+          Create
+          <span mvc-text='title'></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div class="modal fade" id="editStatus" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Status</h5>
+            <button type="button" class="btn-close" mvc-click='resetStatus()'>
+            </button>
+          </div>
+
+          <div class='modal-body'>
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.SelectMVC(id=main.company.id, size='1', mvc_value='main.company', mvc_each='companies', textField='name', valueField='id', label=main.company.verbose, mvc_on='{"change": "getCompany()"}') }}
+              </div>
+            </div>
+
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.SelectMVC(id=main.area.id, size='1', mvc_value='main.area', mvc_each='areas', textField='name', valueField='code', label=main.area.verbose) }}
+              </div>
+            </div>
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Integer(id=main.grpsize.id, mvc_value='main.grpsize', min='0', max='9999', step='1', label=main.grpsize.verbose) }}
+              </div>
+            </div>
+    
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Integer(id=main.infants.id, mvc_value='main.infants', min='0', max='9999', step='1', label=main.infants.verbose) }}
+              </div>
+            </div>
+    
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Integer(id=main.children.id, mvc_value='main.children', min='0', max='9999', step='1', label=main.children.verbose) }}
+              </div>
+            </div>        
+    
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Integer(id=main.youth.id, mvc_value='main.youth', min='0', max='9999', step='1', label=main.youth.verbose) }}
+              </div>
+            </div>        
+    
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Integer(id=main.adults.id, mvc_value='main.adults', min='0', max='9999', step='1', label=main.adults.verbose) }}
+              </div>
+            </div>        
+    
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Integer(id=main.seniors.id, mvc_value='main.seniors', min='0', max='9999', step='1', label=main.seniors.verbose) }}
+              </div>
+            </div>      
+            
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Char(id=main.owner.id, maxlength=main.owner.maxlength, mvc_value='main.owner', label='Owner (employee)') }}
+              </div>
+            </div>            
+            
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Switch(id=main.allowfup.id, maxlength=main.allowfup.maxlength, mvc_checked='main.allowfup', label=main.allowfup.verbose) }}
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='updateStatus()'>
+                  Save Changes
+                </button>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12'>
+                <hr>
+              </div>
+            </div>
+
+            <div class='row mb-3'>
+              <div class='col-6'>
+                <span mvc-show='main.status == "A"'>
+                  <button class='btn btn-outline-primary' mvc-click='quote()'>
+                    Convert to Quotation
+                  </button>
+                </span>
+
+                <span mvc-show='main.status == "Q"'>
+                  <button class='btn btn-outline-primary' mvc-click='unQuote()'>
+                    Convert to Active
+                  </button>
+                </span>
+              </div>
+
+              <div class='col-6'>
+                <span mvc-show='main.status == "A"'>
+                  <button class='btn btn-outline-danger' mvc-click='cancel()'>
+                    Cancel
+                  </button>
+                </span>
+
+                <span mvc-show='main.status == "X"'>
+                  <button class='btn btn-outline-danger' mvc-click='unCancel()'>
+                    UnCancel
+                  </button>
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>  
+      </div>
+    </div>
+
+    <div class="modal fade" id="editGuest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Guest</h5>
+            <button type="button" class="btn-close" mvc-click='resetGuest()'>
+            </button>
+          </div>
+
+          <div class='modal-body'>
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Search(id=main.contact.id, maxlength=main.contact.maxlength, mvc_value='main.contact', mvc_on='{"change": "getContact()"}', mvc_click='contactSearch()', label=main.contact.verbose) }}
+              </div>
+              <div class='col-12'>
+                <span mvc-text='contact.first'></span>
+                <span mvc-text='contact.last'></span>
+              </div>
+            </div>
+
+            <div class='row mb-3'>
+              <div class='col-12'>
+                {{ fields.Char(id=main.client.id, maxlength=main.client.maxlength, mvc_value='main.client', label=main.client.verbose) }}
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-success' mvc-click='updateGuest()'>
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </section>
+</page>
