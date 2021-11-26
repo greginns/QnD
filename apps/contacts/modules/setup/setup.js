@@ -16,6 +16,7 @@ class title extends MVC {
     this.model.tagcats = [];
     this.model.notecats = [];
 
+    this.model.navbarTitle = 'Contact Setup';
     //this.ready(); //  use if not in router
   }
 

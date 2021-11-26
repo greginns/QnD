@@ -38,6 +38,31 @@ Router.add(new RouterMessage({
   }
 }));
 
+// Page route
+Router.add(new RouterMessage({
+  method: 'get',
+  app,
+  subapp: 'modules',
+  version,
+  path: ['/contactsetup', '/contactsetup/:etc', '/contactsetup/:etc/:etc', '/contactsetup/:etc/:etc/:etc', '/contactsetup/:etc/:etc/:etc/:etc'], 
+  rewrite: true,
+  id: 'contactsetup',
+  level: ACCESS,
+  desc: 'Contact Setup Page',
+  inAPI: false,
+  fn: async function(req) {
+    let tm = await services.output.setup(req);
+
+    return tm.toResponse();
+  },
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+      {basic: {allowAnon: false, needCSRF: false, redirect: '/login/v1/login/'}},
+    ],
+  }
+}));
+
 Router.add(new RouterMessage({
   method: 'get',
   app,

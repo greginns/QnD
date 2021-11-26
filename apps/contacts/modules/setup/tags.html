@@ -1,14 +1,16 @@
+    {% include "./navbar.html" %}
+    
     <div class='row justify-content-center'>
       <div class='col-12 col-md-6 col-lg-6 col-xl-9'>
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
               <div class='col-5'>
-                {{ fields.Char(type='text', id=tagcat.id.id, maxlength=tagcat.id.maxLength, mvc_value='tagcat.id', mvc_on='{"blur": "testID()"}', mvc_disabled='existingEntry', mvc_edit='upper', label=tagcat.id.verbose) }}
+                {{ fields.Char(type='text', id=tag.id.id, maxlength=tag.id.maxLength, mvc_value='tag.id', mvc_on='{"blur": "testID()"}', mvc_disabled='existingEntry', mvc_edit='upper', label=tag.id.verbose) }}
               </div>
               <div class='col-2'></div>
               <div class='col-5'>
-                {{ fields.Switch(id=tagcat.active.id, mvc_checked='tagcat.active', label=tagcat.active.verbose) }}
+                {{ fields.Switch(id=tag.active.id, mvc_checked='tag.active', label=tag.active.verbose) }}
               </div>
             </div>          
           </div>
@@ -18,7 +20,17 @@
               <div class='col-12 col-xl-6'>
                 <div class='row'>
                   <div class='col-12 mb-3'>
-                    {{ fields.Char(type='text', id=tagcat.desc.id, maxlength=tagcat.desc.maxLength, mvc_value='tagcat.desc', label=tagcat.desc.verbose) }}
+                    {{ fields.Char(type='text', id=tag.desc.id, maxlength=tag.desc.maxLength, mvc_value='tag.desc', label=tag.desc.verbose) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-xl-6'>
+                <div class='row'>
+                  <div class='col-12'>
+                    {{ fields.SelectMVC(id=tag.cat.id, size='1', mvc_value='tag.cat', mvc_each='tagcats', valueField='id', textField='desc', label=tag.cat.verbose) }}
                   </div>
                 </div>
               </div>
@@ -34,16 +46,15 @@
               </div>
             </div>         
 
-
             <div class='row'>
               <div class='col-12'>
                 <span mvc-hide='existingEntry'>
-                  {{ buttons.btn(class='success', mvc_click='save()', text='Add Category') }}
+                  {{ buttons.btn(class='success', mvc_click='save()', text='Add Tag') }}
                   {{ buttons.btn(class='warning', mvc_click='clear()', text='Clear') }}
                 </span>
                 <span mvc-show='existingEntry'>
-                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save()', text='Update Category') }}
-                  {{ buttons.btn(class='danger mb-3 mb-lg-0', mvc_click='delete()', text='Delete Category') }}
+                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save()', text='Update Tag') }}
+                  {{ buttons.btn(class='danger mb-3 mb-lg-0', mvc_click='delete()', text='Delete Tag') }}
                 </span>
                 {{ buttons.btn(class='danger', mvc_click='exit()', text='Exit') }}
               </div>

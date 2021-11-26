@@ -7,7 +7,7 @@ import {Modal} from '/~static/lib/client/widgets/modal.js';
 // js for pages
 import '/~static/apps/documents/modules/setup/docsetup.js';
 import '/~static/apps/documents/modules/setup/document.js';
-import '/~static/apps/documents/modules/send/docsend.js';
+//import '/~static/apps/documents/modules/send/docsend.js';
 
 let moduleStart = function() {
   let connectToData = async function() {

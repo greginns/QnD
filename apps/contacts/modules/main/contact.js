@@ -201,6 +201,12 @@ class Contact extends ContactWithAddress {
     utils.modals.buttonSpinner(ev.target, false, spinner);
   }
   
+  send() {
+    let doctype = 'letter';
+
+    Module.pager.go(`/docsend/${doctype}/${this.model.contact.id}`);
+  }
+
   // Screen handling
   async canClear(ev) {
     let contact = this.model.contact.toJSON();

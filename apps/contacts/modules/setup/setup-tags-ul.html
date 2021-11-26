@@ -1,0 +1,6 @@
+<ul class="list-group list-group-flush" mvc-each='tags' mvc-click='goto()'>
+  <div mvc-href='/tags/${tags[$index].id}' mvc-attrclassx='{"text-danger": "tags[$index].active"}' class="list-group-item list-group-item-action d-flex justify-content-between align-items-center pointer">
+    <span mvc-text='tags[$index].desc'></span>
+    <span mvc-text='tags[$index].id'></span>
+  </div>
+</ul>

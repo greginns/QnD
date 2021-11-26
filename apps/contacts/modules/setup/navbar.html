@@ -1,0 +1,20 @@
+<nav class="navbar navbar-expand-lg navbar-light fixed-top r4-navbar" >
+  <div class="container-fluid">
+    <div mvc-if='navbarTitle != "Contact Setup"'>
+      <span style='font-size: 20px' class='pointer' mvc-click='exit()'>
+        &laquo;
+        Exit
+      </span>
+    </div>
+    <div mvc-else>
+      &nbsp;
+    </div>
+    <div>
+      <span style='font-size: 20px' mvc-text='navbarTitle'>
+      </span>
+    </div>
+    <div>
+      &nbsp;
+    </div>
+  </div>
+</nav>

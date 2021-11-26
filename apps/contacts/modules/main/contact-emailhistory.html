@@ -10,48 +10,50 @@
           </div>
 
           <div class='card-body'>
-            <table class='table table-hover'>
-              <thead>
-                <tr>
-                  <th>Date Sent</th>
-                  <th>Doc Type</th>
-                  <th>Reference</th>
-                  <th>Document/Letter/Subject</th>
-                  <th>From</th>
-                  <th>To/CC/BCC</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='hists'>
-                <tr mvc-click='getEE()' mvc-attr='{eid: "hists[$index].transid"}' style='cursor: pointer'>
-                  <td mvc-text='hists[$index].datesent' mvc-filter='datetime'></td>
-                  <td mvc-text='hists[$index].doctype'></td>
-                  <td>
-                    <span mvc-text='hists[$index].ref1'></span>
-                    <br>
-                    <span mvc-text='hists[$index].ref2'></span>
-                  </td>
-                  <td>
-                    <span mvc-text='hists[$index].document.name'></span>
-                    <br>
-                    <span mvc-text='hists[$index].docletter.name'></span>
-                    <br>
-                    <span mvc-text='hists[$index].subject'></span>
-                  </td>
-                  <td>
-                    <span mvc-text='hists[$index].from'></span>
-                    <br>
-                    <span mvc-text='hists[$index].user.name'></span>
-                  </td>
-                  <td> 
-                    <span mvc-text='hists[$index].to'></span>
-                    <br>
-                    <span mvc-text='hists[$index].cc'></span>
-                    <br>
-                    <span mvc-text='hists[$index].bcc'></span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class='table-responsive'>
+              <table class='table table-hover'>
+                <thead>
+                  <tr>
+                    <th>Date Sent</th>
+                    <th>Doc Type</th>
+                    <th>Reference</th>
+                    <th>Document/Letter/Subject</th>
+                    <th>From</th>
+                    <th>To/CC/BCC</th>
+                  </tr>
+                </thead>
+                <tbody mvc-each='hists'>
+                  <tr mvc-click='getEE()' mvc-attr='{eid: "hists[$index].transid"}' style='cursor: pointer'>
+                    <td mvc-text='hists[$index].datesent' mvc-filter='datetime'></td>
+                    <td mvc-text='hists[$index].doctype'></td>
+                    <td>
+                      <span mvc-text='hists[$index].ref1'></span>
+                      <br>
+                      <span mvc-text='hists[$index].ref2'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='hists[$index].document.name'></span>
+                      <br>
+                      <span mvc-text='hists[$index].docletter.name'></span>
+                      <br>
+                      <span mvc-text='hists[$index].subject'></span>
+                    </td>
+                    <td>
+                      <span mvc-text='hists[$index].from'></span>
+                      <br>
+                      <span mvc-text='hists[$index].user.name'></span>
+                    </td>
+                    <td> 
+                      <span mvc-text='hists[$index].to'></span>
+                      <br>
+                      <span mvc-text='hists[$index].cc'></span>
+                      <br>
+                      <span mvc-text='hists[$index].bcc'></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div class='card-footer'>

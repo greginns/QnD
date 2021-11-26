@@ -1,5 +1,5 @@
-<fieldset class="border px-2 contact-name">
-  <legend class="w-auto fieldset-legend">Name</legend>
+<!--fieldset class="border px-2 contact-name">
+  <legend class="w-auto fieldset-legend">Name</legend-->
   <div class='row'>
     <div class='col-12 col-md-6 mb-3'>
       {{ fields.SelectMVC(id=contact.title.id, size='1', mvc_value='contact.title', mvc_each='titles', valueField='id', textField='title', label='Title') }}
@@ -22,4 +22,4 @@
       {{ fields.Char(type='text', id=contact.group.id, maxlength=contact.group.maxLength, mvc_value='contact.group', label=contact.group.verbose) }}
     </div>
   </div>
-</fieldset>
+<!--/fieldset-->

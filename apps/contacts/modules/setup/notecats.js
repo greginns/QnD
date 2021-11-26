@@ -18,6 +18,8 @@ class notecats extends Verror {
 
     this.configID = 'notecats';
 
+    this.model.navbarTitle = 'Note Categories';
+
     //this.ready(); //  use if not in router
   }
 

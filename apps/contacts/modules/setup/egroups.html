@@ -1,14 +1,16 @@
+    {% include "./navbar.html" %}
+
     <div class='row justify-content-center'>
       <div class='col-12 col-md-6 col-lg-6 col-xl-9'>
         <div class='card'>
           <div class='card-header'>
             <div class='row'>
               <div class='col-5'>
-                {{ fields.Char(type='text', id=group.id.id, maxlength=group.id.maxLength, mvc_value='group.id', mvc_on='{"blur": "testID()"}', mvc_disabled='existingEntry', mvc_edit='upper', label=group.id.verbose) }}
+                {{ fields.Char(type='text', id=egroup.id.id, maxlength=egroup.id.maxLength, mvc_value='egroup.id', mvc_on='{"blur": "testID()"}', mvc_disabled='existingEntry', mvc_edit='upper', label=egroup.id.verbose) }}
               </div>
               <div class='col-2'></div>
               <div class='col-5'>
-                {{ fields.Switch(id=group.active.id, mvc_checked='group.active', label=group.active.verbose) }}
+                {{ fields.Switch(id=egroup.active.id, mvc_checked='egroup.active', label=egroup.active.verbose) }}
               </div>
             </div>          
           </div>
@@ -17,8 +19,18 @@
             <div class='row'>
               <div class='col-12 col-xl-6'>
                 <div class='row'>
+                  <div class='col-12 mb-3'>
+                    {{ fields.Char(type='text', id=egroup.desc.id, maxlength=egroup.desc.maxLength, mvc_value='egroup.desc', label=egroup.desc.verbose) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12 col-xl-6'>
+                <div class='row'>
                   <div class='col-12'>
-                    {{ fields.Char(type='text', id=group.type.id, maxlength=group.type.maxLength, mvc_value='group.type', label=group.type.verbose) }}
+                    {{ fields.SelectChoices(id=egroup.freq.id, size='1', mvc_value='egroup.freq', choices=egroup.freq.choices, label=egroup.freq.verbose) }}
                   </div>
                 </div>
               </div>
@@ -37,12 +49,12 @@
             <div class='row'>
               <div class='col-12'>
                 <span mvc-hide='existingEntry'>
-                  {{ buttons.btn(class='success', mvc_click='save()', text='Add Group') }}
+                  {{ buttons.btn(class='success', mvc_click='save()', text='Add E-Group') }}
                   {{ buttons.btn(class='warning', mvc_click='clear()', text='Clear') }}
                 </span>
                 <span mvc-show='existingEntry'>
-                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save()', text='Update Group') }}
-                  {{ buttons.btn(class='danger mb-3 mb-lg-0', mvc_click='delete()', text='Delete Group') }}
+                  {{ buttons.btn(class='primary mb-3 mb-lg-0', mvc_click='save()', text='Update E-Group') }}
+                  {{ buttons.btn(class='danger mb-3 mb-lg-0', mvc_click='delete()', text='Delete E-Group') }}
                 </span>
                 {{ buttons.btn(class='danger', mvc_click='exit()', text='Exit') }}
               </div>
@@ -51,4 +63,4 @@
         </div>
 
       </div>
-    </div>  
+    </div>

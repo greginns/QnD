@@ -4,36 +4,36 @@ import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
 
-class title extends Verror {
+class egroup extends Verror {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.title = {};
+    this.model.egroup = {};
     this.model.existingEntry = false;
-    this.model.titles = [];
+    this.model.egroups = [];
     this.model.badMessage = '';
     this.model.errors = {
-      title: {},
+      egroup: {},
       message: ''
     };
-        
-    this.titleOrig = {};
+
+    this.egroupOrig = {};
     this.defaults = {};
+
+    this.model.navbarTitle = 'E-Groups';
 
     //this.ready(); //  use if not in router
   }
 
   async ready() {
     return new Promise(async function(resolve) {
-      let titles = new TableView({proxy: this.model.titles});
+      let egroups = new TableView({proxy: this.model.egroups});
 
-      Module.tableStores.title.addView(titles);
+      Module.tableStores.egroup.addView(egroups);
     
-      this.defaults.title = await Module.data.title.getDefault();      
-
-      //this.$addWatched('title.id', this.testID.bind(this));
+      this.defaults.egroup = await Module.data.egroup.getDefault();      
 
       resolve();
     }.bind(this));
@@ -54,14 +54,15 @@ class title extends Verror {
     return true;  
   }
 
+  // IO
   async save(ev) {
-    var title = this.model.title.toJSON();
-    var diffs;
+    let egroup = this.model.egroup.toJSON();
+    let diffs;
 
     this.clearErrors();
           
     if (this.model.existingEntry) {
-      diffs = utils.object.diff(this.titleOrig, title);
+      diffs = utils.object.diff(this.egroupOrig, egroup);
       
       if (Object.keys(diffs).length == 0) {
         this.model.badMessage = 'No Changes to Update';
@@ -78,12 +79,12 @@ class title extends Verror {
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.title.update(title.id, diffs) : await Module.tableStores.title.insert(title);
+    let res = (this.model.existingEntry) ? await Module.tableStores.egroup.update(egroup.id, diffs) : await Module.tableStores.egroup.insert(egroup);
 
     if (res.status == 200) {
-      utils.modals.toast('Title', title.title + ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
+      utils.modals.toast('E-Group', group.type + ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
    
-      this.titleOrig = this.model.title.toJSON();
+      this.egroupOrig = this.model.egroup.toJSON();
 
       setTimeout(function() {
         if (this.model.existingEntry) {
@@ -105,7 +106,7 @@ class title extends Verror {
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
-    let title = this.model.title.toJSON();
+    let egroup = this.model.egroup.toJSON();
     let ret = await utils.modals.reConfirm(ev.target, 'Confirm Deletion?');
 
     if (!ret) return;
@@ -115,11 +116,11 @@ class title extends Verror {
 
     this.clearErrors();
     
-    let res = await Module.tableStores.title.delete(title.id);
+    let res = await Module.tableStores.egroup.delete(egroup.id);
 
     if (res.status == 200) {
-      utils.modals.toast('Title', 'Title Removed', 1000);
-      
+      utils.modals.toast('E-Group', 'E-Group Removed', 1000);
+            
       setTimeout(function() {
         Module.pager.back();
       }, 1000)
@@ -141,11 +142,12 @@ class title extends Verror {
   go() {
     Module.pager.go('/setup');
   }
-
+  
+  // Clearing
   async canClear(ev) {
-    let title = this.model.title.toJSON();
-    let orig = this.titleOrig;
-    let diffs = utils.object.diff(orig, title);
+    let egroup = this.model.egroup.toJSON();
+    let orig = this.egroupOrig;
+    let diffs = utils.object.diff(orig, egroup);
     let ret = true;
 
     if (Object.keys(diffs).length > 0) {
@@ -156,63 +158,63 @@ class title extends Verror {
   }
 
   newEntry() {
-    this.model.title = {};
+    this.model.egroup = {};
     this.model.existingEntry = false;
 
     this.setDefaults();
-    this.titleOrig = this.model.title.toJSON();
+    this.egroupOrig = this.model.egroup.toJSON();
 
+    this.$focus('egroup.id');
     window.scrollTo(0,document.body.scrollHeight);
-    this.$focus('title.id');
   }
 
   async existingEntry(pk) {
-    this.model.title = await Module.tableStores.title.getOne(pk);
+    this.model.egroup = await Module.tableStores.egroup.getOne(pk);
     this.model.existingEntry = true;
 
-    this.titleOrig = this.model.title.toJSON();
+    this.egroupOrig = this.model.egroup.toJSON();
   }
 
   async testID() {
-    let id = this.model.title.id;
-    let ret = await Module.tableStores.title.getOne(id);
+    let id = this.model.egroup.id;
+    let ret = await Module.tableStores.egroup.getOne(id);
     
     if (Object.keys(ret).length == 0) return;
 
     let options = {text: id + ' already exists.  Do you wish to edit?', buttons: [{text: 'Yes', class: 'btn-primary'}, {text: 'No', class: 'btn-danger'}], defaultButton: 1, okayButton: 0};
     let btn = await Module.modal.confirm(options);
 
-    this.model.title.id = '';
+    this.model.egroup.id = '';
 
     if (btn == 0) {
       // edit
-      Module.pager.go('/titles/' + id);
+      Module.pager.go('/egroups/' + id);
     }
     else {
       // retry
-      this.$focus('title.id');
+      this.$focus('egroup.id');
     }
   }
 
   setDefaults() {
-    // set title to default value
-    for (let k in this.defaults.title) {
-      this.model.title[k] = this.defaults.title[k];
+    // set entry to default value
+    for (let k in this.defaults.egroup) {
+      this.model.egroup[k] = this.defaults.egroup[k];
     }
 
-    this.titleOrig = this.model.title.toJSON();
+    this.egroupOrig = this.model.egroup.toJSON();
   }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('contacts-titles-create');   // page html
-let el2 = document.getElementById('contacts-titles-update');   // page html
-let title1 = new title('contacts-titles-create-section');
-let title2 = new title('contacts-titles-update-section');
-let section1 = new Section({mvc: title1});
-let section2 = new Section({mvc: title2});
-let page1 = new Page({el: el1, path: '/titles', title: 'Add Title', sections: [section1]});
-let page2 = new Page({el: el2, path: '/titles/:id', title: 'Update Title', sections: [section2]});
+let el1 = document.getElementById('contacts-egroups-create');   // page html
+let el2 = document.getElementById('contacts-egroups-update');   // page html
+let egroup1 = new egroup('contacts-egroups-create-section');
+let egroup2 = new egroup('contacts-egroups-update-section');
+let section1 = new Section({mvc: egroup1});
+let section2 = new Section({mvc: egroup2});
+let page1 = new Page({el: el1, path: '/egroups', title: 'Add E-Group', sections: [section1]});
+let page2 = new Page({el: el2, path: '/egroups/:id', title: 'Update E-Group', sections: [section2]});
 
 Module.pages.push(page1);
 Module.pages.push(page2);

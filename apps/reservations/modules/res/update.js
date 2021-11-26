@@ -139,7 +139,6 @@ class Rescreate extends Verror {
   send() {
     let doctype = (this.model.main.status == 'A') ? 'invoiceA' : (this.model.main.status == 'Q') ? 'quote' : 'cancel';
 
-    //window.open(`/docpage/docsend/${doctype}/${this.model.main.rsvno}/${this.model.main.contact}`);
     Module.pager.go(`/docsend/${doctype}/${this.model.main.rsvno}/${this.model.main.contact}`);
   }
 

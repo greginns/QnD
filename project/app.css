@@ -1,10 +1,17 @@
+/* Navbar */
+.r4-navbar {
+  background-color: #bbe2f1;
+  border-bottom: 2px solid blue;
+}
+
 /* Heading */
 .page-heading {
   height: 60px;
 }
 
 div#qndPages {
-  padding-top: 130px;
+  /*padding-top: 130px;*/
+  padding-top: 65px;
 }
 
 @media (min-width: 575px) {
@@ -17,9 +24,9 @@ div#qndPages {
   div.bottom-spacer {
     padding-bottom: 60px;
   }
-  div#qndPages {
+  /*div#qndPages {
     padding-top: 65px;
-  }
+  }*/
 }
 
 .list-hovered:hover {
@@ -34,6 +41,17 @@ div#qndPages {
 /* Misc */
 .pointer {cursor: pointer;}
 
+.div-label {
+  position: relative;
+  top: -14px;
+  left: -8px;
+  color:  #007bff; /* #00000060; */
+  background-color: #FFFFFF;
+  padding-left: 3px;
+  padding-right: 3px;
+  line-height: 12px;
+  z-index: 3;
+}
 
 .overlay {
   position: fixed;

@@ -22,6 +22,8 @@ class group extends Verror {
     this.groupOrig = {};
     this.defaults = {};
 
+    this.model.navbarTitle = 'Group Types';
+
     //this.ready(); //  use if not in router
   }
 

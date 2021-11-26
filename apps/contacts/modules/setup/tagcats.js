@@ -4,41 +4,36 @@ import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
 
-class tag extends Verror {
+class tagcat extends Verror {
   constructor(element) {
     super(element);
   }
 
   createModel() {
-    this.model.tag = {};
+    this.model.tagcat = {};
     this.model.existingEntry = false;
-    this.model.tags = [];
     this.model.tagcats = [];
     this.model.badMessage = '';
     this.model.errors = {
-      tag: {},
+      tagcat: {},
       message: ''
     };
 
-    this.tagOrig = {};
+    this.tagcatOrig = {};
     this.defaults = {};
+
+    this.model.navbarTitle = 'Tag Categories';
 
     //this.ready(); //  use if not in router
   }
 
   async ready() {
-    let activeFunc = function(rec) {
-      return rec.active;
-    }
-
     return new Promise(async function(resolve) {
-      let tags = new TableView({proxy: this.model.tags});
-      let tagcats = new TableView({proxy: this.model.tagcats, filterFunc: activeFunc});
+      let tagcats = new TableView({proxy: this.model.tagcats});
 
-      Module.tableStores.tag.addView(tags);
       Module.tableStores.tagcat.addView(tagcats);
     
-      this.defaults.tag = await Module.data.tag.getDefault();      
+      this.defaults.tagcat = await Module.data.tagcat.getDefault();      
 
       resolve();
     }.bind(this));
@@ -61,13 +56,13 @@ class tag extends Verror {
 
   // IO
   async save(ev) {
-    let tag = this.model.tag.toJSON();
+    let tagcat = this.model.tagcat.toJSON();
     let diffs;
 
     this.clearErrors();
           
     if (this.model.existingEntry) {
-      diffs = utils.object.diff(this.tagOrig, tag);
+      diffs = utils.object.diff(this.tagcatOrig, tagcat);
       
       if (Object.keys(diffs).length == 0) {
         this.model.badMessage = 'No Changes to Update';
@@ -84,12 +79,12 @@ class tag extends Verror {
     utils.modals.overlay(true);
 
     // new (post) or old (put)?
-    let res = (this.model.existingEntry) ? await Module.tableStores.tag.update(tag.id, diffs) : await Module.tableStores.tag.insert(tag);
+    let res = (this.model.existingEntry) ? await Module.tableStores.tagcat.update(tagcat.id, diffs) : await Module.tableStores.tagcat.insert(tagcat);
 
     if (res.status == 200) {
       utils.modals.toast('Group', group.type + ((this.model.existingEntry) ? ' Updated' : ' Created'), 2000);
    
-      this.tagOrig = this.model.tag.toJSON();
+      this.tagcatOrig = this.model.tagcat.toJSON();
 
       setTimeout(function() {
         if (this.model.existingEntry) {
@@ -111,7 +106,7 @@ class tag extends Verror {
   async delete(ev) {
     if (!this.model.existingEntry) return;
 
-    let tag = this.model.tag.toJSON();
+    let tagcat = this.model.tagcat.toJSON();
     let ret = await utils.modals.reConfirm(ev.target, 'Confirm Deletion?');
 
     if (!ret) return;
@@ -121,10 +116,10 @@ class tag extends Verror {
 
     this.clearErrors();
     
-    let res = await Module.tableStores.tag.delete(tag.id);
+    let res = await Module.tableStores.tagcat.delete(tagcat.id);
 
     if (res.status == 200) {
-      utils.modals.toast('Tag', 'Tag Removed', 1000);
+      utils.modals.toast('Tag Cat', 'Category Removed', 1000);
             
       setTimeout(function() {
         Module.pager.back();
@@ -147,12 +142,12 @@ class tag extends Verror {
   go() {
     Module.pager.go('/setup');
   }
-  
+
   // Clearing
   async canClear(ev) {
-    let tag = this.model.tag.toJSON();
-    let orig = this.tagOrig;
-    let diffs = utils.object.diff(orig, tag);
+    let tagcat = this.model.tagcat.toJSON();
+    let orig = this.tagcatOrig;
+    let diffs = utils.object.diff(orig, tagcat);
     let ret = true;
 
     if (Object.keys(diffs).length > 0) {
@@ -163,63 +158,63 @@ class tag extends Verror {
   }
 
   newEntry() {
-    this.model.tag = {};
+    this.model.tagcat = {};
     this.model.existingEntry = false;
 
     this.setDefaults();
-    this.tagOrig = this.model.tag.toJSON();
+    this.tagcatOrig = this.model.tagcat.toJSON();
 
-    this.$focus('tag.id');
+    this.$focus('tagcat.id');
     window.scrollTo(0,document.body.scrollHeight);
   }
 
   async existingEntry(pk) {
-    this.model.tag = await Module.tableStores.tag.getOne(pk);
+    this.model.tagcat = await Module.tableStores.tagcat.getOne(pk);
     this.model.existingEntry = true;
 
-    this.tagOrig = this.model.tag.toJSON();
+    this.tagcatOrig = this.model.tagcat.toJSON();
   }
 
   async testID() {
-    let id = this.model.tag.id;
-    let ret = await Module.tableStores.tag.getOne(id);
+    let id = this.model.tagcat.id;
+    let ret = await Module.tableStores.tagcat.getOne(id);
     
     if (Object.keys(ret).length == 0) return;
 
     let options = {text: id + ' already exists.  Do you wish to edit?', buttons: [{text: 'Yes', class: 'btn-primary'}, {text: 'No', class: 'btn-danger'}], defaultButton: 1, okayButton: 0};
     let btn = await Module.modal.confirm(options);
 
-    this.model.tag.id = '';
+    this.model.tagcat.id = '';
 
     if (btn == 0) {
       // edit
-      Module.pager.go('/tags/' + id);
+      Module.pager.go('/tagcats/' + id);
     }
     else {
       // retry
-      this.$focus('tag.id');
+      this.$focus('tagcat.id');
     }
   }
 
   setDefaults() {
     // set entry to default value
-    for (let k in this.defaults.tag) {
-      this.model.tag[k] = this.defaults.tag[k];
+    for (let k in this.defaults.tagcat) {
+      this.model.tagcat[k] = this.defaults.tagcat[k];
     }
 
-    this.tagOrig = this.model.tag.toJSON();
+    this.tagcatOrig = this.model.tagcat.toJSON();
   }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
-let el1 = document.getElementById('contacts-tags-create');   // page html
-let el2 = document.getElementById('contacts-tags-update');   // page html
-let tag1 = new tag('contacts-tags-create-section');
-let tag2 = new tag('contacts-tags-update-section');
-let section1 = new Section({mvc: tag1});
-let section2 = new Section({mvc: tag2});
-let page1 = new Page({el: el1, path: '/tags', title: 'Add Tag', sections: [section1]});
-let page2 = new Page({el: el2, path: '/tags/:id', title: 'Update Tag', sections: [section2]});
+let el1 = document.getElementById('contacts-tagcats-create');   // page html
+let el2 = document.getElementById('contacts-tagcats-update');   // page html
+let tagcat1 = new tagcat('contacts-tagcats-create-section');
+let tagcat2 = new tagcat('contacts-tagcats-update-section');
+let section1 = new Section({mvc: tagcat1});
+let section2 = new Section({mvc: tagcat2});
+let page1 = new Page({el: el1, path: '/tagcats', title: 'Add E-Group', sections: [section1]});
+let page2 = new Page({el: el2, path: '/tagcats/:id', title: 'Update E-Group', sections: [section2]});
 
 Module.pages.push(page1);
 Module.pages.push(page2);

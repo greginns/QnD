@@ -1,6 +1,5 @@
-<fieldset class="border px-2 contact-cat">
-  <legend class="w-auto fieldset-legend">Categorization</legend>
-
+<!--fieldset class="border px-2 contact-cat">
+  <legend class="w-auto fieldset-legend">Categorization</legend-->
   <div class='row'>
     <div class='col-12 mb-3'>
       {{ fields.SelectMVC(id=contact.company.id, size='1', mvc_value='contact.company', mvc_each='companies', textField='name', valueField='id', label=contact.company.verbose) }}
@@ -26,11 +25,15 @@
   <div class='row'>
     <div class='col-12 mb-3'>
       <div style='height: auto;' class="form-control">
-        <div class='div-label'>Tags</div>
+        <div class='div-label float-start'>Tags</div>
+        <div class='float-end'>
+          {{ buttons.btnsmoutline(class='primary', mvc_click='addTag()', text='Add') }}
+        </div>                
         <div class='mb-2'>
           <span mvc-dhtml='contact.tags' mvc-filter='chip' chip-format='formatTag'></span>  
         </div>
-        {{ buttons.btnsmoutline(class='primary', mvc_click='addTag()', text='Add') }}
+        <div style='clear:both'>
+        </div>
       </div>
     </div>
   </div>
@@ -38,14 +41,18 @@
   <div class='row'>
     <div class='col-12 mb-3'>
       <div style='height: auto;' class="form-control">
-        <div class='div-label'>E-Groups</div>
+        <div class='div-label float-start'>E-Groups</div>
+        <div class='float-end'>
+          {{ buttons.btnsmoutline(class='primary', mvc_click='addEgroup()', text='Add') }}
+        </div>                
         <div class='mb-2'>
           <span mvc-dhtml='contact.egroups' mvc-filter='chip' chip-format='formatEgroup'></span>  
         </div>
-        {{ buttons.btnsmoutline(class='primary', mvc_click='addEgroup()', text='Add') }}
+        <div style='clear:both'>
+        </div>
       </div>
     </div>
   </div>  
-</fieldset>
+<!--/fieldset-->
 
 {% include "./contact-account.html" %}

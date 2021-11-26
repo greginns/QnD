@@ -1,5 +1,5 @@
-<fieldset class="border px-2 contact-address">
-  <legend class="w-auto fieldset-legend">Address</legend>
+<!--fieldset class="border px-2 contact-address">
+  <legend class="w-auto fieldset-legend">Address</legend-->
   <div class='row'>
     <div class='col-12 mb-3'>
       {{ fields.Char(type='text', id=contact.address1.id, maxlength=contact.address1.maxLength, mvc_value='contact.address1', label=contact.address1.verbose) }}
@@ -35,4 +35,4 @@
       {{ fields.Char(type='text', id=contact.city.id, maxlength=contact.city.maxLength, mvc_value='contact.city', mvc_on='{"blur": "cityChanged()"}', label=contact.city.verbose) }}
     </div>
   </div>
-</fieldset> 
+<!--/fieldset--> 

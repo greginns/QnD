@@ -108,6 +108,38 @@ services.output = {
       ctx.CSRFToken = await makeCSRF(req.session.data.database, req.session.data.pgschema, req.session.user.code);
       ctx.associate = models.Associate.getColumnDefns();
       ctx.contact = models.Contact.getColumnDefns();
+
+      ctx.dateFormat = dateFormat;
+      ctx.timeFormat = timeFormat;
+      ctx.TID = req.TID;    
+      ctx.USER = JSON.stringify(req.session.user);
+
+      try {
+        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+        tm.type = 'html';
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+    }
+    catch(err) {
+      tm.status = 500;
+      tm.message = err.toString();
+    }
+
+    return tm;
+  },
+
+  setup: async function(req) {
+    // main admin manage page.  Needs a user so won't get here without one
+    const tm = new TravelMessage();
+
+    try {
+      let ctx = {};
+      let tmpl = 'apps/contacts/modules/setup/module.html';
+
+      ctx.CSRFToken = await makeCSRF(req.session.data.database, req.session.data.pgschema, req.session.user.code);
       ctx.group = models.Group.getColumnDefns();
       ctx.egroup = models.Egroup.getColumnDefns();
       ctx.tag = models.Tag.getColumnDefns();

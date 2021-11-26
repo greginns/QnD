@@ -1,120 +1,299 @@
 <page id='contacts-contact-update' style='display: none;'>
   <section id='contacts-contact-update-section'>
-    <div class='row justify-content-center'>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top " style='background-color: #bbe2f1; border-bottom: 2px solid blue;'>
+      <div class="container-fluid">
+        <div>
+        </div>
+        <div>
+          <span style='font-size: 20px'>
+            Contact
+            <span mvc-text='contact.id'></span>
+            Update
+          </span>          
+        </div>
+        <div></div>
+        <!--div class='col-2'>
+          <div class='d-block d-sm-none'>XS</div>
+          <div class='d-none d-sm-block d-md-none'>SM</div>
+          <div class='d-none d-md-block d-lg-none'>MD</div>
+          <div class='d-none d-lg-block d-xl-none'>LG</div>
+          <div class='d-none d-xl-block'>XL</div>
+        </div-->
+      </div>
+    </nav>
+
+    <!-- XS only -->
+    <div class='row d-block d-sm-none mb-3'>
       <div class='col-12'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-10'>
-                <h3>
-                  Contact 
-                  <span mvc-text='contact.id'></span>
-                  Update
-                </h3>
-              </div>
-              <div class='col-2'>
-                <div class='d-block d-sm-none'>XS</div>
-                <div class='d-none d-sm-block d-md-none'>SM</div>
-                <div class='d-none d-md-block d-lg-none'>MD</div>
-                <div class='d-none d-lg-block d-xl-none'>LG</div>
-                <div class='d-none d-xl-block'>XL</div>
-              </div>
-            </div>          
-          </div>
-          
-          <div class='card-body'>
-            <div class='row pt-2'>
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+        <div class='accordion shadow' id='contact-update-xs'>
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contact-update-xs-name">
+                <span class='pe-2'>
+                  Name
+                </span>
+                <span mvc-text='contact.first'>
+                </span>
+              </button>
+            </div>
+
+            <div id="contact-update-xs-name" class="accordion-collapse collapse" data-bs-parent="#contact-update-xs">
+              <div class='accordion-body'>
                 {% include "./contact-name.html" %}
               </div>
-    
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {% include "./contact-address-update.html" %}
-              </div>
-
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {% include "./contact-contact.html" %}
-              </div>  
-
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {% include "./contact-notes.html" %}
-              </div>  
-              
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {% include "./contact-emergency.html" %}
-              </div>  
-              
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {% include "./contact-flags.html" %}
-              </div>                
-              
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {% include "./contact-cat.html" %}
-              </div>  
-
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {% include "./contact-misc.html" %}
-              </div>  
-
             </div>
           </div>
 
-          <div class='card-footer'>
-            <div class='row' mvc-show='badMessage'>
-              <div class='col-12'>
-                <div class="alert alert-danger" role="alert">
-                  <span mvc-text='badMessage'></span>  
-                </div>
-              </div>
-            </div>         
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contact-update-xs-address">
+                <span class='pe-2'>
+                  Address
+                </span>
+                <span mvc-text='contact.address1'>
+                </span>
+              </button>
+            </div>
 
-            <div class='row'>
-              <div class='col-12'>
-                <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                  {{ buttons.btn(class='primary', mvc_click='save()', text='Update Contact') }}
-                  {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete Contact') }}    
-                
-                  <div class="btn-group dropup" role="group">
-                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                      Actions
-                    </button>
-                    <div class="dropdown-menu pointer">
-                      <span class="dropdown-item" mvc-click='emailHistory()'>Email History</span>
-                      <span class="dropdown-item" mvc-click='associated()'>Associated</span>
-                      <span class="dropdown-item" mvc-click='dymo()'>Dymo label</span>
-                    </div>
-                  </div>
-                </div>
-                
+            <div id="contact-update-xs-address" class="accordion-collapse collapse" data-bs-parent="#contact-update-xs">
+              <div class='accordion-body'>
+                {% include "./contact-address-update.html" %}
               </div>
-            </div>            
+            </div>
+          </div>
+
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contact-update-xs-contact">
+                <span class='pe-2'>
+                  Contact
+                </span>
+                <span mvc-text='contact.email'>
+                </span>
+              </button>
+            </div>
+
+            <div id="contact-update-xs-contact" class="accordion-collapse collapse" data-bs-parent="#contact-update-xs">
+              <div class='accordion-body'>
+                {% include "./contact-contact.html" %}
+              </div>
+            </div>
+          </div>
+
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contact-update-xs-notes">
+                <span class='pe-2'>
+                  Notes
+                </span>
+                <span class="badge rounded-pill bg-danger" mvc-text='contact.notes.length'></span>
+              </button>
+            </div>
+
+            <div id="contact-update-xs-notes" class="accordion-collapse collapse" data-bs-parent="#contact-update-xs">
+              <div class='accordion-body'>
+                <div class='float-end'>
+                  {{ buttons.btnsmoutline(class='primary', mvc_click='notesAdd()', text='Add') }}
+                </div>
+                {% include "./contact-notes.html" %}
+              </div>
+            </div>
+          </div>
+
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contact-update-xs-emergency">
+                <span class='pe-2'>
+                  Emergency
+                </span>
+                <span mvc-text='contact.emgname'></span>
+              </button>
+            </div>
+
+            <div id="contact-update-xs-emergency" class="accordion-collapse collapse" data-bs-parent="#contact-update-xs">
+              <div class='accordion-body'>
+                {% include "./contact-emergency.html" %}
+              </div>
+            </div>
+          </div>
+
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contact-update-xs-indicators">
+                <span class='pe-2'>
+                  Indicators
+                </span>
+              </button>
+            </div>
+
+            <div id="contact-update-xs-indicators" class="accordion-collapse collapse" data-bs-parent="#contact-update-xs">
+              <div class='accordion-body'>
+                {% include "./contact-flags.html" %}
+              </div>
+            </div>
+          </div>
+
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contact-update-xs-cat">
+                <span class='pe-2'>
+                  Categorization
+                </span>
+              </button>
+            </div>
+
+            <div id="contact-update-xs-cat" class="accordion-collapse collapse" data-bs-parent="#contact-update-xs">
+              <div class='accordion-body'>
+                {% include "./contact-cat.html" %}
+              </div>
+            </div>
+          </div>
+
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contact-update-xs-misc">
+                <span class='pe-2'>
+                  Miscellaneous
+                </span>
+              </button>
+            </div>
+
+            <div id="contact-update-xs-misc" class="accordion-collapse collapse" data-bs-parent="#contact-update-xs">
+              <div class='accordion-body'>
+                {% include "./contact-misc.html" %}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- SM and above -->
+    <div class='d-none d-sm-block mb-3'>
+      <div class='row'>
+        <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Name</h5>
+            </div>
+            <div class='card-body'>
+              {% include "./contact-name.html" %}
+            </div>
           </div>
         </div>
 
+        <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Address</h5>
+            </div>
+            <div class='card-body'>
+              {% include "./contact-address-update.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Contact Info</h5>
+            </div>
+            <div class='card-body'>
+              {% include "./contact-contact.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Notes</h5>
+              <div class='float-end'>
+                {{ buttons.btnsmoutline(class='primary', mvc_click='notesAdd()', text='Add') }}
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./contact-notes.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Emergency</h5>
+            </div>
+            <div class='card-body'>
+              {% include "./contact-emergency.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Indicators</h5>
+            </div>
+            <div class='card-body'>
+              {% include "./contact-flags.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Categorization</h5>
+            </div>
+            <div class='card-body'>
+              {% include "./contact-cat.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <h5 class='float-start'>Miscellaneous</h5>
+            </div>
+            <div class='card-body'>
+              {% include "./contact-misc.html" %}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class='d-block d-md-none' style='padding-top: 70px'>
-    </div>
-
-    <div class='d-block d-lg-none' style='padding-top: 30px'>
-    </div>
-
-    <div class='d-block' style='padding-top: 30px'>
-    </div>
-
-    <nav class="navbar fixed-bottom navbar-expand-lg navbar-light bg-primary d-block d-lg-none" style='padding: .2rem 1rem;'>
-      <div class='nav nav-fill'>
-        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-name'>Name</div>
-        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-address'>Address</div>
-        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-contact'>Contact</div>
-        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-notes'>Notes</div>
-        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-emergency'>Emergency</div>
-        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-flags'>Flags</div>        
-        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-cat'>Category</div>        
-        <div class="nav-link text-white pointer" mvc-click='goto()' to='contact-misc'>Misc</div>
+    <div class='row' mvc-show='badMessage'>
+      <div class='col-12'>
+        <div class="alert alert-danger" role="alert">
+          <span mvc-text='badMessage'></span>  
+        </div>
       </div>
-    </nav>
+    </div>         
+
+    <div class='row'>
+      <div class='col-12'>
+        <div class="btn-group shadow" role="group" aria-label="Button group with nested dropdown">
+          {{ buttons.btn(class='success', mvc_click='save()', text='Update Contact') }}
+          {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete Contact') }}    
+          {{ buttons.btn(class='primary', mvc_click='send()', text='Email Letter') }}    
+        
+          <div class="btn-group dropup" role="group">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              Actions
+            </button>
+            <div class="dropdown-menu pointer">
+              <span class="dropdown-item" mvc-click='emailHistory()'>Email History</span>
+              <span class="dropdown-item" mvc-click='associated()'>Associated</span>
+              <span class="dropdown-item" mvc-click='dymo()'>Dymo label</span>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>        
 
     {% include "./contact-account.html" %}
     {% include "./contact-dymo.html" %}
