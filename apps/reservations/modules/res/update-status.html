@@ -1,0 +1,57 @@
+<span class='text-success' mvc-show='main.status == "A"'>Active</span>
+<span class='text-warning' mvc-show='main.status == "Q"'>Quotation</span>
+<span class='text-warning' mvc-show='main.status == "I"'>Internet</span>
+<span class='text-danger' mvc-show='main.status == "X"'>Cancelled</span>
+<br>
+
+<span mvc-show='main.status == "X"'>
+  <span class='text-danger' mvc-text='cancreas.name'></span>
+  <br>
+  <span class='text-danger' mvc-text='main.cancwho'></span>
+  <br>
+</span>
+
+<span mvc-text='company.name'></span>
+<br>
+
+Group of 
+<span mvc-text='main.grpsize || main.grpsizex'></span>
+<span mvc-show='main.arrdate'>
+  arriving on
+  <span mvc-text='main.arrdate' mvc-filter='date'></span>
+</span>
+at
+<span mvc-text='area.name'></span>
+<br>
+
+<span mvc-show='main.owner'>
+  Managed by
+  <span mvc-text='main.owner'></span>
+  <br>
+</span>
+
+Follow-Up
+<span mvc-show='main.allowfup'>Enabled</span>
+<span mvc-show='!main.allowfup'>Disabled</span>
+<br>
+
+<span mvc-show='main.cidate'>
+  Checked-In:
+  <span mvc-text='main.cidate' mvc-filter='date'></span>
+  <span mvc-text='main.citime' mvc-filter='time'></span>
+  <br>
+</span>
+
+<span mvc-show='main.codate'>
+  Checked-Out:
+  <span mvc-text='main.codate' mvc-filter='date'></span>
+  <span mvc-text='main.cotime' mvc-filter='time'></span>
+  <br>
+</span>
+
+Created on 
+<span mvc-text='main.cr8date' mvc-filter='date'></span>
+at
+<span mvc-text='main.cr8time' mvc-filter='time'></span>
+by
+<span mvc-text='main.cr8user'></span>

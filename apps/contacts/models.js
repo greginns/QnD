@@ -69,8 +69,9 @@ const Contact = class extends Model {
         company: new Fields.Char({null: true, maxLength: 1, verbose: 'Company'}),
         grptype: new Fields.Char({null: true, maxLength: 4, verbose: 'Group Type'}),
         cat: new Fields.Char({null: true, default: 'F', maxLength: 1, verbose: 'Category'}),
-        tags: new Fields.Json({verbose: 'Tags'}),
-        egroups: new Fields.Json({verbose: 'E-groups'}),
+        tags: new Fields.Jsonb({verbose: 'Tags'}),
+        egroups: new Fields.Jsonb({verbose: 'E-groups'}),
+        notes: new Fields.Jsonb({verbose: 'Notes'}),
 
         massmail: new Fields.Boolean({default: false, verbose: 'Mass Mail'}),
         massemail: new Fields.Boolean({default: false, verbose: 'Mass Email'}),

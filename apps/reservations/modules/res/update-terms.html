@@ -1,0 +1,67 @@
+<div class='row'>
+  <div class='col-12'>
+    <div class='table-responsive'>
+      <table class='table table-sm' style='min-width: 600px'>
+        <thead>
+          <tr>
+            <th>Due Date</th>
+            <th style='text-align: right'>Amount</th>
+            <th style='text-align: right'>Applied</th>
+            <th style='text-align: right'>Remain</th>
+            <th style='text-align: right'>Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td mvc-text='main.pmtdate1' mvc-filter='date'></td>
+            <td style='text-align: right' mvc-text='main.pmtamt1'></td>
+            <td style='text-align: right' mvc-text='main.pmtapp1'></td>
+            <td style='text-align: right' mvc-text='main.pmtrem1'></td>
+            <td style='text-align: right' mvc-text='main.pmtbal1'></td>
+          </tr>
+          <tr>
+            <td mvc-text='main.pmtdate2' mvc-filter='date'></td>
+            <td style='text-align: right' mvc-text='main.pmtamt2'></td>
+            <td style='text-align: right' mvc-text='main.pmtapp2'></td>
+            <td style='text-align: right' mvc-text='main.pmtrem2'></td>
+            <td style='text-align: right' mvc-text='main.pmtbal2'></td>
+          </tr>
+          <tr>
+            <td mvc-text='main.pmtdate3' mvc-filter='date'></td>
+            <td style='text-align: right' mvc-text='main.pmtamt3'></td>
+            <td style='text-align: right' mvc-text='main.pmtapp3'></td>
+            <td style='text-align: right' mvc-text='main.pmtrem3'></td>
+            <td style='text-align: right' mvc-text='main.pmtbal3'></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class='row' mvc-show='main.pmttermsx'>
+  <div class='col-12'>
+    Rule
+    <span mvc-text='main.pmttermsx'></span>
+    -
+    <span mvc-text='pmttermsx.name'></span>
+  </div>
+</div>
+
+<div class='row' mvc-show='main.pmtterms'>
+  <div class='col-12'>
+    Override Rule
+    <span mvc-text='main.pmtterms'></span>
+    -
+    <span mvc-text='pmtterms.name'></span>
+  </div>
+</div>
+
+<div class='row'>
+  <div class='col-12 col-sm-6' mvc-show='main.lockdates'>
+    Dates are Locked
+  </div>
+  <div class='col-12 col-sm-6' mvc-show='main.lockamts'>
+    Amounts are Locked
+  </div>
+</div>

@@ -460,14 +460,14 @@ class Contact extends ContactWithAddress {
   }
 
   async notesEdit(ev) {
-    let notes = this.model.contact.notes.toJSON() || [];
+    let notes = this.model.contact.notes || [];
     let idx = ev.target.closest('tr').getAttribute('data-index');
     let note = notes[idx];
 
     try {
       let ret = await this.notesInst.edit(note.topic, note.subject, note.operator, note.datetime, note.text);
 
-      notes[idx] = {topic: ret.topic, subject: ret.subject, operator: note.operator, datetime: ret.datetime || (new Date()).toJSON(), text: ret.text};
+      notes[idx] = {topic: ret.topic, subject: ret.subject, operator: note.operator, datetime: ret.datetime || utils.datetime.getCurrentDatetime(), text: ret.text};
       this.model.contact.notes = notes;
     }
     catch(e) {
@@ -475,17 +475,17 @@ class Contact extends ContactWithAddress {
   }
 
   async notesAdd() {
-    let notes = this.model.contact.notes.toJSON() || [];
+    let notes = this.model.contact.notes || [];
     let topic = '';
     let subject = '';
     let operator = App.USER.code;
-    let datetime = (new Date()).toJSON();
+    let datetime = utils.datetime.getCurrentDatetime();
     let text = '';
 
     try {
       let ret = await this.notesInst.edit(topic, subject, operator, datetime, text);
 
-      notes.push({topic: ret.topic, subject: ret.subject, operator, datetime: ret.datetime || (new Date()).toJSON(), text: ret.text});
+      notes.push({topic: ret.topic, subject: ret.subject, operator, datetime: ret.datetime || utils.datetime.getCurrentDatetime(), text: ret.text});
       
       this.model.contact.notes = notes;
     }

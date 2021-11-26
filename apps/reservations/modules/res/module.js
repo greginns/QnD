@@ -7,6 +7,7 @@ import {Modal} from '/~static/lib/client/widgets/modal.js';
 // js for pages
 import '/~static/apps/reservations/modules/res/create.js';
 import '/~static/apps/reservations/modules/res/update.js';
+import '/~static/apps/documents/modules/send/docsend.js';
 
 let moduleStart = function() {
   let connectToData = async function() {
@@ -16,12 +17,18 @@ let moduleStart = function() {
     Module.data.pmtterms = new TableAccess({modelName: 'pmtterms', url: `/items/v1/pmtterms`});    
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});    
     Module.data.company = new TableAccess({modelName: 'company', url: `/contacts/v1/company`});    
-    Module.data.currency = new TableAccess({modelName: 'currency', url: `/contacts/v1/currency`});    
+    Module.data.currency = new TableAccess({modelName: 'currency', url: `/contacts/v1/currency`});  
+    Module.data.config = new TableAccess({modelName: 'config', url: `/contacts/v1/config`});  
+    Module.data.emailhist = new TableAccess({modelName: 'emailhist', url: `/contacts/v1/emailhist`});
     Module.data.main = new TableAccess({modelName: 'main', url: `/reservations/v1/main`});
+    Module.data.docsetup = new TableAccess({modelName: 'docsetup', url: `/documents/v1/docsetup`});
+    Module.data.document = new TableAccess({modelName: 'document', url: `/documents/v1/document`});
+    Module.data.docletter = new TableAccess({modelName: 'docletter', url: `/documents/v1/docletter`});
 
     const itemData = new WSDataComm('items');                 // WS instances for items
     const contactData = new WSDataComm('contacts');                 // WS instances for contacts
     const resData = new WSDataComm('reservations');                 // WS instances for reservations
+    const docData = new WSDataComm('documents');                 // WS instances for this app
 
     const safemode = false;
     let model, dataPromises = [];
@@ -75,10 +82,44 @@ let moduleStart = function() {
     Module.tableStores.currency = new TableStore({accessor: Module.data.currency, model, safemode});  // setup a table store in Module so all pages can access
     dataPromises.push(Module.tableStores.currency.getAll());
 
+    // Config table ---
+    model = `/contacts/config`;
+
+    contactData.addModel(model);                          
+
+    Module.tableStores.config = new TableStore({accessor: Module.data.config, model, safemode});  // setup a table store in Module so all pages can access
+    dataPromises.push(Module.tableStores.config.getAll());
+
+    
+    // Docsetup table ---
+    model = `/documents/docsetup`;                      // url-like of interest to follow model changes
+
+    docData.addModel(model);                      // WS data change notifications.  
+
+    Module.tableStores.docsetup = new TableStore({accessor: Module.data.docsetup, model, safemode});  // setup a table store in Module so all pages can access
+    dataPromises.push(Module.tableStores.docsetup.getAll());               // seed the table store
+
+    // Document table ---
+    model = `/documents/document`;               
+
+    docData.addModel(model);                          
+
+    Module.tableStores.document = new TableStore({accessor: Module.data.document, model, safemode});  // setup a table store in Module so all pages can access
+    //dataPromises.push(Module.tableStores.associate.getAll());
+
+    // docletter table ---
+    model = `/documents/docletter`;               
+
+    docData.addModel(model);                          
+
+    Module.tableStores.docletter = new TableStore({accessor: Module.data.docletter, model, safemode});  // setup a table store in Module so all pages can access
+    //dataPromises.push(Module.tableStores.docletter.getAll());
+
     // start following via WS ---
     resData.start();
     itemData.start();
     contactData.start();
+    docData.start();
 
     // fill up on data
     Promise.all(dataPromises)

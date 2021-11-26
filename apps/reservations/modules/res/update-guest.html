@@ -1,0 +1,48 @@
+<div class='row'>
+  <div class='col-12 col-sm-6'>
+    <button class='btn btn-sm btn-outline-secondary' mvc-click='gotoContact()'>
+      <span mvc-text='main.contact'></span>
+    </button>
+    <br>
+    
+    <span mvc-text='contact.first'></span>
+    <span mvc-text='contact.last'></span>
+    <br>
+    <span mvc-show='contact.group'>
+      <span mvc-text='contact.group'></span>
+      <br>
+    </span>              
+
+    <span mvc-show='main.client'>
+      <span mvc-text='main.client'></span>
+      <br>
+    </span>              
+
+    <span mvc-text='contact.address1'></span>
+    <br>
+
+    <span mvc-text='contact.city'></span>
+    <span mvc-text='contact.state'></span>
+    <span mvc-text='contact.postcode'></span>
+  </div>
+
+  <div class='col-12 col-sm-6'>
+    <span mvc-show='contact.email'>
+      <a mvc-href='mailto:${contact.email}?subject=Reservation ${main.rsvno} on ${main.arrdate}'>
+        <span mvc-text='contact.email'></span>
+      </a>
+      <br>
+    </span>
+    
+    <span mvc-show='contact.email2'>
+      <a mvc-href='mailto:${contact.email2}?subject=Reservation ${main.rsvno} on ${main.arrdate}'>
+        <span mvc-text='contact.email2'></span>
+      </a>
+      <br>
+    </span>              
+
+    <span mvc-show='contact.phone'>
+      <a mvc-href='tel:${contact.phone}'><span mvc-text='contact.phone'></span></a>
+    </span>
+  </div>
+</div>

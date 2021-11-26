@@ -1,0 +1,11 @@
+<div class='table-responsive'>
+  <table class='table table-sm table-hover pointer'>
+    <tbody mvc-each='main.notes' mvc-click='notesEdit()'>
+      <tr data-index='$index'>
+        <td><span mvc-text='main.notes[$index].topic'></span></td>
+        <td><span mvc-text='main.notes[$index].subject'></span></td>
+        <td><span mvc-text='main.notes[$index].datetime' mvc-filter='datetime'></span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

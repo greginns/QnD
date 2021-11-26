@@ -2,7 +2,6 @@ import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
-import {io} from '/~static/lib/client/core/io.js';
 
 class Docsend extends Verror {
   constructor(element) {
@@ -48,7 +47,9 @@ class Docsend extends Verror {
     this.model.docsend.ref1 = params.ref1;
     this.model.docsend.ref2 = (params.ref2) ? params.ref2 : '';
 
-    this.company = await this.getCompanyFromDoc();
+    this.getTitle();
+    await this.getBaseData();
+    
     this.docsetup = await this.getDocsetup();
     this.model.documents = await this.getDocuments();
     this.model.docletters = await this.getDocletters();
@@ -159,6 +160,7 @@ class Docsend extends Verror {
     let doc = this.model.docsend.docsource;
     let ltr = this.model.docsend.ltrsource;
     let html;
+    let re = /{{(.*?)}}/g;
 
     context.letter = ltr;
     context.remarks = this.model.docsend.remarks;
@@ -179,7 +181,13 @@ class Docsend extends Verror {
     await this.getMergeData(context);
 
     let txt = nunjucks.renderString(html, context);
-    
+
+    let objs = html.match(re).map(function(m) {
+      return m.substr(2,m.length-4);
+    });
+
+    console.log(objs)
+
     return txt;
   }
 
@@ -190,40 +198,108 @@ class Docsend extends Verror {
       case 'quote':
       case 'cancel':
       case 'receipt':
+        context.main = this.main;
+
       case 'ccreceipt':
       case 'posreceipt':
       case 'posccreceipt':
-        // get from rsv 
-        co = '';
-        contact = '';
+        // get pmt info
+        break;
+
+      case 'letter':
+      case 'accreceipt':
+      case 'accccreceipt':
+        break;
+
+      case 'giftcert':
+        // get GC info
+      case 'gcreceipt':
+      case 'gcccreceipt':
+        // get pmt info
+        break;
+
+      case 'rainchek':
+        // get from RC
+        break;
+    }
+
+    // get Contact
+    let values = [this.model.docsend.contact];
+    let res = await Module.data.contact.storedQuery({qid: 'contact-basic', values});
+
+    if (res.status == 200) {
+      context.contact = res.data[0];
+    }
+  }
+
+  async getTitle() {
+    let doctype = this.model.docsend.doctype;
+    let docs = this.model.docgroups;
+
+    for (let doc of docs) {
+      for (let item of doc.items) {
+        if (item.value == doctype) {
+          this.model.title = item.text;
+          break;
+        }
+      }
+    }
+  }
+
+  async getBaseData() {
+    let contact, co;
+    this.company = {};
+
+    switch (this.model.docsend.doctype) {
+      case 'invoiceA':
+      case 'invoiceB':
+      case 'quote':
+      case 'cancel':
+        // get rsv info
+        let rsvno = this.model.docsend.ref1;
+        contact = this.model.docsend.ref2;
+
+        this.main = await Module.tableStores.main.getOne(rsvno);
+
+        co = this.main.company;        
+
+      case 'receipt':
+      case 'ccreceipt':
+      case 'posreceipt':
+      case 'posccreceipt':
+        // get pmt info
         break;
 
       case 'letter':
       case 'accreceipt':
       case 'accccreceipt':
         // get from Contact
-        let values = [this.model.docsend.contact];
-        let res = await Module.data.contact.storedQuery({qid: 'contact-basic', values});
-
-        if (res.status == 200) {
-          context.contact = res.data[0];
-        }
+        contact = this.model.docsend.ref1;
         break;
 
       case 'giftcert':
+        // get GC data
+        co = 'from GC data';
+
       case 'gcreceipt':
       case 'gcccreceipt':
-        // get from GC
-        co = '';
-        contact = '';
+        // get pmt info
+        contact = this.model.docsend.ref2;
         break;
 
       case 'rainchek':
         // get from RC
-        co = '';
-        contact = '';
+        co = 'from RC data'
+        contact = this.model.docsend.ref2;
         break;
     }
+
+    this.model.docsend.contact = contact;
+    this.model.contact = await this.getContact();
+
+    if (!co) co = this.model.contact.company;
+
+    this.company = await Module.tableStores.company.getOne(co);
   }
 
   splitFromAddress(addr) {
@@ -234,57 +310,6 @@ class Docsend extends Verror {
     if (parts.length == 1) return [parts[0].trim(), ''];
 
     return [parts[1].trim(), parts[0].substr(1).trim()];
-  }
-
-  async getCompanyFromDoc() {
-    // get company, set contact
-    let co, contact;
-
-    switch (this.model.docsend.doctype) {
-      case 'invoiceA':
-      case 'invoiceB':
-      case 'quote':
-      case 'cancel':
-      case 'receipt':
-      case 'ccreceipt':
-      case 'posreceipt':
-      case 'posccreceipt':
-        // get from rsv 
-        co = '';
-        contact = '';
-        break;
-
-      case 'letter':
-      case 'accreceipt':
-      case 'accccreceipt':
-        // get from Contact
-        co = '';
-        contact = this.model.docsend.ref1;
-        break;
-
-      case 'giftcert':
-      case 'gcreceipt':
-      case 'gcccreceipt':
-        // get from GC
-        co = '';
-        contact = '';
-        break;
-
-      case 'rainchek':
-        // get from RC
-        co = '';
-        contact = '';
-        break;
-    }
-
-    this.model.docsend.contact = contact;
-    this.model.contact = await this.getContact();
-
-    if (!co) {
-      co = this.model.contact.company;
-    }
-
-    return co;
   }
 
   async getContact() {
@@ -300,7 +325,7 @@ class Docsend extends Verror {
 
   async getDocsetup() {
     let docsetup = {};
-    let filters = {company: this.company, doctype: this.model.docsend.doctype};
+    let filters = {company: this.company.id, doctype: this.model.docsend.doctype};
     let res = await Module.data.docsetup.getMany({filters});
 
     if (res.status == 200 && res.data.length > 0) {
@@ -355,10 +380,10 @@ class Docsend extends Verror {
 
   getEmailDefaults() {
     for (let fld of ['fromaddr', 'toaddr', 'ccaddr', 'bccaddr', 'subject']) {
-      this.model.docsend[fld] = this.docsetup[fld];
+      this.model.docsend[fld] = this.docsetup[fld] || '';
     }
 
-    this.model.docsend['subjlist'] = this.docsetup.subjlist.split('\n');
+    this.model.docsend['subjlist'] = (this.docsetup.subjlist || '').split('\n');
 
     if (!this.docsetup.fromaddr) this.model.docsend.fromaddr = `<${App.USER.name}> ${App.USER.email}`;
     if (!this.docsetup.toaddr) this.model.docsend.toaddr = this.model.contact.email;
@@ -430,6 +455,10 @@ class Docsend extends Verror {
     }
 
     return anyErrors;
+  }
+
+  goBack() {
+    Module.pager.back();
   }
 
   async recordEmailHistory(data) {

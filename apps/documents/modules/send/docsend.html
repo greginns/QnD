@@ -1,29 +1,40 @@
 <page id='documents-send' style='display: none;'>
   <section id='documents-send-section'>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top " style='background-color: #bbe2f1;'>
+      <div class="container-fluid">
+        <div>
+          <span mvc-click='goBack()' class='pointer'>
+            <i class="fas fa-chevron-left"></i>
+            Back
+          </span>          
+        </div>
+        <div>
+          <span style='font-size: 20px' mvc-text='title'></span>          
+        </div>
+        <div>
+        </div>
+        <!--div class='col-2'>
+          <div class='d-block d-sm-none'>XS</div>
+          <div class='d-none d-sm-block d-md-none'>SM</div>
+          <div class='d-none d-md-block d-lg-none'>MD</div>
+          <div class='d-none d-lg-block d-xl-none'>LG</div>
+          <div class='d-none d-xl-block'>XL</div>
+        </div-->
+      </div>
+    </nav>
+
     <div class='row'>
-      <div class='col-12 mb-3'>
+      <div class='col-12 col-md-6 mb-3'>
         <div class='card'>
           <div class='card-header'>
-            <div class='row'>
-              <div class='col-12 col-md-6 col-lg-4'>
-                <span class='align-middle pointer' mvc-click='go()'>
-                  <i class="fas fa-chevron-left"></i>
-                  Back
-                </span>
-              </div>
-              <div class='col-12 col-md-6 col-lg-4 text-center'>
-                 <h4>Document Send</h4>
-              </div>
-              <div class='col-12 col-md-6 col-lg-4'>
-              </div>
-            </div>
+            <h5>Document</h5>
           </div>
           
           <div class='card-body'>
             <div class='row'>
-              <div class='col-12 col-md-6'>
+              <div class='col-12'>
                 <div class='row'>
-                  <div class='col-12 col-md-6 col-lg-4 mb-3'>
+                  <div class='col-12 col-md-6 mb-3'>
                     <div class="form-label-group">
                       <select size='1' mvc-value="docsend.doctype" mvc-each='docgroups' class="form-select" mvc-on='{"change": "getDocsetup()"}' disabled>
                         <optgroup mvc-optgroup='docgroups[$index].label' mvc-each='docgroups[$index].items' mvc-index='$index1'>
@@ -58,7 +69,7 @@
                 </div>
 
                 <div class='row'>
-                  <div class='col-12 col-md-8 mb-3'>
+                  <div class='col-12 mb-3'>
                     <div class="form-label-group">
                       <select size='1' mvc-value="docsend.document" mvc-each='documents' mvc-on='{change: "docChanged()"}' class="form-select">
                         <option mvc-option='{"text": "documents[$index].name", "value": "documents[$index].id"}'></option>
@@ -69,7 +80,7 @@
                 </div>
 
                 <div class='row'>
-                  <div class='col-12 col-md-8 mb-3'>
+                  <div class='col-12 mb-3'>
                     <div class="form-label-group">
                       <select size='1' mvc-value="docsend.docletter" mvc-each='docletters' mvc-on='{change: "ltrChanged()"}' class="form-select">
                         <option mvc-option='{"text": "docletters[$index].name", "value": "docletters[$index].id"}'></option>
@@ -85,57 +96,12 @@
                   </div>
                 </div>
               </div>
-
-              <div class='col-12 col-md-6'>
-                <div class='row'>
-                  <div class='col-12 col-md-12 mb-3'>
-                    {{ fields.Char(id='fromaddr', maxlength='100', mvc_value='docsend.fromaddr', mvc_enabled='', label='From') }}
-                  </div>
-                </div>
-
-                <div class='row'>
-                  <div class='col-12 col-md-12 mb-3'>
-                    {{ fields.Char(id='toaddr', maxlength='500', mvc_value='docsend.toaddr', mvc_enabled='', label='To') }}
-                  </div>
-                </div>
-
-                <div class='row'>
-                  <div class='col-12 col-md-12 mb-3'>
-                    {{ fields.Char(id='ccaddr', maxlength='500', mvc_value='docsend.ccaddr', mvc_enabled='', label='CC') }}
-                  </div>
-                </div>                
-
-                <div class='row'>
-                  <div class='col-12 col-md-12 mb-3'>
-                    {{ fields.Char(id='bccaddr', maxlength='500', mvc_value='docsend.bccaddr', mvc_enabled='', label='BCC') }}
-                  </div>
-                </div>                
-
-                <div class='row'>
-                  <div class='col-12 col-md-12 mb-3'>
-                    <div class="form-label-group">
-                      <select size='1' mvc-value="docsend.subject" mvc-each='docsend.subjlist' class="form-select">
-                        <option mvc-option='{"text": "docsend.subjlist[$index]", "value": "docsend.subjlist[$index]"}'></option>
-                      </select>
-                      <label>Subject List</label>
-                    </div>
-                  </div>
-                </div>
-
-                <div class='row'>
-                  <div class='col-12 col-md-12 mb-3'>
-                    {{ fields.Char(id='subject', maxlength='100', mvc_value='docsend.subject', mvc_enabled='', label='Subject') }}
-                  </div>
-                </div>                
-
-              </div>
-
             </div>
           </div>
-          
+
           <div class='card-footer'>
             <div class='row'>
-              <div class='col-6'>
+              <div class='col-12'>
                 <button class='btn btn-primary' mvc-click='previewHTML()'>
                   Preview HTML
                 </button>
@@ -143,14 +109,71 @@
                   Preview PDF
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <div class='col-6'>
-                <button class='btn btn-success' mvc-click='send()'>
-                  Send Email
-                </button>
+      <div class='col-12 col-md-6 mb-3'>
+        <div class='card'>
+          <div class='card-header'>
+            <h5>Email</h5>
+          </div>
+          
+          <div class='card-body'>
+            <div class='col-12'>
+              <div class='row'>
+                <div class='col-12 mb-3'>
+                  {{ fields.Char(id='fromaddr', maxlength='100', mvc_value='docsend.fromaddr', mvc_enabled='', label='From') }}
+                </div>
+              </div>
+
+              <div class='row'>
+                <div class='col-12 mb-3'>
+                  {{ fields.Char(id='toaddr', maxlength='500', mvc_value='docsend.toaddr', mvc_enabled='', label='To') }}
+                </div>
+              </div>
+
+              <div class='row'>
+                <div class='col-12 mb-3'>
+                  {{ fields.Char(id='ccaddr', maxlength='500', mvc_value='docsend.ccaddr', mvc_enabled='', label='CC') }}
+                </div>
+              </div>                
+
+              <div class='row'>
+                <div class='col-12 mb-3'>
+                  {{ fields.Char(id='bccaddr', maxlength='500', mvc_value='docsend.bccaddr', mvc_enabled='', label='BCC') }}
+                </div>
+              </div>                
+
+              <div class='row'>
+                <div class='col-12 mb-3'>
+                  <div class="form-label-group">
+                    <select size='1' mvc-value="docsend.subject" mvc-each='docsend.subjlist' class="form-select">
+                      <option mvc-option='{"text": "docsend.subjlist[$index]", "value": "docsend.subjlist[$index]"}'></option>
+                    </select>
+                    <label>Subject List</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class='row'>
+                <div class='col-12 mb-3'>
+                  {{ fields.Char(id='subject', maxlength='100', mvc_value='docsend.subject', mvc_enabled='', label='Subject') }}
+                </div>
+              </div>                
             </div>
 
+            <div class='card-footer'>
+              <div class='row'>
+                <div class='col-12'>
+                  <button class='btn btn-success' mvc-click='send()'>
+                    Send Email
+                  </button>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
     </div>

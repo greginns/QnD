@@ -19,8 +19,12 @@ let moduleStart = function() {
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});
     Module.data.company = new TableAccess({modelName: 'company', url: `/contacts/v1/company`});
     Module.data.emailhist = new TableAccess({modelName: 'emailhist', url: `/contacts/v1/emailhist`});
+    Module.data.main = new TableAccess({modelName: 'main', url: `/reservations/v1/main`});
 
     const docData = new WSDataComm('documents');                 // WS instances for this app
+    const resData = new WSDataComm('reservations');                 // WS instances for this app
+    const conData = new WSDataComm('contacts');                 // WS instances for this app
+
     const safemode = false;
     let model, dataPromises = [];
 
@@ -54,14 +58,14 @@ let moduleStart = function() {
     // contact table ---
     model = `/contacts/contact`;               
 
-    docData.addModel(model);                          
+    conData.addModel(model);                          
 
     Module.tableStores.contact = new TableStore({accessor: Module.data.contact, model, safemode});  // setup a table store in Module so all pages can access
 
     // company table ---
     model = `/contacts/company`;
 
-    docData.addModel(model);                          
+    conData.addModel(model);                          
 
     Module.tableStores.company = new TableStore({accessor: Module.data.company, model, safemode});  // setup a table store in Module so all pages can access
     dataPromises.push(Module.tableStores.company.getMany({filters: {active: true}}));
@@ -69,12 +73,21 @@ let moduleStart = function() {
     // emailhist table ---
     model = `/contacts/emailhist`;
 
-    docData.addModel(model);                          
+    conData.addModel(model);                          
 
     Module.tableStores.emailhist = new TableStore({accessor: Module.data.emailhist, model, safemode});  // setup a table store in Module so all pages can access
 
+    // main table ---
+    model = `/reservations/main`;               
+
+    resData.addModel(model);                          
+
+    Module.tableStores.main = new TableStore({accessor: Module.data.main, model, safemode});  // setup a table store in Module so all pages can access
+
     // start following via WS ---
     docData.start();
+    resData.start();
+    conData.start();
 
     // fill up on data
     Promise.all(dataPromises)

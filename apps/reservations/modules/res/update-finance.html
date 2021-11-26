@@ -1,0 +1,123 @@
+<div class='row'>
+  <div class='col-12 col-sm-6'>
+    <div class='row'>
+      <div class='col-6'>
+        Charges
+      </div>
+      <div class='col-6'>
+        <span mvc-text='main.charges'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-6'>
+        Complementary
+      </div>
+      <div class='col-6'>
+        <span mvc-text='main.comped'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-6'>
+        Discount
+      </div>
+      <div class='col-6'>
+        <span mvc-text='main.discount'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-6'>
+        Taxes
+      </div>
+      <div class='col-6'>
+        <span mvc-text='main.taxes'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-6'>
+        Commission
+      </div>
+      <div class='col-6'>
+        <span mvc-text='main.comm'></span>
+      </div>
+    </div>                  
+
+    <div class='row'>
+      <div class='col-6'>
+        Total
+      </div>
+      <div class='col-6'>
+        <span mvc-text='main.total'></span>
+      </div>
+    </div>         
+    
+    <div class='row'>
+      <div class='col-6'>
+        Payments
+      </div>
+      <div class='col-6'>
+        <span mvc-text='main.payments'></span>
+      </div>
+    </div>                  
+
+    <div class='row'>
+      <div class='col-6'>
+        DUE
+      </div>
+      <div class='col-6'>
+        <span mvc-text='main.baldue'></span>
+      </div>
+    </div>
+  </div>
+
+  <div class='col-12 col-sm-6'>
+    <div class='row'>
+      <div class='col-12'>
+        <span mvc-if='main.taxable'>
+          Taxable
+        </span>
+        <span mvc-else>
+          <span class='text-danger'>
+            Not Taxable
+          </span>
+        </span>
+      </div>
+    </div>  
+
+    <div class='row' mvc-show='main.taxno'>
+      <div class='col-12'>
+        Tax#
+        <span mvc-text='main.taxno'></span>
+      </div>
+    </div>
+
+    <div mvc-show='main.agent'>
+      <div class='row'>
+        <div class='col-4'>
+          <span mvc-text='main.agent'></span>
+        </div>
+        <div class='col-8'>
+          <span mvc-text='agent.first'></span>
+          <span mvc-text='agent.last'></span>
+        </div>
+      </div>
+
+      <div class='row'>
+        <div class='col-4'>
+          <span mvc-text='main.commrate'></span>
+          % Commission
+        </div>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12'>
+        <span mvc-text='currency.name'></span>
+      </div>  
+    </div>
+
+  </div>
+</div>

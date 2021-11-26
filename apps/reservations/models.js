@@ -322,6 +322,7 @@ const Main = class extends Model {
         allowfup: new Fields.Boolean({default: true, verbose: 'Follow Up'}),
         firm: new Fields.Boolean({default: true, verbose: 'Deposit Paid'}),
         system: new Fields.Char({notNull: true, maxLength: 2, default: 'R', choices: SYSTEMS, verbose: 'System'}),
+        notes: new Fields.Jsonb({verbose: 'Notes'}),
 
         cidate: new Fields.Date({null: true, verbose: 'Check-In Date'}),
         citime: new Fields.Time({null: true, verbose: 'Check-In Time'}),
