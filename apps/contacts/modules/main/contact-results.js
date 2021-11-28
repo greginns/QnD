@@ -11,6 +11,7 @@ class Searchresults extends MVC {
     this.model.headers = [];
     this.model.contacts = [];
     this.fields = [
+      ['id', 'Contact#'],
       ['first', 'First Name'],
       ['last', 'Last Name'],
       ['email', 'Email Address'],
@@ -30,7 +31,7 @@ class Searchresults extends MVC {
   }
   
   inView(params) {
-    Module.navbar.setActive('search');
+    //Module.navbar.setActive('search');
 
     if ('filters' in params) {
       this.search(JSON.parse(decodeURI(params.filters)));
@@ -38,7 +39,7 @@ class Searchresults extends MVC {
   }
 
   outView() {
-    Module.navbar.setInactive('search');
+    //Module.navbar.setInactive('search');
 
     return true;  
   }
@@ -98,7 +99,7 @@ class Searchresults extends MVC {
   }
 
   searchAgain() {
-    Module.pager.back();
+    Module.pager.go('/contact/search');
   }
 
   newContact() {

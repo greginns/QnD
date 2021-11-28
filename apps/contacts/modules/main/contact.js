@@ -161,9 +161,13 @@ class Contact extends ContactWithAddress {
     if (res.status == 200) {
       utils.modals.toast('CONTACT', (this.model.existingEntry) ? contact.fullname + ' Updated' : 'Created', 2000);
    
-      this.contactOrig = this.model.contact.toJSON();
-
-      if (!this.model.existingEntry) this.clearIt();
+      if (!this.model.existingEntry) {
+        this.clearIt();
+        Module.pager.go('/contact/update/' + contact.id);
+      }
+      else {
+        this.contactOrig = this.model.contact.toJSON();
+      }
     }
     else {
       this.displayErrors(res);
@@ -205,6 +209,10 @@ class Contact extends ContactWithAddress {
     let doctype = 'letter';
 
     Module.pager.go(`/docsend/${doctype}/${this.model.contact.id}`);
+  }
+
+  back() {
+    Module.pager.back();
   }
 
   // Screen handling

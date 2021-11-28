@@ -1,0 +1,16 @@
+<div class='table-responsive'>
+  <table class='table table-sm table-hover'>
+    <thead>
+      <tr>
+        <th mvc-click='sortItems("glcode","code")'>Code</th>
+        <th mvc-click='sortItems("glcode","name")'>Name</th>
+      </tr>
+    </thead>
+    <tbody mvc-each='glcode'>
+      <tr mvc-click='editItem("glcode", "$index")' mvc-attrclassx='{"text-danger": "glcode[$index].active"}'>
+        <td mvc-text='glcode[$index].code'></td>
+        <td mvc-text='glcode[$index].name'></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -24,8 +24,8 @@
     </nav>
 
     <div class='row'>
-      <div class='col-12 col-md-6 mb-3'>
-        <div class='card'>
+      <div class='col-12 col-md-6 mb-4'>
+        <div class='card shadow'>
           <div class='card-header'>
             <h5>Document</h5>
           </div>
@@ -112,8 +112,8 @@
         </div>
       </div>
 
-      <div class='col-12 col-md-6 mb-3'>
-        <div class='card'>
+      <div class='col-12 col-md-6 mb-4'>
+        <div class='card shadow'>
           <div class='card-header'>
             <h5>Email</h5>
           </div>
@@ -177,14 +177,18 @@
     </div>
 
     <div class='row'>
-      <div class='col-12 mb-3'>
-        {{ fields.Text(id='docsource', cols='40', rows='10', mvc_value='docsend.docsource', mvc_enabled='', label='Document HTML') }}
+      <div class='col-12 mb-4'>
+        <div class='shadow'>
+          {{ fields.Text(id='docsource', cols='40', rows='10', mvc_value='docsend.docsource', mvc_enabled='', label='Document HTML') }}
+        </div>
       </div>
     </div>
 
     <div class='row'>
-      <div class='col-12 mb-3'>
-        {{ fields.Text(id='ltrsource', cols='40', rows='10', mvc_value='docsend.ltrsource', mvc_enabled='', label='Letter HTML') }}
+      <div class='col-12'>
+        <div class='shadow'>
+          {{ fields.Text(id='ltrsource', cols='40', rows='10', mvc_value='docsend.ltrsource', mvc_enabled='', label='Letter HTML') }}
+        </div>
       </div>
     </div>
 

@@ -1,11 +1,13 @@
 <page id='contacts-contact-update' style='display: none;'>
   <section id='contacts-contact-update-section'>
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top " style='background-color: #bbe2f1; border-bottom: 2px solid blue;'>
-      <div class="container-fluid">
-        <div>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top r4-navbar">
+      <div class="container-fluid" style='font-size: 20px'>
+        <div class='pointer' mvc-click='back()'>
+          <i class="fas fa-chevron-left"></i>
+          Back
         </div>
         <div>
-          <span style='font-size: 20px'>
+          <span>
             Contact
             <span mvc-text='contact.id'></span>
             Update
@@ -276,9 +278,9 @@
     <div class='row'>
       <div class='col-12'>
         <div class="btn-group shadow" role="group" aria-label="Button group with nested dropdown">
-          {{ buttons.btn(class='success', mvc_click='save()', text='Update Contact') }}
-          {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete Contact') }}    
-          {{ buttons.btn(class='primary', mvc_click='send()', text='Email Letter') }}    
+          {{ buttons.btn(class='success', mvc_click='save()', text='Update') }}
+          {{ buttons.btn(class='danger', mvc_click='delete()', text='Delete') }}    
+          {{ buttons.btn(class='primary', mvc_click='send()', text='Email') }}    
         
           <div class="btn-group dropup" role="group">
             <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -287,7 +289,7 @@
             <div class="dropdown-menu pointer">
               <span class="dropdown-item" mvc-click='emailHistory()'>Email History</span>
               <span class="dropdown-item" mvc-click='associated()'>Associated</span>
-              <span class="dropdown-item" mvc-click='dymo()'>Dymo label</span>
+              <span class="dropdown-item" mvc-click='dymo()'>Dymo Label</span>
             </div>
           </div>
         </div>

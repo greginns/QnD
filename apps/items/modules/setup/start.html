@@ -1,737 +1,812 @@
 <page id='items-start' style='display: none;'>
   <section id='items-start-section'>
-    <div class='fixed-top bg-secondary'>
-			<div class='row'>
-				<div class='col-12 text-center text-white'>
-					<h3>
-						Item Setup
-					</h3>
-				</div>
-			</div>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top r4-navbar">
+      <div class="container-fluid">
+        <div>
+        </div>
+        <div>
+          <span style='font-size: 20px'>
+            Item Setup
+          </span>          
+        </div>
+        <div></div>
+        <!--div class='col-2'>
+          <div class='d-block d-sm-none'>XS</div>
+          <div class='d-none d-sm-block d-md-none'>SM</div>
+          <div class='d-none d-md-block d-lg-none'>MD</div>
+          <div class='d-none d-lg-block d-xl-none'>LG</div>
+          <div class='d-none d-xl-block'>XL</div>
+        </div-->
+      </div>
+    </nav>
+
+    <!-- XS only -->
+    <div class='row d-block d-sm-none mb-3'>
+      <div class='col-12'>
+        <div class='accordion shadow' id='item-setup-xs'>
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-activity">
+                <span class='pe-2'>
+                  Activities
+                </span>
+                {% include "./start-activity-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-activity" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-activity-btn.html" %}
+                <br>
+                {% include "./start-activity-table.html" %}
+              </div>
+            </div>
+          </div>
+
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-lodging">
+                <span class='pe-2'>
+                  Lodging
+                </span>
+                {% include "./start-lodging-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-lodging" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-lodging-btn.html" %}
+                <br>
+                {% include "./start-lodging-table.html" %}
+              </div>
+            </div>
+          </div>  
+
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-meals">
+                <span class='pe-2'>
+                  Meals
+                </span>
+                {% include "./start-meals-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-meals" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-meals-btn.html" %}
+                <br>
+                {% include "./start-meals-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-actgroup">
+                <span class='pe-2'>
+                  Activity Groups
+                </span>
+                {% include "./start-actgroup-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-actgroup" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-actgroup-btn.html" %}
+                <br>
+                {% include "./start-actgroup-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-actres">
+                <span class='pe-2'>
+                  Activity Resources
+                </span>
+                {% include "./start-actres-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-actres" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-actres-btn.html" %}
+                <br>
+                {% include "./start-actres-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-actttot">
+                <span class='pe-2'>
+                  Activity Time Totals
+                </span>
+                {% include "./start-actttot-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-actttot" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-actttot-btn.html" %}
+                <br>
+                {% include "./start-actttot-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-lodglocn">
+                <span class='pe-2'>
+                  Lodging Locations
+                </span>
+                {% include "./start-lodglocn-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-lodglocn" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-lodglocn-btn.html" %}
+                <br>
+                {% include "./start-lodglocn-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-lodgtype">
+                <span class='pe-2'>
+                  Lodging Types
+                </span>
+                {% include "./start-lodgtype-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-lodgtype" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-lodgtype-btn.html" %}
+                <br>
+                {% include "./start-lodgtype-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-meallocn">
+                <span class='pe-2'>
+                  Meal Locations
+                </span>
+                {% include "./start-meallocn-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-meallocn" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-meallocn-btn.html" %}
+                <br>
+                {% include "./start-meallocn-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-mealtype">
+                <span class='pe-2'>
+                  Meal Types
+                </span>
+                {% include "./start-mealtype-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-mealtype" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-mealtype-btn.html" %}
+                <br>
+                {% include "./start-mealtype-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-company">
+                <span class='pe-2'>
+                  Companies
+                </span>
+                {% include "./start-company-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-company" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-company-btn.html" %}
+                <br>
+                {% include "./start-company-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-area">
+                <span class='pe-2'>
+                  Areas
+                </span>
+                {% include "./start-area-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-area" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-area-btn.html" %}
+                <br>
+                {% include "./start-area-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-glcode">
+                <span class='pe-2'>
+                  GL Codes
+                </span>
+                {% include "./start-glcode-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-glcode" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-glcode-btn.html" %}
+                <br>
+                {% include "./start-glcode-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-taxes">
+                <span class='pe-2'>
+                  Taxes/Service Charges
+                </span>
+                {% include "./start-taxes-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-taxes" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-taxes-btn.html" %}
+                <br>
+                {% include "./start-taxes-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-waiver">
+                <span class='pe-2'>
+                  Waivers
+                </span>
+                {% include "./start-waiver-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-waiver" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-waiver-btn.html" %}
+                <br>
+                {% include "./start-waiver-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-template">
+                <span class='pe-2'>
+                  Templates
+                </span>
+                {% include "./start-template-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-template" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-template-btn.html" %}
+                <br>
+                {% include "./start-template-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-pricelevel">
+                <span class='pe-2'>
+                  Pricing Levels
+                </span>
+                {% include "./start-pricelevel-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-pricelevel" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-pricelevel-btn.html" %}
+                <br>
+                {% include "./start-pricelevel-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-pmtterms">
+                <span class='pe-2'>
+                  Payment Terms
+                </span>
+                {% include "./start-pmtterms-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-pmtterms" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-pmtterms-btn.html" %}
+                <br>
+                {% include "./start-pmtterms-table.html" %}
+              </div>
+            </div>
+          </div>            
+          
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-supplier">
+                <span class='pe-2'>
+                  Suppliers
+                </span>
+                {% include "./start-supplier-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-supplier" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-supplier-btn.html" %}
+                <br>
+                {% include "./start-supplier-table.html" %}
+              </div>
+            </div>
+          </div>            
+
+          <div class='accordion-item'>
+            <div class='accordion-header'>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#item-setup-xs-reseller">
+                <span class='pe-2'>
+                  Resellers
+                </span>
+                {% include "./start-reseller-badge.html" %}
+              </button>
+            </div>
+
+            <div id="item-setup-xs-reseller" class="accordion-collapse collapse" data-bs-parent="#item-setup-xs">
+              <div class='accordion-body'>
+                {% include "./start-reseller-btn.html" %}
+                <br>
+                {% include "./start-reseller-table.html" %}
+              </div>
+            </div>
+          </div>            
+
+        </div>
+      </div>
     </div>
 
-    <div class='row'>
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Activity
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.activity.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.activity.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("activity")'>
-                  New
-                </button>
+    <!-- SM and above -->
+    <div class='d-none d-sm-block mb-3'>
+      <div class='row'>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Activities
+                  {% include "./start-activity-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-activity-btn.html" %}
+                </div>
               </div>
             </div>
+            <div class='card-body'>
+              {% include "./start-activity-table.html" %}
+            </div>
           </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("activity","code")'>Code</th>
-                  <th mvc-click='sortItems("activity","name")'>Name</th>
-                  <th mvc-click='sortItems("activity","group")'>Group</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='activity'>
-                <tr mvc-click='editItem("activity", "$index")' mvc-attrclassx='{"text-danger": "activity[$index].active"}'>
-                  <td mvc-text='activity[$index].code'></td>
-                  <td mvc-text='activity[$index].name'></td>
-                  <td mvc-text='activity[$index].actgroup'></td>
-                </tr>
-              </tbody>
-            </table>
+        </div>
+
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Lodging
+                  {% include "./start-lodging-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-lodging-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-lodging-table.html" %}
+            </div>
+          </div>
+        </div>    
+
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Meals
+                  {% include "./start-meals-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-meals-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-meals-table.html" %}
+            </div>
+          </div>
+        </div>                
+      </div>
+
+      <div class='row'>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Activity Groups
+                  {% include "./start-actgroup-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-actgroup-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-actgroup-table.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Activity Resources
+                  {% include "./start-actres-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-actres-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-actres-table.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Activity Time Totals
+                  {% include "./start-actttot-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-actttot-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-actttot-table.html" %}
+            </div>
           </div>
         </div>
       </div>
 
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Lodging
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.lodging.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.lodging.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodging")'>
-                  New
-                </button>
+      <div class='row'>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Lodging Locations
+                  {% include "./start-lodglocn-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-lodglocn-btn.html" %}
+                </div>
               </div>
             </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("lodging","code")'>Code</th>
-                  <th mvc-click='sortItems("lodging","name")'>Name</th>
-                  <th mvc-click='sortItems("lodging","locn")'>Location</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='lodging'>
-                <tr mvc-click='editItem("lodging", "$index")' mvc-attrclassx='{"text-danger": "lodging[$index].active"}'>
-                  <td mvc-text='lodging[$index].code'></td>
-                  <td mvc-text='lodging[$index].name'></td>
-                  <td mvc-text='lodging[$index].locn'></td>
-                </tr>
-              </tbody>
-            </table>
+            <div class='card-body'>
+              {% include "./start-lodglocn-table.html" %}
+            </div>
           </div>
         </div>
-      </div>    
 
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Meals
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.meals.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.meals.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("meals")'>
-                  New
-                </button>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Lodging Types
+                  {% include "./start-lodgtype-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-lodgtype-btn.html" %}
+                </div>
               </div>
             </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("meals","code")'>Code</th>
-                  <th mvc-click='sortItems("meals","name")'>Name</th>
-                  <th mvc-click='sortItems("meals","group")'>Location</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='meals'>
-                <tr mvc-click='editItem("meals", "$index")' mvc-attrclassx='{"text-danger": "meals[$index].active"}'>
-                  <td mvc-text='meals[$index].code'></td>
-                  <td mvc-text='meals[$index].name'></td>
-                  <td mvc-text='meals[$index].meallocn'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>                
-    </div>
-
-    <div class='row'>
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Activity Groups
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.actgroup.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.actgroup.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actgroup")'>
-                  New
-                </button>
-              </div>
+            <div class='card-body'>
+              {% include "./start-lodgtype-table.html" %}
             </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("actgroup","code")'>Code</th>
-                  <th mvc-click='sortItems("actgroup","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='actgroup'>
-                <tr mvc-click='editItem("actgroup", "$index")' mvc-attrclassx='{"text-danger": "actgroup[$index].active"}'>
-                  <td mvc-text='actgroup[$index].code'></td>
-                  <td mvc-text='actgroup[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
-
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Activity Resources
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.actres.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.actres.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actres")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("actres","code")'>Code</th>
-                  <th mvc-click='sortItems("actres","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='actres'>
-                <tr mvc-click='editItem("actres", "$index")' mvc-attrclassx='{"text-danger": "actres[$index].active"}'>
-                  <td mvc-text='actres[$index].code'></td>
-                  <td mvc-text='actres[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Activity Time Totals
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.actttot.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.actttot.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("actttot")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("actttot","code")'>Code</th>
-                  <th mvc-click='sortItems("actttot","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='actttot'>
-                <tr mvc-click='editItem("actttot", "$index")' mvc-attrclassx='{"text-danger": "actttot[$index].active"}'>
-                  <td mvc-text='actttot[$index].code'></td>
-                  <td mvc-text='actttot[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class='row'>
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Lodging Locations
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.lodglocn.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.lodglocn.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodglocn")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("lodglocn","code")'>Code</th>
-                  <th mvc-click='sortItems("lodglocn","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='lodglocn'>
-                <tr mvc-click='editItem("lodglocn", "$index")' mvc-attrclassx='{"text-danger": "lodglocn[$index].active"}'>
-                  <td mvc-text='lodglocn[$index].code'></td>
-                  <td mvc-text='lodglocn[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Lodging Types
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.lodgtype.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.lodgtype.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("lodgtype")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("lodgtype","code")'>Code</th>
-                  <th mvc-click='sortItems("lodgtype","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='lodgtype'>
-                <tr mvc-click='editItem("lodgtype", "$index")' mvc-attrclassx='{"text-danger": "lodgtype[$index].active"}'>
-                  <td mvc-text='lodgtype[$index].code'></td>
-                  <td mvc-text='lodgtype[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class='row'>
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Meal Locations
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.meallocn.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.meallocn.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("meallocn")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("meallocn","code")'>Code</th>
-                  <th mvc-click='sortItems("meallocn","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='meallocn'>
-                <tr mvc-click='editItem("meallocn", "$index")' mvc-attrclassx='{"text-danger": "meallocn[$index].active"}'>
-                  <td mvc-text='meallocn[$index].code'></td>
-                  <td mvc-text='meallocn[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Meal Types
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.mealtype.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.mealtype.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("mealtype")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("mealtype","code")'>Code</th>
-                  <th mvc-click='sortItems("mealtype","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='mealtype'>
-                <tr mvc-click='editItem("mealtype", "$index")' mvc-attrclassx='{"text-danger": "mealtype[$index].active"}'>
-                  <td mvc-text='mealtype[$index].code'></td>
-                  <td mvc-text='mealtype[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class='row'>
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Companies
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.company.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.company.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("company")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("company","id")'>Code</th>
-                  <th mvc-click='sortItems("company","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='company'>
-                <tr mvc-click='editItem("company", "$index")' mvc-attrclassx='{"text-danger": "company[$index].active"}'>
-                  <td mvc-text='company[$index].id'></td>
-                  <td mvc-text='company[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Areas
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.area.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.area.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("area")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("area","code")'>Code</th>
-                  <th mvc-click='sortItems("area","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='area'>
-                <tr mvc-click='editItem("area", "$index")' mvc-attrclassx='{"text-danger": "area[$index].active"}'>
-                  <td mvc-text='area[$index].code'></td>
-                  <td mvc-text='area[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                GL Codes
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.glcode.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.glcode.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("glcode")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("glcode","code")'>Code</th>
-                  <th mvc-click='sortItems("glcode","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='glcode'>
-                <tr mvc-click='editItem("glcode", "$index")' mvc-attrclassx='{"text-danger": "glcode[$index].active"}'>
-                  <td mvc-text='glcode[$index].code'></td>
-                  <td mvc-text='glcode[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>  
-    </div>
       
-    <div class='row'>
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Taxes/Service Charges
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.tax.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.tax.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("tax")'>
-                  New
-                </button>
+      <div class='row'>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Meal Locations
+                  {% include "./start-meallocn-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-meallocn-btn.html" %}
+                </div>
               </div>
             </div>
+            <div class='card-body'>
+              {% include "./start-meallocn-table.html" %}
+            </div>
           </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("tax","code")'>Code</th>
-                  <th mvc-click='sortItems("tax","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='tax'>
-                <tr mvc-click='editItem("tax", "$index")' mvc-attrclassx='{"text-danger": "tax[$index].active"}'>
-                  <td mvc-text='tax[$index].code'></td>
-                  <td mvc-text='tax[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
+        </div>
+      
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Meal Types
+                  {% include "./start-mealtype-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-mealtype-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-mealtype-table.html" %}
+            </div>
           </div>
         </div>
       </div>
 
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Waivers
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.waiver.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.waiver.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("waiver")'>
-                  New
-                </button>
+      <div class='row'>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Companies
+                  {% include "./start-company-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-company-btn.html" %}
+                </div>
               </div>
             </div>
+            <div class='card-body'>
+              {% include "./start-company-table.html" %}
+            </div>
           </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("waiver","code")'>Code</th>
-                  <th mvc-click='sortItems("waiver","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='waiver'>
-                <tr mvc-click='editItem("waiver", "$index")' mvc-attrclassx='{"text-danger": "waiver[$index].active"}'>
-                  <td mvc-text='waiver[$index].code'></td>
-                  <td mvc-text='waiver[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
+        </div>
+
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Areas
+                  {% include "./start-company-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-company-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-area-table.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  GL Codes
+                  {% include "./start-glcode-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-glcode-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-glcode-table.html" %}
+            </div>
+          </div>
+        </div>  
+      </div>
+        
+      <div class='row'>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Taxes/Service Charges
+                  {% include "./start-taxes-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-taxes-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-taxes-table.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Waivers
+                  {% include "./start-waiver-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-waiver-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-waiver-table.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Templates
+                  {% include "./start-template-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-template-badge.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-template-table.html" %}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class='row'>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Pricing Levels
+                  {% include "./start-pricelevel-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-pricelevel-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-pricelevel-table.html" %}
+            </div>
+          </div>
+        </div>
+
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Payment Terms
+                  {% include "./start-pricelevel-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-pricelevel-btn.html" %}
+                </div>
+              </div>
+            </div>
+            <div class='card-body'>
+              {% include "./start-pmtterms-table.html" %}
+            </div>
           </div>
         </div>
       </div>
 
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Templates
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.template.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.template.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("template")'>
-                  New
-                </button>
+      <div class='row'>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Suppliers
+                  {% include "./start-supplier-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-supplier-btn.html" %}
+                </div>
               </div>
             </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("template","code")'>Code</th>
-                  <th mvc-click='sortItems("template","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='template'>
-                <tr mvc-click='editItem("template", "$index")' mvc-attrclassx='{"text-danger": "template[$index].active"}'>
-                  <td mvc-text='template[$index].code'></td>
-                  <td mvc-text='template[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
+            <div class='card-body'>
+              {% include "./start-supplier-table.html" %}
+            </div>
           </div>
         </div>
-      </div>
 
-    </div>
-
-    <div class='row'>
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Pricing Levels
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.pricelevel.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.pricelevel.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("pricelevel")'>
-                  New
-                </button>
+        <div class='col-12 col-md-6 col-lg-4 mb-3'>
+          <div class='card shadow'>
+            <div class='card-header'>
+              <div class='row'>
+                <div class='col-8'>
+                  Resellers
+                  {% include "./start-supplier-badge.html" %}
+                </div>
+                <div class='col-4'>
+                  {% include "./start-supplier-btn.html" %}
+                </div>
               </div>
             </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("pricelevel","code")'>Code</th>
-                  <th mvc-click='sortItems("pricelevel","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='pricelevel'>
-                <tr mvc-click='editItem("pricelevel", "$index")' mvc-attrclassx='{"text-danger": "pricelevel[$index].active"}'>
-                  <td mvc-text='pricelevel[$index].code'></td>
-                  <td mvc-text='pricelevel[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Payment Terms
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.pmtterms.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.pmtterms.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("pmtterms")'>
-                  New
-                </button>
-              </div>
+            <div class='card-body'>
+              {% include "./start-supplier-table.html" %}
             </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("pmtterms","code")'>Code</th>
-                  <th mvc-click='sortItems("pmtterms","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='pmtterms'>
-                <tr mvc-click='editItem("pmtterms", "$index")' mvc-attrclassx='{"text-danger": "pmtterms[$index].active"}'>
-                  <td mvc-text='pmtterms[$index].code'></td>
-                  <td mvc-text='pmtterms[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class='row'>
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Suppliers
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.supplier.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.supplier.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("supplier")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("supplier","code")'>Code</th>
-                  <th mvc-click='sortItems("supplier","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='supplier'>
-                <tr mvc-click='editItem("supplier", "$index")' mvc-attrclassx='{"text-danger": "supplier[$index].active"}'>
-                  <td mvc-text='supplier[$index].code'></td>
-                  <td mvc-text='supplier[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class='col-12 col-md-6 col-lg-4 mb-3'>
-        <div class='card'>
-          <div class='card-header'>
-            <div class='row'>
-              <div class='col-8'>
-                Resellers
-                <span class="badge rounded-pill bg-success" mvc-text='lengths.reseller.active'></span>
-                <span class="badge rounded-pill bg-danger" mvc-text='lengths.reseller.inactive'></span>
-              </div>
-              <div class='col-4'>
-                <button class='btn-sm btn-outline-primary float-end' mvc-click='newItem("reseller")'>
-                  New
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class='card-body'>
-            <table class='table table-sm table-hover'>
-              <thead>
-                <tr>
-                  <th mvc-click='sortItems("reseller","code")'>Code</th>
-                  <th mvc-click='sortItems("reseller","name")'>Name</th>
-                </tr>
-              </thead>
-              <tbody mvc-each='reseller'>
-                <tr mvc-click='editItem("reseller", "$index")' mvc-attrclassx='{"text-danger": "reseller[$index].active"}'>
-                  <td mvc-text='reseller[$index].code'></td>
-                  <td mvc-text='reseller[$index].name'></td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
     </div>
+
   </section>
 </page>

@@ -1,0 +1,18 @@
+<div class='table-responsive'>
+  <table class='table table-sm table-hover'>
+    <thead>
+      <tr>
+        <th mvc-click='sortItems("meals","code")'>Code</th>
+        <th mvc-click='sortItems("meals","name")'>Name</th>
+        <th mvc-click='sortItems("meals","group")'>Location</th>
+      </tr>
+    </thead>
+    <tbody mvc-each='meals'>
+      <tr mvc-click='editItem("meals", "$index")' mvc-attrclassx='{"text-danger": "meals[$index].active"}'>
+        <td mvc-text='meals[$index].code'></td>
+        <td mvc-text='meals[$index].name'></td>
+        <td mvc-text='meals[$index].meallocn'></td>
+      </tr>
+    </tbody>
+  </table>
+</div>  
