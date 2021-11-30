@@ -249,6 +249,7 @@
               <h5 class='float-start'>Categorization</h5>
             </div>
             <div class='card-body'>
+              {% set parameters = {'iid': 'update'} %}
               {% include "./contact-cat.html" %}
             </div>
           </div>
@@ -260,6 +261,7 @@
               <h5 class='float-start'>Miscellaneous</h5>
             </div>
             <div class='card-body'>
+              {% set parameters = {'iid': 'update'} %}
               {% include "./contact-misc.html" %}
             </div>
           </div>

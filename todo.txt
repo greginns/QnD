@@ -1,17 +1,14 @@
 Items
-  Show inactive as red
-  Redo badges for red/green
   Finish supplier/reseller DB/schema stuff
   Test cat/code in Suppliers, default item name  
   Save item online page when item saved or template selected.  
-  
+
 Documents
   All doc types other than letter
   Move ee routines out of App
   Separate Send from Setup in Module.
 
 Contacts
-  Segments need unique id for create/update
   Notes
   emailhistory
     make ref clickable, except for contact#s

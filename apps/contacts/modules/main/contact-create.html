@@ -92,8 +92,7 @@
               <div class='accordion-body'>
                 <div class='float-end'>
                   {{ buttons.btnsmoutline(class='primary', mvc_click='notesAdd()', text='Add') }}
-                </div>803FC6CB1D6204
-                
+                </div>
                 {% include "./contact-notes.html" %}
               </div>
             </div>
@@ -143,6 +142,7 @@
 
             <div id="contact-create-xs-cat" class="accordion-collapse collapse" data-bs-parent="#contact-create-xs">
               <div class='accordion-body'>
+                {% set parameters = {'iid': 'create'} %}
                 {% include "./contact-cat.html" %}
               </div>
             </div>
@@ -159,6 +159,7 @@
 
             <div id="contact-create-xs-misc" class="accordion-collapse collapse" data-bs-parent="#contact-create-xs">
               <div class='accordion-body'>
+                {% set parameters = {'iid': 'create'} %}
                 {% include "./contact-misc.html" %}
               </div>
             </div>

@@ -11,9 +11,9 @@
       <label class='label-color'>Gender</label>      
 
       <div class="toggle-radio" data-color='black'>
-        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='Male', value='M') }}
-        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='Female', value='F') }}
-        {{ fields.Segment(id=contact.gender.id, mvc_checked='contact.gender', name='contact-gender', label='N/A', value='U') }}
+        {{ fields.Segment(id=contact.gender.id, iid=parameters.iid, mvc_checked='contact.gender', name='contact-gender', label='Male', value='M') }}
+        {{ fields.Segment(id=contact.gender.id, iid=parameters.iid, mvc_checked='contact.gender', name='contact-gender', label='Female', value='F') }}
+        {{ fields.Segment(id=contact.gender.id, iid=parameters.iid, mvc_checked='contact.gender', name='contact-gender', label='N/A', value='U') }}
       </div>
 
       <div mvc-show='errors.contact.gender'>

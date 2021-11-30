@@ -9,9 +9,9 @@
   <div class='row'>
     <div class='col-12 mb-3'>
       {{ fields.SegmentStart(label='Category') }}
-        {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Family', value='F') }}
-        {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Non-Profit', value='G') }}
-        {{ fields.Segment(id=contact.cat.id, mvc_checked='contact.cat', name='contact-cat', label='Corp', value='C') }}
+        {{ fields.Segment(id=contact.cat.id, iid=parameters.iid, mvc_checked='contact.cat', name='contact-cat', label='Family', value='F') }}
+        {{ fields.Segment(id=contact.cat.id, iid=parameters.iid, mvc_checked='contact.cat', name='contact-cat', label='Non-Profit', value='G') }}
+        {{ fields.Segment(id=contact.cat.id, iid=parameters.iid, mvc_checked='contact.cat', name='contact-cat', label='Corp', value='C') }}
       {{ fields.SegmentEnd(mvc_value='contact.cat', mvc_helptext=contact.cat.helptext) }}
     </div>
   </div>                         

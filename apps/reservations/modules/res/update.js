@@ -7,7 +7,7 @@ import {TableView} from '/~static/lib/client/core/data.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
 import {Notes} from '/~static/lib/client/widgets/notes.js';
 
-class Rescreate extends Verror {
+class Resupdate extends Verror {
   constructor(element) {
     super(element);
   }
@@ -394,10 +394,101 @@ class Rescreate extends Verror {
   }
 }
 
+class Resitems extends Verror {
+  constructor(element) {
+    super(element);
+  }
+
+  createModel() {
+    this.model.items = [];
+    this.model.cats = [
+      {text: 'Package', value: 'P'},
+      {text: 'Transportation', value: 'T'},
+      {text: 'Retail', value: 'S'},
+      {text: 'Miscellaneous', value: 'O'},
+      {text: 'Rental', value: 'R'},
+      {text: 'Meal', value: 'M'},
+      {text: 'Lodging', value: 'L'},
+      {text: 'Activity', value: 'A'},
+    ];
+
+    this.model.codes = [];
+
+    this.model.item = {};
+
+    this.model.actgroup = [];
+    this.model.activity = [];
+  }
+
+  async ready() {
+    let self = this;
+    let filterFunc = function(x) {
+      // only show active=true
+      return x.active;
+    }
+
+    return new Promise(async function(resolve) {
+      Module.tableStores.actgroup.addView(new TableView({proxy: this.model.actgroup, filterFunc}));
+      Module.tableStores.activity.addView(new TableView({proxy: this.model.activity, filterFunc}));
+
+      resolve();
+    }.bind(this));
+  }
+  
+  async inView(params) {
+  }
+
+  outView() {
+    return true;  
+  }
+
+  catChanged() {
+    let cat = this.model.item.cat;
+    let codes = {};
+    let codeList = [];
+
+    switch(cat) {
+      case 'A':
+        for (let grp of this.model.actgroup) {
+          codes[grp.code] = {name: grp.name, items: []};
+        }
+
+        for (let item of this.model.activity) {
+          codes[item.actgroup].items.push({code: item.code, name: item.name});
+        }
+
+        break;
+    }
+
+    for (let grp in codes) {
+      if (codes[grp].items.length > 0) codeList.push({name: codes[grp].name, items: codes[grp].items});
+    }
+
+    // sort by group name
+    codeList.sort(function(a, b) {
+      return (a.name < b.name) ? -1 : (a.name > b.name) ? 1 : 0;
+    })
+
+    // sort items within group
+    for (let entry of codeList) {
+      entry.items.sort(function(a, b) {
+        return (a.name < b.name) ? -1 : (a.name > b.name) ? 1 : 0;
+      })
+    }
+
+    this.model.codes = codeList;
+  }
+};
+
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('rsvs-rsv-update');   // page html
-let setup1 = new Rescreate('rsvs-rsv-update-section');
+
+let setup1 = new Resupdate('rsvs-rsv-update-section');
 let section1 = new Section({mvc: setup1});
-let page1 = new Page({el: el1, path: ['/:rsvno'], title: 'Reservation', sections: [section1]});
+
+let setup2 = new Resitems('rsvs-rsv-items-section');
+let section2 = new Section({mvc: setup2});
+
+let page1 = new Page({el: el1, path: ['/:rsvno'], title: 'Reservation', sections: [section1, section2]});
 
 Module.pages.push(page1);

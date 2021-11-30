@@ -161,9 +161,9 @@
 <div class="toggle-radio" data-color='black'>
 {% endmacro %}
 
-{% macro Segment(id='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
-  <input type="radio" name="{{name}}" id="{{id}}-{{value}}" mvc-checked='{{mvc_checked}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}">
-  <label for="{{id}}-{{value}}">{{label}}</label>
+{% macro Segment(id='', iid='', mvc_checked='', name='', label='', value='', mvc_enabled='', mvc_disabled='') %}
+  <input type="radio" name="{{name}}" id="{{id}}-{{value}}-{{iid}}" mvc-checked='{{mvc_checked}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' value="{{value}}">
+  <label for="{{id}}-{{value}}-{{iid}}">{{label}}</label>
 {% endmacro %}
 
 {% macro SegmentEnd(mvc_value='', mvc_helptext) %} 
@@ -179,12 +179,12 @@
 {% endmacro %}
 
 
-{% macro SegmentChoices(id='', mvc_checked='', mvc_enabled='', mvc_disabled='', mvc_helptext, mvc_on='', choices=[], name='', label='') %} 
+{% macro SegmentChoices(id='', iid='', mvc_checked='', mvc_enabled='', mvc_disabled='', mvc_helptext, mvc_on='', choices=[], name='', label='') %} 
 <label class='label-color'>{{label}}</label>
 <div class="toggle-radio" data-color='black'>
   {% for choice in choices %}
-    <input type="radio" name="{{name}}" id="{{id}}-{{choice.value}}" mvc-checked='{{mvc_checked}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' mvc-on='{{mvc_on}}' value="{{choice.value}}">
-    <label for="{{id}}-{{choice.value}}">{{choice.text}}</label>
+    <input type="radio" name="{{name}}" id="{{id}}-{{choice.value}}-{{iid}}" mvc-checked='{{mvc_checked}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' mvc-on='{{mvc_on}}' value="{{choice.value}}">
+    <label for="{{id}}-{{choice.value}}-{{iid}}">{{choice.text}}</label>
   {% endfor %}
 </div>
   

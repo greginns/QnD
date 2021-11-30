@@ -1,6 +1,6 @@
 <page id='rsvs-rsv-update' style='display: none;'>
   <section id='rsvs-rsv-update-section'>
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top r4-navbar" >
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top r4-navbar">
       <div class="container-fluid">
         <div>
         </div>
@@ -238,7 +238,7 @@
       </div>
     </div>
 
-    <div class='row'>
+    <div class='row mb-4'>
       <div class='col-12'>
         <button class='btn btn-primary' mvc-click='send()'>
           Email
@@ -559,6 +559,37 @@
           </div>
 
         </div>
+      </div>
+    </div>
+
+  </section>
+
+  <section id='rsvs-rsv-items-section'>
+    <div class='row'>
+      <div class='col'>
+        {{ fields.Date(id='item-date', mvc_value='item.date', label='Date') }}
+      </div>            
+      <div class='col'>
+        {{ fields.SelectMVC(id='item-cat', size='1', mvc_value='item.cat', mvc_each='cats', label='Category', mvc_on='{"change": "catChanged()"}') }}         
+      </div>
+      <div class='col'>
+        <div class="form-label-group">
+          <select xid="item-code" size='1' mvc-value="item.code" mvc-each='codes' mvc-nonetext='' mvc-nonevalue='' class="form-select">
+            <optgroup mvc-optgroup='codes[$index].name' mvc-each='codes[$index].items' mvc-index='$index1'>
+              <option mvc-option='{"text": "codes[$index].items[$index1].name", "value": "codes[$index].items[$index1].code"}'></option>
+            </optgroup>
+          </select>
+          <label class='split-bg'>Item</label>
+        </div>
+      </div>
+      <div class='col'>
+        {{ fields.Char(id='item-total', mvc_value='item.total', label='Guests') }}
+      </div>      
+      <div class='col'>
+        {{ fields.Char(id='item-time', mvc_value='item.time', label='Time') }}
+      </div>   
+      <div class='col'>
+        {{ fields.SelectMVC(id='item-rate', size='1', mvc_value='item.rate', mvc_each='rates', label='Rate') }}                  
       </div>
     </div>
 

@@ -13,14 +13,20 @@ let moduleStart = function() {
   let connectToData = async function() {
     // setup data table access
     // gets us access to raw data.
+    Module.data.main = new TableAccess({modelName: 'main', url: `/reservations/v1/main`});
+
+    Module.data.activity = new TableAccess({modelName: 'activity', url: `/items/v1/activity`});    
+    Module.data.actgroup = new TableAccess({modelName: 'actgroup', url: `/items/v1/actgroup`});    
+
     Module.data.area = new TableAccess({modelName: 'area', url: `/items/v1/area`});    
     Module.data.pmtterms = new TableAccess({modelName: 'pmtterms', url: `/items/v1/pmtterms`});    
+
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});    
     Module.data.company = new TableAccess({modelName: 'company', url: `/contacts/v1/company`});    
     Module.data.currency = new TableAccess({modelName: 'currency', url: `/contacts/v1/currency`});  
     Module.data.config = new TableAccess({modelName: 'config', url: `/contacts/v1/config`});  
     Module.data.emailhist = new TableAccess({modelName: 'emailhist', url: `/contacts/v1/emailhist`});
-    Module.data.main = new TableAccess({modelName: 'main', url: `/reservations/v1/main`});
+    
     Module.data.docsetup = new TableAccess({modelName: 'docsetup', url: `/documents/v1/docsetup`});
     Module.data.document = new TableAccess({modelName: 'document', url: `/documents/v1/document`});
     Module.data.docletter = new TableAccess({modelName: 'docletter', url: `/documents/v1/docletter`});
@@ -50,6 +56,22 @@ let moduleStart = function() {
 
     Module.tableStores.area = new TableStore({accessor: Module.data.area, model, safemode});  // setup a table store in Module so all pages can access    
     dataPromises.push(Module.tableStores.area.getAll());
+
+    // Activity
+    model = `/items/activity`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.activity = new TableStore({accessor: Module.data.activity, model, safemode});  // setup a table store in Module so all pages can access    
+    dataPromises.push(Module.tableStores.activity.getAll());
+
+    // Actgroup
+    model = `/items/actgroup`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.actgroup = new TableStore({accessor: Module.data.actgroup, model, safemode});  // setup a table store in Module so all pages can access    
+    dataPromises.push(Module.tableStores.actgroup.getAll());
 
     // Pmt terms
     model = `/items/pmtterms`;

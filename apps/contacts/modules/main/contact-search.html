@@ -54,13 +54,15 @@
               <div class='col-12 col-lg-6 col-xl-4 mb-3'>
                 {% include "./contact-emergency.html" %}
               </div>  
-
-              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
-                {% include "./contact-misc.html" %}
-              </div>  
               
               <div class='col-12 col-lg-6 col-xl-4 mb-3'>
+                {% set parameters = {'iid': 'search'} %}
                 {% include "./contact-cat.html" %}
+              </div>  
+
+              <div class='col-12 col-lg-6 col-xl-4 mb-3'>
+                {% set parameters = {'iid': 'search'} %}
+                {% include "./contact-misc.html" %}
               </div>  
               
               <div class='col-12 col-lg-6 col-xl-4 mb-3'>
