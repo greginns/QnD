@@ -97,7 +97,7 @@ class Mealminppl extends Setup {
     // update the one being edited
     minppl[mealminppl.dayno] = {minppl: mealminppl.minppl};
 
-    minppl = JSON.stringify(minppl);
+    //minppl = JSON.stringify(minppl);
 
     let data = {meal: this.meals.code, rateno: this.rateno, year: this.model.year, month: this.model.month, minppl};
 
@@ -220,7 +220,7 @@ class Mealminppl extends Setup {
         this.updateRangeMinppl(minppl, yy, mm, dds);
       }
 
-      minppl = JSON.stringify(minppl);
+      //minppl = JSON.stringify(minppl);
   
       let data = {meal: act, rateno, year: yy, month: mm, minppl};
   

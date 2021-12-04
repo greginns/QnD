@@ -46,12 +46,13 @@ class Lodgsched extends Setup {
     this.model.range = {
       fromdate: '2021-10-01',
       todate: '2021-10-31',
-      units: '',
+      units: [],
       limit: 0,
       dowall: true,
       dow: [true, true, true, true, true, true, true]
     };
 
+    this.model.drop = {units: ''};
     this.model.unitlist = [];
     this.model.errors = {range: {}};
 
@@ -129,7 +130,7 @@ class Lodgsched extends Setup {
     // update the one being edited
     sched[lodgsched.dayno][unit] = {limit: lodgsched.limit};    
 
-    sched = JSON.stringify(sched);
+    //sched = JSON.stringify(sched);
 
     let data = {lodging: this.model.lodging.code, year: this.model.year, month: this.model.month, sched};
 
@@ -263,7 +264,7 @@ class Lodgsched extends Setup {
         this.updateRangeSched(sched, yy, mm, dds, units, qty);
       }
 
-      sched = JSON.stringify(sched);
+      //sched = JSON.stringify(sched);
   
       let data = {lodging: lodge, year: yy, month: mm, sched};
   
@@ -316,6 +317,21 @@ class Lodgsched extends Setup {
     for(let i=0; i<7; i++) {
       this.model.range.dow[i] = dowall;
     }
+  }
+
+  dropdownUnits() {
+    let text = [];
+    let units = [];
+
+    for (let unit of this.model.unitlist) {
+      if (unit.checked) {
+        text.push(unit.text);
+        units.push(unit.value);
+      }
+    }
+
+    this.model.drop.units = text.join(', ');
+    this.model.range.units = units;
   }
 
   test(ev) {

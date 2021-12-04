@@ -61,7 +61,7 @@
               <div class='card-body'>
                 <div class='row'>
                   <div class='col-6 col-md-4 mb-3' mvc-show='lodging.unitized'>
-                    {{ fields.SelectMulti(id='range-units', mvc_value='range.units', mvc_each='unitlist', label='Units', placeholder='Select Unit(s)') }}
+                    {{ fields.Dropdown(id='drop-units', handler='dropdownUnits', template_id='lodge-sched-range-units', mvc_value='drop.units', label='Units', placeholder='Select Unit(s)') }}
                   </div>
 
                   <div class='col-6 col-md-2 mb-3' mvc-show='!lodging.unitized || lodging.bookbeds'>
@@ -189,6 +189,16 @@
       </div>
     </div>
   
-
   </section>
 </page>
+
+<template id='lodge-sched-range-units'>
+  <div mvc-each='unitlist'>
+    <div class='list-hovered ms-2 me-2 px-2'>
+      <label>
+        <input type='checkbox' mvc-checked='unitlist[$index].checked' />
+        <span mvc-text='unitlist[$index].text'></span>
+      </label>
+    </div>
+  </div>
+</template>

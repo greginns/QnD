@@ -127,7 +127,7 @@ class Actsched extends Setup {
     // update the one being edited
     sched[actsched.dayno][Datetime.timeRound(actsched.time)] = {limit: actsched.limit, boo: actsched.boo, bow: actsched.bow};
 
-    sched = JSON.stringify(sched);
+    //sched = JSON.stringify(sched);
 
     let data = {activity: this.activity.code, year: this.model.year, month: this.model.month, sched};
 
@@ -257,7 +257,7 @@ class Actsched extends Setup {
         this.updateRangeSched(sched, yy, mm, dds);
       }
 
-      sched = JSON.stringify(sched);
+      //sched = JSON.stringify(sched);
   
       let data = {activity: act, year: yy, month: mm, sched};
   

@@ -4,7 +4,7 @@ const Fields = require(root + '/lib/server/model/modelFields');
 const Model = require(root + '/lib/server/model/modelRun.js');
 const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {Contact, Company, Currency} = require(root + '/apps/contacts/models.js');
-const {Activity, Lodging, Lodgunit, Meals, Area, Pmtterms, Tax, Glcode, Reseller, Supplier, PRIVILEGES} = require(root + '/apps/items/models.js');
+const {Activity, Actrates, Lodging, Lodgrates, Lodgunit, Meals, Mealrates, Area, Pmtterms, Tax, Glcode, Reseller, Supplier, PRIVILEGES} = require(root + '/apps/items/models.js');
 
 const app = getAppName(__dirname);
 
@@ -259,31 +259,6 @@ const Daily = class extends Model {
   }
 };
 
-const Booked = class extends Model {
-  constructor(obj, opts) {
-    super(obj, opts);
-  }
-  
-  static parent() {
-    return {
-      schema: {
-        year: new Fields.Integer({notNull: true, maxLength: 4, verbose: 'Year'}),
-        month: new Fields.Integer({notNull: true, maxLength: 2, verbose: 'Month'}),
-        booked: new Fields.Jsonb({null: true, verbose: 'Bookings'}) 
-      },
-      
-      constraints: {
-        fk: [],
-      },
-      
-      hidden: [],
-      
-      dbschema: '',
-      app,
-      desc: 'Bookings'
-    }
-  }
-};
 
 // MAIN //
 const Main = class extends Model {
@@ -640,6 +615,7 @@ const Actinclude = class extends Include {
       constraints: {
         fk: [
           {name: 'activity', columns: ['activity'], app, table: Activity, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'actrates', columns: ['activity', 'rateno'], app, table: Actrates, tableColumns: ['activity', 'rateno'], onDelete: 'NO ACTION'},
         ]
       },
 
@@ -746,42 +722,6 @@ const Actdaily = class extends Daily {
   }
 }
 
-const Actbooked = class extends Booked {
-  // booked:
-  //    31x [{time: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, }, ] 
-  //    one {} for all times in a day, one {} for each rsv daily
-  //
-  constructor(obj, opts) {
-    super(obj, opts);
-  }
-
-  static child() {
-    return {
-      schema: {
-        activity: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Activity'}),
-      },
-      
-      constraints: {
-        pk: ['activity', 'year', 'month'],
-        fk: [
-          {name: 'activity', columns: ['activity'], app, table: Activity, tableColumns: ['code'], onDelete: 'NO ACTION'},
-        ],
-      },
-      
-      hidden: [],
-      
-      orderBy: ['activity', 'year', 'month'],
-      
-      dbschema: '',
-      app,
-      desc: 'Activity Bookings'
-    }
-  }
-    
-  static definition() {
-    return this.mergeSchemas(this.parent(), this.child());
-  }
-};
   
 // LODGING //
 const Lodginclude = class extends Include {
@@ -798,6 +738,7 @@ const Lodginclude = class extends Include {
       constraints: {
         fk: [
           {name: 'lodging', columns: ['lodging'], app, table: Lodging, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'lodgrates', columns: ['lodging', 'rateno'], app, table: Lodgrates, tableColumns: ['lodging', 'rateno'], onDelete: 'NO ACTION'},
         ]
       },
 
@@ -922,44 +863,6 @@ const Lodgdaily = class extends Daily {
   }
 }
 
-const Lodgbooked = class extends Booked {
-  // booked:
-  //    31x [{unitseq: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, seq3: xx}, ]}}, ] 
-  //    one {} for all units, one {} for each rsv daily
-  //    mostly have only one daily entry, except for non-unitized and book beds, where more than one item can be in the same unit.
-  //
-  constructor(obj, opts) {
-    super(obj, opts);
-  }
-
-  static child() {
-    return {
-      schema: {
-        lodging: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Lodging'}),
-      },
-      
-      constraints: {
-        pk: ['lodging', 'year', 'month'],
-        fk: [
-          {name: 'lodging', columns: ['lodging'], app, table: Lodging, tableColumns: ['code'], onDelete: 'NO ACTION'},
-        ],
-      },
-      
-      hidden: [],
-      
-      orderBy: ['lodging', 'year', 'month'],
-      
-      dbschema: '',
-      app,
-      desc: 'Lodging Bookings'
-    }
-  }
-    
-  static definition() {
-    return this.mergeSchemas(this.parent(), this.child());
-  }
-};
-
 // MEALS //
 const Mealinclude = class extends Include {
   constructor(obj, opts) {
@@ -975,6 +878,7 @@ const Mealinclude = class extends Include {
       constraints: {
         fk: [
           {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
+          {name: 'mealrates', columns: ['meal', 'rateno'], app, table: Mealrates, tableColumns: ['meal', 'rateno'], onDelete: 'NO ACTION'},
         ]
       },
 
@@ -1081,42 +985,6 @@ const Mealdaily = class extends Daily {
   }
 }
 
-const Mealbooked = class extends Booked {
-  // booked:
-  //    31x [{time: xx, booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, ] 
-  //    one {} for each time, one {} for each rsv daily
-  //
-  constructor(obj, opts) {
-    super(obj, opts);
-  }
-
-  static child() {
-    return {
-      schema: {
-        meal: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Meal'}),
-      },
-      
-      constraints: {
-        pk: ['meal', 'year', 'month'],
-        fk: [
-          {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
-        ],
-      },
-      
-      hidden: [],
-      
-      orderBy: ['meal', 'year', 'month'],
-      
-      dbschema: '',
-      app,
-      desc: 'Meal Bookings'
-    }
-  }
-    
-  static definition() {
-    return this.mergeSchemas(this.parent(), this.child());
-  }
-};
 
 // GENERAL //
 const Cancreas = class extends Model {
@@ -1214,8 +1082,8 @@ const Sequence = class extends Model {
 module.exports = {
   Main, Maintaxes, Maingls,
   Item, Itemtaxes, Itemgls,
-  Actinclude, Actdaily, Actbooked, Acttaxes, Actgls,
-  Lodginclude, Lodgdaily, Lodgbooked, Lodgtaxes, Lodggls,
-  Mealinclude, Mealdaily, Mealbooked, Mealtaxes, Mealgls,
+  Actinclude, Actdaily, Acttaxes, Actgls,
+  Lodginclude, Lodgdaily, Lodgtaxes, Lodggls,
+  Mealinclude, Mealdaily, Mealtaxes, Mealgls,
   Cancreas, Discount, Sequence
 };

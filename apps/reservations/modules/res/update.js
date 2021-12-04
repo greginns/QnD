@@ -414,10 +414,12 @@ class Resitems extends Verror {
 
     this.model.codes = [];
 
-    this.model.item = {};
+    this.model.item = {cat: "A"};
 
-    this.model.actgroup = [];
+    this.model.actgroups = [];
     this.model.activity = [];
+    this.model.activities = [];
+    this.model.drop = {infants: 0, children: 0, youth: 0, adults: 0, seniors: 0};
   }
 
   async ready() {
@@ -428,7 +430,7 @@ class Resitems extends Verror {
     }
 
     return new Promise(async function(resolve) {
-      Module.tableStores.actgroup.addView(new TableView({proxy: this.model.actgroup, filterFunc}));
+      Module.tableStores.actgroup.addView(new TableView({proxy: this.model.actgroups, filterFunc}));
       Module.tableStores.activity.addView(new TableView({proxy: this.model.activity, filterFunc}));
 
       resolve();
@@ -442,41 +444,43 @@ class Resitems extends Verror {
     return true;  
   }
 
-  catChanged() {
-    let cat = this.model.item.cat;
-    let codes = {};
+  droptest() {
+    let text = [];
+
+    for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
+      if (this.model.drop[g] > 0) {
+        text.push(this.model.drop[g] + '/' + g.substr(0,1).toUpperCase());
+      }
+    }
+
+    this.model.drop.ppl = text.join(' ');
+  }
+
+  dropcode() {
+    let code = this.model.item.code;
+    let text = '';
+
+    for (let act of this.model.activity) {
+      if (act.code == code) {
+        text = act.name;
+        break;
+      }
+    }
+
+    this.model.drop.code = text;
+  }
+
+  groupChanged() {
+    let group = this.model.item.group;
     let codeList = [];
 
-    switch(cat) {
-      case 'A':
-        for (let grp of this.model.actgroup) {
-          codes[grp.code] = {name: grp.name, items: []};
-        }
-
-        for (let item of this.model.activity) {
-          codes[item.actgroup].items.push({code: item.code, name: item.name});
-        }
-
-        break;
+    for (let act of this.model.activity) {
+      if (act.actgroup == group) {
+        codeList.push(act);
+      }
     }
 
-    for (let grp in codes) {
-      if (codes[grp].items.length > 0) codeList.push({name: codes[grp].name, items: codes[grp].items});
-    }
-
-    // sort by group name
-    codeList.sort(function(a, b) {
-      return (a.name < b.name) ? -1 : (a.name > b.name) ? 1 : 0;
-    })
-
-    // sort items within group
-    for (let entry of codeList) {
-      entry.items.sort(function(a, b) {
-        return (a.name < b.name) ? -1 : (a.name > b.name) ? 1 : 0;
-      })
-    }
-
-    this.model.codes = codeList;
+    this.model.activities = codeList;
   }
 };
 

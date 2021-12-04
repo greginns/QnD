@@ -109,7 +109,7 @@ class Mealsched extends Setup {
     // update the one being edited
     sched[mealsched.dayno][Datetime.timeRound(mealsched.time)] = {limit: mealsched.limit};
 
-    sched = JSON.stringify(sched);
+    //sched = JSON.stringify(sched);
 
     let data = {meal: this.meals.code, year: this.model.year, month: this.model.month, sched};
 
@@ -240,7 +240,7 @@ class Mealsched extends Setup {
         this.updateRangeSched(sched, yy, mm, dds);
       }
 
-      sched = JSON.stringify(sched);
+      //sched = JSON.stringify(sched);
   
       let data = {meal: act, year: yy, month: mm, sched};
   

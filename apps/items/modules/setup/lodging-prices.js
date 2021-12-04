@@ -127,7 +127,7 @@ class Lodgprices extends Setup {
       data.prices.push([nullify(entry.price0), nullify(entry.price1), nullify(entry.price2), nullify(entry.price3), nullify(entry.price4), nullify(entry.price5), nullify(entry.price6)]);
     }
 
-    data.prices = JSON.stringify(data.prices);
+    //data.prices = JSON.stringify(data.prices);
     
     //let spinner = this.startSpinner(ev);
 
@@ -246,7 +246,7 @@ class Lodgprices extends Setup {
         this.updateRangePrices(prices, yy, mm, dds);
       }
 
-      prices = JSON.stringify(prices);
+      //prices = JSON.stringify(prices);
 
       let data = {lodging: act, rateno: rateno, year: yy, month: mm};
   

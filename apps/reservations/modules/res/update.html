@@ -566,32 +566,141 @@
 
   <section id='rsvs-rsv-items-section'>
     <div class='row'>
-      <div class='col'>
-        {{ fields.Date(id='item-date', mvc_value='item.date', label='Date') }}
-      </div>            
-      <div class='col'>
-        {{ fields.SelectMVC(id='item-cat', size='1', mvc_value='item.cat', mvc_each='cats', label='Category', mvc_on='{"change": "catChanged()"}') }}         
+      <div class='col-4 col-md-2 col-lg-1 mb-3 text-center'>
+        <button class='btn btn-sm act-color' mvc-click='book("A")'>
+          Activity
+        </button>
       </div>
-      <div class='col'>
-        <div class="form-label-group">
-          <select xid="item-code" size='1' mvc-value="item.code" mvc-each='codes' mvc-nonetext='' mvc-nonevalue='' class="form-select">
-            <optgroup mvc-optgroup='codes[$index].name' mvc-each='codes[$index].items' mvc-index='$index1'>
-              <option mvc-option='{"text": "codes[$index].items[$index1].name", "value": "codes[$index].items[$index1].code"}'></option>
-            </optgroup>
-          </select>
-          <label class='split-bg'>Item</label>
-        </div>
+
+      <div class='col-4 col-md-2 col-lg-1 mb-3 text-center'>
+        <button class='btn btn-sm lodge-color' mvc-click='book("L")'>
+          Lodging
+        </button>
       </div>
-      <div class='col'>
-        {{ fields.Char(id='item-total', mvc_value='item.total', label='Guests') }}
-      </div>      
-      <div class='col'>
-        {{ fields.Char(id='item-time', mvc_value='item.time', label='Time') }}
-      </div>   
-      <div class='col'>
-        {{ fields.SelectMVC(id='item-rate', size='1', mvc_value='item.rate', mvc_each='rates', label='Rate') }}                  
+
+      <div class='col-4 col-md-2 col-lg-1 mb-3 text-center'>
+        <button class='btn btn-sm rent-color' mvc-click='book("R")'>
+          Rental
+        </button>
       </div>
+      
+      <div class='col-4 col-md-2 col-lg-1 mb-3 text-center'>
+        <button class='btn btn-sm meal-color' mvc-click='book("M")'>
+          Meal
+        </button>
+      </div>
+
+      <div class='col-4 col-md-2 col-lg-1 mb-3 text-center'>
+        <button class='btn btn-sm trans-color' mvc-click='book("T")'>
+          Transport
+        </button>
+      </div>
+
+      <div class='col-4 col-md-2 col-lg-1 mb-3 text-center'>
+        <button class='btn btn-sm store-color' mvc-click='book("S")'>
+          Retail
+        </button>
+      </div>
+
+      <div class='col-4 col-md-2 col-lg-1 mb-3 text-center'>
+        <button class='btn btn-sm other-color' mvc-click='book("O")'>
+          Misc
+        </button>
+      </div>
+
+      <div class='col-4 col-md-2 col-lg-1 mb-3 text-center'>
+        <button class='btn btn-sm package-color' mvc-click='book("P")'>
+          Package
+        </button>
+      </div>
+    </div>  
+
+    <div class='row act-color'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Date(id='item-date', mvc_value='item.date', label='') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropup(id='drop-code', mvc_value='drop.code', handler='dropcode', template_id='rsv-update-dropdown-code', dd_class='dropdown-code', label='') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropup(id='drop-guest', mvc_value='drop.ppl', handler='droptest', template_id='rsv-update-dropdown-guests', dd_class='dropdown-guests', label='') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Char(id='item-time', mvc_value='item.time', label='') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.SelectMVC(id='item-rate', size='1', mvc_value='item.rate', mvc_each='rates', label='') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        Tools
+      </div>
+
     </div>
 
   </section>
 </page>
+
+<template id='rsv-update-dropdown-guests'>
+  <div class='container'>
+    <div class='row mb-3'>
+      <div class='col'>
+        {{ fields.Integer(id='drop-infants', mvc_value='drop.infants', min='0', max='9999', step='1', label='Infants') }}
+      </div>
+    </div>
+
+    <div class='row mb-3'>
+      <div class='col'>
+        {{ fields.Integer(id='drop-children', mvc_value='drop.children', min='0', max='9999', step='1', label='Children') }}
+      </div>
+    </div>
+
+    <div class='row mb-3'>
+      <div class='col'>
+        {{ fields.Integer(id='drop-youth', mvc_value='drop.youth', min='0', max='9999', step='1', label='Youth') }}
+      </div>
+    </div>
+
+    <div class='row mb-3'>
+      <div class='col'>
+        {{ fields.Integer(id='drop-adults', mvc_value='drop.adults', min='0', max='9999', step='1', label='Adults') }}
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col'>
+        {{ fields.Integer(id='drop-seniors', mvc_value='drop.seniors', min='0', max='9999', step='1', label='Seniors') }}
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col'>
+        <div class='float-end pointer dismiss' style='font-size: 30px'>&times;</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id='rsv-update-dropdown-code'>
+  <div class='container'>
+    <div class='row mb-3'>
+      <div class='col-6'>
+        {{ fields.SelectMVC(id='item-group', size='10', mvc_value='item.group', mvc_each='actgroups', mvc_on='{"change": "groupChanged()"}', valueField='code', textField='name', label='') }}
+      </div>
+      <div class='col-6'>
+        {{ fields.SelectMVC(id='item-code', size='10', mvc_value='item.code', mvc_each='activities', valueField='code', textField='name', label='') }}
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col'>
+        <div class='float-end pointer dismiss' style='font-size: 30px'>&times;</div>
+      </div>
+    </div>
+    
+  </div>
+</template>

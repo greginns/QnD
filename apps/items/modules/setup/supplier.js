@@ -82,7 +82,7 @@ class Supplier extends Setup {
 
     this.clearErrors();
     
-    data.items = JSON.stringify(data.items);
+    //data.items = JSON.stringify(data.items);
 
     if (this.model.existingEntry) {
       diffs = this.checkDiff(this.origData, data);

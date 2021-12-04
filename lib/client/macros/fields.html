@@ -307,6 +307,7 @@
 
 
 {% macro SelectMulti(id='', maxlength='', mvc_value='', mvc_each='', mvc_filter='checked2text', label='', placeholder='') %}
+<!-- USE DROPDOWN INSTEAD -->
 <div mvc-multiselect>
   <div class='form-label-group'>
     <div class='input-group'>
@@ -333,6 +334,42 @@
       </div>
     </div>
   </div>
+</div>               
+{% endmacro %}
+
+
+{% macro Dropdown(id='', maxlength='', mvc_value='', mvc_filter='', handler='', template_id='', label='', placeholder='', dd_class='') %}
+<div mvc-dropdown='{{handler}}' data-template='{{template_id}}' class='dropdown'>
+  <div class='form-label-group'>
+    <input class='form-control' mvc-value='{{mvc_value}}' mvc-filter='{{mvc_filter}}' placeholder='{{placeholder}}' style='text-overflow:ellipsis' data-bs-toggle="dropdown" data-bs-auto-close="false">
+    <div class='dropdown-menu {{dd_class}}' tabindex=-'1'>
+      <!-- template ends up here -->
+    </div>    
+    <label class='split-bg'>{{label}}</label>
+  </div>
+  
+  <div mvc-show='errors.{{mvc_value}}'>
+    <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
+  </div>
+
+</div>               
+{% endmacro %}
+
+
+{% macro Dropup(id='', maxlength='', mvc_value='', mvc_filter='', handler='', template_id='', label='', placeholder='', dd_class='') %}
+<div mvc-dropper='{{handler}}' data-template='{{template_id}}' class='R4dropper R4dropup'>
+  <div class='form-label-group'>
+    <input class='form-control' mvc-value='{{mvc_value}}' mvc-filter='{{mvc_filter}}' placeholder='{{placeholder}}' style='text-overflow:ellipsis' data-toggle="dropup">
+    <div class='R4dropper-content {{dd_class}}' tabindex=-'1'>
+      <!-- template ends up here -->
+    </div>    
+    <label class='split-bg'>{{label}}</label>
+  </div>
+  
+  <div mvc-show='errors.{{mvc_value}}'>
+    <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
+  </div>
+
 </div>               
 {% endmacro %}
 

@@ -58,7 +58,8 @@ class notecats extends Verror {
 
   // IO
   async save(ev) {
-    let data = JSON.stringify(this.model.notecats.split('\n'));
+    //let data = JSON.stringify(this.model.notecats.split('\n'));
+    let data = this.model.notecats.split('\n');
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
     utils.modals.overlay(true);
