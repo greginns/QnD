@@ -479,7 +479,7 @@
           <div class='modal-body'>
             <div class='row mb-3'>
               <div class='table-responsive'>
-                <table class='table table-sm' style='min-width: 600px'>
+                <table class='table table-sm' style='min-width: 450px'>
                   <thead>
                     <tr>
                       <th></th>
@@ -615,17 +615,35 @@
       </div>
     </div>  
 
+    <div class='row'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        Date
+      </div>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        Guests
+      </div>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        Item
+      </div>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        Time
+      </div>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        Pricing
+      </div>
+    </div>
+
     <div class='row act-color'>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        {{ fields.Date(id='item-date', mvc_value='item.date', label='') }}
+        {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='') }}
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        {{ fields.Dropup(id='drop-code', mvc_value='drop.code', handler='dropcode', template_id='rsv-update-dropdown-code', dd_class='dropdown-code', label='') }}
+        {{ fields.Dropper(id='drop-guest', mvc_value='drop.ppl', handler='dropppl', template_id='rsv-update-dropdown-guests', dir_class='dropup', dd_class='dropper-guests', label='') }}
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        {{ fields.Dropup(id='drop-guest', mvc_value='drop.ppl', handler='droptest', template_id='rsv-update-dropdown-guests', dd_class='dropdown-guests', label='') }}
+        {{ fields.Dropper(id='drop-code', mvc_value='drop.code', handler='dropcode', template_id='rsv-update-dropdown-code', dir_class='dropup', dd_class='dropper-code', label='') }}
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
@@ -677,30 +695,56 @@
       </div>
     </div>
 
+ 
     <div class='row'>
       <div class='col'>
-        <div class='float-end pointer dismiss' style='font-size: 30px'>&times;</div>
+        <div class='float-end'>
+          <span class='pointer accept text-success' style='font-size: 30px'>
+            <i class="fa-light fa-check"></i>
+          </span>
+
+          <span class='pointer dismiss text-danger' style='font-size: 30px'>
+            <i class="fa-light fa-xmark"></i>
+          </span>
+        </div>
       </div>
     </div>
+
   </div>
 </template>
 
 <template id='rsv-update-dropdown-code'>
   <div class='container'>
     <div class='row mb-3'>
-      <div class='col-6'>
+      <div class='col-12 col-md-6'>
         {{ fields.SelectMVC(id='item-group', size='10', mvc_value='item.group', mvc_each='actgroups', mvc_on='{"change": "groupChanged()"}', valueField='code', textField='name', label='') }}
       </div>
-      <div class='col-6'>
+      <div class='col-12 col-md-6'>
         {{ fields.SelectMVC(id='item-code', size='10', mvc_value='item.code', mvc_each='activities', valueField='code', textField='name', label='') }}
       </div>
     </div>
 
     <div class='row'>
       <div class='col'>
-        <div class='float-end pointer dismiss' style='font-size: 30px'>&times;</div>
+        <div class='float-end'>
+          <span class='pointer accept text-success' style='font-size: 30px'>
+            <i class="fa-light fa-check"></i>
+          </span>
+
+          <span class='pointer dismiss text-danger' style='font-size: 30px'>
+            <i class="fa-light fa-xmark"></i>
+          </span>
+        </div>
       </div>
     </div>
     
+  </div>
+</template>
+
+<template id='rsv-update-dropdown-date'>
+  <div style='padding-left: 0px;'>
+    <div class='bg-primary text-white' style='padding: 5px; border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0;'>
+      <h4>Heading</h4>
+    </div>    
   </div>
 </template>

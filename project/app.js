@@ -2,12 +2,12 @@
 import {MVC} from '/~static/lib/client/core/mvc.js';
 import addBindings from '/~static/lib/client/core/mvc-bindings.js';
 import addDtBindings from '/~static/lib/client/core/mvc-datetime.js';
-import addDropdown from '/~static/lib/client/core/mvc-dropdown.js';
+import addDropper from '/~static/lib/client/core/mvc-dropper.js';
 //import addDB4Functions from '/~static/lib/client/core/mvc-db4.js';
 
 addBindings(MVC);
 addDtBindings(MVC);
-addDropdown(MVC);
+addDropper(MVC);
 //addDB4Functions(MVC);
 
 const App = {};

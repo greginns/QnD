@@ -3,11 +3,14 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
 import {Pages} from '/~static/lib/client/core/paging.js';
 import {Modal} from '/~static/lib/client/widgets/modal.js';
+import {MDateModal} from '/~static/lib/client/widgets/mdate.js';
+
 
 // js for pages
 import '/~static/apps/reservations/modules/res/create.js';
 import '/~static/apps/reservations/modules/res/update.js';
 import '/~static/apps/documents/modules/send/docsend.js';
+import '/~static/lib/client/widgets/mdate.js';
 
 let moduleStart = function() {
   let connectToData = async function() {
@@ -184,4 +187,6 @@ let moduleStart = function() {
 window.name = 'R4_main'
 
 Module.modal = new Modal();
+Module.widgets.MDateModal = new MDateModal(document.getElementById('widget-mdate-modal'));
+
 moduleStart();

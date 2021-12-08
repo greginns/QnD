@@ -423,12 +423,23 @@ class Resitems extends Verror {
   }
 
   async ready() {
-    let self = this;
     let filterFunc = function(x) {
       // only show active=true
       return x.active;
     }
+/*
+    document.addEventListener('dropper-init', function(ev) {
+      console.log('init', ev.detail)
+    })
 
+    document.addEventListener('dropper-open', function(ev) {
+      console.log('open', ev.detail)
+    })
+
+    document.addEventListener('dropper-close', function(ev) {
+      console.log('close', ev.detail)
+    })
+*/
     return new Promise(async function(resolve) {
       Module.tableStores.actgroup.addView(new TableView({proxy: this.model.actgroups, filterFunc}));
       Module.tableStores.activity.addView(new TableView({proxy: this.model.activity, filterFunc}));
@@ -444,30 +455,39 @@ class Resitems extends Verror {
     return true;  
   }
 
-  droptest() {
-    let text = [];
+  dropppl(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      let text = [];
 
-    for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
-      if (this.model.drop[g] > 0) {
-        text.push(this.model.drop[g] + '/' + g.substr(0,1).toUpperCase());
+      for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
+        if (this.model.drop[g] > 0) {
+          text.push(this.model.drop[g] + '/' + g.substr(0,1).toUpperCase());
+        }
       }
-    }
 
-    this.model.drop.ppl = text.join(' ');
+      this.model.drop.ppl = text.join(' ');
+    }
   }
 
-  dropcode() {
-    let code = this.model.item.code;
-    let text = '';
+  dropcode(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      let code = this.model.item.code;
+      let text = '';
 
-    for (let act of this.model.activity) {
-      if (act.code == code) {
-        text = act.name;
-        break;
+      for (let act of this.model.activity) {
+        if (act.code == code) {
+          text = act.name;
+          break;
+        }
       }
-    }
 
-    this.model.drop.code = text;
+      this.model.drop.code = text;
+    }
+/*
+    setTimeout(function() {
+      this.$focus('item.date');
+    }.bind(this), 1000)
+*/    
   }
 
   groupChanged() {

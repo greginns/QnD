@@ -1,0 +1,209 @@
+<span mvc-show='cal.cal1'>
+  <table class='table table-sm widget-mdate-table'>
+    <thead>
+      <tr>
+        <th>
+          <button class='btn btn-primary' mvc-on='{click: "cal1PrevYear()"}'>
+            &lt;
+          </button>
+        </th>
+        <th colspan='5' style='text-align: center'>
+          <button class='btn btn-primary' mvc-on='{click: "cal1Month()"}'>
+            <span mvc-text='cal1.month'></span>
+          </button>
+          <button class='btn btn-primary' mvc-on='{click: "cal1Year()"}'>
+            <span mvc-text='cal1.year'></span>
+          </button>
+        </th>
+        <th style='text-align: right'>
+          <button class='btn btn-primary' mvc-on='{click: "cal1NextYear()"}'>
+            &gt;
+          </button>
+        </th>
+      </tr>
+
+      <tr>
+        <th width='14.28%'>Su</th>
+        <th width='14.28%'>Mo</th>
+        <th width='14.28%'>Tu</th>
+        <th width='14.32%'>We</th>
+        <th width='14.28%'>Th</th>
+        <th width='14.28%'>Fr</th>
+        <th width='14.28%'>Sa</th>
+      </tr>
+    </thead>
+
+    <tbody mvc-on='{click: "cal1DayClicked()"}' style='cursor: pointer'>
+      <tr>
+        <td mvc-attr='{"data-year": "cal1.attrs[0].year", "data-month": "cal1.attrs[0].month", "data-day": "cal1.attrs[0].day"}'><span mvc-text='cal1.days[0]' mvc-class='cal1.classes[0]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[1].year", "data-month": "cal1.attrs[1].month", "data-day": "cal1.attrs[1].day"}'><span mvc-text='cal1.days[1]' mvc-class='cal1.classes[1]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[2].year", "data-month": "cal1.attrs[2].month", "data-day": "cal1.attrs[2].day"}'><span mvc-text='cal1.days[2]' mvc-class='cal1.classes[2]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[3].year", "data-month": "cal1.attrs[3].month", "data-day": "cal1.attrs[3].day"}'><span mvc-text='cal1.days[3]' mvc-class='cal1.classes[3]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[4].year", "data-month": "cal1.attrs[4].month", "data-day": "cal1.attrs[4].day"}'><span mvc-text='cal1.days[4]' mvc-class='cal1.classes[4]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[5].year", "data-month": "cal1.attrs[5].month", "data-day": "cal1.attrs[5].day"}'><span mvc-text='cal1.days[5]' mvc-class='cal1.classes[5]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[6].year", "data-month": "cal1.attrs[6].month", "data-day": "cal1.attrs[6].day"}'><span mvc-text='cal1.days[6]' mvc-class='cal1.classes[6]'></span></td>
+      </tr>
+      <tr>
+        <td mvc-attr='{"data-year": "cal1.attrs[7].year", "data-month": "cal1.attrs[7].month", "data-day": "cal1.attrs[7].day"}'><span mvc-text='cal1.days[7]' mvc-class='cal1.classes[7]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[8].year", "data-month": "cal1.attrs[8].month", "data-day": "cal1.attrs[8].day"}'><span mvc-text='cal1.days[8]' mvc-class='cal1.classes[8]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[9].year", "data-month": "cal1.attrs[9].month", "data-day": "cal1.attrs[9].day"}'><span mvc-text='cal1.days[9]' mvc-class='cal1.classes[9]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[10].year", "data-month": "cal1.attrs[10].month", "data-day": "cal1.attrs[10].day"}'><span mvc-text='cal1.days[10]' mvc-class='cal1.classes[10]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[11].year", "data-month": "cal1.attrs[11].month", "data-day": "cal1.attrs[11].day"}'><span mvc-text='cal1.days[11]' mvc-class='cal1.classes[11]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[12].year", "data-month": "cal1.attrs[12].month", "data-day": "cal1.attrs[12].day"}'><span mvc-text='cal1.days[12]' mvc-class='cal1.classes[12]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[13].year", "data-month": "cal1.attrs[13].month", "data-day": "cal1.attrs[13].day"}'><span mvc-text='cal1.days[13]' mvc-class='cal1.classes[13]'></span></td>
+      </tr>
+      <tr>
+        <td mvc-attr='{"data-year": "cal1.attrs[14].year", "data-month": "cal1.attrs[14].month", "data-day": "cal1.attrs[14].day"}'><span mvc-text='cal1.days[14]' mvc-class='cal1.classes[14]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[15].year", "data-month": "cal1.attrs[15].month", "data-day": "cal1.attrs[15].day"}'><span mvc-text='cal1.days[15]' mvc-class='cal1.classes[15]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[16].year", "data-month": "cal1.attrs[16].month", "data-day": "cal1.attrs[16].day"}'><span mvc-text='cal1.days[16]' mvc-class='cal1.classes[16]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[17].year", "data-month": "cal1.attrs[17].month", "data-day": "cal1.attrs[17].day"}'><span mvc-text='cal1.days[17]' mvc-class='cal1.classes[17]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[18].year", "data-month": "cal1.attrs[18].month", "data-day": "cal1.attrs[18].day"}'><span mvc-text='cal1.days[18]' mvc-class='cal1.classes[18]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[19].year", "data-month": "cal1.attrs[19].month", "data-day": "cal1.attrs[19].day"}'><span mvc-text='cal1.days[19]' mvc-class='cal1.classes[19]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[20].year", "data-month": "cal1.attrs[20].month", "data-day": "cal1.attrs[20].day"}'><span mvc-text='cal1.days[20]' mvc-class='cal1.classes[20]'></span></td>
+      </tr>
+      <tr>
+        <td mvc-attr='{"data-year": "cal1.attrs[21].year", "data-month": "cal1.attrs[21].month", "data-day": "cal1.attrs[21].day"}'><span mvc-text='cal1.days[21]' mvc-class='cal1.classes[21]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[22].year", "data-month": "cal1.attrs[22].month", "data-day": "cal1.attrs[22].day"}'><span mvc-text='cal1.days[22]' mvc-class='cal1.classes[22]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[23].year", "data-month": "cal1.attrs[23].month", "data-day": "cal1.attrs[23].day"}'><span mvc-text='cal1.days[23]' mvc-class='cal1.classes[23]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[24].year", "data-month": "cal1.attrs[24].month", "data-day": "cal1.attrs[24].day"}'><span mvc-text='cal1.days[24]' mvc-class='cal1.classes[24]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[25].year", "data-month": "cal1.attrs[25].month", "data-day": "cal1.attrs[25].day"}'><span mvc-text='cal1.days[25]' mvc-class='cal1.classes[25]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[26].year", "data-month": "cal1.attrs[26].month", "data-day": "cal1.attrs[26].day"}'><span mvc-text='cal1.days[26]' mvc-class='cal1.classes[26]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[27].year", "data-month": "cal1.attrs[27].month", "data-day": "cal1.attrs[27].day"}'><span mvc-text='cal1.days[27]' mvc-class='cal1.classes[27]'></span></td>
+      </tr>
+      <tr>
+        <td mvc-attr='{"data-year": "cal1.attrs[28].year", "data-month": "cal1.attrs[28].month", "data-day": "cal1.attrs[28].day"}''><span mvc-text='cal1.days[28]' mvc-class='cal1.classes[28]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[29].year", "data-month": "cal1.attrs[29].month", "data-day": "cal1.attrs[29].day"}''><span mvc-text='cal1.days[29]' mvc-class='cal1.classes[29]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[30].year", "data-month": "cal1.attrs[30].month", "data-day": "cal1.attrs[30].day"}''><span mvc-text='cal1.days[30]' mvc-class='cal1.classes[30]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[31].year", "data-month": "cal1.attrs[31].month", "data-day": "cal1.attrs[31].day"}''><span mvc-text='cal1.days[31]' mvc-class='cal1.classes[31]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[32].year", "data-month": "cal1.attrs[32].month", "data-day": "cal1.attrs[32].day"}''><span mvc-text='cal1.days[32]' mvc-class='cal1.classes[32]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[33].year", "data-month": "cal1.attrs[33].month", "data-day": "cal1.attrs[33].day"}''><span mvc-text='cal1.days[33]' mvc-class='cal1.classes[33]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[34].year", "data-month": "cal1.attrs[34].month", "data-day": "cal1.attrs[34].day"}''><span mvc-text='cal1.days[34]' mvc-class='cal1.classes[34]'></span></td>
+      </tr>
+      <tr>
+        <td mvc-attr='{"data-year": "cal1.attrs[35].year", "data-month": "cal1.attrs[35].month", "data-day": "cal1.attrs[35].day"}''><span mvc-text='cal1.days[35]' mvc-class='cal1.classes[35]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[36].year", "data-month": "cal1.attrs[36].month", "data-day": "cal1.attrs[36].day"}''><span mvc-text='cal1.days[36]' mvc-class='cal1.classes[36]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[37].year", "data-month": "cal1.attrs[37].month", "data-day": "cal1.attrs[37].day"}''><span mvc-text='cal1.days[37]' mvc-class='cal1.classes[37]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[38].year", "data-month": "cal1.attrs[38].month", "data-day": "cal1.attrs[38].day"}''><span mvc-text='cal1.days[38]' mvc-class='cal1.classes[38]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[39].year", "data-month": "cal1.attrs[39].month", "data-day": "cal1.attrs[39].day"}''><span mvc-text='cal1.days[39]' mvc-class='cal1.classes[39]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[40].year", "data-month": "cal1.attrs[40].month", "data-day": "cal1.attrs[40].day"}''><span mvc-text='cal1.days[40]' mvc-class='cal1.classes[40]'></span></td>
+        <td mvc-attr='{"data-year": "cal1.attrs[41].year", "data-month": "cal1.attrs[41].month", "data-day": "cal1.attrs[41].day"}''><span mvc-text='cal1.days[41]' mvc-class='cal1.classes[41]'></span></td>
+      </tr>
+    </tbody>
+  </table>
+</span>
+
+<span mvc-show='cal.cal2'>
+  <table class='table table-bordered table-sm widget-mdate-table'>
+    <thead>
+      <tr>
+        <th>
+          <button class='btn btn-primary' mvc-on='{click: "cal2PrevYear()"}'>
+            &lt;
+          </button>
+        </th>
+        <th style='text-align: center'>
+          <button class='btn btn-primary' mvc-on='{click: "cal2Year()"}'>
+            <span mvc-text='cal2.year'></span>
+          </button>
+        </th>
+        <th style='text-align: right'>
+          <button class='btn btn-primary' mvc-on='{click: "cal2NextYear()"}'>
+            &gt;
+          </button>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody mvc-on='{click: "cal2MonthClicked()"}' style='cursor: pointer'>
+      <tr>
+        <td data-month='1'>January</td>
+        <td data-month='2'>February</td>
+        <td data-month='3'>March</td>
+      </tr>
+      <tr>
+        <td data-month='4'>April</td>
+        <td data-month='5'>May</td>
+        <td data-month='6'>June</td>
+      </tr>
+      <tr>
+        <td data-month='7'>July</td>
+        <td data-month='8'>August</td>
+        <td data-month='9'>September</td>
+      </tr>
+      <tr>
+        <td data-month='10'>October</td>
+        <td data-month='11'>November</td>
+        <td data-month='12'>December</td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>
+    </tbody>
+  </table>
+</span>
+
+<span mvc-show='cal.cal3'>
+  <table class='table table-bordered table-sm widget-mdate-table'>
+    <thead>
+      <tr>
+        <th>
+          <button class='btn btn-primary' mvc-on='{click: "cal3PrevDecade()"}'>
+            &lt;
+          </button>
+        </th>
+        <th colspan='2' style='text-align: center'>
+        </th>
+        <th style='text-align: right'>
+          <button class='btn btn-primary' mvc-on='{click: "cal3NextDecade()"}'>
+            &gt;
+          </button>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody mvc-on='{click: "cal3YearClicked()"}' style='cursor: pointer'>
+      <tr>
+        <td><span mvc-text='cal3.years[0]'></span></td>
+        <td><span mvc-text='cal3.years[1]'></span></td>
+        <td><span mvc-text='cal3.years[2]'></span></td>
+        <td><span mvc-text='cal3.years[3]'></span></td>
+      </tr>
+      <tr>
+        <td><span mvc-text='cal3.years[4]'></span></td>
+        <td><span mvc-text='cal3.years[5]'></span></td>
+        <td><span mvc-text='cal3.years[6]'></span></td>
+        <td><span mvc-text='cal3.years[7]'></span></td>
+      </tr>
+      <tr>
+        <td><span mvc-text='cal3.years[8]'></span></td>
+        <td><span mvc-text='cal3.years[9]'></span></td>
+        <td><span mvc-text='cal3.years[10]'></span></td>
+        <td><span mvc-text='cal3.years[11]'></span></td>
+      </tr>
+      <tr>
+        <td><span mvc-text='cal3.years[12]'></span></td>
+        <td><span mvc-text='cal3.years[13]'></span></td>
+        <td><span mvc-text='cal3.years[14]'></span></td>
+        <td><span mvc-text='cal3.years[15]'></span></td>
+      </tr>
+      <tr>
+        <td><span mvc-text='cal3.years[16]'></span></td>
+        <td><span mvc-text='cal3.years[17]'></span></td>
+        <td><span mvc-text='cal3.years[18]'></span></td>
+        <td><span mvc-text='cal3.years[19]'></span></td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>
+    </tbody>
+  </table>
+</span>

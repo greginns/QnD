@@ -75,11 +75,11 @@
 </div>
 {% endmacro %}
 
-{% macro Date(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', placeholder='') %}
+{% macro Date(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_click='date:boot()', placeholder='') %}
 <div class="form-label-group">
   <div class='input-group'>
     <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="date" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
-    <span class="input-group-text" mvc-click='date:boot()'><i class="far fa-calendar-alt"></i></span>
+    <span class="input-group-text" mvc-click='{{mvc_click}}'><i class="far fa-calendar-alt"></i></span>
   </div>
   <label class='split-bg'>{{label}}</label>
 </div>
@@ -338,29 +338,11 @@
 {% endmacro %}
 
 
-{% macro Dropdown(id='', maxlength='', mvc_value='', mvc_filter='', handler='', template_id='', label='', placeholder='', dd_class='') %}
-<div mvc-dropdown='{{handler}}' data-template='{{template_id}}' class='dropdown'>
+{% macro Dropper(id='', maxlength='', mvc_value='', mvc_filter='', handler='', template_id='',label='', placeholder='', dir_class='', dd_class='') %}
+<div mvc-dropper='{{handler}}' data-template='{{template_id}}' class='dropper {{dir_class}}' data-id='{{id}}'>
   <div class='form-label-group'>
-    <input class='form-control' mvc-value='{{mvc_value}}' mvc-filter='{{mvc_filter}}' placeholder='{{placeholder}}' style='text-overflow:ellipsis' data-bs-toggle="dropdown" data-bs-auto-close="false">
-    <div class='dropdown-menu {{dd_class}}' tabindex=-'1'>
-      <!-- template ends up here -->
-    </div>    
-    <label class='split-bg'>{{label}}</label>
-  </div>
-  
-  <div mvc-show='errors.{{mvc_value}}'>
-    <small class='text-danger' mvc-text='errors.{{mvc_value}}'></small>
-  </div>
-
-</div>               
-{% endmacro %}
-
-
-{% macro Dropup(id='', maxlength='', mvc_value='', mvc_filter='', handler='', template_id='', label='', placeholder='', dd_class='') %}
-<div mvc-dropper='{{handler}}' data-template='{{template_id}}' class='R4dropper R4dropup'>
-  <div class='form-label-group'>
-    <input class='form-control' mvc-value='{{mvc_value}}' mvc-filter='{{mvc_filter}}' placeholder='{{placeholder}}' style='text-overflow:ellipsis' data-toggle="dropup">
-    <div class='R4dropper-content {{dd_class}}' tabindex=-'1'>
+    <input class='form-control' mvc-value='{{mvc_value}}' mvc-filter='{{mvc_filter}}' placeholder='{{placeholder}}' style='text-overflow:ellipsis' data-trigger>
+    <div class='dropper-content {{dd_class}}' tabindex=-'1'>
       <!-- template ends up here -->
     </div>    
     <label class='split-bg'>{{label}}</label>

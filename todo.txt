@@ -1,7 +1,8 @@
 Items
   Finish supplier/reseller DB/schema stuff
   Test cat/code in Suppliers, default item name  
-  Save item online page when item saved or template selected.  
+  Save item online page when item saved or template selected. 
+  5xppl in Min Ppl 
 
 Documents
   All doc types other than letter
