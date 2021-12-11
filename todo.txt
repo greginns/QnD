@@ -3,6 +3,8 @@ Items
   Test cat/code in Suppliers, default item name  
   Save item online page when item saved or template selected. 
   5xppl in Min Ppl 
+  Sched for Res and tts 
+  Make sure limits and other numerics are numeric when saved to json
 
 Documents
   All doc types other than letter

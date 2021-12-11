@@ -1,7 +1,7 @@
 {
-  "name": "timekeep",
+  "name": "qnd",
   "version": "1.0.0",
-  "description": "Time Keeper",
+  "description": "QND",
   "main": "index.js",
   "directories": {
     "lib": "lib"

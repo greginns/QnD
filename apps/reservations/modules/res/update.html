@@ -246,6 +246,9 @@
         <button class='btn btn-success' mvc-click='payments()'>
           Payments
         </button>
+        <button class='btn btn-warning' mvc-click='test()'>
+          Test
+        </button>
       </div>
     </div>
 
@@ -616,6 +619,30 @@
     </div>  
 
     <div class='row'>
+      <div class='col-12 mb-3'>
+        <div id='item-section'>
+          Item Section - List of items
+        </div>
+      </div>
+    </div>
+
+    <div class='row' id='item-A'>
+      <div class='col-12 mb-3'>
+        <div class='row'>
+          <div class='col-12 mb-1'>
+            Activity - defined section with all facade fields ALRMOSTP
+            Need display shell and entry/edit shell
+            Display shells can be a template
+          </div>
+        </div>
+        <div id='activity-includes'>
+          Included Items - each include type included-AR, included-AM, included-AO, etc would have their own section
+          Need display shell and entry/edit shell
+        </div>
+      </div>
+    </div>
+
+    <div class='row'>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         Date
       </div>
@@ -647,11 +674,11 @@
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        {{ fields.Char(id='item-time', mvc_value='item.time', label='') }}
+        {{ fields.Char(id='item-time', mvc_value='item.time', mvc_filter='time', label='') }}
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        {{ fields.SelectMVC(id='item-rate', size='1', mvc_value='item.rate', mvc_each='rates', label='') }}
+        {{ fields.Char(id='item-rate', mvc_value='item.rate', label='') }}
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
@@ -720,7 +747,7 @@
         {{ fields.SelectMVC(id='item-group', size='10', mvc_value='item.group', mvc_each='actgroups', mvc_on='{"change": "groupChanged()"}', valueField='code', textField='name', label='') }}
       </div>
       <div class='col-12 col-md-6'>
-        {{ fields.SelectMVC(id='item-code', size='10', mvc_value='item.code', mvc_each='activities', valueField='code', textField='name', label='') }}
+        {{ fields.SelectMVC(id='item-code', size='10', mvc_value='item.code', mvc_each='activities', mvc_on='{"change": "codeChanged()"}', valueField='code', textField='name', classField='class', label='') }}
       </div>
     </div>
 

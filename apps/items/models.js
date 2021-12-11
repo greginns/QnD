@@ -470,6 +470,7 @@ const Actminp = class extends Minppl {
 };
 
 const Actsched = class extends Model {
+  // sched: [31x {time: {boo, bow, limit}}]
   constructor(obj, opts) {
     super(obj, opts);
   }

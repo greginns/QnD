@@ -1,7 +1,6 @@
 const root = process.cwd();
 
 const {Router, RouterMessage, Routes} = require(root + '/lib/server/utils/router.js');
-const {TravelMessage} = require(root + '/lib/server/utils/messages.js');
 const {Authentication} = require(root + '/lib/server/utils/authentication.js');
 const {VIEW, UPDATE, DELETE, ACCESS} = require(root + '/lib/server/utils/authorization.js');
 const loginServices = require(root + '/apps/login/services.js');
@@ -10,7 +9,6 @@ const {urlQueryParse} = require(root + '/lib/server/utils/url.js');
 
 const app = getAppName(__dirname);
 const version = 'v1';
-
 const models = require(root + `/apps/${app}/models.js`);
 const services = require(root + `/apps/${app}/services.js`);
 

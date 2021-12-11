@@ -34,6 +34,7 @@ class Resupdate extends Verror {
     this.model.text = {};
     this.origData = {};
     this.modals = {};
+    this.availData = {};
 
     this.notesInst = new Notes();
     this.processed = false;
@@ -394,6 +395,14 @@ class Resupdate extends Verror {
   }
 }
 
+class Activity extends Verror {
+  constructor(element, init) {
+    super(element);
+
+    // init is what item to get or new item
+  }
+}
+
 class Resitems extends Verror {
   constructor(element) {
     super(element);
@@ -482,25 +491,108 @@ class Resitems extends Verror {
       }
 
       this.model.drop.code = text;
-    }
-/*
-    setTimeout(function() {
-      this.$focus('item.date');
-    }.bind(this), 1000)
-*/    
+    } 
   }
 
-  groupChanged() {
-    let group = this.model.item.group;
-    let codeList = [];
+  async getAvail(cat, grp, code, filters) {
+    // cat /cat
+    // grp /cat/grp
+    // code /cat/grp/code, or /cat//code
+    let opts = {};
+    let url = `/avail/v1/avail/${cat}`;
 
-    for (let act of this.model.activity) {
-      if (act.actgroup == group) {
-        codeList.push(act);
+    if (grp ) url += `/${grp}`;
+    if (code) url += `/${code}`;
+
+    opts.filters = JSON.stringify(filters);
+
+    return await io.get(opts, url);
+  }
+
+  determineSpace(rec, dt, ppl, alreadyBooked) {
+    if (! (dt in rec.dates)) return 'text-danger';
+
+    let dtInfo = rec.dates[dt];
+    let klass = 'text-success';
+    let maxAvail = 99999;
+
+    ppl = parseInt(ppl);
+    alreadyBooked = parseInt(alreadyBooked);
+
+    for (let time in dtInfo.times) {
+      let tmInfo = dtInfo.times[time];
+      let avail = parseInt(tmInfo.avail);
+
+      if (avail + alreadyBooked >= ppl) {
+        maxAvail = Math.min(maxAvail, avail + alreadyBooked);
       }
     }
 
+    if (maxAvail < ppl*1.1) klass = 'text-warning'
+    if (maxAvail < ppl) klass = 'text-danger';
+    
+    return klass;
+  }
+
+  async groupChanged() {
+    let codeList = [];
+    let filters = {};
+    let ppl = this.model.drop.ppl || 1;
+    let alreadyBooked = 0;
+    let dt = this.model.item.date;
+
+    filters.fromdate = dt;
+    filters.todate = dt;
+    filters.time = '';
+
+    utils.modals.overlay(true);
+
+    let group = this.model.item.group;
+    let res = await this.getAvail('A', group, '', filters);
+    
+    if (res.status == 200) {
+      this.availData = res.data;
+
+      for (let rec of res.data) {
+        let klass = this.determineSpace(rec, dt, ppl, alreadyBooked);
+
+        codeList.push({code: rec.code, name: rec.name, class: klass});
+      }
+    }
+    else {
+      Module.modal.alert(res.data.errors.message);
+    }
+
     this.model.activities = codeList;
+
+    utils.modals.overlay(false);
+  }
+
+  async codeChanged() {
+    let dt = this.model.item.date;
+    let code = this.model.item.code;
+    let data = {}, ret = [];
+
+    for (let rec of this.availData) {
+      if (rec.code == code) {
+        if (dt in rec.dates) {
+          data = rec.dates[dt].times;
+        }
+      }
+    }
+
+    for (let tm in data) {
+      let t = data[tm];
+      t.time = tm;
+
+      ret.push(t)
+    }
+
+    ret.sort(function(a,b) {
+      return (a.boo < b.boo) ? -1 : (a.boo > b.boo) ? 1 : (a.time < b.time) ? -1 : (a.time > b.time) ? 1 : 0;
+    })
+
+    this.model.item.time = ret[0].time;
   }
 };
 

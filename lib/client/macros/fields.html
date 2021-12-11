@@ -268,10 +268,10 @@
 {% endmacro %}
 
 
-{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', mvc_nonetext='', mvc_nonevalue='', mvc_on='{}', mvc_enabled='', mvc_disabled='', valueField='value', textField='text', label='', multiple='') %}
+{% macro SelectMVC(id='', size='10', mvc_value='', mvc_each='', mvc_nonetext='', mvc_nonevalue='', mvc_on='{}', mvc_enabled='', mvc_disabled='', valueField='value', textField='text', classField='class', label='', multiple='') %}
 <div class="form-label-group">
   <select xid="{{id}}" size='{{size}}' mvc-value="{{mvc_value}}" mvc-each='{{mvc_each}}' mvc-nonetext='{{mvc_nonetext}}' mvc-nonevalue='{{mvc_nonevalue}}' mvc-on='{{mvc_on}}' mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{label}}' class="form-select" {{multiple}}>
-    <option mvc-option='{value: "{{mvc_each}}.$index.{{valueField}}", text: "{{mvc_each}}.$index.{{textField}}"}'></option>
+    <option mvc-option='{value: "{{mvc_each}}.$index.{{valueField}}", text: "{{mvc_each}}.$index.{{textField}}"}' mvc-class='{{mvc_each}}.$index.{{classField}}'></option>
   </select>
   <label class='split-bg'>{{label}}</label>
 </div>

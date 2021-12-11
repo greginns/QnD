@@ -35,7 +35,7 @@ const Booked = class extends Model {
 
 const Activitybooked = class extends Booked {
   // booked:
-  //    31x [{time: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, }, ] 
+  //    31x [{time: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, ppl: xx, qty: xx}, ]}, }, ] 
   //    one {} for all times in a day, one {} for each rsv daily
   //
   constructor(obj, opts) {
@@ -72,7 +72,7 @@ const Activitybooked = class extends Booked {
 
 const Actresbooked = class extends Booked {
   // booked:
-  //    31x [{booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, ] 
+  //    31x [{booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, ppl: xx}, ]}, ] 
   //    one total for a day, one {} for each rsv daily
   //
   constructor(obj, opts) {
@@ -109,7 +109,7 @@ const Actresbooked = class extends Booked {
 
 const Actttotbooked = class extends Booked {
   // booked:
-  //    31x [{time: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, }, ] 
+  //    31x [{time: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, ppl: xx}, ]}, }, ] 
   //    one {} for all times in a day, one {} for each rsv daily
   //
   constructor(obj, opts) {
@@ -146,7 +146,7 @@ const Actttotbooked = class extends Booked {
 
 const Lodgingbooked = class extends Booked {
   // booked:
-  //    31x [{unitseq: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, seq3: xx}, ]}}, ] 
+  //    31x [{unitseq: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, seq3: xx, ppl: xx, qty: xx}, ]}}, ] 
   //    one {} for all units, one {} for each rsv daily
   //    mostly have only one daily entry, except for non-unitized and book beds, where more than one item can be in the same unit.
   //
@@ -184,7 +184,7 @@ const Lodgingbooked = class extends Booked {
 
 const Mealbooked = class extends Booked {
   // booked:
-  //    31x [{time: xx, booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx}, ]}, ] 
+  //    31x [{time: xx, booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, ppl: xx}, ]}, ] 
   //    one {} for each time, one {} for each rsv daily
   //
   constructor(obj, opts) {
