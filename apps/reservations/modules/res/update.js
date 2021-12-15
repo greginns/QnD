@@ -4,6 +4,7 @@ import {io} from '/~static/lib/client/core/io.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
+import {datetimer} from '/~static/lib/client/core/datetime.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
 import {Notes} from '/~static/lib/client/widgets/notes.js';
 
@@ -32,12 +33,15 @@ class Resupdate extends Verror {
     this.model.pmttermss = [];
 
     this.model.text = {};
+
+    this.model.days = [];
+
     this.origData = {};
     this.modals = {};
     this.availData = {};
-
     this.notesInst = new Notes();
     this.processed = false;
+    this.itemManager;
   }
 
   async ready() {
@@ -61,6 +65,9 @@ class Resupdate extends Verror {
 
       self.notesInst.setTopics(topics);
     };
+
+    this.itemManager = new ItemManager('rsvs-rsv-items-section');
+    await this.itemManager.ready();
 
     return new Promise(async function(resolve) {
       Module.tableStores.company.addView(new TableView({proxy: this.model.companies, filterFunc}));
@@ -145,6 +152,12 @@ class Resupdate extends Verror {
 
   gotoContact() {
     window.open('/contactpage/contact/update/' + this.model.main.contact);
+  }
+
+  book(obj) {
+    let cat = obj.args[0];
+
+    this.itemManager.bookNew(cat);
   }
 
   /* Modals */
@@ -395,15 +408,33 @@ class Resupdate extends Verror {
   }
 }
 
-class Activity extends Verror {
-  constructor(element, init) {
+class ItemManager extends Verror {
+  constructor(element) {
     super(element);
+  }
 
-    // init is what item to get or new item
+  createModel() {
+    this.home = document.getElementById('rsvs-rsv-items-list');
+    this.els = {
+      A: 'entry-item-A',
+    };
+    this.cats = {};
+  }
+
+  async ready() {
+    this.cats['A'] = new Activity(this.els['A']);
+    this.cats['A'].ready();
+  }
+
+  bookNew(cat) {
+    let itemmgr = this.cats[cat]._section;
+
+    this.home.prepend(itemmgr);
+    itemmgr.style.display = 'block';
   }
 }
 
-class Resitems extends Verror {
+class Activity extends Verror {
   constructor(element) {
     super(element);
   }
@@ -422,13 +453,15 @@ class Resitems extends Verror {
     ];
 
     this.model.codes = [];
+    this.model.days = [];
 
     this.model.item = {cat: "A"};
+    this.activity = {};
 
     this.model.actgroups = [];
     this.model.activity = [];
     this.model.activities = [];
-    this.model.drop = {infants: 0, children: 0, youth: 0, adults: 0, seniors: 0};
+    this.model.facade = {};
   }
 
   async ready() {
@@ -464,34 +497,138 @@ class Resitems extends Verror {
     return true;  
   }
 
-  dropppl(ev) {
+  ppl(ev) {
     if (ev.state == 'close' && ev.accept) {
       let text = [];
+      let ppl = 0;
 
       for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
-        if (this.model.drop[g] > 0) {
-          text.push(this.model.drop[g] + '/' + g.substr(0,1).toUpperCase());
+        if (this.model.item[g] > 0) {
+          text.push(this.model.item[g] + '/' + g.substr(0,1).toUpperCase());
+          ppl += parseInt(this.model.item[g]);
         }
       }
 
-      this.model.drop.ppl = text.join(' ');
+      this.model.facade.ppl = text.join(' ');
+      this.model.item.ppl = ppl;
     }
   }
 
-  dropcode(ev) {
+  code(ev) {
     if (ev.state == 'close' && ev.accept) {
       let code = this.model.item.code;
       let text = '';
 
+      this.activity = {};
+
       for (let act of this.model.activity) {
         if (act.code == code) {
+          this.activity = act;
           text = act.name;
           break;
         }
       }
 
-      this.model.drop.code = text;
-    } 
+      this.model.facade.code = text;
+
+      this.processTimes();
+      this.model.item.times = ['17:00:00.000'];
+    }
+  }
+
+  time(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      let times = this.extractTimes();
+
+      this.model.times = times;
+      this.model.facade.time = times[0];
+    }
+  }
+
+  processTimes() {
+    this.model.facade.time = '';
+
+    // [[{time info}, {time info}], [], ...]
+    let fmt = 'YYYY-MM-DD';
+    let dt = this.model.item.date;
+    let dtx = datetimer(dt, fmt);
+    let data = this.availData[this.model.item.code].dates, timedata = {},resdata = {}, ttotdata = {};
+    let days = [];
+    let dayCount = (this.activity.multi) ? this.activity.durdays : 1;
+
+    for (let day=0; day<dayCount; day++) {
+      let times = [];
+      dtx.add(day, 'days');
+      let dtn = dtx.format(fmt);
+
+      if (dtn in data) {
+        timedata = data[dtn].times || {};
+        resdata = data[dtn].res || {};
+        ttotdata = data[dtn].ttot || {};
+
+        for (let tm in timedata) {
+          let text = tm.substr(0,5) + String(timedata[tm]['limit']).padStart(5, ' ') + String(timedata[tm]['booked']).padStart(6, ' ') + String(timedata[tm]['avail']).padStart(5, ' ');
+          text = text.replaceAll(' ', '\xA0');
+
+          timedata[tm]['time'] = tm;
+          timedata[tm]['text'] = text;
+
+          times.push(timedata[tm]);
+        }
+
+        days.push({day: day+1, times});
+      }
+      else {
+        days.push([]);  // no times for you! (on this date)
+      }
+    }
+
+    // sort times by boo/time
+    if (days.length > 0) {
+      //for (let time of times)
+      //  time.sort(function(a,b) {
+      //    return (a.boo < b.boo) ? -1 : (a.boo > b.boo) ? 1 : (a.time < b.time) ? -1 : (a.time > b.time) ? 1 : 0;
+      //  })
+  
+      // find first time with space, for each day
+      days[0].times[0].class = 'time-chosen';
+
+      this.model.days = days;
+
+      let times = this.extractTimes();
+    
+      this.model.times = times;
+      this.model.facade.time = times[0];
+    }
+  }
+
+  async selectTime(obj) {
+    let day = obj.args[0], timeSlot = obj.args[1];
+    let days = this.model.days;
+
+    for (let time of days[day].times) {
+      time.class = '';
+    }
+
+    days[day].times[timeSlot].class = 'time-chosen';
+  }
+
+  extractTimes() {
+    let days = this.model.days;
+    let times = [], idx = 0;
+    
+    for (let day of days) {
+      idx++;
+
+      for (let time of day.times) {
+        if (time.class) {
+          times.push(time.time);
+          break;
+        }
+      }
+    }
+
+    return times;
   }
 
   async getAvail(cat, grp, code, filters) {
@@ -537,7 +674,7 @@ class Resitems extends Verror {
   async groupChanged() {
     let codeList = [];
     let filters = {};
-    let ppl = this.model.drop.ppl || 1;
+    let ppl = this.model.item.ppl || 1;
     let alreadyBooked = 0;
     let dt = this.model.item.date;
 
@@ -553,7 +690,8 @@ class Resitems extends Verror {
     if (res.status == 200) {
       this.availData = res.data;
 
-      for (let rec of res.data) {
+      for (let code in res.data) {
+        let rec = res.data[code];
         let klass = this.determineSpace(rec, dt, ppl, alreadyBooked);
 
         codeList.push({code: rec.code, name: rec.name, class: klass});
@@ -567,33 +705,6 @@ class Resitems extends Verror {
 
     utils.modals.overlay(false);
   }
-
-  async codeChanged() {
-    let dt = this.model.item.date;
-    let code = this.model.item.code;
-    let data = {}, ret = [];
-
-    for (let rec of this.availData) {
-      if (rec.code == code) {
-        if (dt in rec.dates) {
-          data = rec.dates[dt].times;
-        }
-      }
-    }
-
-    for (let tm in data) {
-      let t = data[tm];
-      t.time = tm;
-
-      ret.push(t)
-    }
-
-    ret.sort(function(a,b) {
-      return (a.boo < b.boo) ? -1 : (a.boo > b.boo) ? 1 : (a.time < b.time) ? -1 : (a.time > b.time) ? 1 : 0;
-    })
-
-    this.model.item.time = ret[0].time;
-  }
 };
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
@@ -602,9 +713,9 @@ let el1 = document.getElementById('rsvs-rsv-update');   // page html
 let setup1 = new Resupdate('rsvs-rsv-update-section');
 let section1 = new Section({mvc: setup1});
 
-let setup2 = new Resitems('rsvs-rsv-items-section');
-let section2 = new Section({mvc: setup2});
+//let setup2 = new Resitems('rsvs-rsv-items-section');
+//let section2 = new Section({mvc: setup2});
 
-let page1 = new Page({el: el1, path: ['/:rsvno'], title: 'Reservation', sections: [section1, section2]});
+let page1 = new Page({el: el1, path: ['/:rsvno'], title: 'Reservation', sections: [section1]});
 
 Module.pages.push(page1);

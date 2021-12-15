@@ -61,7 +61,7 @@
               <div class='card-body'>
                 <div class='row'>
                   <div class='col-6 col-md-4 mb-3' mvc-show='lodging.unitized'>
-                    {{ fields.Dropdown(id='drop-units', handler='dropdownUnits', template_id='lodge-sched-range-units', mvc_value='drop.units', label='Units', placeholder='Select Unit(s)') }}
+                    {{ fields.Dropper(id='drop-units', handler='dropdownUnits', mvc_value='drop.units', template_id='lodge-sched-range-units', label='Units', placeholder='Select Unit(s)') }}
                   </div>
 
                   <div class='col-6 col-md-2 mb-3' mvc-show='!lodging.unitized || lodging.bookbeds'>
@@ -193,12 +193,30 @@
 </page>
 
 <template id='lodge-sched-range-units'>
-  <div mvc-each='unitlist'>
-    <div class='list-hovered ms-2 me-2 px-2'>
-      <label>
-        <input type='checkbox' mvc-checked='unitlist[$index].checked' />
-        <span mvc-text='unitlist[$index].text'></span>
-      </label>
+  <div class='container'>
+    <div class='row mb-3'>
+      <div mvc-each='unitlist'>
+        <div class='list-hovered ms-2 me-2 px-2'>
+          <label>
+            <input type='checkbox' mvc-checked='unitlist[$index].checked' />
+            <span mvc-text='unitlist[$index].text'></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col'>
+        <div class='float-end'>
+          <span class='pointer accept text-success' style='font-size: 30px'>
+            <i class="fa-light fa-check"></i>
+          </span>
+
+          <span class='pointer dismiss text-danger' style='font-size: 30px'>
+            <i class="fa-light fa-xmark"></i>
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </template>

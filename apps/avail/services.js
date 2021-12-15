@@ -134,7 +134,7 @@ services.avail = {
   cat: async function({database='', pgschema='', user={}, cat='', filters={}}={}) {
     let {fromdate, todate, time} = getFilters(filters);
     let listOfDays = fromdate.listOfDays(todate);
-    let data = [], item, res;
+    let data = {}, item, res;
 
     switch(cat) {
       case 'A':
@@ -143,7 +143,7 @@ services.avail = {
         if (res.status == 200) {
           for (let rec of res.data) {
             item = await gatherA(database, pgschema, user, rec.code, listOfDays);
-            data.push(item);
+            data[rec.code] = item;
           }
         }
         else {
@@ -162,7 +162,7 @@ services.avail = {
   group: async function({database='', pgschema='', user={}, cat='', grp='', filters={}}={}) {
     let {fromdate, todate, time} = getFilters(filters);
     let listOfDays = fromdate.listOfDays(todate);
-    let data = [], item, res;
+    let data = {}, item, res;
 
     switch(cat) {
       case 'A':
@@ -171,7 +171,7 @@ services.avail = {
         if (res.status == 200) {
           for (let rec of res.data) {
             item = await gatherA(database, pgschema, user, rec.code, listOfDays);
-            data.push(item);
+            data[rec.code] = item;
           }
         }
 
@@ -187,13 +187,13 @@ services.avail = {
   code: async function({database='', pgschema='', user={}, cat='', code='', filters={}}={}) {
     let {fromdate, todate, time} = getFilters(filters);
     let listOfDays = fromdate.listOfDays(todate);
-    let data = [], item;
+    let data = {}, item;
 
     switch(cat) {
       case 'A':
         item = await gatherA(database, pgschema, user, code, listOfDays);
 
-        data.push(item);
+        data[code] = item;
         break;
     }
 

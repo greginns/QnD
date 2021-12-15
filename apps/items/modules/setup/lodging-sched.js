@@ -319,19 +319,21 @@ class Lodgsched extends Setup {
     }
   }
 
-  dropdownUnits() {
-    let text = [];
-    let units = [];
+  dropdownUnits(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      let text = [];
+      let units = [];
 
-    for (let unit of this.model.unitlist) {
-      if (unit.checked) {
-        text.push(unit.text);
-        units.push(unit.value);
+      for (let unit of this.model.unitlist) {
+        if (unit.checked) {
+          text.push(unit.text);
+          units.push(unit.value);
+        }
       }
-    }
 
-    this.model.drop.units = text.join(', ');
-    this.model.range.units = units;
+      this.model.drop.units = text.join(', ');
+      this.model.range.units = units;
+    }
   }
 
   test(ev) {

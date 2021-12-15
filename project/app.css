@@ -80,6 +80,64 @@ div#qndPages {
   border-top:6px solid rgba(0,174,239,.8);
   border-radius:100%;
 }
+.modal-backdrop {
+  background-color: #00000050;
+}
+
+.dropper {
+  position: relative;
+}
+
+.dropper-content {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  padding: .5rem 0;
+  
+  font-size: 1rem;
+  text-align: left;
+  background-color: #fff;
+  border: 1px solid #00000015;
+  border-radius: .25rem;
+  min-width: 160px;
+  height: auto;
+}
+
+.dropper-content.show {
+  display: block;
+}
+
+.act-color {
+  background-color: #a9d0f5;
+}
+
+.lodge-color {
+  background-color: #bef781;
+}
+
+.rent-color {
+  background-color: #f5a9d0;
+}
+
+.meal-color {
+  background-color: #a9f5f2;
+}
+
+.trans-color {
+  background-color: #d8d8d8;
+}
+
+.store-color {
+  background-color: #f7be81;
+}
+
+.other-color {
+  background-color: #f3f781;
+}
+
+.package-color {
+  background-color: #00FF80;
+}
 
 @-webkit-keyframes rotation {
   from {-webkit-transform: rotate(0deg);}
