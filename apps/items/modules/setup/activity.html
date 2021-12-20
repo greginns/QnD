@@ -107,18 +107,27 @@
               <div class='col-12 col-lg-4 mb-3'>
                 {{ fields.Float(id=activity.arroffset.id, min='0', max='600', step='1', maxlength=activity.arroffset.maxlength, mvc_value='activity.arroffset', label=activity.arroffset.verbose) }}
               </div>
+              <div class='col-lg-2'>
+              </div>
               <div class='col-12 col-lg-6 mb-3'>
-                {{ fields.SegmentStart(label=activity.assign.verbose) }}
-                {{ fields.Segment(id=activity.assign.id, mvc_checked='activity.assign', name='activity-assign', label='Arrival', value='A') }}
-                {{ fields.Segment(id=activity.assign.id, mvc_checked='activity.assign', name='activity-assign', label='Booking', value='B') }}
-                {{ fields.Segment(id=activity.assign.id, mvc_checked='activity.assign', name='activity-assign', label='Either', value='E') }}
-                {{ fields.SegmentEnd(mvc_value='activity.assign', mvc_helptext=activity.assign.helptext) }}
+                <div class='float-end'>
+                  {{ fields.SegmentStart(label=activity.assign.verbose) }}
+                  {{ fields.Segment(id=activity.assign.id, mvc_checked='activity.assign', name='activity-assign', label='Arrival', value='A') }}
+                  {{ fields.Segment(id=activity.assign.id, mvc_checked='activity.assign', name='activity-assign', label='Booking', value='B') }}
+                  {{ fields.Segment(id=activity.assign.id, mvc_checked='activity.assign', name='activity-assign', label='Either', value='E') }}
+                  {{ fields.SegmentEnd(mvc_value='activity.assign', mvc_helptext=activity.assign.helptext) }}
+                </div>
               </div>
             </div>
 
             <div class='row'>
               <div class='col-12 col-lg-6 mb-3'>
                 {{ fields.SelectMVC(id=activity.level.id, size='1', mvc_value='activity.level', mvc_each='levels', label='Excitement Level') }}
+              </div>
+              <div class='col-lg-2'>
+              </div>
+              <div class='col-12 col-lg-4 mb-3'>
+                {{ fields.Integer(id=activity.maxppl.id, min='0', max='9999', step='1', maxlength=activity.maxppl.maxlength, mvc_value='activity.maxppl', label=activity.maxppl.verbose) }}
               </div>
             </div>
           </div>

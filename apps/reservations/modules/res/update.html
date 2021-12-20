@@ -686,7 +686,7 @@
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        {{ fields.Char(id='item-rate', mvc_value='item.rate', label='') }}
+        {{ fields.Dropper(id='item-rate', mvc_value='facade.rate', handler='rate', template_id='rsv-update-dropdown-rate', dir_class='dropup dropright', dd_class='dropper-rate drop-right', label='') }}
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
@@ -798,42 +798,28 @@
 
 <template id='rsv-update-dropdown-time'>
   <div class='container'>
-    <div mvc-each='days' mvc-index='$index1'>
-      <div class='row pointer'>
-        <div class='col-1'>
-          <span mvc-text='days[$index1].day'></span>
-        </div>
-        <div class='col-11'>
-          <div mvc-each='days[$index1].times' mvc-index='$index2'>
-            <div class='row' mvc-class='days[$index1].times[$index2].class' mvc-click='selectTime($index1, $index2)'>
-              <div class='col-3'>
-                <span mvc-text='days[$index1].times[$index2].time' mvc-filter='time'></span>
-              </div>
-              <div class='col-2'>
-                <span mvc-text='days[$index1].times[$index2].limit'></span>
-              </div>
-              <div class='col-2'>
-                <span mvc-text='days[$index1].times[$index2].booked'></span>
-              </div>
-              <div class='col-2'>
-                <span mvc-text='days[$index1].times[$index2].avail'></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class='row'>
       <div class='col-12'>
         <div mvc-each='days' mvc-index='$index1'>
+          <div class='row'style='font-family: "courier new";'>
+            <div class='col-1'>
+              Day
+            </div>
+            <div class='col-11'>
+              Time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Limit
+              &nbsp;&nbsp;&nbsp;&nbsp;Booked 
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Avail
+            </div>
+          </div>
+
           <div class='row'>
             <div class='col-1'>
               <span mvc-text='days[$index1].day'></span>
             </div>
             <div class='col-11'>
               <select mvc-each='days[$index1].times' mvc-value='item.times[$index1]' mvc-index='$index2' style='font-family: "courier new";'>
-                <option mvc-option='{text: "days[$index1].times[$index2].text", value: "days[$index1].times[$index2].time"}'></option>
+                <option mvc-option='{text: "days[$index1].times[$index2].text", value: "days[$index1].times[$index2].time"}' class='form-control'></option>
               </select>
             </div>
           </div>
@@ -850,6 +836,131 @@
 
           <span class='pointer dismiss text-danger' style='font-size: 30px'>
             <i class="fa-light fa-xmark"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id='rsv-update-dropdown-rate'>
+  <div class='container'>
+    <div class='row mb-3'>
+      <div class='col-6'>
+        {{ fields.SelectMVC(id='item-rate', size='1', mvc_value='item.rateno', mvc_each='rates', textField='name', valueField='rateno', label='', mvc_on='{"change": "rateChanged()"}') }}
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-sm-3'>
+        <span mvc-text='item.pdesc[0]'></span>
+      </div>
+      <div class='col-2'>
+        {{ fields.Char(id='item-ppl1', mvc_value='item.pqty[0]', min='0', max='9999', step='1', label='', mvc_role='integer') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        {{ fields.Char(id='item-price1', mvc_value='item.price[0]', min='0', max='99999', step='1', label='', mvc_role='dollar', class='text-end') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        <span mvc-text='item.pextn[0]' class='float-end'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-sm-3'>
+        <span mvc-text='item.pdesc[1]'></span>
+      </div>
+      <div class='col-2'>
+        {{ fields.Char(id='item-ppl2', mvc_value='item.pqty[1]', min='0', max='9999', step='1', label='', mvc_role='integer') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        {{ fields.Char(id='item-price2', mvc_value='item.price[1]', min='0', max='99999', step='1', label='', mvc_role='dollar', class='text-end') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        <span mvc-text='item.pextn[1]' class='float-end'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-sm-3'>
+        <span mvc-text='item.pdesc[2]'></span>
+      </div>
+      <div class='col-2'>
+        {{ fields.Char(id='item-ppl3', mvc_value='item.pqty[2]', min='0', max='9999', step='1', label='', mvc_role='integer') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        {{ fields.Char(id='item-price3', mvc_value='item.price[2]', min='0', max='99999', step='1', label='', mvc_role='dollar', class='text-end') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        <span mvc-text='item.pextn[2]' class='float-end'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-sm-3'>
+        <span mvc-text='item.pdesc[3]'></span>
+      </div>
+      <div class='col-2'>
+        {{ fields.Char(id='item-ppl4', mvc_value='item.pqty[3]', min='0', max='9999', step='1', label='', mvc_role='integer') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        {{ fields.Char(id='item-price4', mvc_value='item.price[3]', min='0', max='99999', step='1', label='', mvc_role='dollar', class='text-end') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        <span mvc-text='item.pextn[3]' class='float-end'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-sm-3'>
+        <span mvc-text='item.pdesc[4]'></span>
+      </div>
+      <div class='col-2'>
+        {{ fields.Char(id='item-ppl5', mvc_value='item.pqty[4]', min='0', max='9999', step='1', label='', mvc_role='integer') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        {{ fields.Char(id='item-price5', mvc_value='item.price[4]', min='0', max='99999', step='1', label='', mvc_role='dollar', class='text-end') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        <span mvc-text='item.pextn[4]' class='float-end'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-sm-3'>
+        <span mvc-text='item.pdesc[5]'></span>
+      </div>
+      <div class='col-2'>
+        {{ fields.Char(id='item-ppl6', mvc_value='item.pqty[5]', min='0', max='9999', step='1', label='', mvc_role='integer') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        {{ fields.Char(id='item-price6', mvc_value='item.price[5]', min='0', max='99999', step='1', label='', mvc_role='dollar', class='text-end') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        <span mvc-text='item.pextn[5]' class='float-end'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-12 col-sm-3'>
+        <span mvc-text='item.pdesc[6]'></span>
+      </div>
+      <div class='col-2'>
+        {{ fields.Char(id='item-addl', mvc_value='item.pqty[6]', min='0', max='9999', step='1', label='', mvc_role='integer') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        {{ fields.Char(id='item-addl', mvc_value='item.price[6]', min='0', max='99999', step='1', label='', mvc_role='dollar', class='text-end') }}
+      </div>
+      <div class='col-4 col-sm-3'>
+        <span mvc-text='item.pextn[6]' class='float-end'></span>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col'>
+        <div class='float-end'>
+          <span class='pointer accept text-success' style='font-size: 30px'>
+            <i class="fa-light fa-check"></i>
           </span>
         </div>
       </div>

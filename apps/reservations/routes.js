@@ -117,6 +117,7 @@ Router.add(new RouterMessage({
 
 // Model Routes
 new Routes({app, subapp: 'main', version, allowCORS: true, model: models.Main, services: services.main});
+new Routes({app, subapp: 'pricing', version, allowCORS: true, model: null, services: services.pricing});
 
 new Routes({app, subapp: 'discount', version, allowCORS: true, model: models.Discount, services: services.discount});
 new Routes({app, subapp: 'cancreas', version, allowCORS: true, model: models.Cancreas, services: services.cancreas});

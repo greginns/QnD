@@ -435,6 +435,9 @@ class ItemManager extends Verror {
 }
 
 class Activity extends Verror {
+  // Needs res/ttot data from server
+  // factor that in to space
+  // sort times by boo/time
   constructor(element) {
     super(element);
   }
@@ -455,12 +458,12 @@ class Activity extends Verror {
     this.model.codes = [];
     this.model.days = [];
 
-    this.model.item = {cat: "A"};
+    this.model.item = {cat: "A", pdesc: ['','','','','','',''], price: [0,0,0,0,0,0,0], pqty: [0,0,0,0,0,0,0], pextn: [0,0,0,0,0,0,0]};
     this.activity = {};
 
     this.model.actgroups = [];
-    this.model.activity = [];
-    this.model.activities = [];
+    this.model.activity = [];       // overall list of activities from table
+    this.model.activities = [];     // activites within a group
     this.model.facade = {};
   }
 
@@ -500,7 +503,7 @@ class Activity extends Verror {
   ppl(ev) {
     if (ev.state == 'close' && ev.accept) {
       let text = [];
-      let ppl = 0;
+      let ppl = 0, qty = 0;
 
       for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
         if (this.model.item[g] > 0) {
@@ -519,6 +522,8 @@ class Activity extends Verror {
       let code = this.model.item.code;
       let text = '';
 
+      if (!code) return;
+
       this.activity = {};
 
       for (let act of this.model.activity) {
@@ -531,17 +536,37 @@ class Activity extends Verror {
 
       this.model.facade.code = text;
 
+      this.model.item.qty = Math.ceil(this.model.item.ppl / parseInt(this.activity.maxppl) || 1);
+      this.model.item.dur = this.activity.durdays;
+
       this.processTimes();
-      this.model.item.times = ['17:00:00.000'];
+      this.getRates();
     }
   }
 
   time(ev) {
     if (ev.state == 'close' && ev.accept) {
-      let times = this.extractTimes();
+      this.model.facade.time = this.model.item.times[0];
+    }
+  }
 
-      this.model.times = times;
-      this.model.facade.time = times[0];
+  rate(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      let rateno = this.model.item.rateno;
+      let text = '';
+
+      if (rateno) {
+        for (let rate of this.model.rates) {
+          if (rate.rateno == rateno) {
+            text = rate.name;
+            break;
+
+          }
+        }
+      }
+
+      this.model.facade.rate = text;
+      console.log(this.model.item.toJSON())      
     }
   }
 
@@ -555,6 +580,7 @@ class Activity extends Verror {
     let data = this.availData[this.model.item.code].dates, timedata = {},resdata = {}, ttotdata = {};
     let days = [];
     let dayCount = (this.activity.multi) ? this.activity.durdays : 1;
+    let timeList = [];
 
     for (let day=0; day<dayCount; day++) {
       let times = [];
@@ -567,7 +593,7 @@ class Activity extends Verror {
         ttotdata = data[dtn].ttot || {};
 
         for (let tm in timedata) {
-          let text = tm.substr(0,5) + String(timedata[tm]['limit']).padStart(5, ' ') + String(timedata[tm]['booked']).padStart(6, ' ') + String(timedata[tm]['avail']).padStart(5, ' ');
+          let text = tm.substr(0,5).padEnd(10, ' ') + String(timedata[tm]['limit']).padStart(10, ' ') + String(timedata[tm]['booked']).padStart(10, ' ') + String(timedata[tm]['avail']).padStart(10, ' ');
           text = text.replaceAll(' ', '\xA0');
 
           timedata[tm]['time'] = tm;
@@ -577,9 +603,11 @@ class Activity extends Verror {
         }
 
         days.push({day: day+1, times});
+        timeList.push(times[0].time);
       }
       else {
-        days.push([]);  // no times for you! (on this date)
+        days.push([{day: day+1, times: [{text: 'No Time', time: ''}]}]);  // no times for you! (on this date)
+        timeList.push('');
       }
     }
 
@@ -591,44 +619,11 @@ class Activity extends Verror {
       //  })
   
       // find first time with space, for each day
-      days[0].times[0].class = 'time-chosen';
-
       this.model.days = days;
+      this.model.item.times = timeList;
 
-      let times = this.extractTimes();
-    
-      this.model.times = times;
-      this.model.facade.time = times[0];
+      this.model.facade.time = timeList[0];
     }
-  }
-
-  async selectTime(obj) {
-    let day = obj.args[0], timeSlot = obj.args[1];
-    let days = this.model.days;
-
-    for (let time of days[day].times) {
-      time.class = '';
-    }
-
-    days[day].times[timeSlot].class = 'time-chosen';
-  }
-
-  extractTimes() {
-    let days = this.model.days;
-    let times = [], idx = 0;
-    
-    for (let day of days) {
-      idx++;
-
-      for (let time of day.times) {
-        if (time.class) {
-          times.push(time.time);
-          break;
-        }
-      }
-    }
-
-    return times;
   }
 
   async getAvail(cat, grp, code, filters) {
@@ -705,6 +700,42 @@ class Activity extends Verror {
 
     utils.modals.overlay(false);
   }
+
+  async getRates() {
+    let code = this.model.item.code;
+    let filters = {activity: code, active: true}
+    let res = await Module.data.actrates.getMany({filters});
+    let rates = [];
+
+    this.model.item.rateno = '';
+
+    rates = [{rateno: '', name: 'No Rate Selected'}];
+
+    if (res.status == 200) {
+      for (let rate of res.data) {
+        rates.push(rate);
+      }
+    }
+
+    this.model.rates = rates;
+  }
+
+  async rateChanged(obj) {
+    let pobj = this.model.item.toJSON();
+
+    pobj.rateno = this.model.item.rateno;
+
+    if (!pobj.rateno) return;
+
+    let res = await Module.data.pricing.insert(pobj);
+
+    if (res.status == 200) {
+      this.model.item.pdesc = res.data.pdesc;
+      this.model.item.pqty = res.data.pqty;
+      this.model.item.price = res.data.price;
+      this.model.item.pextn = res.data.pextn;
+    }
+  }  
 };
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

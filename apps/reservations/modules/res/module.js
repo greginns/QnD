@@ -17,12 +17,15 @@ let moduleStart = function() {
     // setup data table access
     // gets us access to raw data.
     Module.data.main = new TableAccess({modelName: 'main', url: `/reservations/v1/main`});
+    Module.data.pricing = new TableAccess({modelName: 'pricing', url: `/reservations/v1/pricing`});  // pseudo table
 
     Module.data.activity = new TableAccess({modelName: 'activity', url: `/items/v1/activity`});    
     Module.data.actgroup = new TableAccess({modelName: 'actgroup', url: `/items/v1/actgroup`});    
+    Module.data.actrates = new TableAccess({modelName: 'actrates', url: `/items/v1/actrates`});    
 
     Module.data.area = new TableAccess({modelName: 'area', url: `/items/v1/area`});    
     Module.data.pmtterms = new TableAccess({modelName: 'pmtterms', url: `/items/v1/pmtterms`});    
+    //Module.data.pricelevel = new TableAccess({modelName: 'pricelevel', url: `/items/v1/pricelevel`});    
 
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});    
     Module.data.company = new TableAccess({modelName: 'company', url: `/contacts/v1/company`});    
@@ -76,6 +79,13 @@ let moduleStart = function() {
     Module.tableStores.actgroup = new TableStore({accessor: Module.data.actgroup, model, safemode});  // setup a table store in Module so all pages can access    
     dataPromises.push(Module.tableStores.actgroup.getAll());
 
+    // Actrates
+    model = `/items/actrates`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.actrates = new TableStore({accessor: Module.data.actrates, model, safemode});  // setup a table store in Module so all pages can access    
+
     // Pmt terms
     model = `/items/pmtterms`;
 
@@ -83,6 +93,13 @@ let moduleStart = function() {
 
     Module.tableStores.pmtterms = new TableStore({accessor: Module.data.pmtterms, model, safemode});  // setup a table store in Module so all pages can access    
     dataPromises.push(Module.tableStores.pmtterms.getAll());
+
+    // Price levels
+    //model = `/items/pricelevel`;
+
+    //itemData.addModel(model);                          
+
+    //Module.tableStores.pricelevel = new TableStore({accessor: Module.data.pricelevel, model, safemode});  // setup a table store in Module so all pages can access    
 
     // Contact table ---
     model = `/contacts/contact`;
@@ -188,5 +205,36 @@ window.name = 'R4_main'
 
 Module.modal = new Modal();
 Module.widgets.MDateModal = new MDateModal(document.getElementById('widget-mdate-modal'));
+
+let winSize = '';
+
+window.onresize = function () {
+  let newWinSize = 'xs'; // default value
+  let w = window.innerWidth;
+
+  if (w >= 1400) {
+    newWinSize = 'xxl';
+  }
+  else if (w >= 1200) {
+    newWinSize = 'xl';
+  } 
+  else if (w >= 992) {
+    newWinSize = 'lg';
+  } 
+  else if (w >= 768) 
+  {
+    newWinSize = 'md';
+  }
+  else if (w >= 576) 
+  {
+    newWinSize = 'sm';
+  }
+
+  if (newWinSize != winSize ) {
+    document.dispatchEvent(new CustomEvent('breakpoint-change', {detail: {size: newWinSize}, bubbles: false}));
+
+    winSize = newWinSize;
+  }
+};
 
 moduleStart();

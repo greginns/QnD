@@ -139,6 +139,7 @@ const Items = class extends Model {
         narrbook: new Fields.Text({null: true, verbose: 'Narrative - Booking'}),
         narraddon: new Fields.Text({null: true, verbose: 'Narrative - Add-On'}),
         narroff: new Fields.Text({null: true, verbose: 'Narrative - Office'}),
+        maxppl: new Fields.Integer({null: true, default: 0, verbose: 'Max Ppl/Item'}),
       },
       
       constraints: {
@@ -190,7 +191,6 @@ const Rates = class extends Model {
         privilege: new Fields.Char({notNull: true, maxLength: 5, default: 'rsvsA', choices: PRIVILEGES, verbose: 'Privilege'}),
         ratebase1: new Fields.Char({notNull: true, maxLength: 5, default: 'P', choices: RATEBASE1, verbose: 'Rate Base-1'}),
         ratebase2: new Fields.Char({notNull: true, maxLength: 5, default: 'F', choices: RATEBASE2, verbose: 'Rate Base-2'}),
-        
         addlppl: new Fields.Integer({notNull: true, default: 0, maxLength: 2, verbose: 'Addl Ppl'}),
       },
 
@@ -757,7 +757,6 @@ const Lodging = class extends Items {
         unitized: new Fields.Boolean({null: true, default: true, verbose: 'Unitized'}),
         checkin: new Fields.Time({null: true, verbose: 'Check-in Time'}),
         checkout: new Fields.Time({null: true, verbose: 'Check-out Time'}),
-        maxppl: new Fields.Integer({null: true, default: 0, verbose: 'Max ppl/unit'}),
         unitinv: new Fields.Boolean({null: true, default: true, verbose: 'Units on Invoice'}),
         bookbeds: new Fields.Boolean({null: true, default: true, verbose: 'Book Beds'}),
         assign: new Fields.Char({null: true, maxLength: 1, default: 'B', choices: ASSIGN, verbose: 'Assign unit'}),
