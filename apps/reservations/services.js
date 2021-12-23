@@ -27,8 +27,31 @@ const makeCSRF = async function(database, pgschema, user) {
   return CSRFToken;
 }
 
+class ItemService extends ModelService {
+  async create({database = '', pgschema = '', user = {}, rec = {}} = {}) {
+    // Insert row - Needs to get highest seq1
+    let recs = await this.model.select({database, pgschema, user, rec: {rsvno: rec.rsvno}});
+    if (!recs.status == 200) return recs;
+    
+    let data = recs.data;
+    let seq1 = (data.length == 0) ? -1 : parseInt(data[data.length-1].seq1);
+
+    rec.seq1 = ++seq1;
+
+    let tobj = new this.model(rec);
+    let tm = await tobj.insertOne({database, pgschema, user});
+
+    //if (tm.isGood()) {
+    //  zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, tm.data);
+    //}
+
+    return tm;    
+  }
+}
+
 // Model services
 services.main = new ModelService({model: models.Main});
+services.item = new ItemService({model: models.Item});
 
 services.discount = new ModelService({model: models.Discount});
 services.cancreas = new ModelService({model: models.Cancreas});
@@ -105,15 +128,82 @@ services.output = {
   },
 };
 
-services.pricing = {
-  create: async function({database = '', pgschema = '', user = {}, rec = {}} = {}) {
+services.calc = {
+  pricing: async function({database = '', pgschema = '', user = {}, rec = {}} = {}) {
     // to calc price
     // cat, code, date, duration, qty, hours, times[], infants-seniors.
     
     let p = new Pricing(database, pgschema, user, rec);
 
-    return await p.priceIt();
+    return await p.calcIt();
+  },
+
+  discount: async function({database = '', pgschema = '', user = {}, rec = {}} = {}) {
+    let d = new Discount(database, pgschema, user, rec);
+
+    return await d.calcIt();
   }
+}
+
+class Discount {
+  constructor(database, pgschema, user, pobj) {
+    this.database = database;
+    this.pgschema = pgschema;
+    this.user = user;
+    this.pobj = pobj;
+
+    this.tm = new TravelMessage();
+    this.discRecord = {};
+  }
+
+  async calcIt() {
+    // disccode, discamt (if allowed), ppl, dur, charges
+    //
+    // Flat, %, per person, per person day, 
+    await this.getDiscount();
+    let discount = this.calc();
+
+    if (this.discRecord.maxdisc != 0) discount = Math.min(discount, this.discRecord.maxdisc);
+
+    this.tm.data = (Math.round(discount*100)/100).toFixed(2);
+
+    return this.tm;
+  }
+
+  calc() {
+    let amt = parseFloat(this.discRecord.amount) || parseFloat(this.pobj.discamt);    // override 0 amount in setup with entered amount
+    let basis = this.discRecord.basis;
+    let ppl = parseInt(this.pobj.ppl);
+    let dur = parseInt(this.pobj.dur);
+
+    if (! ('basis' in this.discRecord)) return 0;
+    if (!this.discRecord.active) return 0;
+
+    switch (basis) {
+      case 'F':
+        return amt;
+
+      case '%':
+        return (amt/100) * parseFloat(this.pobj.charges);
+
+      case 'P':
+        return ppl*amt;
+
+      case 'D':
+        return ppl*amt*dur;
+
+      default:
+        return 0;
+    }
+  }
+
+  async getDiscount() {
+    let res = await models.Discount.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [this.pobj.disccode]});
+    if (res.status == 200) {
+      this.discRecord = res.data;
+    }
+  }
+
 }
 
 class Pricing {
@@ -147,7 +237,21 @@ class Pricing {
     this.adultList = ['adult', 'adults', 'father', 'fathers', 'mother', 'mothers', 'supervisor', 'supervisors', 'teacher', 'teachers', 'parent', 'parents'];
     this.seniorList = ['senior', 'seniors', 'aged', 'old folks'];
 
-    this.data = {pdesc: ['','','','','','',''], pqty: [0,0,0,0,0,0,0], price: [0,0,0,0,0,0,0], pextn: [0,0,0,0,0,0,0]}
+    this.data = {pdesc: ['','','','','','','','Complimentary'], pqty: [0,0,0,0,0,0,0,0], price: [0,0,0,0,0,0,0,0], pextn: [0,0,0,0,0,0,0,0]}
+  }
+
+  async calcIt() {
+    await this.getBasicData();
+
+    this.setPriceDescs();
+    this.setQtys();
+    await this.getprice();
+    this.calcExtn();
+    this.formatPrices();
+
+    this.tm.data = this.data;
+
+    return this.tm;
   }
 
   async getBasicData() {
@@ -162,27 +266,13 @@ class Pricing {
     this.plevel = plevel.data;
   }
 
-  async priceIt() {
-    await this.getBasicData();
-
-    this.setPriceDescs();
-    this.setQtys();
-    await this.getprice();
-    this.calcExtn();
-    this.formatPrices();
-
-    this.tm.data = this.data;
-
-    return this.tm;
-  }
-
   async getprice() {
     let timeno = -1, price;
     let code = this.pobj.code, rateno = this.pobj.rateno, times = this.pobj.times || [''];
     let dur = parseInt(this.pobj.dur) || 1;
     let startDate = datetimer(this.pobj.date, this.dateFormat);
     let endDate = datetimer(startDate).add(dur-1, 'days');
-    let prices = [0,0,0,0,0,0,0];
+    let prices = [0,0,0,0,0,0,0,0];
 
     let lod = startDate.listOfDays(endDate);
     
@@ -231,7 +321,7 @@ class Pricing {
   }
 
   formatPrices() {
-    for (let i=0; i<7; i++) {
+    for (let i=0; i<this.data.price.length; i++) {
       this.data.price[i] = this.data.price[i].toFixed(2);
       this.data.pextn[i] = this.data.pextn[i].toFixed(2);
     }

@@ -93,6 +93,7 @@ class Resupdate extends Verror {
     // if loading a new rsv, then set this.processed = false.
 
     this.rsvno = params.rsvno;
+    this.itemManager.setRsvno(this.rsvno);
 
     this.model.main = await Module.tableStores.main.getOne(this.rsvno); 
     this.origData = this.$copy(this.model.main);
@@ -422,11 +423,19 @@ class ItemManager extends Verror {
   }
 
   async ready() {
-    this.cats['A'] = new Activity(this.els['A']);
+    this.cats['A'] = new Activity(this.els['A'], this.rsvno);
     this.cats['A'].ready();
   }
 
+  setRsvno(rsvno) {
+    this.rsvno = rsvno;
+
+    this.cats['A'].setRsvno(this.rsvno);
+  }
+
   bookNew(cat) {
+    this.cats[cat].bookNew();
+
     let itemmgr = this.cats[cat]._section;
 
     this.home.prepend(itemmgr);
@@ -457,13 +466,16 @@ class Activity extends Verror {
 
     this.model.codes = [];
     this.model.days = [];
+    this.model.rate = {};
 
-    this.model.item = {cat: "A", pdesc: ['','','','','','',''], price: [0,0,0,0,0,0,0], pqty: [0,0,0,0,0,0,0], pextn: [0,0,0,0,0,0,0]};
+    this.model.item = {};
     this.activity = {};
 
     this.model.actgroups = [];
     this.model.activity = [];       // overall list of activities from table
     this.model.activities = [];     // activites within a group
+    this.model.discounts = [];
+    this.model.discount = {};
     this.model.facade = {};
   }
 
@@ -488,6 +500,7 @@ class Activity extends Verror {
     return new Promise(async function(resolve) {
       Module.tableStores.actgroup.addView(new TableView({proxy: this.model.actgroups, filterFunc}));
       Module.tableStores.activity.addView(new TableView({proxy: this.model.activity, filterFunc}));
+      Module.tableStores.discount.addView(new TableView({proxy: this.model.discounts, filterFunc}));
 
       resolve();
     }.bind(this));
@@ -500,14 +513,48 @@ class Activity extends Verror {
     return true;  
   }
 
+  setRsvno(rsvno) {
+    this.rsvno = rsvno;
+  }
+
+  bookNew() {
+    this.initItem();
+  }
+
+  initItem() {
+    this.model.item = {
+      rsvno: this.rsvno,
+      cat: "A", 
+      infants: 0, 
+      children: 0, 
+      youth: 0, 
+      adults: 0, 
+      seniors: 0, 
+      pdesc: ['','','','','','',''], 
+      price: [0,0,0,0,0,0,0], 
+      pqty: [0,0,0,0,0,0,0], 
+      pextn: [0,0,0,0,0,0,0],
+    };
+  }
+
+  async save(ev) {
+    let item = this.model.item.toJSON();
+
+    item.rsvno = this.rsvno;
+    item.snapshot = JSON.parse(JSON.stringify(item));
+
+    let res = await Module.tableStores.item.insert(item);
+    console.log(res)
+  }
+
   ppl(ev) {
     if (ev.state == 'close' && ev.accept) {
       let text = [];
-      let ppl = 0, qty = 0;
+      let ppl = 0;
 
       for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
         if (this.model.item[g] > 0) {
-          text.push(this.model.item[g] + '/' + g.substr(0,1).toUpperCase());
+          text.push(this.model.item[g] + '/' + g.substring(0,1).toUpperCase());
           ppl += parseInt(this.model.item[g]);
         }
       }
@@ -552,12 +599,14 @@ class Activity extends Verror {
 
   rate(ev) {
     if (ev.state == 'close' && ev.accept) {
+      this.model.rate = {};
       let rateno = this.model.item.rateno;
       let text = '';
 
       if (rateno) {
         for (let rate of this.model.rates) {
           if (rate.rateno == rateno) {
+            this.model.rate = rate;
             text = rate.name;
             break;
 
@@ -565,8 +614,7 @@ class Activity extends Verror {
         }
       }
 
-      this.model.facade.rate = text;
-      console.log(this.model.item.toJSON())      
+      this.model.facade.rate = text + '  $' + this.model.item.charges;
     }
   }
 
@@ -593,7 +641,7 @@ class Activity extends Verror {
         ttotdata = data[dtn].ttot || {};
 
         for (let tm in timedata) {
-          let text = tm.substr(0,5).padEnd(10, ' ') + String(timedata[tm]['limit']).padStart(10, ' ') + String(timedata[tm]['booked']).padStart(10, ' ') + String(timedata[tm]['avail']).padStart(10, ' ');
+          let text = tm.substring(0,5).padEnd(10, ' ') + String(timedata[tm]['limit']).padStart(10, ' ') + String(timedata[tm]['booked']).padStart(10, ' ') + String(timedata[tm]['avail']).padStart(10, ' ');
           text = text.replaceAll(' ', '\xA0');
 
           timedata[tm]['time'] = tm;
@@ -727,7 +775,7 @@ class Activity extends Verror {
 
     if (!pobj.rateno) return;
 
-    let res = await Module.data.pricing.insert(pobj);
+    let res = await io.post({calc: pobj}, `/reservations/v1/calc/pricing`);
 
     if (res.status == 200) {
       this.model.item.pdesc = res.data.pdesc;
@@ -735,7 +783,76 @@ class Activity extends Verror {
       this.model.item.price = res.data.price;
       this.model.item.pextn = res.data.pextn;
     }
-  }  
+
+    this.calcCharges();
+  }
+  
+  calcCharges() {
+    let charges = 0, qty = this.model.item.pqty.toJSON(), price = this.model.item.price.toJSON();
+    let extn = [0,0,0,0,0,0,0,0];
+
+    for (let i=0; i<8; i++) {   // 8 is comped
+      extn[i] = qty[i]*price[i];
+
+      if (i<7) charges += extn[i];
+
+      extn[i] = extn[i].toFixed(2);
+    };
+
+    this.model.item.pextn = extn;
+    this.model.item.charges = charges.toFixed(2);
+  }
+
+  changeDiscount() {
+    let disc;
+
+    if (!this.model.item.disccode) {
+      this.model.item.discount = '0.00';
+      this.model.item.discamt = '0';
+      this.model.discount = {};
+
+      return;
+    }
+
+    for (disc of this.model.discounts) {
+      if (disc.code == this.model.item.disccode) {
+        this.model.discount = disc;
+        break;
+      }
+    }
+
+    if (parseFloat(disc.amount) != 0) {
+      this.model.item.discamt = disc.amount;
+      this.model.discount.manual = false;
+      this.calcDiscount();
+    }
+    else {
+      this.model.discount.manual = true;
+      this.model.item.discamt = '';
+    }
+  }
+
+  async calcDiscount() {
+    let pobj = {};    
+
+    pobj.ppl = this.model.item.ppl;
+    pobj.dur = this.model.item.dur;
+    pobj.disccode = this.model.item.disccode;
+    pobj.discamt = this.model.item.discamt;
+    pobj.charges = this.model.item.charges;
+
+    let res = await io.post({calc: pobj}, `/reservations/v1/calc/discount`);
+
+    if (res.status == 200) {
+      this.model.item.discount = res.data;
+    }
+  }
+
+  removeDiscount(obj) {
+    this.model.item.disccode = '';
+
+    this.calcDiscount();
+  }
 };
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

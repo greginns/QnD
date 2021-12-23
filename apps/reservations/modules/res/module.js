@@ -17,7 +17,8 @@ let moduleStart = function() {
     // setup data table access
     // gets us access to raw data.
     Module.data.main = new TableAccess({modelName: 'main', url: `/reservations/v1/main`});
-    Module.data.pricing = new TableAccess({modelName: 'pricing', url: `/reservations/v1/pricing`});  // pseudo table
+    Module.data.item = new TableAccess({modelName: 'item', url: `/reservations/v1/item`});
+    Module.data.discount = new TableAccess({modelName: 'discount', url: `/reservations/v1/discount`});
 
     Module.data.activity = new TableAccess({modelName: 'activity', url: `/items/v1/activity`});    
     Module.data.actgroup = new TableAccess({modelName: 'actgroup', url: `/items/v1/actgroup`});    
@@ -55,6 +56,21 @@ let moduleStart = function() {
 
     Module.tableStores.main = new TableStore({accessor: Module.data.main, model, safemode});  // setup a table store in Module so all pages can access
     
+    // item table ---
+    model = `/reservations/item`;
+
+    resData.addModel(model); 
+    
+    Module.tableStores.item = new TableStore({accessor: Module.data.item, model, safemode});  // setup a table store in Module so all pages can access    
+
+    // Discount
+    model = `/reservations/discount`;
+
+    resData.addModel(model);
+
+    Module.tableStores.discount = new TableStore({accessor: Module.data.discount, model, safemode});  // setup a table store in Module so all pages can access
+    dataPromises.push(Module.tableStores.discount.getAll());
+
     // Area
     model = `/items/area`;
 

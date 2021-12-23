@@ -1430,6 +1430,7 @@ const Area = class extends Model {
         latitude: new Fields.Float({null: true, maxlength: 12, verbose: 'Latitude'}),
         longitude: new Fields.Float({null: true, maxlength: 12, verbose: 'Longitude'}),        
         dirlink: new Fields.Char({null: true, maxLength: 100, verbose: 'Directions Link'}),
+        test: new Fields.Time({null: true, maxLength: 100, array: 1, verbose: 'Times'}),
       },
       
       constraints: {

@@ -40,7 +40,6 @@ const getCurrentDate = function() {
   let dt = ((new Date()).toJSON()).split('T');
 
   return dt[0];
-
 }
 
 const getCurrentTime = function() {
@@ -71,7 +70,7 @@ const DISCBASIS = [
   {text: 'Flat', value: 'F'},
   {text: 'Per Person', value: 'P'},
   {text: 'Per Person/Day', value: 'D'},
-  {text: 'Open', value: 'B'},
+  //{text: 'Open', value: 'B'},
 ]
 
 const Include = class extends Model {
@@ -108,14 +107,15 @@ const Include = class extends Model {
         fv: new Fields.Boolean({default: true, verbose: 'Fixed Value'}),
         adj: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Adj Amount'}),     
         orprice: new Fields.Boolean({default: false, verbose: 'Prices O/R'}),
-        prices: new Fields.Jsonb({verbose: 'Prices'}),        
+        prices: new Fields.Jsonb({verbose: 'Prices'}),  
+        snapshot: new Fields.Jsonb({verbose: 'Snapshot'}),      
         
         rslrseq2: new Fields.Integer({notNull: true, verbose: 'Reseller Included Sequence'}),
         supplier: new Fields.Char({null: true, maxLength: 8, verbose: 'Supplier Rsvno'}),
         suppseq1: new Fields.Integer({null: true, verbose: 'Supplier Item'}),
 
         charges: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Charges'}),
-        comped: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Complementary'}),
+        comped: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Complimentary'}),
         discount: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Discount'}),
         tip: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Tip'}),
         comm: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Commission'}),
@@ -333,7 +333,7 @@ const Main = class extends Model {
         pmtbal3: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Pmt-3 Balance'}),
 
         charges: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Charges'}),
-        comped: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Complementary'}),
+        comped: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Complimentary'}),
         discount: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Discount'}),
         tip: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Tip'}),
         comm: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Commission'}),
@@ -350,7 +350,7 @@ const Main = class extends Model {
         cancfee: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Cxl Fee'}),
 
         xcharges: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Charges'}),
-        xcomped: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Complementary'}),
+        xcomped: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Complimentary'}),
         xdiscount: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Discount'}),
         xtip: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Tip'}),
         xcomm: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Commission'}),
@@ -484,18 +484,23 @@ const Item = class extends Model {
         code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
         opt: new Fields.Integer({null: true, verbose: 'Option'}),
         date: new Fields.Date({null: true, verbose: 'Date'}),
-        waitlist: new Fields.Boolean({default: false, verbose: 'Waitlist'}),
+        times: new Fields.Time({null: true, array: 1, verbose: 'Times'}),
+        units: new Fields.Integer({null: true, array: 1, verbose: 'Units'}),
+        ttimes: new Fields.Time({null: true, array: 1, verbose: 'To Times'}),
+        rateno: new Fields.Integer({notNull: true, verbose: 'Rate#'}),
         infants: new Fields.Integer({notNull: true, verbose: 'Infants'}),
         children: new Fields.Integer({notNull: true, verbose: 'Children'}),
         youth: new Fields.Integer({notNull: true, verbose: 'Youth'}),
         adults: new Fields.Integer({notNull: true, verbose: 'Adults'}),
         seniors: new Fields.Integer({notNull: true, verbose: 'Seniors'}),
         ppl: new Fields.Integer({notNull: true, verbose: 'Total Ppl'}),
+        waitlist: new Fields.Boolean({default: false, verbose: 'Waitlist'}),
         disccode: new Fields.Char({null: true, maxLength: 8, verbose: 'Discount'}),
-        rslrseq1: new Fields.Integer({notNull: true, verbose: 'Reseller Item Sequence'}),
+        rslrseq1: new Fields.Integer({null: true, verbose: 'Reseller Item Sequence'}),
+        snapshot: new Fields.Jsonb({verbose: 'Snapshot'}),
 
         charges: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Charges'}),
-        comped: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Complementary'}),
+        comped: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Complimentary'}),
         discount: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Discount'}),
         tip: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Tip'}),
         comm: new Fields.Decimal({null: true, digits: 10, decimals: 2, default: '0.00', verbose: 'Commission'}),
@@ -610,6 +615,7 @@ const Actinclude = class extends Include {
     return {
       schema: {
         activity: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Activity'}),
+        times: new Fields.Time({notNull: true, array: 1, verbose: 'Times'}),
       },
 
       constraints: {
@@ -699,7 +705,7 @@ const Actdaily = class extends Daily {
     return {
       schema: {
         activity: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Activity'}),
-        time: new Fields.Time({null: true, verbose: 'Last Accessed Time'}),
+        time: new Fields.Time({null: true, verbose: 'Activity Time'}),
       },
 
       constraints: {
@@ -733,6 +739,7 @@ const Lodginclude = class extends Include {
     return {
       schema: {
         lodging: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Lodging'}),
+        units: new Fields.Integer({notNull: true, array: 1, verbose: 'Units'}),
       },
 
       constraints: {
@@ -873,6 +880,7 @@ const Mealinclude = class extends Include {
     return {
       schema: {
         meal: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Meal'}),
+        times: new Fields.Time({notNull: true, array: 1, verbose: 'Times'}),
       },
 
       constraints: {

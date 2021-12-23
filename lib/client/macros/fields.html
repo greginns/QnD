@@ -338,11 +338,11 @@
 {% endmacro %}
 
 
-{% macro Dropper(id='', maxlength='', mvc_value='', mvc_filter='', handler='', template_id='',label='', placeholder='', dir_class='', dd_class='') %}
+{% macro Dropper(id='', maxlength='', mvc_value='', mvc_filter='', mvc_enabled='', handler='', template_id='',label='', placeholder='', dir_class='', dd_class='') %}
 <div mvc-dropper='{{handler}}' data-template='{{template_id}}' class='dropper {{dir_class}}' data-id='{{id}}'>
   <div class='form-label-group'>
-    <input class='form-control' mvc-value='{{mvc_value}}' mvc-filter='{{mvc_filter}}' placeholder='{{placeholder}}' style='text-overflow:ellipsis' data-trigger>
-    <div class='dropper-content {{dd_class}}' tabindex=-'1'>
+    <input class='form-control' mvc-value='{{mvc_value}}' mvc-filter='{{mvc_filter}}' mvc-enabled='{{mvc_enabled}}' placeholder='{{placeholder}}' style='text-overflow:ellipsis' data-trigger>
+    <div class='dropper-content {{dd_class}}'>
       <!-- template ends up here -->
     </div>    
     <label class='split-bg'>{{label}}</label>

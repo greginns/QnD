@@ -12,6 +12,13 @@ const version = 'v1';
 const models = require(root + `/apps/${app}/models.js`);
 const services = require(root + `/apps/${app}/services.js`);
 
+const getDBandPG = function(req) {
+  let database = req.session.data.database;
+  let pgschema = req.session.data.pgschema;
+
+  return {database, pgschema};
+}
+
 // Page route
 Router.add(new RouterMessage({
   method: 'get',
@@ -117,10 +124,65 @@ Router.add(new RouterMessage({
 
 // Model Routes
 new Routes({app, subapp: 'main', version, allowCORS: true, model: models.Main, services: services.main});
-new Routes({app, subapp: 'pricing', version, allowCORS: true, model: null, services: services.pricing});
+new Routes({app, subapp: 'item', version, allowCORS: true, model: models.Item, services: services.item});
 
 new Routes({app, subapp: 'discount', version, allowCORS: true, model: models.Discount, services: services.discount});
 new Routes({app, subapp: 'cancreas', version, allowCORS: true, model: models.Cancreas, services: services.cancreas});
+
+// Calculation routes
+Router.add(new RouterMessage({
+  method: 'post',
+  app: app,
+  subapp: 'calc',
+  version: version,
+  path: `/pricing`, 
+  id: 'pricing',
+  level: ACCESS,
+  inAPI: false,
+  apiInfo: {},
+  allowCORS: true,
+  fn: async function(req) {
+    let {database, pgschema} = getDBandPG(req);
+    let user = req.session.user;
+
+    let tm = await services.calc.pricing({database, pgschema, user, rec: req.body.calc || {} });
+
+    return tm.toResponse();
+  }.bind(this), 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
+
+Router.add(new RouterMessage({
+  method: 'post',
+  app: app,
+  subapp: 'calc',
+  version: version,
+  path: `/discount`, 
+  id: 'discount',
+  level: ACCESS,
+  inAPI: false,
+  apiInfo: {},
+  allowCORS: true,
+  fn: async function(req) {
+    let {database, pgschema} = getDBandPG(req);
+    let user = req.session.user;
+
+    let tm = await services.calc.discount({database, pgschema, user, rec: req.body.calc || {} });
+
+    return tm.toResponse();
+  }.bind(this), 
+  security: {
+    strategies: [
+      {session: {allowAnon: false, needCSRF: true}},
+      {basic: {allowAnon: false, needCSRF: false}},
+    ],
+  } 
+}));
 
 //strategy rtns
 Authentication.add(app, 'session', async function(req, security, strategy) {
