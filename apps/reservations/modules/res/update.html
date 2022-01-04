@@ -614,46 +614,22 @@
         </button>
       </div>
     </div>  
-
-    <div mvc-each='days' mvc-index='$index1'>
-      <div class='row'>
-        <div class='col-1'>
-          <span mvc-text='days[$index1].day'></span>
-        </div>
-        <div class='col-11'>
-          <div mvc-each='days[$index1].times' mvc-index='$index2'>
-            <div class='row'>
-              <div class='col-3'>
-                <span mvc-text='days[$index1].times[$index2].time' mvc-filter='time'></span>
-              </div>
-              <div class='col-2'>
-                <span mvc-text='days[$index1].times[$index2].limit'></span>
-              </div>
-              <div class='col-2'>
-                <span mvc-text='days[$index1].times[$index2].booked'></span>
-              </div>
-              <div class='col-2'>
-                <span mvc-text='days[$index1].times[$index2].avail'></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  
-  </section>
+    </section>
 
   <section id='rsvs-rsv-items-section'>
     <div class='row'>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         Date
       </div>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
         Guests
       </div>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         Item
       </div>
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+        Dur
+      </div>      
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         Time/Unit
       </div>
@@ -662,22 +638,49 @@
       </div>
     </div>
 
-    <div id='rsvs-rsv-items-list'>
+    <div id='rsvs-rsv-items-new'>
+    </div>
+
+    <div mvc-each='facade' mvc-click='bookOld()'>
+      <div class='row pointer' data-index='$index' mvc-class='facade[$index].klass'>
+        <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+          <span mvc-text='facade[$index].date'></span>
+        </div>
+        <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
+          <span mvc-text='facade[$index].ppl'></span>
+        </div>
+        <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+          <span mvc-text='facade[$index].code'></span>
+        </div>
+        <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
+          <span mvc-text='facade[$index].dur'></span>
+        </div>        
+        <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+          <span mvc-text='facade[$index].time'></span>
+        </div>
+        <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+          <span mvc-text='facade[$index].rate'></span>
+        </div>
+      </div>
     </div>
   </section>
 
   <section id='entry-item-A' style='display: none'>
     <div class='row act-color'>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='') }}
+        {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='', mvc_on='{"change": "date()"}') }}
       </div>
 
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
         {{ fields.Dropper(id='item-guest', mvc_value='facade.ppl', handler='ppl', template_id='rsv-update-dropdown-guests', dir_class='dropup', dd_class='dropper-guests', label='') }}
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         {{ fields.Dropper(id='item-code', mvc_value='facade.code', handler='code', template_id='rsv-update-dropdown-code', dir_class='dropup', dd_class='dropper-code', label='', mvc_enabled='item.date') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+        {{ fields.Char(id='item-dur', mvc_value='item.dur', label='', mvc_enabled='false') }}
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
@@ -690,32 +693,51 @@
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         {{ buttons.btnsm(text='Save', mvc_click='save()') }}
+        <span mvc-show='item.seq1'>
+          {{ buttons.btnsm(class='danger', text='Delete', mvc_click='delete()') }}
+          {{ buttons.btnsm(class='secondary', text='Done', mvc_click='bookDone()') }}
+        </span>
       </div>
     </div>
   </section>
+
+  <section id='entry-item-M' style='display: none'>
+    <div class='row meal-color'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='', mvc_on='{"change": "date()"}') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-guest', mvc_value='facade.ppl', handler='ppl', template_id='rsv-update-dropdown-guests', dir_class='dropup', dd_class='dropper-guests', label='') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-code', mvc_value='facade.code', handler='code', template_id='rsv-update-dropdown-code', dir_class='dropup', dd_class='dropper-code', label='', mvc_enabled='item.date') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+        {{ fields.Char(id='item-dur', mvc_value='item.dur', mvc_role='integer', label='') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-time', mvc_value='facade.time', mvc_filter='time', handler='time', template_id='rsv-update-dropdown-time', dir_class='dropup dropright', dd_class='dropper-time', label='', mvc_enabled='item.date') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-rate', mvc_value='facade.rate', handler='rate', template_id='rsv-update-dropdown-rate', dir_class='dropup dropright', dd_class='dropper-rate drop-right', label='', mvc_enabled='item.date') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ buttons.btnsm(text='Save', mvc_click='save()') }}
+        <span mvc-show='item.seq1'>
+          {{ buttons.btnsm(class='danger', text='Delete', mvc_click='delete()') }}
+          {{ buttons.btnsm(class='secondary', text='Done', mvc_click='bookDone()') }}
+        </span>
+      </div>
+    </div>
+  </section>
+
 </page>
-
-<template id='display-item-A'>
-  <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-    <span mvc-text='item.date' mvc-filter='date'></span>
-  </div>
-
-  <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-    <span mvc-text='facade.ppl'></span>
-  </div>
-
-  <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-    <span mvc-text='facade.code'></span>
-  </div>
-
-  <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-    <span mvc-text='facade.time'></span>
-  </div>
-
-  <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-    <span mvc-text='facade.price'></span>
-  </div>
-</template>
 
 <template id='rsv-update-dropdown-guests'>
   <div class='container'>
@@ -770,10 +792,10 @@
   <div class='container'>
     <div class='row mb-3'>
       <div class='col-12 col-md-6'>
-        {{ fields.SelectMVC(id='item-group', size='10', mvc_value='item.group', mvc_each='actgroups', mvc_on='{"change": "groupChanged()"}', valueField='code', textField='name', label='') }}
+        {{ fields.SelectMVC(id='item-group', size='10', mvc_value='item.group', mvc_each='productGroups', mvc_on='{"change": "groupChanged()"}', valueField='code', textField='name', label='') }}
       </div>
       <div class='col-12 col-md-6'>
-        {{ fields.SelectMVC(id='item-code', size='10', mvc_value='item.code', mvc_each='activities', valueField='code', textField='name', classField='class', label='') }}
+        {{ fields.SelectMVC(id='item-code', size='10', mvc_value='item.code', mvc_each='groupProducts', valueField='code', textField='name', classField='class', label='') }}
       </div>
     </div>
 

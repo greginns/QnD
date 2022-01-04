@@ -37,8 +37,8 @@ class Mealsched extends Setup {
     this.model.year = '';
 
     this.model.range = {
-      fromdate: '2021-10-01',
-      todate: '2021-10-31',
+      fromdate: '',
+      todate: '',
       time: '',
       limit: 0,
       dowall: true,
@@ -280,7 +280,9 @@ class Mealsched extends Setup {
       if (dows[dow]) {
         // have one, what to do with it?
         let dayEntry = sched[dd-1];   // that day's entry
-
+console.log(dd)        
+console.log(sched)
+console.log(dayEntry)
         dayEntry[Datetime.timeRound(range.time)] = {limit: range.limit};
       }
     }

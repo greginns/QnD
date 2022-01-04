@@ -35,7 +35,7 @@ const Booked = class extends Model {
 
 const Activitybooked = class extends Booked {
   // booked:
-  //    31x [{time: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, ppl: xx, qty: xx}, ]}, }, ] 
+  //    31x [{HH:MM.SSS: {booked: xx, daily: [{rsvno: xx, seq1: xx, seq2: xx, day: xx, ppl: xx, qty: xx}, ]}, }, ] 
   //    one {} for all times in a day, one {} for each rsv daily
   //
   constructor(obj, opts) {

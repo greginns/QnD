@@ -8,7 +8,7 @@ import {datetimer} from '/~static/lib/client/core/datetime.js';
 import {Verror} from '/~static/project/subclasses/simple-entry.js';
 import {Notes} from '/~static/lib/client/widgets/notes.js';
 
-class Resupdate extends Verror {
+class Reserv extends Verror {
   constructor(element) {
     super(element);
   }
@@ -94,6 +94,7 @@ class Resupdate extends Verror {
 
     this.rsvno = params.rsvno;
     this.itemManager.setRsvno(this.rsvno);
+    this.itemManager.getItems(this.rsvno);
 
     this.model.main = await Module.tableStores.main.getOne(this.rsvno); 
     this.origData = this.$copy(this.model.main);
@@ -415,68 +416,127 @@ class ItemManager extends Verror {
   }
 
   createModel() {
-    this.home = document.getElementById('rsvs-rsv-items-list');
-    this.els = {
-      A: 'entry-item-A',
-    };
+    this.home = document.getElementById('rsvs-rsv-items-new');
     this.cats = {};
+    this.model.facade = [];
+    this.currentItem;
+    this.itemList = [];
   }
 
   async ready() {
-    this.cats['A'] = new Activity(this.els['A'], this.rsvno);
+    this.cats['A'] = new Activity();
     this.cats['A'].ready();
+
+    this.cats['M'] = new Meal();
+    this.cats['M'].ready();
   }
 
   setRsvno(rsvno) {
     this.rsvno = rsvno;
-
-    this.cats['A'].setRsvno(this.rsvno);
   }
 
-  bookNew(cat) {
-    this.cats[cat].bookNew();
+  async getItems() {
+    let facade = [];
+    let filters = {rsvno: this.rsvno};
+    let res = await Module.data.item.getMany({filters});
 
-    let itemmgr = this.cats[cat]._section;
+    if (res.status != 200) return;
+
+    this.itemList = res.data;
+
+    for (let item of res.data) {
+      this.createItem(item.cat, item.seq1);
+
+      let data = await this.currentItem.getFacadeData(item);
+
+      facade.push(data);
+    }
+
+    this.model.facade = facade;
+  }
+
+  setRsvno(rsvno) {
+    this.rsvno = rsvno;
+  }
+
+  async createItem(cat) {
+    this.currentItem = this.cats[cat];
+    this.currentItem.setRsvno(this.rsvno);
+  }
+
+  displayItem() {
+    let itemmgr = this.currentItem._section;
 
     this.home.prepend(itemmgr);
     itemmgr.style.display = 'block';
   }
+
+  hideItem() {
+    let itemmgr = this.currentItem._section;
+
+    itemmgr.style.display = 'none';
+  }
+
+  bookNew(cat) {
+    this.createItem(cat);
+    this.currentItem.bookNew(this.bookDone.bind(this));
+    this.displayItem();
+  }
+
+  bookOld(obj) {
+    let idx = obj.target.closest('div.row').getAttribute('data-index');
+    let item = this.itemList[idx];
+
+    this.createItem(item.cat);
+    this.currentItem.bookOld(item, this.bookDone.bind(this));
+    this.displayItem();    
+  }
+
+  bookDone() {
+    this.hideItem();
+    this.getItems();
+  }
 }
 
-class Activity extends Verror {
+class BookItem extends Verror {
   // Needs res/ttot data from server
   // factor that in to space
   // sort times by boo/time
-  constructor(element) {
-    super(element);
+  constructor(el) {
+    super(el);
   }
 
   createModel() {
     this.model.items = [];
-    this.model.cats = [
-      {text: 'Package', value: 'P'},
-      {text: 'Transportation', value: 'T'},
-      {text: 'Retail', value: 'S'},
-      {text: 'Miscellaneous', value: 'O'},
-      {text: 'Rental', value: 'R'},
-      {text: 'Meal', value: 'M'},
-      {text: 'Lodging', value: 'L'},
-      {text: 'Activity', value: 'A'},
-    ];
-
+    this.model.item = {};
     this.model.codes = [];
     this.model.days = [];
     this.model.rate = {};
 
-    this.model.item = {};
-    this.activity = {};
+    this.model.productGroups = [];      // groups
+    this.model.products = [];           // all products
+    this.model.groupProducts = [];      // products within a group
 
-    this.model.actgroups = [];
-    this.model.activity = [];       // overall list of activities from table
-    this.model.activities = [];     // activites within a group
+    this.model.product = {};
     this.model.discounts = [];
     this.model.discount = {};
     this.model.facade = {};
+
+    this.existingData = {};
+    this.klasses = {
+      'A': 'act-color',
+      'L': 'lodge-color',
+      'R': 'rent-color',
+      'M': 'meal-color',
+      'O': 'other-color',
+      'S': 'store-color',
+      'T': 'trans-color',
+      'P': 'package-color'
+    };    
+
+    this.dateFmt = 'YYYY-MM-DD';
+    this.timeFmt = 'H:mm A';
+    this.bookDoneCallback;
   }
 
   async ready() {
@@ -484,309 +544,106 @@ class Activity extends Verror {
       // only show active=true
       return x.active;
     }
-/*
-    document.addEventListener('dropper-init', function(ev) {
-      console.log('init', ev.detail)
-    })
 
-    document.addEventListener('dropper-open', function(ev) {
-      console.log('open', ev.detail)
-    })
-
-    document.addEventListener('dropper-close', function(ev) {
-      console.log('close', ev.detail)
-    })
-*/
     return new Promise(async function(resolve) {
-      Module.tableStores.actgroup.addView(new TableView({proxy: this.model.actgroups, filterFunc}));
-      Module.tableStores.activity.addView(new TableView({proxy: this.model.activity, filterFunc}));
       Module.tableStores.discount.addView(new TableView({proxy: this.model.discounts, filterFunc}));
 
       resolve();
     }.bind(this));
-  }
-  
-  async inView(params) {
-  }
-
-  outView() {
-    return true;  
   }
 
   setRsvno(rsvno) {
     this.rsvno = rsvno;
   }
 
-  bookNew() {
+  bookNew(cb) {
+    this.existingData = {};
+    this.bookDoneCallback = cb;
     this.initItem();
   }
 
   initItem() {
+    this.model.facade = {};
     this.model.item = {
       rsvno: this.rsvno,
-      cat: "A", 
+      cat: this.cat, 
       infants: 0, 
       children: 0, 
       youth: 0, 
       adults: 0, 
       seniors: 0, 
+      times: [],
+      ttimes: [],
+      units: [],
+      dur: 1,
+      rateno: '',
       pdesc: ['','','','','','',''], 
-      price: [0,0,0,0,0,0,0], 
+      prices: [0,0,0,0,0,0,0], 
       pqty: [0,0,0,0,0,0,0], 
       pextn: [0,0,0,0,0,0,0],
     };
   }
 
+// I/O
   async save(ev) {
     let item = this.model.item.toJSON();
-
+    
     item.rsvno = this.rsvno;
     item.snapshot = JSON.parse(JSON.stringify(item));
 
-    let res = await Module.tableStores.item.insert(item);
-    console.log(res)
-  }
-
-  ppl(ev) {
-    if (ev.state == 'close' && ev.accept) {
-      let text = [];
-      let ppl = 0;
-
-      for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
-        if (this.model.item[g] > 0) {
-          text.push(this.model.item[g] + '/' + g.substring(0,1).toUpperCase());
-          ppl += parseInt(this.model.item[g]);
-        }
-      }
-
-      this.model.facade.ppl = text.join(' ');
-      this.model.item.ppl = ppl;
-    }
-  }
-
-  code(ev) {
-    if (ev.state == 'close' && ev.accept) {
-      let code = this.model.item.code;
-      let text = '';
-
-      if (!code) return;
-
-      this.activity = {};
-
-      for (let act of this.model.activity) {
-        if (act.code == code) {
-          this.activity = act;
-          text = act.name;
-          break;
-        }
-      }
-
-      this.model.facade.code = text;
-
-      this.model.item.qty = Math.ceil(this.model.item.ppl / parseInt(this.activity.maxppl) || 1);
-      this.model.item.dur = this.activity.durdays;
-
-      this.processTimes();
-      this.getRates();
-    }
-  }
-
-  time(ev) {
-    if (ev.state == 'close' && ev.accept) {
-      this.model.facade.time = this.model.item.times[0];
-    }
-  }
-
-  rate(ev) {
-    if (ev.state == 'close' && ev.accept) {
-      this.model.rate = {};
-      let rateno = this.model.item.rateno;
-      let text = '';
-
-      if (rateno) {
-        for (let rate of this.model.rates) {
-          if (rate.rateno == rateno) {
-            this.model.rate = rate;
-            text = rate.name;
-            break;
-
-          }
-        }
-      }
-
-      this.model.facade.rate = text + '  $' + this.model.item.charges;
-    }
-  }
-
-  processTimes() {
-    this.model.facade.time = '';
-
-    // [[{time info}, {time info}], [], ...]
-    let fmt = 'YYYY-MM-DD';
-    let dt = this.model.item.date;
-    let dtx = datetimer(dt, fmt);
-    let data = this.availData[this.model.item.code].dates, timedata = {},resdata = {}, ttotdata = {};
-    let days = [];
-    let dayCount = (this.activity.multi) ? this.activity.durdays : 1;
-    let timeList = [];
-
-    for (let day=0; day<dayCount; day++) {
-      let times = [];
-      dtx.add(day, 'days');
-      let dtn = dtx.format(fmt);
-
-      if (dtn in data) {
-        timedata = data[dtn].times || {};
-        resdata = data[dtn].res || {};
-        ttotdata = data[dtn].ttot || {};
-
-        for (let tm in timedata) {
-          let text = tm.substring(0,5).padEnd(10, ' ') + String(timedata[tm]['limit']).padStart(10, ' ') + String(timedata[tm]['booked']).padStart(10, ' ') + String(timedata[tm]['avail']).padStart(10, ' ');
-          text = text.replaceAll(' ', '\xA0');
-
-          timedata[tm]['time'] = tm;
-          timedata[tm]['text'] = text;
-
-          times.push(timedata[tm]);
-        }
-
-        days.push({day: day+1, times});
-        timeList.push(times[0].time);
-      }
-      else {
-        days.push([{day: day+1, times: [{text: 'No Time', time: ''}]}]);  // no times for you! (on this date)
-        timeList.push('');
-      }
-    }
-
-    // sort times by boo/time
-    if (days.length > 0) {
-      //for (let time of times)
-      //  time.sort(function(a,b) {
-      //    return (a.boo < b.boo) ? -1 : (a.boo > b.boo) ? 1 : (a.time < b.time) ? -1 : (a.time > b.time) ? 1 : 0;
-      //  })
-  
-      // find first time with space, for each day
-      this.model.days = days;
-      this.model.item.times = timeList;
-
-      this.model.facade.time = timeList[0];
-    }
-  }
-
-  async getAvail(cat, grp, code, filters) {
-    // cat /cat
-    // grp /cat/grp
-    // code /cat/grp/code, or /cat//code
-    let opts = {};
-    let url = `/avail/v1/avail/${cat}`;
-
-    if (grp ) url += `/${grp}`;
-    if (code) url += `/${code}`;
-
-    opts.filters = JSON.stringify(filters);
-
-    return await io.get(opts, url);
-  }
-
-  determineSpace(rec, dt, ppl, alreadyBooked) {
-    if (! (dt in rec.dates)) return 'text-danger';
-
-    let dtInfo = rec.dates[dt];
-    let klass = 'text-success';
-    let maxAvail = 99999;
-
-    ppl = parseInt(ppl);
-    alreadyBooked = parseInt(alreadyBooked);
-
-    for (let time in dtInfo.times) {
-      let tmInfo = dtInfo.times[time];
-      let avail = parseInt(tmInfo.avail);
-
-      if (avail + alreadyBooked >= ppl) {
-        maxAvail = Math.min(maxAvail, avail + alreadyBooked);
-      }
-    }
-
-    if (maxAvail < ppl*1.1) klass = 'text-warning'
-    if (maxAvail < ppl) klass = 'text-danger';
-    
-    return klass;
-  }
-
-  async groupChanged() {
-    let codeList = [];
-    let filters = {};
-    let ppl = this.model.item.ppl || 1;
-    let alreadyBooked = 0;
-    let dt = this.model.item.date;
-
-    filters.fromdate = dt;
-    filters.todate = dt;
-    filters.time = '';
-
-    utils.modals.overlay(true);
-
-    let group = this.model.item.group;
-    let res = await this.getAvail('A', group, '', filters);
-    
+    let res = (item.seq1) ? await Module.tableStores.item.update([item.rsvno, item.seq1], item) : await Module.tableStores.item.insert(item);
     if (res.status == 200) {
-      this.availData = res.data;
-
-      for (let code in res.data) {
-        let rec = res.data[code];
-        let klass = this.determineSpace(rec, dt, ppl, alreadyBooked);
-
-        codeList.push({code: rec.code, name: rec.name, class: klass});
-      }
+      this.model.item.seq1 = res.data.seq1;
+      this.existingData = this.model.item.toJSON();
     }
     else {
-      Module.modal.alert(res.data.errors.message);
+      alert(res.message);
     }
-
-    this.model.activities = codeList;
-
-    utils.modals.overlay(false);
   }
 
-  async getRates() {
-    let code = this.model.item.code;
-    let filters = {activity: code, active: true}
-    let res = await Module.data.actrates.getMany({filters});
-    let rates = [];
+  async delete(ev) {
+    if (! ('seq1' in this.model.item)) return;
 
-    this.model.item.rateno = '';
-
-    rates = [{rateno: '', name: 'No Rate Selected'}];
-
+    let res = await Module.data.item.delete([this.model.item.rsvno, this.model.item.seq1]);
     if (res.status == 200) {
-      for (let rate of res.data) {
-        rates.push(rate);
-      }
+      this.bookDoneCallback();
     }
-
-    this.model.rates = rates;
+    else {
+      alert(res.message);
+    }
   }
 
-  async rateChanged(obj) {
-    let pobj = this.model.item.toJSON();
+  bookDone() {
+    this.bookDoneCallback();
+  }
 
-    pobj.rateno = this.model.item.rateno;
+// Calc Rtns  
+  calcQty() {
+    this.model.item.qty = Math.ceil(this.model.item.ppl / parseInt(this.model.product.maxppl) || 1);
+  }
 
-    if (!pobj.rateno) return;
+  calcEndDate() {
+    let date = this.model.item.date, dur = this.model.item.dur;
 
-    let res = await io.post({calc: pobj}, `/reservations/v1/calc/pricing`);
+    dur = parseInt(dur);
+    if (this.model.item.cat != 'L') dur--;
 
-    if (res.status == 200) {
-      this.model.item.pdesc = res.data.pdesc;
-      this.model.item.pqty = res.data.pqty;
-      this.model.item.price = res.data.price;
-      this.model.item.pextn = res.data.pextn;
+    let dtx = datetimer(date, this.dateFmt);
+    dtx.add(dur, 'days');
+
+    this.model.item.enddate = dtx.format(this.dateFmt);
+  }
+
+  calcPpl() {
+    let ppl = 0;
+
+    for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
+      ppl += parseInt(this.model.item[g]);
     }
 
-    this.calcCharges();
+    this.model.item.ppl = ppl;
   }
-  
+
   calcCharges() {
     let charges = 0, qty = this.model.item.pqty.toJSON(), price = this.model.item.price.toJSON();
     let extn = [0,0,0,0,0,0,0,0];
@@ -803,6 +660,53 @@ class Activity extends Verror {
     this.model.item.charges = charges.toFixed(2);
   }
 
+// Rates
+  async rateChanged(obj) {
+    // select a rate
+    // calc prices
+    let pobj = this.model.item.toJSON();
+
+    pobj.rateno = this.model.item.rateno;
+
+    if (pobj.rateno) {
+      let res = await io.post({calc: pobj}, `/reservations/v1/calc/pricing`);
+
+      if (res.status == 200) {
+        this.model.item.pdesc = res.data.pdesc;
+        this.model.item.pqty = res.data.pqty;
+        this.model.item.price = res.data.price;
+        this.model.item.pextn = res.data.pextn;
+      }
+    }
+    else {
+      this.model.item.pdesc = ['','','','','','','',''];
+      this.model.item.pqty = [0,0,0,0,0,0,0,0];
+      this.model.item.price = [0,0,0,0,0,0,0,0];
+      this.model.item.pextn = [0,0,0,0,0,0,0,0];
+    }
+
+    this.calcCharges();
+  }
+
+  chooseRate() {
+    let pastRate = this.existingData.rateno || '';
+    let rateno = '';
+
+    for (let rate of this.model.rates) {
+      if (pastRate && pastRate == rate.rateno) {
+        rateno = rate.rateno;
+        break;
+      }
+    }
+
+    if (!rateno) {
+      rateno = (this.model.rates.length > 1) ? this.model.rates[1].rateno : '';   // [0] is "No Rate Selected"
+    }
+
+    this.model.item.rateno = rateno;
+  }
+
+// Discount Rtns
   changeDiscount() {
     let disc;
 
@@ -853,16 +757,766 @@ class Activity extends Verror {
 
     this.calcDiscount();
   }
+
+// Facade
+  makeFacadePpl() {
+    let text = [];
+
+    for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
+      if (this.model.item[g] > 0) {
+        text.push(this.model.item[g] + '/' + g.substring(0,1).toUpperCase());
+      }
+    }
+
+    return text.join(' ');
+  }
+
+  makeFacadeRate() {
+    this.model.rate = {};
+    let rateno = this.model.item.rateno;
+    let text = '';
+
+    if (rateno) {
+      for (let rate of this.model.rates) {
+        if (rate.rateno == rateno) {
+          this.model.rate = rate;
+          text = rate.name;
+          break;
+        }
+      }
+    }
+
+    return text + '  $' + this.model.item.charges;
+  }
+}
+
+class Activity extends BookItem {
+  // Needs res/ttot data from server
+  // factor that in to space
+  // sort times by boo/time
+  constructor() {
+    super('entry-item-A');
+
+    this.cat = 'A';
+  }
+
+  createModel() {
+    super.createModel();
+  }
+
+  async ready() {
+    let filterFunc = function(x) {
+      // only show active=true
+      return x.active;
+    }
+
+    await super.ready();
+
+    return new Promise(async function(resolve) {
+      Module.tableStores.actgroup.addView(new TableView({proxy: this.model.productGroups, filterFunc}));
+      Module.tableStores.activity.addView(new TableView({proxy: this.model.products, filterFunc}));
+
+      resolve();
+    }.bind(this));
+  }
+  
+  async inView(params) {
+  }
+
+  outView() {
+    return true;  
+  }
+
+  async getFacadeData(item) {
+    this.model.item = item.snapshot;
+
+    await this.getRates();    // for rate name
+
+    let klass = this.klasses[this.cat];
+    let seq1 = this.model.item.seq1;
+    let dt = this.model.item.date;
+    let ppl = this.makeFacadePpl();
+    let code = this.makeFacadeCode();
+    let dur = this.model.item.dur;
+    let timex = this.makeFacadeTime();
+    let rate = this.makeFacadeRate();
+    let date = datetimer(dt, this.dateFmt).format(this.dateFmt);
+    let time = datetimer(timex, 'HH:mm:SS').format(this.timeFmt);
+
+    return {cat: this.cat, klass, seq1, date, ppl, code, dur, time, timex, rate};
+  }
+
+  async bookOld(item, cb) {
+    this.existingData = item;
+    this.bookDoneCallback = cb;
+    let data = await this.getFacadeData(item);
+
+    this.model.facade = {};
+    this.model.facade.date = data.date;
+    this.model.facade.ppl = data.ppl;
+    this.model.facade.code = data.code;
+    this.model.facade.dur = data.dur;
+    this.model.facade.time = data.timex;
+    this.model.facade.rate = data.rate;
+
+    // setup all data
+    await this.groupChanged();
+    this.processTimes();
+    await this.rateChanged();
+  }
+
+// dropper close routines -------------------------------------------------
+  async date(obj) {
+    // date was changed
+    if (this.model.item.code) {
+      this.calcEndDate();
+      await this.groupChanged();  // avail data
+      this.processTimes();        // re-select times
+      this.rateChanged();         // get prices
+
+      this.model.facade.time = this.makeFacadeTime();
+      this.model.facade.rate = this.makeFacadeRate();
+    }
+  }
+
+  ppl(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      this.model.facade.ppl = this.makeFacadePpl();
+      this.calcPpl();
+
+      if (this.model.item.code) {
+        this.calcQty();
+        this.processTimes();        // re-select times
+        this.rateChanged();         // get prices
+        
+        this.model.facade.time = this.makeFacadeTime();
+        this.model.facade.rate = this.makeFacadeRate();
+      }
+    }
+  }
+
+  async code(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      this.model.facade.code = this.makeFacadeCode();
+
+      this.model.item.dur = this.model.product.durdays;
+      this.model.item.desc = this.model.product.name;
+      this.model.item.activity = this.model.item.code;
+      this.model.item.rateno = '';
+
+      this.calcQty();
+      this.processTimes();
+      await this.getRates();
+      this.chooseRate();
+      await this.rateChanged();         // get prices
+
+      this.model.facade.time = this.makeFacadeTime();
+      this.model.facade.rate = this.makeFacadeRate();
+    }
+  }
+
+  time(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      this.rateChanged();         // get prices
+
+      this.model.facade.time = this.makeFacadeTime();     
+      this.model.facade.rate = this.makeFacadeRate();
+    }
+  }
+
+  rate(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      this.model.facade.rate = this.makeFacadeRate();
+    }
+  }
+
+// derived fields -------------------------------------------------
+  processTimes() {
+    this.makeTimeList();
+    this.chooseTimes();
+  }
+
+  makeTimeList() {
+    // [[{time info}, {time info}], [], ...]
+    let dt = this.model.item.date.substring(0,10);
+    let dtx = datetimer(dt, this.dateFmt);
+    let data = this.availData[this.model.item.code].dates || {}, timedata = {}, resdata = {}, ttotdata = {};
+    let days = [];
+    let dayCount = (this.model.product.multi) ? this.model.product.durdays : 1;
+
+    for (let day=0, dtn; day<dayCount; day++) {
+      let times = [];
+      dtx.add(day, 'days');
+      dtn = dtx.format(this.dateFmt);
+
+      if (dtn in data) {
+        timedata = data[dtn].times || {};
+        resdata = data[dtn].res || {};
+        ttotdata = data[dtn].ttot || {};
+
+        for (let tm in timedata) {
+          let text = tm.substring(0,5).padEnd(10, ' ') + String(timedata[tm]['limit']).padStart(10, ' ') + String(timedata[tm]['booked']).padStart(10, ' ') + String(timedata[tm]['avail']).padStart(10, ' ');
+          text = text.replaceAll(' ', '\xA0');
+
+          timedata[tm]['time'] = tm;
+          timedata[tm]['text'] = text;
+
+          times.push(timedata[tm]);
+        }
+
+        days.push({day: day+1, times});
+      }
+      else {
+        days.push([{day: day+1, times: [{text: 'No Time', time: ''}]}]);  // no times for you! (on this date)
+      }
+    }
+
+    // sort times by boo/time
+    if (days.length > 0) {
+      //for (let time of times)
+      //  time.sort(function(a,b) {
+      //    return (a.boo < b.boo) ? -1 : (a.boo > b.boo) ? 1 : (a.time < b.time) ? -1 : (a.time > b.time) ? 1 : 0;
+      //  })
+  
+      // find first time with space, for each day
+      this.model.days = days;
+    }
+  }
+
+  chooseTimes() {
+    // [[{time info}, {time info}], [], ...]
+    let existingTimes = this.model.item.times || [];
+    let ppl = this.model.item.ppl;
+    let exPpl = this.existingData.ppl || 0;
+    let dt = this.model.item.date.substring(0,10);
+    let dtx = datetimer(dt, this.dateFmt);
+    let data = this.availData[this.model.item.code].dates || {}, timedata = {}, resdata = {}, ttotdata = {};
+    let dayCount = (this.model.product.multi) ? this.model.product.durdays : 1;
+    let timeList = [];
+
+    for (let day=0, dtn; day<dayCount; day++) {
+      dtx.add(day, 'days');
+      dtn = dtx.format(this.dateFmt);
+
+      if (dtn in data) {
+        timedata = data[dtn].times || {};
+        resdata = data[dtn].res || {};
+        ttotdata = data[dtn].ttot || {};
+
+        let found = false;
+        let exTime = (existingTimes.length > day) ? existingTimes[day] : '';
+
+        if (exTime in timedata && timedata[exTime].avail + exPpl >= ppl) {
+          timeList.push(exTime);
+          found = true;
+        }
+
+        if (!found) {
+          for (let tm in timedata) {
+            if (timedata[tm].avail + exPpl >= ppl) {
+              timeList.push(tm);
+              found = true;
+              break;
+            }
+          }
+        }
+
+        if (!found) timeList.push('');
+      }
+      else {
+        timeList.push('');
+      }
+    }
+
+    this.model.item.times = timeList;
+  }
+
+// element events -----------------------------------------------
+  async groupChanged() {
+    // get avail
+    // build list of items with space
+    let codeList = [];
+    let dt = this.model.item.date.substring(0,10);
+    let ppl = parseInt(this.model.item.ppl) || 1;
+    let exPpl = parseInt(this.existingData.ppl) || 0;    
+    
+    const determineSpace = function(rec) {
+      if (! (dt in rec.dates)) return 'text-danger';
+  
+      let dtInfo = rec.dates[dt];
+      let klass = 'text-success';
+      let maxAvail = 99999;
+  
+      for (let time in dtInfo.times) {
+        let tmInfo = dtInfo.times[time];
+        let avail = parseInt(tmInfo.avail);
+  
+        if (avail + exPpl >= ppl) {
+          maxAvail = Math.min(maxAvail, avail + exPpl);
+        }
+      }
+  
+      if (maxAvail < ppl*1.1) klass = 'text-warning'
+      if (maxAvail < ppl) klass = 'text-danger';
+      
+      return klass;
+    }    
+
+    await this.getAvailForGroup();
+
+    for (let code in this.availData) {
+      let rec = this.availData[code];
+      let klass = determineSpace(rec);
+
+      codeList.push({code: rec.code, name: rec.name, class: klass});
+    }
+
+    this.model.groupProducts = codeList;    
+  }
+
+// data gatherers ---------------------------------------------
+  async getAvailForGroup() {
+    // cat /cat
+    // grp /cat/grp
+    // code /cat/grp/code, or /cat//code
+    let cat = this.model.item.cat;
+    let code = '';
+    let group = this.model.item.group;
+    let dt = this.model.item.date.substring(0,10);
+    let filters = {};
+
+    filters.fromdate = dt;
+    filters.todate = dt;
+    filters.time = '';
+
+    let opts = {};
+    let url = `/avail/v1/avail/${cat}`;
+
+    if (group) url += `/${group}`;
+    if (code) url += `/${code}`;
+
+    opts.filters = JSON.stringify(filters);
+        
+    utils.modals.overlay(true);
+    let res = await io.get(opts, url);
+    utils.modals.overlay(false);
+
+    if (res.status == 200) {
+      this.availData = res.data;
+    }
+    else {
+      Module.modal.alert(res.data.errors.message);
+      this.availData = {};
+    }
+  }
+
+  async getRates() {
+    let code = this.model.item.code;
+    let filters = {activity: code, active: true}
+    let rates = [{rateno: '', name: 'No Rate Selected'}];
+
+    utils.modals.overlay(true);
+    let res = await Module.data.actrates.getMany({filters});
+    utils.modals.overlay(false);    
+
+    if (res.status == 200) {
+      for (let rate of res.data) {
+        rates.push(rate);
+      }
+    }
+
+    this.model.rates = rates;
+  }
+
+// facade routines -----------------------------------------------
+  makeFacadeCode() {
+    let code = this.model.item.code;
+    let text = '';
+
+    if (!code) return;
+
+    this.model.product = {};
+
+    for (let act of this.model.products) {
+      if (act.code == code) {
+        this.model.product = act;
+        text = act.name;
+        break;
+      }
+    }
+
+    return text;
+  }
+
+  makeFacadeTime() {
+    return (this.model.item.times.length>0) ? this.model.item.times[0] : '';
+  }
+};
+
+class Meal extends BookItem {
+  // Needs res/ttot data from server
+  // factor that in to space
+  // sort times by boo/time
+  constructor() {
+    super('entry-item-M');
+
+    this.cat = 'M';
+  }
+
+  createModel() {
+    super.createModel();
+  }
+
+  async ready() {
+    let filterFunc = function(x) {
+      // only show active=true
+      return x.active;
+    }
+
+    await super.ready();
+
+    return new Promise(async function(resolve) {
+      Module.tableStores.meallocn.addView(new TableView({proxy: this.model.productGroups, filterFunc}));
+      Module.tableStores.meals.addView(new TableView({proxy: this.model.products, filterFunc}));
+
+      resolve();
+    }.bind(this));
+  }
+  
+  async inView(params) {
+  }
+
+  outView() {
+    return true;  
+  }
+
+  async getFacadeData(item) {
+    this.model.item = item.snapshot;
+
+    await this.getRates();    // for rate name
+
+    let klass = this.klasses[this.cat];
+    let seq1 = this.model.item.seq1;
+    let dt = this.model.item.date;
+    let ppl = this.makeFacadePpl();
+    let code = this.makeFacadeCode();
+    let dur = this.model.item.dur;
+    let timex = this.makeFacadeTime();
+    let rate = this.makeFacadeRate();
+    let date = datetimer(dt, this.dateFmt).format(this.dateFmt);
+    let time = datetimer(timex, 'HH:mm:SS').format(this.timeFmt);
+
+    return {cat: this.cat, klass, seq1, date, ppl, code, dur, time, timex, rate};
+  }
+
+  async bookOld(item, cb) {
+    this.existingData = item;
+    this.bookDoneCallback = cb;
+    let data = await this.getFacadeData(item);
+
+    this.model.facade = {};
+    this.model.facade.date = data.date;
+    this.model.facade.ppl = data.ppl;
+    this.model.facade.code = data.code;
+    this.model.facade.dur = data.dur;
+    this.model.facade.time = data.timex;
+    this.model.facade.rate = data.rate;
+
+    // setup all data
+    await this.groupChanged();
+    this.processTimes();
+    await this.rateChanged();
+  }
+
+// dropper close routines -------------------------------------------------
+  async date(obj) {
+    // date was changed
+    if (this.model.item.code) {
+      this.calcEndDate();
+      await this.groupChanged();  // avail data
+      this.processTimes();        // re-select times
+      this.rateChanged();         // get prices
+    }
+  }
+
+  ppl(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      this.model.facade.ppl = this.makeFacadePpl();
+      this.calcPpl();
+
+      if (this.model.item.code) {
+        this.calcQty();
+        this.processTimes();        // re-select times
+        this.rateChanged();         // get prices
+
+        this.model.facade.time = this.makeFacadeTime();
+        this.model.facade.rate = this.makeFacadeRate();        
+      }
+    }
+  }
+
+  async code(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      this.model.facade.code = this.makeFacadeCode();
+
+      this.model.item.desc = this.model.product.name;
+      this.model.item.meal = this.model.item.code;
+      this.model.item.rateno = '';
+
+      this.calcQty();
+      this.processTimes();
+      await this.getRates();
+      this.chooseRate();
+      await this.rateChanged();         // get prices
+
+      this.model.facade.time = this.makeFacadeTime();
+      this.model.facade.rate = this.makeFacadeRate();
+    }
+  }
+
+  time(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      this.rateChanged();         // get prices
+
+      this.model.facade.time = this.makeFacadeTime();
+      this.model.facade.rate = this.makeFacadeRate();      
+    }
+  }
+
+  rate(ev) {
+    if (ev.state == 'close' && ev.accept) {
+      this.model.facade.rate = this.makeFacadeRate();
+    }
+  }
+
+// derived fields -------------------------------------------------
+  processTimes() {
+    this.makeTimeList();
+    this.chooseTimes();
+  }
+
+  makeTimeList() {
+    // [[{time info}, {time info}], [], ...]
+    let dt = this.model.item.date.substring(0,10);
+    let dtx = datetimer(dt, this.dateFmt);
+    let data = this.availData[this.model.item.code].dates || {}, timedata = {}, resdata = {}, ttotdata = {};
+    let days = [];
+    let dayCount = (this.model.product.multi) ? this.model.product.durdays : 1;
+
+    for (let day=0, dtn; day<dayCount; day++) {
+      let times = [];
+      dtx.add(day, 'days');
+      dtn = dtx.format(this.dateFmt);
+
+      if (dtn in data) {
+        timedata = data[dtn].times || {};
+        resdata = data[dtn].res || {};
+        ttotdata = data[dtn].ttot || {};
+
+        for (let tm in timedata) {
+          let text = tm.substring(0,5).padEnd(10, ' ') + String(timedata[tm]['limit']).padStart(10, ' ') + String(timedata[tm]['booked']).padStart(10, ' ') + String(timedata[tm]['avail']).padStart(10, ' ');
+          text = text.replaceAll(' ', '\xA0');
+
+          timedata[tm]['time'] = tm;
+          timedata[tm]['text'] = text;
+
+          times.push(timedata[tm]);
+        }
+
+        days.push({day: day+1, times});
+      }
+      else {
+        days.push([{day: day+1, times: [{text: 'No Time', time: ''}]}]);  // no times for you! (on this date)
+      }
+    }
+
+    // sort times by boo/time
+    if (days.length > 0) {
+      //for (let time of times)
+      //  time.sort(function(a,b) {
+      //    return (a.boo < b.boo) ? -1 : (a.boo > b.boo) ? 1 : (a.time < b.time) ? -1 : (a.time > b.time) ? 1 : 0;
+      //  })
+  
+      // find first time with space, for each day
+      this.model.days = days;
+    }
+  }
+
+  chooseTimes() {
+    // [[{time info}, {time info}], [], ...]
+    let existingTimes = this.model.item.times || [];
+    let ppl = this.model.item.ppl;
+    let exPpl = this.existingData.ppl || 0;
+    let dt = this.model.item.date.substring(0,10);
+    let dtx = datetimer(dt, this.dateFmt);
+    let data = this.availData[this.model.item.code].dates || {}, timedata = {}, resdata = {}, ttotdata = {};
+    let dayCount = (this.model.product.multi) ? this.model.product.durdays : 1;
+    let timeList = [];
+
+    for (let day=0, dtn; day<dayCount; day++) {
+      dtx.add(day, 'days');
+      dtn = dtx.format(this.dateFmt);
+
+      if (dtn in data) {
+        timedata = data[dtn].times || {};
+        resdata = data[dtn].res || {};
+        ttotdata = data[dtn].ttot || {};
+
+        let found = false;
+        let exTime = (existingTimes.length > day) ? existingTimes[day] : '';
+
+        if (exTime in timedata && timedata[exTime].avail + exPpl >= ppl) {
+          timeList.push(exTime);
+          found = true;
+        }
+
+        if (!found) {
+          for (let tm in timedata) {
+            if (timedata[tm].avail + exPpl >= ppl) {
+              timeList.push(tm);
+              found = true;
+              break;
+            }
+          }
+        }
+
+        if (!found) timeList.push('');
+      }
+      else {
+        timeList.push('');
+      }
+    }
+
+    this.model.item.times = timeList;
+  }
+
+// element events -----------------------------------------------
+  async groupChanged() {
+    // get avail
+    // build list of items with space
+    let codeList = [];
+    let dt = this.model.item.date.substring(0,10);
+    let ppl = parseInt(this.model.item.ppl) || 1;
+    let exPpl = parseInt(this.existingData.ppl) || 0;    
+    
+    const determineSpace = function(rec) {
+      if (! (dt in rec.dates)) return 'text-danger';
+  
+      let dtInfo = rec.dates[dt];
+      let klass = 'text-success';
+      let maxAvail = 99999;
+  
+      for (let time in dtInfo.times) {
+        let tmInfo = dtInfo.times[time];
+        let avail = parseInt(tmInfo.avail);
+  
+        if (avail + exPpl >= ppl) {
+          maxAvail = Math.min(maxAvail, avail + exPpl);
+        }
+      }
+  
+      if (maxAvail < ppl*1.1) klass = 'text-warning'
+      if (maxAvail < ppl) klass = 'text-danger';
+      
+      return klass;
+    }    
+
+    await this.getAvailForGroup();
+
+    for (let code in this.availData) {
+      let rec = this.availData[code];
+      let klass = determineSpace(rec);
+
+      codeList.push({code: rec.code, name: rec.name, class: klass});
+    }
+
+    this.model.groupProducts = codeList;    
+  }
+
+// data gatherers ---------------------------------------------
+  async getAvailForGroup() {
+    // cat /cat
+    // grp /cat/grp
+    // code /cat/grp/code, or /cat//code
+    let cat = this.model.item.cat;
+    let code = '';
+    let group = this.model.item.group;
+    let dt = this.model.item.date.substring(0,10);
+    let filters = {};
+
+    filters.fromdate = dt;
+    filters.todate = dt;
+    filters.time = '';
+
+    let opts = {};
+    let url = `/avail/v1/avail/${cat}`;
+
+    if (group) url += `/${group}`;
+    if (code) url += `/${code}`;
+
+    opts.filters = JSON.stringify(filters);
+        
+    utils.modals.overlay(true);
+    let res = await io.get(opts, url);
+    utils.modals.overlay(false);
+
+    if (res.status == 200) {
+      this.availData = res.data;
+    }
+    else {
+      Module.modal.alert(res.data.errors.message);
+      this.availData = {};
+    }
+  }
+
+  async getRates() {
+    let code = this.model.item.code;
+    let filters = {meal: code, active: true}
+    let rates = [{rateno: '', name: 'No Rate Selected'}];
+
+    utils.modals.overlay(true);
+    let res = await Module.data.mealrates.getMany({filters});
+    utils.modals.overlay(false);    
+
+    if (res.status == 200) {
+      for (let rate of res.data) {
+        rates.push(rate);
+      }
+    }
+
+    this.model.rates = rates;
+  }
+
+// facade routines -----------------------------------------------
+  makeFacadeCode() {
+    let code = this.model.item.code;
+    let text = '';
+
+    if (!code) return;
+
+    this.model.product = {};
+
+    for (let act of this.model.products) {
+      if (act.code == code) {
+        this.model.product = act;
+        text = act.name;
+        break;
+      }
+    }
+
+    return text;
+  }
+
+  makeFacadeTime() {
+    return (this.model.item.times.length>0) ? this.model.item.times[0] : '';
+  }
 };
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('rsvs-rsv-update');   // page html
 
-let setup1 = new Resupdate('rsvs-rsv-update-section');
+let setup1 = new Reserv('rsvs-rsv-update-section');
 let section1 = new Section({mvc: setup1});
-
-//let setup2 = new Resitems('rsvs-rsv-items-section');
-//let section2 = new Section({mvc: setup2});
 
 let page1 = new Page({el: el1, path: ['/:rsvno'], title: 'Reservation', sections: [section1]});
 

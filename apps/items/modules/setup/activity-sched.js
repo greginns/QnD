@@ -37,8 +37,8 @@ class Actsched extends Setup {
     this.model.year = '';
 
     this.model.range = {
-      fromdate: '2021-10-01',
-      todate: '2021-10-31',
+      fromdate: '',
+      todate: '',
       time: '',
       limit: 0,
       boo: 1,
@@ -257,10 +257,8 @@ class Actsched extends Setup {
         this.updateRangeSched(sched, yy, mm, dds);
       }
 
-      //sched = JSON.stringify(sched);
-  
       let data = {activity: act, year: yy, month: mm, sched};
-  
+
       // new (post) or old (put)?
       res = (existingEntry) ? await Module.tableStores.actsched.update([data.activity, data.year, data.month], {sched: data.sched}) : await Module.tableStores.actsched.insert(data);
   

@@ -283,6 +283,7 @@ class Mealprices extends Setup {
 
       if (dows[dow]) {
         for (let idx=0; idx<7; idx++) {   // for each price desc
+// something craps out here prices[(dd - 1)] is undefined          
           prices[dd-1][idx] = (rangePrices[idx]) ? rangePrices[idx][dow] || null : null;
         }
       }

@@ -7,14 +7,17 @@ const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {jsonQueryExecify} = require(root + '/lib/server/utils/sqlUtil.js');
 const {ModelService} = require(root + '/lib/server/utils/services.js');
 const {datetimer} = require(root + '/lib/server/utils/datetime.js');
+const {Transaction} = require(root + '/lib/server/utils/db.js');
 const {CSRF} = require(root + '/apps/login/models.js');
 const app = getAppName(__dirname);
 const models = require(root + `/apps/${app}/models.js`);
 const itemModels = require(root + `/apps/items/models.js`);
+const availModels = require(root + `/apps/avail/models.js`);
 
 const services = {};
 const dateFormat = 'YYYY-MM-DD';
 const timeFormat = 'h:mm A';
+const timeFormatPG = 'HH:mm:SS';
 
 const makeCSRF = async function(database, pgschema, user) {
   var CSRFToken = uuidv1();
@@ -27,26 +30,584 @@ const makeCSRF = async function(database, pgschema, user) {
   return CSRFToken;
 }
 
-class ItemService extends ModelService {
-  async create({database = '', pgschema = '', user = {}, rec = {}} = {}) {
-    // Insert row - Needs to get highest seq1
-    let recs = await this.model.select({database, pgschema, user, rec: {rsvno: rec.rsvno}});
-    if (!recs.status == 200) return recs;
-    
-    let data = recs.data;
-    let seq1 = (data.length == 0) ? -1 : parseInt(data[data.length-1].seq1);
+const getHighestItemSeq = async function(database, pgschema, user, rsvno) {
+  let recs = await models.Item.select({database, pgschema, user, rec: {rsvno}});
+  if (!recs.status == 200) return -1;
+  
+  let data = recs.data;
 
-    rec.seq1 = ++seq1;
+  return (data.length == 0) ? 1 : parseInt(data[data.length-1].seq1) + 1;
+}
 
-    let tobj = new this.model(rec);
-    let tm = await tobj.insertOne({database, pgschema, user});
+const rollback = async function(trans, tm) {
+  await trans.rollback();
+  await trans.release();
 
+  return tm;
+}
+
+class Item {
+  constructor(database, pgschema, user) {
+    this.database = database;
+    this.pgschema = pgschema;
+    this.user = user;
+  }
+
+  async create(rec) {
+    let inst; 
+
+    switch (rec.cat) {
+      case 'A':
+        inst = new Activity(this.database, this.pgschema, this.user);
+        break;
+
+      case 'M':
+        inst = new Meal(this.database, this.pgschema, this.user);
+        break;
+    }
+
+    return await inst.create(rec);
+  }
+
+  async update(rec) {
+    let inst; 
+
+    switch (rec.cat) {
+      case 'A':
+        inst = new Activity(this.database, this.pgschema, this.user);
+        break;
+
+      case 'M':
+        inst = new Meal(this.database, this.pgschema, this.user);
+        break;
+    }
+
+    return await inst.update(rec);
+  } 
+  
+  async delete(pks) {
+    let drec = {rsvno: pks.rsvno, seq1: pks.seq1}
+    let irec = new models.Item(drec);
+
+    let tm = await irec.selectOne({database: this.database, pgschema: this.pgschema, user: this.user});
+
+    if (tm.status != 200) return tm;
+
+    let inst; 
+    let rec = tm.data;
+
+    switch (rec.cat) {
+      case 'A':
+        inst = new Activity(this.database, this.pgschema, this.user);
+        break;
+
+      case 'M':
+        inst = new Meal(this.database, this.pgschema, this.user);
+        break;
+    }
+
+    return await inst.delete(rec);    
+  }
+}
+
+class Booker {
+  constructor(database, pgschema, user) {
+    this.database = database;
+    this.pgschema = pgschema;
+    this.user = user;
+  }
+
+  async create(rec) {
+    let tm = new TravelMessage();
+    let tmKeep, res;
+
+    this.trans = new Transaction(this.database);
+
+    rec.seq1 = await getHighestItemSeq(this.database, this.pgschema, this.user, rec.rsvno);
+    rec.snapshot.seq1 = rec.seq1;
+
+    res = await this.trans.begin();
+    if (res.status != 200) return res;
+
+    // Start Specific
+    try {
+      // save activity
+      tm = await this.saveItem(rec);
+      if (tm.status != 200) return rollback(this.trans, tm);
+
+      tmKeep = tm;
+
+      // Done, Commit
+      tm = await this.trans.commit();
+      if (tm.status != 200) return rollback(this.trans, tm);
+    }
+    catch(err) {
+console.log(err)            
+      tm.status = 500;
+      tm.type = 'text';
+      tm.message = String(err);
+
+      return rollback(this.trans, tm);
+    }
+
+    this.trans.release();
+    // End Specific
+   
     //if (tm.isGood()) {
     //  zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, tm.data);
     //}
 
+    return tmKeep;    
+  }
+
+  async update(rec) {
+    // Update row
+    // We want to keep the 'Item' tm, if all good.  But return whichever tm, if bad.
+    let tm = new TravelMessage();
+    let tmKeep, res;
+
+    this.trans = new Transaction(this.database);
+
+    res = await this.trans.begin();
+    if (res.status != 200) return res;
+
+    // Start Specific
+    try {
+      // Start by deleting everything
+      let drec = {rsvno: rec.rsvno, seq1: rec.seq1}
+
+      tm = await this.deleteItem(drec);
+      if (tm.status != 200) return rollback(this.trans, tm);
+
+      tmKeep = tm;
+
+      // Re-save it all
+      tm = await this.saveItem(rec);
+      if (tm.status != 200) return rollback(this.trans, tm);
+
+      // Done, Commit
+      tm = await this.trans.commit();
+
+      if (tm.status != 200) return rollback(this.trans, tm);
+    }
+    catch(err) {
+console.log(err)            
+      tm.status = 500;
+      tm.type = 'text';
+      tm.message = String(err);
+
+      return rollback(this.trans, tm);
+    }
+
+    this.trans.release();
+    // End Specific
+    
+    //if (tm.isGood()) {
+    //  zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, tm.data);
+    //}
+
+    return tmKeep;    
+  }
+
+  async delete(pks) {
+    // Delete row
+    let tm = new TravelMessage();
+    let tmKeep, res;
+
+    this.trans = new Transaction(this.database);
+
+    res = await this.trans.begin();
+    if (res.status != 200) return res;
+
+    // Start Specific
+    try {
+      // Start by deleting everything
+      let drec = {rsvno: pks.rsvno, seq1: pks.seq1}
+      tm = await this.deleteItem(drec);
+      if (tm.status != 200) return rollback(this.trans, tm);
+
+      tmKeep = tm;
+
+      // Done, Commit
+      tm = await this.trans.commit();
+      if (tm.status != 200) return rollback(this.trans, tm);
+    }
+    catch(err) {
+console.log(err)      
+      tm.status = 500;
+      tm.type = 'text';
+      tm.message = String(err);
+
+      return rollback(this.trans, tm);
+    }
+
+    this.trans.release();
+    // End Specific
+    
+    //if (tm.isGood()) {
+    //  zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, tm.data);
+    //}
+
+    return tmKeep;    
+  }
+}
+
+class Activity extends Booker{
+  async saveItem(rec) {
+    // Item Insert
+    let tobj = new models.Item(rec);
+    let tm = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+    if (tm.status != 200) return tm;
+    let tmKeep = tm;
+
+    // Actinclude insert
+    rec.seq2 = 1;
+console.log(rec)
+    let tobj2 = new models.Actinclude(rec);
+    tm = await tobj2.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+    if (tm.status != 200) return tm;
+
+    // Actdaily
+    let dur = rec.dur;
+    let date = datetimer(rec.date, dateFormat);
+
+    for (let day=1; day<=dur; day++) {
+      let daily = {};
+
+      daily.rsvno = rec.rsvno;
+      daily.seq1 = rec.seq1;
+      daily.seq2 = rec.seq2;
+      daily.day = day;
+      daily.date = date.format(dateFormat);
+      daily.ppl = rec.ppl;
+      daily.qty = rec.qty;
+      daily.activity = rec.code;
+      daily.time = (rec.times.length > day-1) ? rec.times[day-1] : null;  // day time or null
+
+      let tobj3 = new models.Actdaily(daily);
+      tm = await tobj3.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+      if (tm.status != 200) return tm;
+
+      tm = await this.updateActivityBooked(daily);
+      if (tm.status != 200) return tm;
+
+      date.add(1, 'day');
+    }
+
+    return tmKeep;
+  }
+
+  async deleteItem(rec) {
+    let tm = await models.Actdaily.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
+    if (tm.status != 200) return tm;
+  
+    for (let daily of tm.data) {
+      let drec = new models.Actdaily(daily);
+  
+      tm = await drec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+      if (tm.status != 200) return tm;
+  
+      tm = await this.removeActivityBooked(daily);
+      if (tm.status != 200 && tm.status != 400) return tm;
+    }
+  
+    tm = await models.Actinclude.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: rec}, this.trans);
+    if (tm.status != 200) return tm;
+  
+    let irec = new models.Item(rec);
+    tm = await irec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+  
     return tm;    
   }
+
+  async updateActivityBooked(daily) {
+    // update Activitybooked based on a daily record
+    // adding only
+    // an updated daily record will remove then add
+    let {rsvno, seq1, seq2, day, ppl, qty, activity} = daily;
+    let date = datetimer(daily.date, dateFormat);  
+    
+    let year = date.year();
+    let month = date.month();
+    let dd = date.date() - 1;
+    
+    let booked = new Array({date: 1}, {date: 2}, {date: 3}, {date: 4}, {date: 5}, {date: 6}, {date: 7}, {date: 8}, {date: 9}, {date: 10}, {date: 11}, {date: 12}, {date: 13}, {date: 14}, {date: 15}, {date: 16},
+      {date: 17}, {date: 18}, {date: 19}, {date: 20}, {date: 21}, {date: 22}, {date: 23}, {date: 24}, {date: 25}, {date: 26}, {date: 27}, {date: 28}, {date: 29}, {date: 30}, {date: 31});
+    let bobj = {rsvno, seq1, seq2, day, ppl, qty};
+
+    daily.time = daily.time || '';
+
+    let tm = await availModels.Activitybooked.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [activity, year, month]}, this.trans);
+    if (tm.status != 200 && tm.status != 400) return tm;
+
+    if (tm.status == 200) {
+      booked = tm.data.booked;
+    }
+
+    if (! (daily.time in booked[dd])) {
+      booked[dd][daily.time] = {booked: ppl, qty, daily: [bobj]};
+    }
+    else {
+      booked[dd][daily.time].booked += ppl;
+      booked[dd][daily.time].qty += qty;
+      booked[dd][daily.time].daily.push(bobj)
+    }
+
+    let rec = {activity, year, month, booked};
+    let tobj = new availModels.Activitybooked(rec);
+
+    // insert
+    if (tm.data.length == 0) {
+      tm = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+    }
+    else {
+      // update
+      tm = await tobj.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+    }
+
+    return tm;
+  }
+
+  async removeActivityBooked(daily) {
+    // remove daily entry from Activitybooked
+    // removing only
+    let {rsvno, seq1, seq2, day, activity} = daily;
+    let date = datetimer(daily.date);
+    
+    let year = date.year();
+    let month = date.month();
+    let dd = date.date() - 1;
+    
+    daily.time = daily.time || '';
+
+    let tm = await availModels.Activitybooked.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [activity, year, month]}, this.trans);
+    if (tm.status != 200) return tm;  // not there, nothing to remove
+
+    let booked = tm.data.booked;
+
+    if (! (daily.time in booked[dd])) {
+      return tm; // not there
+    }
+
+    // accum ppl, qty from all the other entries.  Find index from needed entry
+    let pplTot = 0, qtyTot = 0, dIdx = -1;
+
+    for (let idx=0; idx<booked[dd][daily.time].daily.length; idx++) {
+      let entry = booked[dd][daily.time].daily[idx];
+
+      if (entry.rsvno == rsvno && entry.seq1 == seq1 && entry.seq2 == seq2 && entry.day == day) {
+        dIdx = idx; // the one to remove
+      }
+      else {
+        pplTot += entry.ppl;  // add up ppl
+        qtyTot += entry.qty;  // add up qty
+      }
+    }
+
+    booked[dd][daily.time].booked = pplTot;
+    booked[dd][daily.time].qty = qtyTot;
+    if (dIdx > -1) booked[dd][daily.time].daily.splice(dIdx,1);
+
+    let rec = {activity, year, month, booked};
+    let tobj = new availModels.Activitybooked(rec);
+
+    // update
+    tm = await tobj.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+    return tm;
+  }
+}
+
+class Meal extends Booker {
+  async saveItem(rec) {
+    // Item Insert
+    let tobj = new models.Item(rec);
+    let tm = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+    if (tm.status != 200) return tm;
+    let tmKeep = tm;
+
+    // Mealinclude insert
+    rec.seq2 = 1;
+
+    let tobj2 = new models.Mealinclude(rec);
+    tm = await tobj2.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+    if (tm.status != 200) return tm;
+
+    // Mealdaily
+    let dur = rec.dur;
+    let date = datetimer(rec.date, dateFormat);
+
+    for (let day=1; day<=dur; day++) {
+      let daily = {};
+
+      daily.rsvno = rec.rsvno;
+      daily.seq1 = rec.seq1;
+      daily.seq2 = rec.seq2;
+      daily.day = day;
+      daily.date = date.format(dateFormat);
+      daily.ppl = rec.ppl;
+      daily.qty = rec.qty;
+      daily.meal = rec.code;
+      daily.time = (rec.times.length > day-1) ? rec.times[day-1] : null;  // day time or null
+
+      let tobj3 = new models.Mealdaily(daily);
+      tm = await tobj3.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+      if (tm.status != 200) return tm;
+
+      tm = await this.updateMealBooked(daily);
+      if (tm.status != 200) return tm;
+
+      date.add(1, 'day');
+    }
+
+    return tmKeep;
+  }
+
+  async deleteItem(rec) {
+    let tm = await models.Mealdaily.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
+    if (tm.status != 200) return tm;
+  
+    for (let daily of tm.data) {
+      let drec = new models.Mealdaily(daily);
+  
+      tm = await drec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+      if (tm.status != 200) return tm;
+  
+      tm = await this.removeMealBooked(daily);
+      if (tm.status != 200 && tm.status != 400) return tm;
+    }
+  
+    tm = await models.Mealinclude.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: rec}, this.trans);
+    if (tm.status != 200) return tm;
+  
+    let irec = new models.Item(rec);
+    tm = await irec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+  
+    return tm;    
+  }
+
+  async updateMealBooked(daily) {
+    // update Mealbooked based on a daily record
+    // adding only
+    // an updated daily record will remove then add
+    let {rsvno, seq1, seq2, day, ppl, qty, meal} = daily;
+    let date = datetimer(daily.date, dateFormat);  
+    
+    let year = date.year();
+    let month = date.month();
+    let dd = date.date() - 1;
+    
+    let booked = new Array({date: 1}, {date: 2}, {date: 3}, {date: 4}, {date: 5}, {date: 6}, {date: 7}, {date: 8}, {date: 9}, {date: 10}, {date: 11}, {date: 12}, {date: 13}, {date: 14}, {date: 15}, {date: 16},
+      {date: 17}, {date: 18}, {date: 19}, {date: 20}, {date: 21}, {date: 22}, {date: 23}, {date: 24}, {date: 25}, {date: 26}, {date: 27}, {date: 28}, {date: 29}, {date: 30}, {date: 31});
+    let bobj = {rsvno, seq1, seq2, day, ppl, qty};
+
+    daily.time = daily.time || '';
+
+    let tm = await availModels.Mealbooked.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [meal, year, month]}, this.trans);
+    if (tm.status != 200 && tm.status != 400) return tm;
+
+    if (tm.status == 200) {
+      booked = tm.data.booked;
+    }
+
+    if (! (daily.time in booked[dd])) {
+      booked[dd][daily.time] = {booked: ppl, qty, daily: [bobj]};
+    }
+    else {
+      booked[dd][daily.time].booked += ppl;
+      booked[dd][daily.time].qty += qty;
+      booked[dd][daily.time].daily.push(bobj)
+    }
+
+    let rec = {meal, year, month, booked};
+    let tobj = new availModels.Mealbooked(rec);
+
+    // insert
+    if (tm.data.length == 0) {
+      tm = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+    }
+    else {
+      // update
+      tm = await tobj.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+    }
+
+    return tm;
+  }
+
+  async removeMealBooked(daily) {
+    // remove daily entry from Mealbooked
+    // removing only
+    let {rsvno, seq1, seq2, day, meal} = daily;
+    let date = datetimer(daily.date);
+    
+    let year = date.year();
+    let month = date.month();
+    let dd = date.date() - 1;
+    
+    daily.time = daily.time || '';
+
+    let tm = await availModels.Mealbooked.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [meal, year, month]}, this.trans);
+    if (tm.status != 200) return tm;  // not there, nothing to remove
+
+    let booked = tm.data.booked;
+
+    if (! (daily.time in booked[dd])) {
+      return tm; // not there
+    }
+
+    // accum ppl, qty from all the other entries.  Find index from needed entry
+    let pplTot = 0, qtyTot = 0, dIdx = -1;
+
+    for (let idx=0; idx<booked[dd][daily.time].daily.length; idx++) {
+      let entry = booked[dd][daily.time].daily[idx];
+
+      if (entry.rsvno == rsvno && entry.seq1 == seq1 && entry.seq2 == seq2 && entry.day == day) {
+        dIdx = idx; // the one to remove
+      }
+      else {
+        pplTot += entry.ppl;  // add up ppl
+        qtyTot += entry.qty;  // add up qty
+      }
+    }
+
+    booked[dd][daily.time].booked = pplTot;
+    booked[dd][daily.time].qty = qtyTot;
+    if (dIdx > -1) booked[dd][daily.time].daily.splice(dIdx,1);
+
+    let rec = {meal, year, month, booked};
+    let tobj = new availModels.Mealbooked(rec);
+
+    // update
+    tm = await tobj.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+    return tm;
+  }
+}
+
+class ItemService extends ModelService {
+  async create({database = '', pgschema = '', user = {}, rec = {}} = {}) {
+    let inst = new Item(database, pgschema, user);
+    
+    return await inst.create(rec);
+  }
+
+  async update({database = '', pgschema = '', user = {}, rec= {}} = {}) {
+    let inst = new Item(database, pgschema, user);
+
+    return await inst.create(rec);
+  }
+  
+  async delete({database = '', pgschema = '', user = {}, pks = {}} = {}) {
+    let inst = new Item(database, pgschema, user);
+
+    return await inst.delete(pks);
+  }  
 }
 
 // Model services
@@ -228,8 +789,8 @@ class Pricing {
     this.rate = '';
     this.plevel = '';
     this.errMsg = '';
-    this.dateFormat = 'YYYY-MM-DD';
-    this.timeFormat = 'H:mm:ss.SSS';
+    this.dateFormat = dateFormat;
+    this.timeFormat = timeFormatPG;
 
     this.infantList = ['infant', 'infants', 'baby', 'babies'];
     this.childList = ['child', 'children', 'kid', 'kids'];
@@ -238,6 +799,23 @@ class Pricing {
     this.seniorList = ['senior', 'seniors', 'aged', 'old folks'];
 
     this.data = {pdesc: ['','','','','','','','Complimentary'], pqty: [0,0,0,0,0,0,0,0], price: [0,0,0,0,0,0,0,0], pextn: [0,0,0,0,0,0,0,0]}
+
+    switch(pobj.cat) {
+      case 'A':
+        this.ratesModel = 'Actrates';
+        this.priceModel = 'Actprices';
+        break;
+
+      case 'L':
+        this.ratesModel = 'Lodgrates';
+        this.priceModel = 'Lodgprices';
+        break;
+
+      case 'M':
+        this.ratesModel = 'Mealrates';
+        this.priceModel = 'Mealprices';
+        break;
+    }
   }
 
   async calcIt() {
@@ -245,7 +823,7 @@ class Pricing {
 
     this.setPriceDescs();
     this.setQtys();
-    await this.getprice();
+    await this.getPrices();
     this.calcExtn();
     this.formatPrices();
 
@@ -255,7 +833,7 @@ class Pricing {
   }
 
   async getBasicData() {
-    let rate = await itemModels.Actrates.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [this.pobj.code, this.pobj.rateno]});
+    let rate = await itemModels[this.ratesModel].selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [this.pobj.code, this.pobj.rateno]});
     if (rate.status != 200) return rate;
 
     this.rate = rate.data;
@@ -266,7 +844,7 @@ class Pricing {
     this.plevel = plevel.data;
   }
 
-  async getprice() {
+  async getPrices() {
     let timeno = -1, price;
     let code = this.pobj.code, rateno = this.pobj.rateno, times = this.pobj.times || [''];
     let dur = parseInt(this.pobj.dur) || 1;
@@ -286,15 +864,15 @@ class Pricing {
           let time1 = datetimer(time, this.timeFormat);
           let hh = time1.hours(), mm = time1.minutes();
 
-          price = await itemModels.Actprices.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [code, rateno, yr, mo, hh, mm]});
+          price = await itemModels[this.priceModel].selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [code, rateno, yr, mo, hh, mm]});
   
           if (price.status != 200) {
-            price = await itemModels.Actprices.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [code, rateno, yr, mo, 0, 0]});
+            price = await itemModels[this.priceModel].selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [code, rateno, yr, mo, 0, 0]});
             }
         }
         else {
-          price = await itemModels.Actprices.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [code, rateno, yr, mo, 0, 0]});
-          }
+          price = await itemModels[this.priceModel].selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [code, rateno, yr, mo, 0, 0]});
+        }
 
         if (price.status == 200) {
           let priceData = price.data.prices;

@@ -5,7 +5,6 @@ import {Pages} from '/~static/lib/client/core/paging.js';
 import {Modal} from '/~static/lib/client/widgets/modal.js';
 import {MDateModal} from '/~static/lib/client/widgets/mdate.js';
 
-
 // js for pages
 import '/~static/apps/reservations/modules/res/create.js';
 import '/~static/apps/reservations/modules/res/update.js';
@@ -23,6 +22,10 @@ let moduleStart = function() {
     Module.data.activity = new TableAccess({modelName: 'activity', url: `/items/v1/activity`});    
     Module.data.actgroup = new TableAccess({modelName: 'actgroup', url: `/items/v1/actgroup`});    
     Module.data.actrates = new TableAccess({modelName: 'actrates', url: `/items/v1/actrates`});    
+
+    Module.data.meals = new TableAccess({modelName: 'meals', url: `/items/v1/meals`});    
+    Module.data.meallocn = new TableAccess({modelName: 'meallocn', url: `/items/v1/meallocn`});    
+    Module.data.mealrates = new TableAccess({modelName: 'mealrates', url: `/items/v1/mealrates`});    
 
     Module.data.area = new TableAccess({modelName: 'area', url: `/items/v1/area`});    
     Module.data.pmtterms = new TableAccess({modelName: 'pmtterms', url: `/items/v1/pmtterms`});    
@@ -101,6 +104,29 @@ let moduleStart = function() {
     itemData.addModel(model);                          
 
     Module.tableStores.actrates = new TableStore({accessor: Module.data.actrates, model, safemode});  // setup a table store in Module so all pages can access    
+
+    // Meals
+    model = `/items/meals`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.meals = new TableStore({accessor: Module.data.meals, model, safemode});  // setup a table store in Module so all pages can access    
+    dataPromises.push(Module.tableStores.meals.getAll());
+
+    // Meallocn
+    model = `/items/meallocn`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.meallocn = new TableStore({accessor: Module.data.meallocn, model, safemode});  // setup a table store in Module so all pages can access    
+    dataPromises.push(Module.tableStores.meallocn.getAll());
+
+    // mealrates
+    model = `/items/mealrates`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.mealrates = new TableStore({accessor: Module.data.mealrates, model, safemode});  // setup a table store in Module so all pages can access    
 
     // Pmt terms
     model = `/items/pmtterms`;

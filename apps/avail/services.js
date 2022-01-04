@@ -108,14 +108,14 @@ const gatherA = async function(database, pgschema, user, code, listOfDays) {
 
         for (let time in times) {
           let t = times[time];
+          let b = parseInt(t.booked);
 
           if (! (time in data.dates[key].times)) {
-            let b = parseInt(t.booked);
-
             data.dates[key].times[time] = {limit: 0, booked: b, avail: -b};
           }
           else {
-            data.dates[key].times[time] = {booked: b, avail: data.dates[key].times[time].limit - b};
+            data.dates[key].times[time].booked = b;
+            data.dates[key].times[time].avail = data.dates[key].times[time].limit - b;
           }
         }
       }
@@ -124,6 +124,75 @@ const gatherA = async function(database, pgschema, user, code, listOfDays) {
 
   // Resources/Times
   // factor in trip length (days) when checking res/tts, baiscally from day 1 to day x+trip.length;
+
+  return data;
+}
+
+const gatherM = async function(database, pgschema, user, code, listOfDays) {
+  // data: {code, name, dates: {yyyy-mm-dd: {times: {time: {limit, booked, avail}}}}
+  let data = {};
+  let meal;
+
+  meal = await itemModels.Meals.selectOne({database, pgschema, user, pks: [code]});
+
+  if (meal.status == 200) {
+    data.code = code;
+    data.name = meal.data.name;
+    data.dates = {};
+  }
+  else {
+    return data;
+  }
+
+  for (let [yr, mo, days] of listOfDays) {
+    // schedule
+    let res = await itemModels.Mealsched.selectOne({database, pgschema, user, pks: [code, yr, mo]});
+
+    if (res.status == 200) {
+      let sched = res.data.sched;
+
+      for (let day of days) {
+        let times = sched[day-1] || {};
+        let key = `${yr}-${zeroPad(mo, 2)}-${zeroPad(day, 2)}`;
+
+        if (! (key in data.dates)) data.dates[key] = {times: {}};
+
+        for (let time in times) {
+          let t = times[time];
+          let limit = parseInt(t.limit);
+
+          data.dates[key].times[time] = {limit, booked: 0, avail: limit};
+        }
+      }
+    }
+
+    // booked
+    res = await availModels.Mealbooked.selectOne({database, pgschema, user, pks: [code, yr, mo]});
+
+    if (res.status == 200) {
+      let booked = res.data.booked;
+
+      for (let day of days) {
+        let times = booked[day-1] || {};
+        let key = `${yr}-${zeroPad(mo, 2)}-${zeroPad(day, 2)}`;
+
+        if (! (key in data.dates)) data.dates[key] = {times: {}};
+
+        for (let time in times) {
+          let t = times[time];
+          let b = parseInt(t.booked);
+
+          if (! (time in data.dates[key].times)) {
+            data.dates[key].times[time] = {limit: 0, booked: b, avail: -b};
+          }
+          else {
+            data.dates[key].times[time].booked = b;
+            data.dates[key].times[time].avail = data.dates[key].times[time].limit - b;
+          }
+        }
+      }
+    }
+  }
 
   return data;
 }
@@ -143,6 +212,21 @@ services.avail = {
         if (res.status == 200) {
           for (let rec of res.data) {
             item = await gatherA(database, pgschema, user, rec.code, listOfDays);
+            data[rec.code] = item;
+          }
+        }
+        else {
+          return res;
+        }
+
+        break;
+
+      case 'M':
+        res = await itemModels.Meals.select({database, pgschema, user, rec: {active: true}});
+
+        if (res.status == 200) {
+          for (let rec of res.data) {
+            item = await gatherM(database, pgschema, user, rec.code, listOfDays);
             data[rec.code] = item;
           }
         }
@@ -176,6 +260,18 @@ services.avail = {
         }
 
         break;
+
+      case 'M':
+        res = await itemModels.Meals.select({database, pgschema, user, rec: {meallocn: grp, active: true}});
+
+        if (res.status == 200) {
+          for (let rec of res.data) {
+            item = await gatherM(database, pgschema, user, rec.code, listOfDays);
+            data[rec.code] = item;
+          }
+        }
+
+        break;        
     }
 
     let tm = new TravelMessage();
@@ -191,6 +287,12 @@ services.avail = {
 
     switch(cat) {
       case 'A':
+        item = await gatherA(database, pgschema, user, code, listOfDays);
+
+        data[code] = item;
+        break;
+
+      case 'M':
         item = await gatherA(database, pgschema, user, code, listOfDays);
 
         data[code] = item;

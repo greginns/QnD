@@ -75,10 +75,10 @@
 </div>
 {% endmacro %}
 
-{% macro Date(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_click='date:boot()', placeholder='') %}
+{% macro Date(type='text', id='', maxlength='', mvc_value='', label='', mvc_enabled='', mvc_disabled='', mvc_click='date:boot()', mvc_on='', placeholder='') %}
 <div class="form-label-group">
   <div class='input-group'>
-    <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="date" mvc-event-type="blur" mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
+    <input type="{{type}}" xid="{{id}}" maxlength="{{maxlength}}" mvc-value="{{mvc_value}}" mvc-role="date" mvc-event-type="blur" mvc-on='{{mvc_on}}', mvc-enabled='{{mvc_enabled}}' mvc-disabled='{{mvc_disabled}}' placeholder='{{placeholder}}' class="form-control" />
     <span class="input-group-text" mvc-click='{{mvc_click}}'><i class="far fa-calendar-alt"></i></span>
   </div>
   <label class='split-bg'>{{label}}</label>

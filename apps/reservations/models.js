@@ -95,7 +95,7 @@ const Include = class extends Model {
         adults: new Fields.Integer({notNull: true, verbose: 'Adults'}),
         seniors: new Fields.Integer({notNull: true, verbose: 'Seniors'}),
         ppl: new Fields.Integer({notNull: true, verbose: 'Total Ppl'}),
-        noshow: new Fields.Integer({notNull: true, verbose: 'No Shows'}),
+        noshow: new Fields.Integer({null: true, verbose: 'No Shows'}),
         qty: new Fields.Integer({notNull: true, default: 0, verbose: 'Qty'}),
         notes: new Fields.Text({null: true, verbose: 'Notes'}),
         cidate: new Fields.Date({null: true, verbose: 'Check-In Date'}),
@@ -110,7 +110,7 @@ const Include = class extends Model {
         prices: new Fields.Jsonb({verbose: 'Prices'}),  
         snapshot: new Fields.Jsonb({verbose: 'Snapshot'}),      
         
-        rslrseq2: new Fields.Integer({notNull: true, verbose: 'Reseller Included Sequence'}),
+        rslrseq2: new Fields.Integer({null: true, verbose: 'Reseller Included Sequence'}),
         supplier: new Fields.Char({null: true, maxLength: 8, verbose: 'Supplier Rsvno'}),
         suppseq1: new Fields.Integer({null: true, verbose: 'Supplier Item'}),
 
@@ -481,6 +481,7 @@ const Item = class extends Model {
         rsvno: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Rsvno'}),      
         seq1: new Fields.Integer({notNull: true, verbose: 'Item Sequence'}),
         cat: new Fields.Char({notNull: true, maxLength: 1, onBeforeUpsert: upper, verbose: 'Category'}),
+        group: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Group'}),
         code: new Fields.Char({notNull: true, maxLength: 8, onBeforeUpsert: upper, verbose: 'Code'}),
         opt: new Fields.Integer({null: true, verbose: 'Option'}),
         date: new Fields.Date({null: true, verbose: 'Date'}),
@@ -976,7 +977,7 @@ const Mealdaily = class extends Daily {
       constraints: {
         fk: [
           {name: 'meal', columns: ['meal'], app, table: Meals, tableColumns: ['code'], onDelete: 'NO ACTION'},
-          {name: 'incl', columns: ['rsvno', 'seq1', 'seq2'], app, table: Actinclude, tableColumns: ['rsvno', 'seq1', 'seq2'], onDelete: 'NO ACTION'},
+          {name: 'incl', columns: ['rsvno', 'seq1', 'seq2'], app, table: Mealinclude, tableColumns: ['rsvno', 'seq1', 'seq2'], onDelete: 'NO ACTION'},
         ]
       },
 
