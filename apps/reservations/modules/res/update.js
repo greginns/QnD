@@ -416,7 +416,7 @@ class ItemManager extends Verror {
   }
 
   createModel() {
-    this.home = document.getElementById('rsvs-rsv-items-new');
+    this.home = document.getElementById('rsvs-rsv-items-list');
     this.cats = {};
     this.model.facade = [];
     this.currentItem;
@@ -424,11 +424,6 @@ class ItemManager extends Verror {
   }
 
   async ready() {
-    this.cats['A'] = new Activity();
-    this.cats['A'].ready();
-
-    this.cats['M'] = new Meal();
-    this.cats['M'].ready();
   }
 
   setRsvno(rsvno) {
@@ -459,11 +454,34 @@ class ItemManager extends Verror {
     this.rsvno = rsvno;
   }
 
-  async createItem(cat) {
-    this.currentItem = this.cats[cat];
-    this.currentItem.setRsvno(this.rsvno);
+  copyTemplate(cat) {
+    let tid = 'entry-item-' + cat;
+    let template = document.getElementById(tid);
+    let clone = template.content.firstElementChild.cloneNode(true);
+
+    this.home.appendChild(clone);
+
+    return clone;
   }
 
+  async createItemInstance(cat, el) {
+    let inst;
+
+    switch(cat) {
+      case 'A':
+        inst = new Activity(el);
+        break;
+
+      case 'M':
+        inst = new Meal(el);
+        break;
+    }
+    
+    await inst.ready();
+
+    return inst;
+  }
+/*
   displayItem() {
     let itemmgr = this.currentItem._section;
 
@@ -476,11 +494,13 @@ class ItemManager extends Verror {
 
     itemmgr.style.display = 'none';
   }
+*/
+  async bookNew(cat) {
+    let el = this.copyTemplate(cat);
+    let inst = await this.createItemInstance(cat, el);
 
-  bookNew(cat) {
-    this.createItem(cat);
-    this.currentItem.bookNew(this.bookDone.bind(this));
-    this.displayItem();
+    inst.setRsvno(this.rsvno);
+    inst.bookNew(this.bookDone.bind(this));
   }
 
   bookOld(obj) {
@@ -536,7 +556,9 @@ class BookItem extends Verror {
 
     this.dateFmt = 'YYYY-MM-DD';
     this.timeFmt = 'H:mm A';
+    this.timeFmtRaw = 'H:mm:SS';
     this.bookDoneCallback;
+    this.ageGroups = ['infants', 'children', 'youth', 'adults', 'seniors'];
   }
 
   async ready() {
@@ -637,7 +659,7 @@ class BookItem extends Verror {
   calcPpl() {
     let ppl = 0;
 
-    for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
+    for (let g of this.ageGroups) {
       ppl += parseInt(this.model.item[g]);
     }
 
@@ -662,8 +684,18 @@ class BookItem extends Verror {
 
 // Rates
   async rateChanged(obj) {
-    // select a rate
-    // calc prices
+    // rate selected by user
+    await this.rePrice();
+
+    this.doIncluded();
+  }
+
+  async rePrice() {
+    await this.getPriceData();
+    this.calcCharges();
+  }
+
+  async getPriceData() {
     let pobj = this.model.item.toJSON();
 
     pobj.rateno = this.model.item.rateno;
@@ -684,8 +716,6 @@ class BookItem extends Verror {
       this.model.item.price = [0,0,0,0,0,0,0,0];
       this.model.item.pextn = [0,0,0,0,0,0,0,0];
     }
-
-    this.calcCharges();
   }
 
   chooseRate() {
@@ -758,11 +788,65 @@ class BookItem extends Verror {
     this.calcDiscount();
   }
 
+// data gatherers ---------------------------------------------
+  async getAvailForGroup() {
+    // cat /cat
+    // grp /cat/grp
+    // code /cat/grp/code, or /cat//code
+    let cat = this.model.item.cat;
+    let code = '';
+    let group = this.model.item.group;
+    let dt = this.model.item.date.substring(0,10);
+    let filters = {};
+
+    filters.fromdate = dt;
+    filters.todate = dt;
+    filters.time = '';
+
+    let opts = {};
+    let url = `/avail/v1/avail/${cat}`;
+
+    if (group) url += `/${group}`;
+    if (code) url += `/${code}`;
+
+    opts.filters = JSON.stringify(filters);
+        
+    utils.modals.overlay(true);
+    let res = await io.get(opts, url);
+    utils.modals.overlay(false);
+
+    if (res.status == 200) {
+      this.availData = res.data;
+    }
+    else {
+      Module.modal.alert(res.data.errors.message);
+      this.availData = {};
+    }
+  }
+
+  async getRates() {
+    let code = this.model.item.code;
+    let filters = {[this.rateKey]: code, active: true}
+    let rates = [{rateno: '', name: 'No Rate Selected'}];
+
+    utils.modals.overlay(true);
+    let res = await Module.data[this.rateTable].getMany({filters});
+    utils.modals.overlay(false);    
+
+    if (res.status == 200) {
+      for (let rate of res.data) {
+        rates.push(rate);
+      }
+    }
+
+    this.model.rates = rates;
+  }
+
 // Facade
   makeFacadePpl() {
     let text = [];
 
-    for (let g of ['infants', 'children', 'youth', 'adults', 'seniors']) {
+    for (let g of this.ageGroups) {
       if (this.model.item[g] > 0) {
         text.push(this.model.item[g] + '/' + g.substring(0,1).toUpperCase());
       }
@@ -788,20 +872,27 @@ class BookItem extends Verror {
 
     return text + '  $' + this.model.item.charges;
   }
+
+  doIncluded() {
+
+  }
 }
 
+/*********** ACTIVITY ************/
 class Activity extends BookItem {
   // Needs res/ttot data from server
   // factor that in to space
   // sort times by boo/time
-  constructor() {
-    super('entry-item-A');
-
-    this.cat = 'A';
+  constructor(el) {
+    super(el);
   }
 
   createModel() {
     super.createModel();
+
+    this.cat = 'A';
+    this.rateKey = 'activity';
+    this.rateTable = 'actrates';
   }
 
   async ready() {
@@ -828,7 +919,7 @@ class Activity extends BookItem {
   }
 
   async getFacadeData(item) {
-    this.model.item = item.snapshot;
+    this.model.item = ('snapshot' in item) ? item.snapshot : item;
 
     await this.getRates();    // for rate name
 
@@ -841,7 +932,7 @@ class Activity extends BookItem {
     let timex = this.makeFacadeTime();
     let rate = this.makeFacadeRate();
     let date = datetimer(dt, this.dateFmt).format(this.dateFmt);
-    let time = datetimer(timex, 'HH:mm:SS').format(this.timeFmt);
+    let time = datetimer(timex, this.timeFmtRaw).format(this.timeFmt);
 
     return {cat: this.cat, klass, seq1, date, ppl, code, dur, time, timex, rate};
   }
@@ -862,7 +953,7 @@ class Activity extends BookItem {
     // setup all data
     await this.groupChanged();
     this.processTimes();
-    await this.rateChanged();
+    await this.rePrice();
   }
 
 // dropper close routines -------------------------------------------------
@@ -872,14 +963,14 @@ class Activity extends BookItem {
       this.calcEndDate();
       await this.groupChanged();  // avail data
       this.processTimes();        // re-select times
-      this.rateChanged();         // get prices
+      await this.rePrice();         // get prices
 
       this.model.facade.time = this.makeFacadeTime();
       this.model.facade.rate = this.makeFacadeRate();
     }
   }
 
-  ppl(ev) {
+  async ppl(ev) {
     if (ev.state == 'close' && ev.accept) {
       this.model.facade.ppl = this.makeFacadePpl();
       this.calcPpl();
@@ -887,7 +978,7 @@ class Activity extends BookItem {
       if (this.model.item.code) {
         this.calcQty();
         this.processTimes();        // re-select times
-        this.rateChanged();         // get prices
+        await this.rePrice();         // get prices
         
         this.model.facade.time = this.makeFacadeTime();
         this.model.facade.rate = this.makeFacadeRate();
@@ -917,7 +1008,7 @@ class Activity extends BookItem {
 
   time(ev) {
     if (ev.state == 'close' && ev.accept) {
-      this.rateChanged();         // get prices
+      this.rePrice();         // get prices
 
       this.model.facade.time = this.makeFacadeTime();     
       this.model.facade.rate = this.makeFacadeRate();
@@ -925,7 +1016,7 @@ class Activity extends BookItem {
   }
 
   rate(ev) {
-    if (ev.state == 'close' && ev.accept) {
+    if (ev.state == 'close') {
       this.model.facade.rate = this.makeFacadeRate();
     }
   }
@@ -1074,58 +1165,70 @@ class Activity extends BookItem {
     this.model.groupProducts = codeList;    
   }
 
-// data gatherers ---------------------------------------------
-  async getAvailForGroup() {
-    // cat /cat
-    // grp /cat/grp
-    // code /cat/grp/code, or /cat//code
-    let cat = this.model.item.cat;
-    let code = '';
-    let group = this.model.item.group;
-    let dt = this.model.item.date.substring(0,10);
-    let filters = {};
+  async doIncluded() {
+    // get included items - Meals, Rentals, Other
+    let mainItem = this.model.item.toJSON();
 
-    filters.fromdate = dt;
-    filters.todate = dt;
-    filters.time = '';
-
-    let opts = {};
-    let url = `/avail/v1/avail/${cat}`;
-
-    if (group) url += `/${group}`;
-    if (code) url += `/${code}`;
-
-    opts.filters = JSON.stringify(filters);
-        
-    utils.modals.overlay(true);
-    let res = await io.get(opts, url);
-    utils.modals.overlay(false);
-
-    if (res.status == 200) {
-      this.availData = res.data;
+    if (!mainItem.rateno) {
+      this.clearIncluded();
+      return;
     }
-    else {
-      Module.modal.alert(res.data.errors.message);
-      this.availData = {};
+
+    let date = mainItem.date;
+    let datex = datetimer(date, this.dateFmt);
+    let filters = {activity: mainItem.code, rateno: mainItem.rateno};
+    let res = await Module.data.actinclm.getMany({filters})
+
+    if (res.status != 200) {
+      alert(res.message);
+      return;
+    }
+
+    let meals = res.data;
+
+    for (let meal of meals) {
+      let obj = {};
+      let day = parseInt(meal.day);
+      let offset = parseInt(meal.offset);
+
+      obj.cat = 'M';
+      obj.meal = meal.meal;
+      obj.code = meal.meal;
+      obj.rateno = meal.mealrate;
+      obj.dur = parseInt(meal.dur);
+      obj.ppl = mainItem.ppl;
+      obj.date = datex.add(day - 1, 'days').format(this.dateFmt);
+      obj.times = [];
+
+      // age group numbers
+      for (let ag of this.ageGroups) {
+        obj[ag] = mainItem[ag];
+      }
+
+      // times.
+      for (let d=0; d<obj.dur; d++) {
+        let t = (d < mainItem.times.length) ? mainItem.times[d] : mainItem.times[0];
+
+        if (t) {
+          let timer = datetimer(t, this.timeFmtRaw);
+
+          obj.times.push(timer.add(offset, 'minutes').format(this.timeFmtRaw));
+        }
+        else {
+          obj.times.push(t);
+        }
+      }
+
+      //let inst = new Meal();
+      //await inst.ready();
+      //let data = await inst.getFacadeData(obj);
+
+      console.log(obj)
     }
   }
 
-  async getRates() {
-    let code = this.model.item.code;
-    let filters = {activity: code, active: true}
-    let rates = [{rateno: '', name: 'No Rate Selected'}];
+  clearIncluded() {
 
-    utils.modals.overlay(true);
-    let res = await Module.data.actrates.getMany({filters});
-    utils.modals.overlay(false);    
-
-    if (res.status == 200) {
-      for (let rate of res.data) {
-        rates.push(rate);
-      }
-    }
-
-    this.model.rates = rates;
   }
 
 // facade routines -----------------------------------------------
@@ -1157,14 +1260,16 @@ class Meal extends BookItem {
   // Needs res/ttot data from server
   // factor that in to space
   // sort times by boo/time
-  constructor() {
-    super('entry-item-M');
-
-    this.cat = 'M';
+  constructor(el) {
+    super(el);
   }
 
   createModel() {
     super.createModel();
+    
+    this.cat = 'M';
+    this.rateKey = 'meal';
+    this.rateTable = 'mealrates';
   }
 
   async ready() {
@@ -1191,9 +1296,13 @@ class Meal extends BookItem {
   }
 
   async getFacadeData(item) {
-    this.model.item = item.snapshot;
+    this.model.item = ('snapshot' in item) ? item.snapshot : item;
 
     await this.getRates();    // for rate name
+
+    if (! ('charges' in this.model.item)) {
+      await this.rePrice();
+    }
 
     let klass = this.klasses[this.cat];
     let seq1 = this.model.item.seq1;
@@ -1225,7 +1334,7 @@ class Meal extends BookItem {
     // setup all data
     await this.groupChanged();
     this.processTimes();
-    await this.rateChanged();
+    await this.rePrice();
   }
 
 // dropper close routines -------------------------------------------------
@@ -1235,7 +1344,7 @@ class Meal extends BookItem {
       this.calcEndDate();
       await this.groupChanged();  // avail data
       this.processTimes();        // re-select times
-      this.rateChanged();         // get prices
+      this.rePrice();         // get prices
     }
   }
 
@@ -1247,7 +1356,7 @@ class Meal extends BookItem {
       if (this.model.item.code) {
         this.calcQty();
         this.processTimes();        // re-select times
-        this.rateChanged();         // get prices
+        this.rePrice();         // get prices
 
         this.model.facade.time = this.makeFacadeTime();
         this.model.facade.rate = this.makeFacadeRate();        
@@ -1276,7 +1385,7 @@ class Meal extends BookItem {
 
   time(ev) {
     if (ev.state == 'close' && ev.accept) {
-      this.rateChanged();         // get prices
+      this.rePrice();         // get prices
 
       this.model.facade.time = this.makeFacadeTime();
       this.model.facade.rate = this.makeFacadeRate();      
@@ -1284,7 +1393,7 @@ class Meal extends BookItem {
   }
 
   rate(ev) {
-    if (ev.state == 'close' && ev.accept) {
+    if (ev.state == 'close') {
       this.model.facade.rate = this.makeFacadeRate();
     }
   }
@@ -1431,60 +1540,6 @@ class Meal extends BookItem {
     }
 
     this.model.groupProducts = codeList;    
-  }
-
-// data gatherers ---------------------------------------------
-  async getAvailForGroup() {
-    // cat /cat
-    // grp /cat/grp
-    // code /cat/grp/code, or /cat//code
-    let cat = this.model.item.cat;
-    let code = '';
-    let group = this.model.item.group;
-    let dt = this.model.item.date.substring(0,10);
-    let filters = {};
-
-    filters.fromdate = dt;
-    filters.todate = dt;
-    filters.time = '';
-
-    let opts = {};
-    let url = `/avail/v1/avail/${cat}`;
-
-    if (group) url += `/${group}`;
-    if (code) url += `/${code}`;
-
-    opts.filters = JSON.stringify(filters);
-        
-    utils.modals.overlay(true);
-    let res = await io.get(opts, url);
-    utils.modals.overlay(false);
-
-    if (res.status == 200) {
-      this.availData = res.data;
-    }
-    else {
-      Module.modal.alert(res.data.errors.message);
-      this.availData = {};
-    }
-  }
-
-  async getRates() {
-    let code = this.model.item.code;
-    let filters = {meal: code, active: true}
-    let rates = [{rateno: '', name: 'No Rate Selected'}];
-
-    utils.modals.overlay(true);
-    let res = await Module.data.mealrates.getMany({filters});
-    utils.modals.overlay(false);    
-
-    if (res.status == 200) {
-      for (let rate of res.data) {
-        rates.push(rate);
-      }
-    }
-
-    this.model.rates = rates;
   }
 
 // facade routines -----------------------------------------------

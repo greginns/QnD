@@ -22,6 +22,7 @@ let moduleStart = function() {
     Module.data.activity = new TableAccess({modelName: 'activity', url: `/items/v1/activity`});    
     Module.data.actgroup = new TableAccess({modelName: 'actgroup', url: `/items/v1/actgroup`});    
     Module.data.actrates = new TableAccess({modelName: 'actrates', url: `/items/v1/actrates`});    
+    Module.data.actinclm = new TableAccess({modelName: 'actinclm', url: `/items/v1/actinclm`});    
 
     Module.data.meals = new TableAccess({modelName: 'meals', url: `/items/v1/meals`});    
     Module.data.meallocn = new TableAccess({modelName: 'meallocn', url: `/items/v1/meallocn`});    
@@ -29,7 +30,6 @@ let moduleStart = function() {
 
     Module.data.area = new TableAccess({modelName: 'area', url: `/items/v1/area`});    
     Module.data.pmtterms = new TableAccess({modelName: 'pmtterms', url: `/items/v1/pmtterms`});    
-    //Module.data.pricelevel = new TableAccess({modelName: 'pricelevel', url: `/items/v1/pricelevel`});    
 
     Module.data.contact = new TableAccess({modelName: 'contact', url: `/contacts/v1/contact`});    
     Module.data.company = new TableAccess({modelName: 'company', url: `/contacts/v1/company`});    
@@ -105,6 +105,13 @@ let moduleStart = function() {
 
     Module.tableStores.actrates = new TableStore({accessor: Module.data.actrates, model, safemode});  // setup a table store in Module so all pages can access    
 
+    // Actinclm
+    model = `/items/actinclm`;
+
+    itemData.addModel(model);                          
+
+    Module.tableStores.actinclm = new TableStore({accessor: Module.data.actinclm, model, safemode});  // setup a table store in Module so all pages can access    
+    
     // Meals
     model = `/items/meals`;
 
@@ -135,13 +142,6 @@ let moduleStart = function() {
 
     Module.tableStores.pmtterms = new TableStore({accessor: Module.data.pmtterms, model, safemode});  // setup a table store in Module so all pages can access    
     dataPromises.push(Module.tableStores.pmtterms.getAll());
-
-    // Price levels
-    //model = `/items/pricelevel`;
-
-    //itemData.addModel(model);                          
-
-    //Module.tableStores.pricelevel = new TableStore({accessor: Module.data.pricelevel, model, safemode});  // setup a table store in Module so all pages can access    
 
     // Contact table ---
     model = `/contacts/contact`;

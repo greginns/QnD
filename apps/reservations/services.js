@@ -86,10 +86,9 @@ class Item {
   } 
   
   async delete(pks) {
-    let drec = {rsvno: pks.rsvno, seq1: pks.seq1}
-    let irec = new models.Item(drec);
+    let drec = [pks.rsvno, pks.seq1];
 
-    let tm = await irec.selectOne({database: this.database, pgschema: this.pgschema, user: this.user});
+    let tm = await models.Item.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: drec});
 
     if (tm.status != 200) return tm;
 
