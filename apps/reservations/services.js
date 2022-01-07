@@ -599,7 +599,7 @@ class ItemService extends ModelService {
   async update({database = '', pgschema = '', user = {}, rec= {}} = {}) {
     let inst = new Item(database, pgschema, user);
 
-    return await inst.create(rec);
+    return await inst.update(rec);
   }
   
   async delete({database = '', pgschema = '', user = {}, pks = {}} = {}) {

@@ -640,168 +640,149 @@
 
     <div id='rsvs-rsv-items-list'>
     </div>
-
-    <div mvc-each='facade' mvc-click='bookOld()'>
-      <div class='row pointer' data-index='$index' mvc-class='facade[$index].klass'>
-        <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-          <span mvc-text='facade[$index].date'></span>
-        </div>
-        <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
-          <span mvc-text='facade[$index].ppl'></span>
-        </div>
-        <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-          <span mvc-text='facade[$index].code'></span>
-        </div>
-        <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
-          <span mvc-text='facade[$index].dur'></span>
-        </div>        
-        <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-          <span mvc-text='facade[$index].time'></span>
-        </div>
-        <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-          <span mvc-text='facade[$index].rate'></span>
-        </div>
-      </div>
-      <div mvc-each='facade[$index].includes' data-index='index$'>
-        <div class='row' mvc-class='facade[$index][index$].klass'>
-          <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-            <span mvc-text='facade[$index][index$].date'></span>
-          </div>
-          <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
-            <span mvc-text='facade[$index][index$].ppl'></span>
-          </div>
-          <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-            <span mvc-text='facade[$index][index$].code'></span>
-          </div>
-          <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
-            <span mvc-text='facade[$index][index$].dur'></span>
-          </div>        
-          <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-            <span mvc-text='facade[$index][index$].time'></span>
-          </div>
-          <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-            <span mvc-text='facade[$index][index$].rate'></span>
-          </div>
-        </div>
-      </div>
-      <div class='mb-2'>
-        <div class='row'>
-        </div>
-      </div>
-    </div>
   </section>
-
 </page>
 
 <template id='entry-item-A'>
-  <div class='row act-color'>
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='', mvc_on='{"change": "date()"}') }}
-    </div>
+  <div class='mb-2'>
+    <div class='row act-color' mvc-show='viewState == "edit"'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='', mvc_on='{"change": "date()"}') }}
+      </div>
+  
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-guest', mvc_value='facade.ppl', handler='ppl', template_id='rsv-update-dropdown-guests', dir_class='dropup', dd_class='dropper-guests', label='') }}
+      </div>
+  
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-code', mvc_value='facade.code', handler='code', template_id='rsv-update-dropdown-code', dir_class='dropup', dd_class='dropper-code', label='', mvc_enabled='item.date') }}
+      </div>
+  
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+        {{ fields.Char(id='item-dur', mvc_value='item.dur', label='', mvc_enabled='false') }}
+      </div>
+  
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-time', mvc_value='facade.time', mvc_filter='time', handler='time', template_id='rsv-update-dropdown-time', dir_class='dropup dropright', dd_class='dropper-time', label='', mvc_enabled='item.date') }}
+      </div>
+  
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-rate', mvc_value='facade.rate', handler='rate', template_id='rsv-update-dropdown-rate', dir_class='dropup dropright', dd_class='dropper-rate drop-right', label='', mvc_enabled='item.date') }}
+      </div>
+  
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1' style='font-size: 20px'>
+        <span class='pointer text-success me-2' mvc-click='save()'>
+          <i class="fa-light fa-floppy-disk"></i>
+        </span>
 
-    <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
-      {{ fields.Dropper(id='item-guest', mvc_value='facade.ppl', handler='ppl', template_id='rsv-update-dropdown-guests', dir_class='dropup', dd_class='dropper-guests', label='') }}
+        <span mvc-show='item.seq1'>
+          <span class='pointer me-2' mvc-click='endEdit()'>
+            <i class="fa-light fa-xmark me-2"></i>
+          </span>          
+          <span class='pointer text-danger me-2' mvc-click='delete()'>
+            <i class="fa-light fa-trash"></i>
+          </span>
+        </span>
+      </div>
     </div>
-
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ fields.Dropper(id='item-code', mvc_value='facade.code', handler='code', template_id='rsv-update-dropdown-code', dir_class='dropup', dd_class='dropper-code', label='', mvc_enabled='item.date') }}
-    </div>
-
-    <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
-      {{ fields.Char(id='item-dur', mvc_value='item.dur', label='', mvc_enabled='false') }}
-    </div>
-
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ fields.Dropper(id='item-time', mvc_value='facade.time', mvc_filter='time', handler='time', template_id='rsv-update-dropdown-time', dir_class='dropup dropright', dd_class='dropper-time', label='', mvc_enabled='item.date') }}
-    </div>
-
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ fields.Dropper(id='item-rate', mvc_value='facade.rate', handler='rate', template_id='rsv-update-dropdown-rate', dir_class='dropup dropright', dd_class='dropper-rate drop-right', label='', mvc_enabled='item.date') }}
-    </div>
-
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ buttons.btnsm(text='Save', mvc_click='save()') }}
-      <span mvc-show='item.seq1'>
-        {{ buttons.btnsm(class='danger', text='Delete', mvc_click='delete()') }}
-        {{ buttons.btnsm(class='secondary', text='Done', mvc_click='bookDone()') }}
-      </span>
-    </div>
-
-    <div class='row act-color'>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1 ms-2'>
+  
+    <div class='row act-color' mvc-show='viewState == "view"'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         <span mvc-text='item.date' mvc-filter='date'></span>
       </div>
-      <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
         <span mvc-text='facade.ppl'></span>
       </div>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         <span mvc-text='facade.code'></span>
       </div>
-      <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
         <span mvc-text='item.dur'></span>
       </div>        
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         <span mvc-text='facade.time' mvc-filter='time'></span>
       </div>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         <span mvc-text='facade.rate'></span>
       </div>
-    </div>  
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        <span class='pointer' mvc-click='edit()' style='font-size: 20px'>
+          <i class="fa-thin fa-pen"></i>
+        </span>
+      </div>
+    </div> 
+    
+    <div class='includes'>
+    </div>
   </div>
 </template>
 
 <template id='entry-item-M'>
-  <div class='row meal-color'>
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='', mvc_on='{"change": "date()"}') }}
+  <div class='mb-2'>
+    <div class='row meal-color' mvc-show='viewState == "edit"'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='', mvc_on='{"change": "date()"}') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-guest', mvc_value='facade.ppl', handler='ppl', template_id='rsv-update-dropdown-guests', dir_class='dropup', dd_class='dropper-guests', label='') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-code', mvc_value='facade.code', handler='code', template_id='rsv-update-dropdown-code', dir_class='dropup', dd_class='dropper-code', label='', mvc_enabled='item.date') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+        {{ fields.Char(id='item-dur', mvc_value='item.dur', mvc_role='integer', label='') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-time', mvc_value='facade.time', mvc_filter='time', handler='time', template_id='rsv-update-dropdown-time', dir_class='dropup dropright', dd_class='dropper-time', label='', mvc_enabled='item.date') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        {{ fields.Dropper(id='item-rate', mvc_value='facade.rate', handler='rate', template_id='rsv-update-dropdown-rate', dir_class='dropup dropright', dd_class='dropper-rate drop-right', label='', mvc_enabled='item.date') }}
+      </div>
+
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1' style='font-size: 20px'>
+        <span class='pointer text-success me-2' mvc-click='save()'>
+          <i class="fa-light fa-floppy-disk"></i>
+        </span>
+
+        <span mvc-show='item.seq1'>
+          <span class='pointer me-2' mvc-click='endEdit()'>
+            <i class="fa-light fa-xmark me-2"></i>
+          </span>
+          <span class='pointer text-danger me-2' mvc-click='delete()'>
+            <i class="fa-light fa-trash"></i>
+          </span>
+        </span>
+      </div>
     </div>
 
-    <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
-      {{ fields.Dropper(id='item-guest', mvc_value='facade.ppl', handler='ppl', template_id='rsv-update-dropdown-guests', dir_class='dropup', dd_class='dropper-guests', label='') }}
-    </div>
-
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ fields.Dropper(id='item-code', mvc_value='facade.code', handler='code', template_id='rsv-update-dropdown-code', dir_class='dropup', dd_class='dropper-code', label='', mvc_enabled='item.date') }}
-    </div>
-
-    <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
-      {{ fields.Char(id='item-dur', mvc_value='item.dur', mvc_role='integer', label='') }}
-    </div>
-
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ fields.Dropper(id='item-time', mvc_value='facade.time', mvc_filter='time', handler='time', template_id='rsv-update-dropdown-time', dir_class='dropup dropright', dd_class='dropper-time', label='', mvc_enabled='item.date') }}
-    </div>
-
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ fields.Dropper(id='item-rate', mvc_value='facade.rate', handler='rate', template_id='rsv-update-dropdown-rate', dir_class='dropup dropright', dd_class='dropper-rate drop-right', label='', mvc_enabled='item.date') }}
-    </div>
-
-    <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-      {{ buttons.btnsm(text='Save', mvc_click='save()') }}
-      <span mvc-show='item.seq1'>
-        {{ buttons.btnsm(class='danger', text='Delete', mvc_click='delete()') }}
-        {{ buttons.btnsm(class='secondary', text='Done', mvc_click='bookDone()') }}
-      </span>
-    </div>
-
-    <div class='row meal-color'>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1 ms-2'>
+    <div class='row meal-color' mvc-show='viewState == "view"'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         <span mvc-text='item.date' mvc-filter='date'></span>
       </div>
-      <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
         <span mvc-text='facade.ppl'></span>
       </div>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         <span mvc-text='facade.code'></span>
       </div>
-      <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
         <span mvc-text='item.dur'></span>
       </div>        
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         <span mvc-text='facade.time' mvc-filter='time'></span>
       </div>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1 ms-1'>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         <span mvc-text='facade.rate'></span>
+      </div>
+      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+        <span class='pointer' mvc-click='edit()' style='font-size: 20px'>
+          <i class="fa-thin fa-pen"></i>
+        </span>
       </div>
     </div>  
   </div>
