@@ -71,8 +71,7 @@ class Reserv extends Verror {
       self.notesInst.setTopics(topics);
     };
 
-    this.itemManager = new ItemManager('rsvs-rsv-items-section');
-    await this.itemManager.ready();
+    this.itemManager = new ItemManager(document.getElementById('rsvs-rsv-items-list'));
 
     return new Promise(async function(resolve) {
       Module.tableStores.company.addView(new TableView({proxy: this.model.companies, filterFunc}));
@@ -415,16 +414,9 @@ class Reserv extends Verror {
   }
 }
 
-class ItemManager extends Verror {
-  constructor(element) {
-    super(element);
-  }
-
-  createModel() {
-    this.home = document.getElementById('rsvs-rsv-items-list');
-  }
-
-  async ready() {
+class ItemManager {
+  constructor(el) {
+    this.home = el;
   }
 
   setRsvno(rsvno) {
@@ -444,28 +436,10 @@ class ItemManager extends Verror {
     }
   }
 
-  setRsvno(rsvno) {
-    this.rsvno = rsvno;
-  }
-
   async bookNew(cat) {
     let inst = await this.makeNewInstance(cat);
     
     inst.bookNew(this.bookRemove.bind(this));
-  }
-
-/*
-  bookOld(obj) {
-    let idx = obj.target.closest('div.row').getAttribute('data-index');
-    let item = this.itemList[idx];
-
-    this.createItem(item.cat);
-    this.currentItem.bookOld(item, this.bookRemove.bind(this));
-    this.displayItem();    
-  }
-*/
-  bookRemove(posn) {
-    console.log('remove',posn)
   }
 
   async makeNewInstance(cat) {
@@ -506,15 +480,18 @@ class ItemManager extends Verror {
   }
 }
 
-class IncludesManager {
-  constructor(section) {
-    this.section = section.querySelector('div.includes');
+class IncludesManager extends ItemManager {
+  constructor(section, rsvno) {
+    super(section)
+    
+    this.rsvno = rsvno;
     this.includes = [];
     this.mainItem = {};
+    this.instances = [];
   }
 
   clear() {
-    this.section.innerHTML = '';
+    this.home.innerHTML = '';
   }
 
   process(includes, mainItem, cat) {
@@ -528,8 +505,10 @@ class IncludesManager {
     }
   }
 
-  processM() {
+  async processM() {
     //meals
+    let seq2 = 0;
+
     for (let incl of this.includes) {
       let obj = {};
       let day = parseInt(incl.day);
@@ -538,6 +517,8 @@ class IncludesManager {
       let datex = datetimer(date, DATEFMT);
 
       obj.cat = 'M';
+      obj.seq1 = incl.seq1;
+      obj.seq2 = ++seq2;
       obj.meal = incl.meal;
       obj.code = incl.meal;
       obj.rateno = incl.mealrate;
@@ -550,23 +531,38 @@ class IncludesManager {
       for (let ag of AGEGROUPS) {
         obj[ag] = this.mainItem[ag];
       }
-
+  
       // times.
       for (let d=0; d<obj.dur; d++) {
         let t = (d < this.mainItem.times.length) ? this.mainItem.times[d] : this.mainItem.times[0];
 
         if (t) {
           let timer = datetimer(t, TIMEFMTRAW);
+          timer.add(offset, 'minutes')
 
-          obj.times.push(timer.add(offset, 'minutes').format(TIMEFMTRAW));
+          obj.times.push(timer.format(TIMEFMTRAW));
         }
         else {
           obj.times.push(t);
         }
       }
 
-      console.log(obj)
+      let inst = await this.makeNewInstance(obj.cat);
+
+      await inst.buildInclude(obj);
+
+      this.instances.push(inst);
     }    
+  }
+
+  getIncludeItems() {
+    let items = [];
+
+    for (let inst of this.instances) {
+      items.push(inst.getItemData());
+    }
+
+    console.log(items)
   }
 }
 
@@ -609,7 +605,6 @@ class BookItem extends Verror {
     };    
 
     this.rsvno = '';
-    this.posn = -1;
 
     this.bookRemoveCallback;
   }
@@ -639,6 +634,7 @@ class BookItem extends Verror {
 
   bookNew(cb) {
     this.model.viewState = 'edit';
+    this.model.parentState = 'parent';
     this.existingData = {};
     this.bookRemoveCallback = cb;
     this.initItem();
@@ -646,6 +642,7 @@ class BookItem extends Verror {
 
   display(item) {
     this.model.viewState = 'view';
+    this.model.parentState = 'parent';
     this.model.item = item;
     this.model.facade = item.snapshot.facade;
 
@@ -676,6 +673,10 @@ class BookItem extends Verror {
       pqty: [0,0,0,0,0,0,0], 
       pextn: [0,0,0,0,0,0,0],
     };
+  }
+
+  getItemData() {
+    return this.model.item.toJSON();
   }
 
 // I/O
@@ -758,6 +759,10 @@ class BookItem extends Verror {
 // Rates
   async rateChanged(obj) {
     // rate selected by user
+    await this.processRate();
+  }
+
+  async processRate() {
     await this.rePrice();
 
     this.doIncluded();
@@ -947,7 +952,6 @@ class BookItem extends Verror {
   }
 
   doIncluded() {
-
   }
 }
 
@@ -966,7 +970,7 @@ class Activity extends BookItem {
     this.cat = 'A';
     this.rateKey = 'activity';
     this.rateTable = 'actrates';
-    this.includes = new IncludesManager(this._section);
+    this.includes = new IncludesManager(this._section.querySelector('div.includes'));
   }
 
   async ready() {
@@ -999,7 +1003,7 @@ class Activity extends BookItem {
 
     // setup all data
     await this.getRates();
-    await this.handleGroupChange();
+    await this.processItemGroup();
     this.handleTimes();
     await this.rePrice();
   }
@@ -1010,7 +1014,7 @@ class Activity extends BookItem {
     // date was changed
     if (this.model.item.code) {
       this.calcEndDate();
-      await this.handleGroupChange();  // avail data
+      await this.processItemGroup();  // avail data
       this.handleTimes();        // re-select times
       await this.rePrice();         // get prices
 
@@ -1048,7 +1052,7 @@ class Activity extends BookItem {
       this.handleTimes();
       await this.getRates();
       this.chooseRate();
-      await this.rateChanged();         // get prices
+      await this.processRate();         // get prices
 
       this.model.facade.time = this.makeFacadeTime();
       this.model.facade.rate = this.makeFacadeRate();
@@ -1173,10 +1177,10 @@ class Activity extends BookItem {
 
 // element events -----------------------------------------------
   async groupChanged() {
-    await this.handleGroupChange();
+    await this.processItemGroup();
   }
 
-  async handleGroupChange() {
+  async processItemGroup() {
     // get avail
     // build list of items with space
     let codeList = [];
@@ -1236,6 +1240,10 @@ class Activity extends BookItem {
     }
 
     this.includes.process(res.data, item, 'M');
+
+    setTimeout(function() {
+      this.includes.getIncludeItems();
+    }.bind(this), 5000)
   }
 
 // facade routines -----------------------------------------------
@@ -1309,28 +1317,30 @@ class Meal extends BookItem {
 
     // setup all data
     await this.getRates();
-    await this.handleGroupChange();
+    await this.processItemGroup();
     this.handleTimes();
     await this.rePrice();
   }
 
-  buildInclude(item) {
+  async buildInclude(item) {
+    this.model.parentState = 'child';
     this.model.item = item;
 
     this.calcPpl();
-    this.handleGroupChange();
+    this.processItemGroup();
 
+    await this.getProductInfo();
     this.model.item.desc = this.model.product.name;
     this.model.item.meal = this.model.item.code;
-    this.model.item.rateno = '';
+    this.model.item.group = this.model.product.meallocn;
 
     this.calcQty();
+    await this.getAvailForGroup();
     this.handleTimes();
     await this.getRates();
-    await this.rateChanged();         // get prices
+    await this.processRate();         // get prices
 
     this.model.facade.ppl = this.makeFacadePpl();
-    this.model.facade.code = this.makeFacadeCode();
     this.model.facade.time = this.makeFacadeTime();
     this.model.facade.rate = this.makeFacadeRate();
   }
@@ -1338,83 +1348,62 @@ class Meal extends BookItem {
 // dropper close routines -------------------------------------------------
   async date(obj) {
     // date was changed
-    this.processDate();
+    if (this.model.item.code) {
+      this.calcEndDate();
+      await this.processItemGroup();  // avail data
+      this.handleTimes();        // re-select times
+      await this.rePrice();         // get prices
+    }
   }
 
   async ppl(ev) {
     if (ev.state == 'close' && ev.accept) {
-      this.processPpl();
+      this.model.facade.ppl = this.makeFacadePpl();
+      this.calcPpl();
+  
+      if (this.model.item.code) {
+        this.calcQty();
+        this.handleTimes();        // re-select times
+        await this.rePrice();         // get prices
+  
+        this.model.facade.time = this.makeFacadeTime();
+        this.model.facade.rate = this.makeFacadeRate();        
+      }
     }
   }
 
   async code(ev) {
     if (ev.state == 'close' && ev.accept) {
-      this.processCode();
+      await this.getProductInfo();
+
+      this.model.item.desc = this.model.product.name;
+      this.model.item.meal = this.model.item.code;
+      this.model.item.rateno = '';
+  
+      this.calcQty();
+      this.handleTimes();
+      await this.getRates();
+      this.chooseRate();
+      await this.processRate();         // get prices
+  
+      this.model.facade.time = this.makeFacadeTime();
+      this.model.facade.rate = this.makeFacadeRate();    
     }
   }
 
   async time(ev) {
     if (ev.state == 'close' && ev.accept) {
-      this.processTime();
+      await this.rePrice();         // get prices
+
+      this.model.facade.time = this.makeFacadeTime();
+      this.model.facade.rate = this.makeFacadeRate();          
     }
   }
 
   rate(ev) {
     if (ev.state == 'close') {
-      this.processRate();
+      this.model.facade.rate = this.makeFacadeRate();
     }
-  }
-
-  // processes
-  processDate() {
-    if (this.model.item.code) {
-      this.calcEndDate();
-      await this.handleGroupChange();  // avail data
-      this.handleTimes();        // re-select times
-      await this.rePrice();         // get prices
-    }
-  }
-
-  processPpl() {
-    this.model.facade.ppl = this.makeFacadePpl();
-    this.calcPpl();
-
-    if (this.model.item.code) {
-      this.calcQty();
-      this.handleTimes();        // re-select times
-      await this.rePrice();         // get prices
-
-      this.model.facade.time = this.makeFacadeTime();
-      this.model.facade.rate = this.makeFacadeRate();        
-    }    
-  }
-
-  processCode() {
-    this.model.facade.code = this.makeFacadeCode();
-
-    this.model.item.desc = this.model.product.name;
-    this.model.item.meal = this.model.item.code;
-    this.model.item.rateno = '';
-
-    this.calcQty();
-    this.handleTimes();
-    await this.getRates();
-    this.chooseRate();
-    await this.rateChanged();         // get prices
-
-    this.model.facade.time = this.makeFacadeTime();
-    this.model.facade.rate = this.makeFacadeRate();    
-  }
-
-  processTime() {
-    await this.rePrice();         // get prices
-
-    this.model.facade.time = this.makeFacadeTime();
-    this.model.facade.rate = this.makeFacadeRate();          
-  }
-
-  processRate() {
-    this.model.facade.rate = this.makeFacadeRate();
   }
 
 // derived fields -------------------------------------------------
@@ -1520,10 +1509,10 @@ class Meal extends BookItem {
 
 // element events -----------------------------------------------
   async groupChanged() {
-    await this.handleGroupChange();
+    await this.processItemGroup();
   }
 
-  async handleGroupChange() {
+  async processItemGroup() {
     // get avail
     // build list of items with space
     let codeList = [];
@@ -1565,26 +1554,16 @@ class Meal extends BookItem {
     this.model.groupProducts = codeList;    
   }
 
-// facade routines -----------------------------------------------
-  makeFacadeCode() {
+  async getProductInfo() {
+    this.model.product = {};
     let code = this.model.item.code;
-    let text = '';
 
     if (!code) return;
 
-    this.model.product = {};
-
-    for (let act of this.model.products) {
-      if (act.code == code) {
-        this.model.product = act;
-        text = act.name;
-        break;
-      }
-    }
-
-    return text;
+    this.model.product = await Module.tableStores.meals.getOne(code);
   }
 
+// facade routines -----------------------------------------------
   makeFacadeTime() {
     return (this.model.item.times.length>0) ? this.model.item.times[0] : '';
   }

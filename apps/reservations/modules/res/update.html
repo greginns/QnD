@@ -153,9 +153,9 @@
           <div class='card shadow'>
             <div class='card-header'>
               <h5 class='float-start'>Status</h5>
-              <button class='btn-sm btn-outline-primary float-end' data-bs-toggle="modal" data-bs-target="#editStatus">
-                Edit
-              </button>
+              <div class='float-end' mvc-click='editStatus()' style='font-size: 20px'>
+                <i class="fa-thin fa-pen"></i>
+              </div>
             </div>
             <div class='card-body'>
               {% include "./update-status.html" %}
@@ -167,9 +167,9 @@
           <div class='card shadow'>
             <div class='card-header'>
               <h5 class='float-start'>Guest</h5>
-              <button class='btn-sm btn-outline-primary float-end' mvc-click='editGuest()'>
-                Edit
-              </button>
+              <div class='float-end pointer' mvc-click='editGuest()' style='font-size: 20px'>
+                <i class="fa-thin fa-pen"></i>
+              </div>
             </div>
             <div class='card-body'>
               {% include "./update-guest.html" %}
@@ -184,9 +184,9 @@
             <div class='card-header'>
                 <h5 class='float-start me-2'>Notes</h5>
               <span class="badge rounded-pill bg-primary" mvc-text='main.notes.length'></span>
-              <button class='btn-sm btn-outline-primary float-end' mvc-click='notesAdd()'>
-                Add
-              </button>
+              <div class='float-end pointer' mvc-click='notesAdd()' style='font-size: 20px'>
+                <i class="fa-thin fa-plus"></i>
+              </div>
             </div>
             <div class='card-body'>
               {% include "./update-notes.html" %}
@@ -211,9 +211,9 @@
           <div class='card shadow'>
             <div class='card-header'>
               <h5 class='float-start'>Financial</h5>
-              <button class='btn-sm btn-outline-primary float-end' mvc-click='editFinancials()'>
-                Edit
-              </button>
+              <div class='float-end pointer' mvc-click='editFinancials()' style='font-size: 20px'>
+                <i class="fa-thin fa-pen"></i>
+              </div>
             </div>
             <div class='card-body'>
               {% include "./update-finance.html" %}
@@ -225,9 +225,9 @@
           <div class='card shadow'>
             <div class='card-header'>
               <h5 class='float-start'>Payment Schedule</h5>
-              <button class='btn-sm btn-outline-primary float-end' mvc-click='editTerms()'>
-                Edit
-              </button>
+              <div class='float-end pointer' mvc-click='editTerms()' style='font-size: 20px'>
+                <i class="fa-thin fa-pen"></i>
+              </div>
             </div>
             <div class='card-body'>
               {% include "./update-terms.html" %}
@@ -239,16 +239,13 @@
     </div>
 
     <div class='row mb-4'>
-      <div class='col-12'>
-        <button class='btn btn-primary' mvc-click='send()'>
-          Email
-        </button>
-        <button class='btn btn-success' mvc-click='payments()'>
-          Payments
-        </button>
-        <button class='btn btn-warning' mvc-click='test()'>
-          Test
-        </button>
+      <div class='col-12' style='font-size: 40px'>
+        <span class='me-2 pointer' mvc-click='send()' title='Email'>
+          <i class="fa-thin fa-envelope"></i>
+        </span>        
+        <span class='me-2 pointer' mvc-click='payments()' title='Payments'>
+          <i class="fa-thin fa-cash-register"></i>
+        </span>
       </div>
     </div>
 
@@ -614,37 +611,35 @@
         </button>
       </div>
     </div>  
-    </section>
-
-  <section id='rsvs-rsv-items-section'>
-    <div class='row'>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        Date
-      </div>
-      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
-        Guests
-      </div>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        Item
-      </div>
-      <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
-        Dur
-      </div>      
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        Time/Unit
-      </div>
-      <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        Pricing
-      </div>
-    </div>
-
-    <div id='rsvs-rsv-items-list'>
-    </div>
   </section>
 </page>
 
+<div class='row'>
+  <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+    Date
+  </div>
+  <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+    Guests
+  </div>
+  <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+    Item
+  </div>
+  <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
+    Dur
+  </div>      
+  <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+    Time/Unit
+  </div>
+  <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
+    Pricing
+  </div>
+</div>
+
+<div id='rsvs-rsv-items-list'>
+</div>
+
 <template id='entry-item-A'>
-  <div class='mb-2'>
+  <div>
     <div class='row act-color' mvc-show='viewState == "edit"'>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='', mvc_on='{"change": "date()"}') }}
@@ -706,7 +701,7 @@
         <span mvc-text='facade.rate'></span>
       </div>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        <span class='pointer' mvc-click='edit()' style='font-size: 20px'>
+        <span class='pointer' mvc-click='edit()' style='font-size: 20px' mvc-show='parentState == "parent"'>
           <i class="fa-thin fa-pen"></i>
         </span>
       </div>
@@ -714,11 +709,16 @@
     
     <div class='includes'>
     </div>
+
+    <div mvc-show='parentState == "parent"'>
+      <div class='row' style='border-bottom: 3px solid black'>
+      </div>
+    </div>
   </div>
 </template>
 
 <template id='entry-item-M'>
-  <div class='mb-2'>
+  <div>
     <div class='row meal-color' mvc-show='viewState == "edit"'>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
         {{ fields.Date(id='item-date', mvc_value='item.date', mvc_click='date:abs()', label='', mvc_on='{"change": "date()"}') }}
@@ -729,7 +729,7 @@
       </div>
 
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        {{ fields.Dropper(id='item-code', mvc_value='facade.code', handler='code', template_id='rsv-update-dropdown-code', dir_class='dropup', dd_class='dropper-code', label='', mvc_enabled='item.date') }}
+        {{ fields.Dropper(id='item-code', mvc_value='product.name', handler='code', template_id='rsv-update-dropdown-code', dir_class='dropup', dd_class='dropper-code', label='', mvc_enabled='item.date') }}
       </div>
 
       <div class='col-6 col-md-3 col-lg-1 mt-1 mb-1'>
@@ -768,7 +768,7 @@
         <span mvc-text='facade.ppl'></span>
       </div>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        <span mvc-text='facade.code'></span>
+        <span mvc-text='product.name'></span>
       </div>
       <div class='col-6 col-md-2 col-lg-1 mt-1 mb-1'>
         <span mvc-text='item.dur'></span>
@@ -780,11 +780,16 @@
         <span mvc-text='facade.rate'></span>
       </div>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        <span class='pointer' mvc-click='edit()' style='font-size: 20px'>
+        <span class='pointer' mvc-click='edit()' style='font-size: 20px' mvc-show='parentState == "parent"'>
           <i class="fa-thin fa-pen"></i>
         </span>
       </div>
-    </div>  
+    </div>
+    
+    <div mvc-show='parentState == "parent"'>
+      <div class='row' style='border-bottom: 3px solid black'>
+      </div>
+    </div>
   </div>
 </template>
 
