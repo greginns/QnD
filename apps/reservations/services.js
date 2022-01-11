@@ -1,4 +1,5 @@
 const root = process.cwd();
+const { inOperator } = require('nunjucks/src/lib');
 const uuidv1 = require('uuid/v1');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
@@ -46,225 +47,199 @@ const rollback = async function(trans, tm) {
   return tm;
 }
 
-class Item {
+class Process {
   constructor(database, pgschema, user) {
     this.database = database;
     this.pgschema = pgschema;
     this.user = user;
+    this.trans = new Transaction(this.database);
+  }
+
+  async getSeq1(rec) {
+    // change this to using a lastrec table.
+    return await getHighestItemSeq(this.database, this.pgschema, this.user, rec.rsvno);
+  }
+
+  getItemInst(cat) {
+    // return an item specific data saver/deleter
+    let inst; 
+
+    switch (cat) {
+      case 'A':
+        inst = new Activity(this.database, this.pgschema, this.user, this.trans);
+        break;
+
+      case 'M':
+        inst = new Meal(this.database, this.pgschema, this.user, this.trans);
+        break;
+    }
+
+    return inst;
   }
 
   async create(rec) {
-    let inst; 
+    let res = await this.trans.begin();
+    if (res.status != 200) return res;
 
-    switch (rec.cat) {
-      case 'A':
-        inst = new Activity(this.database, this.pgschema, this.user);
-        break;
+    let seq1 = await this.getSeq1(rec);
 
-      case 'M':
-        inst = new Meal(this.database, this.pgschema, this.user);
-        break;
+    rec.seq1 = seq1;
+    rec.snapshot.seq1 = seq1;
+
+    let tm = await this.createIt(rec);
+
+    if (tm.status == 200) {
+      // Success
+      this.trans.commit();
+      this.trans.release();
+
+      return tm;
     }
 
-    return await inst.create(rec);
+    return rollback(this.trans, tm);
   }
 
   async update(rec) {
-    let inst; 
+    let res = await this.trans.begin();
+    if (res.status != 200) return res;
 
-    switch (rec.cat) {
-      case 'A':
-        inst = new Activity(this.database, this.pgschema, this.user);
-        break;
+    let tm = await this.deleteIt(rec);
 
-      case 'M':
-        inst = new Meal(this.database, this.pgschema, this.user);
-        break;
+    if (tm.status == 200) {
+      tm = await this.createIt(rec);
     }
 
-    return await inst.update(rec);
-  } 
-  
+    if (tm.status == 200) {
+      // Success
+      this.trans.commit();
+      this.trans.release();
+
+      return tm;
+    }
+
+    return rollback(this.trans, tm);
+  }
+
   async delete(pks) {
-    let drec = [pks.rsvno, pks.seq1];
+    let res = await this.trans.begin();
+    if (res.status != 200) return res;
 
-    let tm = await models.Item.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: drec});
+    let tm = this.deleteIt(pks);
 
-    if (tm.status != 200) return tm;
+    if (tm.status == 200) {
+      // Success
+      this.trans.commit();
+      this.trans.release();
 
-    let inst; 
-    let rec = tm.data;
-
-    switch (rec.cat) {
-      case 'A':
-        inst = new Activity(this.database, this.pgschema, this.user);
-        break;
-
-      case 'M':
-        inst = new Meal(this.database, this.pgschema, this.user);
-        break;
+      return tm;
     }
 
-    return await inst.delete(rec);    
+    return rollback(this.trans, tm);    
+  }
+
+  async createIt(rec) {
+    let seq2;
+    let tm = new TravelMessage();
+    let tmKeep;
+
+    // save Item
+    try {
+      // Save Main Item
+      let tobj = new models.Item(rec);
+      tmKeep = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+      if (tmKeep.status != 200) return tmKeep;
+
+      // save Main Item details
+      seq2 = 1;
+      let alrmostp = this.getItemInst(rec.cat);
+      tm = await alrmostp.create(rec, seq2);
+
+      if (tm.status != 200) return tm;
+
+      // save include items
+      // don't delete as the original delete removed everything
+      /*
+      for (let incl in rec.includes) {
+        seq2++;
+        let incl_alrmostp = this.getItemInst(incl.cat);
+        tm = await incl_alrmostp.create(incl, seq2);
+
+        if (tm.status != 200) break;
+      }
+      */
+
+      if (tm.status != 200) return tm;
+    }      
+    catch(err) {
+      console.log(err)            
+      tm.status = 500;
+      tm.type = 'text';
+      tm.message = String(err);
+
+      return tm;
+    }
+
+    return tmKeep;
+  }
+    
+  async deleteIt(pks) {
+    // this deletes everything for seq1=x, ie all children for seq1.  Main item and includes
+    let tm = new TravelMessage();
+
+    try {
+      tm = await models.Item.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks}, this.trans);
+      if (tm.status != 200) return tm;
+      let cat = tm.data.cat;
+      let rec = {rsvno: pks[0], seq1: pks[1]};
+
+      // delete Item specific
+      let alrmostp = this.getItemInst(cat);
+      tm = await alrmostp.delete(rec);
+      if (tm.status != 200) return tm;
+
+      // delete the main item
+      let irec = new models.Item(rec);
+      tm = await irec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);      
+    }      
+    catch(err) {
+      console.log(err)            
+      tm.status = 500;
+      tm.type = 'text';
+      tm.message = String(err);
+    }
+
+    return tm;
   }
 }
 
 class Booker {
-  constructor(database, pgschema, user) {
+  // parent of individual item types.
+  constructor(database, pgschema, user, trans) {
     this.database = database;
     this.pgschema = pgschema;
     this.user = user;
+    this.trans = trans;
   }
 
-  async create(rec) {
-    let tm = new TravelMessage();
-    let tmKeep, res;
-
-    this.trans = new Transaction(this.database);
-
-    rec.seq1 = await getHighestItemSeq(this.database, this.pgschema, this.user, rec.rsvno);
-    rec.snapshot.seq1 = rec.seq1;
-
-    res = await this.trans.begin();
-    if (res.status != 200) return res;
-
-    // Start Specific
-    try {
-      // save activity
-      tm = await this.saveItem(rec);
-      if (tm.status != 200) return rollback(this.trans, tm);
-
-      tmKeep = tm;
-
-      // Done, Commit
-      tm = await this.trans.commit();
-      if (tm.status != 200) return rollback(this.trans, tm);
-    }
-    catch(err) {
-console.log(err)            
-      tm.status = 500;
-      tm.type = 'text';
-      tm.message = String(err);
-
-      return rollback(this.trans, tm);
-    }
-
-    this.trans.release();
-    // End Specific
-   
-    //if (tm.isGood()) {
-    //  zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, tm.data);
-    //}
-
-    return tmKeep;    
-  }
-
-  async update(rec) {
-    // Update row
-    // We want to keep the 'Item' tm, if all good.  But return whichever tm, if bad.
-    let tm = new TravelMessage();
-    let tmKeep, res;
-
-    this.trans = new Transaction(this.database);
-
-    res = await this.trans.begin();
-    if (res.status != 200) return res;
-
-    // Start Specific
-    try {
-      // Start by deleting everything
-      let drec = {rsvno: rec.rsvno, seq1: rec.seq1}
-
-      tm = await this.deleteItem(drec);
-      if (tm.status != 200) return rollback(this.trans, tm);
-
-      tmKeep = tm;
-
-      // Re-save it all
-      tm = await this.saveItem(rec);
-      if (tm.status != 200) return rollback(this.trans, tm);
-
-      // Done, Commit
-      tm = await this.trans.commit();
-
-      if (tm.status != 200) return rollback(this.trans, tm);
-    }
-    catch(err) {
-console.log(err)            
-      tm.status = 500;
-      tm.type = 'text';
-      tm.message = String(err);
-
-      return rollback(this.trans, tm);
-    }
-
-    this.trans.release();
-    // End Specific
-    
-    //if (tm.isGood()) {
-    //  zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, tm.data);
-    //}
-
-    return tmKeep;    
+  async create(rec, seq2) {
+    // Save info
+    return await this.save(rec, seq2);
   }
 
   async delete(pks) {
-    // Delete row
-    let tm = new TravelMessage();
-    let tmKeep, res;
-
-    this.trans = new Transaction(this.database);
-
-    res = await this.trans.begin();
-    if (res.status != 200) return res;
-
-    // Start Specific
-    try {
-      // Start by deleting everything
-      let drec = {rsvno: pks.rsvno, seq1: pks.seq1}
-      tm = await this.deleteItem(drec);
-      if (tm.status != 200) return rollback(this.trans, tm);
-
-      tmKeep = tm;
-
-      // Done, Commit
-      tm = await this.trans.commit();
-      if (tm.status != 200) return rollback(this.trans, tm);
-    }
-    catch(err) {
-console.log(err)      
-      tm.status = 500;
-      tm.type = 'text';
-      tm.message = String(err);
-
-      return rollback(this.trans, tm);
-    }
-
-    this.trans.release();
-    // End Specific
-    
-    //if (tm.isGood()) {
-    //  zapPubsub.publish(`${pgschema.toLowerCase()}.${app}.${subapp}.create`, tm.data);
-    //}
-
-    return tmKeep;    
+    // Delete info
+    let drec = {rsvno: pks.rsvno, seq1: pks.seq1}
+    return await this.delete(drec);
   }
 }
 
 class Activity extends Booker{
-  async saveItem(rec) {
-    // Item Insert
-    let tobj = new models.Item(rec);
-    let tm = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
-
-    if (tm.status != 200) return tm;
-    let tmKeep = tm;
-
+  async save(rec, seq2) {
     // Actinclude insert
-    rec.seq2 = 1;
-console.log(rec)
+    rec.seq2 = seq2;
+
     let tobj2 = new models.Actinclude(rec);
-    tm = await tobj2.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+    let tm = await tobj2.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
 
     if (tm.status != 200) return tm;
 
@@ -296,10 +271,11 @@ console.log(rec)
       date.add(1, 'day');
     }
 
-    return tmKeep;
+    // success
+    return tm;
   }
 
-  async deleteItem(rec) {
+  async delete(rec) {
     let tm = await models.Actdaily.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
     if (tm.status != 200) return tm;
   
@@ -313,13 +289,7 @@ console.log(rec)
       if (tm.status != 200 && tm.status != 400) return tm;
     }
   
-    tm = await models.Actinclude.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: rec}, this.trans);
-    if (tm.status != 200) return tm;
-  
-    let irec = new models.Item(rec);
-    tm = await irec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
-  
-    return tm;    
+    return await models.Actinclude.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: rec}, this.trans);
   }
 
   async updateActivityBooked(daily) {
@@ -421,19 +391,12 @@ console.log(rec)
 }
 
 class Meal extends Booker {
-  async saveItem(rec) {
-    // Item Insert
-    let tobj = new models.Item(rec);
-    let tm = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
-
-    if (tm.status != 200) return tm;
-    let tmKeep = tm;
-
+  async save(rec, seq2) {
     // Mealinclude insert
-    rec.seq2 = 1;
+    rec.seq2 = seq2;
 
     let tobj2 = new models.Mealinclude(rec);
-    tm = await tobj2.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+    let tm = await tobj2.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
 
     if (tm.status != 200) return tm;
 
@@ -465,10 +428,11 @@ class Meal extends Booker {
       date.add(1, 'day');
     }
 
-    return tmKeep;
+    // success
+    return tm;
   }
 
-  async deleteItem(rec) {
+  async delete(rec) {
     let tm = await models.Mealdaily.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
     if (tm.status != 200) return tm;
   
@@ -483,10 +447,6 @@ class Meal extends Booker {
     }
   
     tm = await models.Mealinclude.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: rec}, this.trans);
-    if (tm.status != 200) return tm;
-  
-    let irec = new models.Item(rec);
-    tm = await irec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
   
     return tm;    
   }
@@ -590,22 +550,25 @@ class Meal extends Booker {
 }
 
 class ItemService extends ModelService {
+  // Main entry into updating items.
   async create({database = '', pgschema = '', user = {}, rec = {}} = {}) {
-    let inst = new Item(database, pgschema, user);
-    
-    return await inst.create(rec);
+    let process = new Process(database, pgschema, user);
+
+    return process.update(rec);
   }
 
   async update({database = '', pgschema = '', user = {}, rec= {}} = {}) {
-    let inst = new Item(database, pgschema, user);
+    let process = new Process(database, pgschema, user);
 
-    return await inst.update(rec);
+    return process.create(rec);
   }
   
   async delete({database = '', pgschema = '', user = {}, pks = {}} = {}) {
-    let inst = new Item(database, pgschema, user);
+    let drec = [pks.rsvno, pks.seq1];
 
-    return await inst.delete(pks);
+    let process = new Process(database, pgschema, user);
+
+    return process.delete(drec);
   }  
 }
 
