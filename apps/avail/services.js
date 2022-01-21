@@ -54,7 +54,7 @@ const getActdailys = async function(database, pgschema, user, code, days) {
   return dailys;
 };
 
-const gatherA = async function(database, pgschema, user, code, listOfDays) {
+const selectActivities = async function(database, pgschema, user, code, listOfDays) {
   // data: {code, name, dates: {yyyy-mm-dd: {times: {time: {limit, booked, avail, boo, bow}}, res: {}, tts: {}}}}
   let data = {};
   let activity, dailys;
@@ -128,7 +128,7 @@ const gatherA = async function(database, pgschema, user, code, listOfDays) {
   return data;
 }
 
-const gatherM = async function(database, pgschema, user, code, listOfDays) {
+const selectMeals = async function(database, pgschema, user, code, listOfDays) {
   // data: {code, name, dates: {yyyy-mm-dd: {times: {time: {limit, booked, avail}}}}
   let data = {};
   let meal;
@@ -211,7 +211,7 @@ services.avail = {
 
         if (res.status == 200) {
           for (let rec of res.data) {
-            item = await gatherA(database, pgschema, user, rec.code, listOfDays);
+            item = await selectActivities(database, pgschema, user, rec.code, listOfDays);
             data[rec.code] = item;
           }
         }
@@ -226,7 +226,7 @@ services.avail = {
 
         if (res.status == 200) {
           for (let rec of res.data) {
-            item = await gatherM(database, pgschema, user, rec.code, listOfDays);
+            item = await selectMeals(database, pgschema, user, rec.code, listOfDays);
             data[rec.code] = item;
           }
         }
@@ -254,7 +254,7 @@ services.avail = {
 
         if (res.status == 200) {
           for (let rec of res.data) {
-            item = await gatherA(database, pgschema, user, rec.code, listOfDays);
+            item = await selectActivities(database, pgschema, user, rec.code, listOfDays);
             data[rec.code] = item;
           }
         }
@@ -266,7 +266,7 @@ services.avail = {
 
         if (res.status == 200) {
           for (let rec of res.data) {
-            item = await gatherM(database, pgschema, user, rec.code, listOfDays);
+            item = await selectMeals(database, pgschema, user, rec.code, listOfDays);
             data[rec.code] = item;
           }
         }
@@ -287,13 +287,13 @@ services.avail = {
 
     switch(cat) {
       case 'A':
-        item = await gatherA(database, pgschema, user, code, listOfDays);
+        item = await selectActivities(database, pgschema, user, code, listOfDays);
 
         data[code] = item;
         break;
 
       case 'M':
-        item = await gatherA(database, pgschema, user, code, listOfDays);
+        item = await selectActivities(database, pgschema, user, code, listOfDays);
 
         data[code] = item;
         break;

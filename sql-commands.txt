@@ -90,6 +90,9 @@ https://querybuilder.js.org/demo.html
 https://www.npmjs.com/package/wheresql
 https://webix.com/
 
+v=DMARC1; p=none; rua=mailto:5050@rotarywindsor.org
+https://support.google.com/a/answer/10032473
+
 00000 	successful_completion
 01000 	warning
 0100C 	dynamic_result_sets_returned

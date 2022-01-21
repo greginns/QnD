@@ -1164,6 +1164,8 @@ const Mealrates = class extends Rates {
     return {
       schema: {
         meal: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Meal'}),
+        tipamt: new Fields.Float({null: true, default: 0, verbose: 'Tip Amount'}),
+        tipbasis: new Fields.Boolean({default: true, verbose: 'Tip as %'}),
       },
 
       constraints: {

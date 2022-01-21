@@ -143,6 +143,7 @@ class Inclmeal extends Verror {
     obj.day = '1';
     obj.dur = '1';
     obj.offset = '0';
+    obj.fixed = false;
 
     this.editTable.add(obj);
   }

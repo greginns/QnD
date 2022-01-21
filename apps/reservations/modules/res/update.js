@@ -428,7 +428,7 @@ class ItemManager {
     let res = await Module.data.item.getMany({filters});
 
     if (res.status != 200) return;
-
+   
     for (let item of res.data) {
       let inst = await this.makeNewInstance(item.cat);
 
@@ -494,21 +494,30 @@ class IncludesManager extends ItemManager {
     this.home.innerHTML = '';
   }
 
-  process(includedItems, mainItem, cat) {
+  async display(incls) {
+    for (let incl of incls) {
+      let inst = await this.makeNewInstance(incl.cat);
+
+      await inst.display(incl, 'child');
+
+      this.itemInstances.push(inst);      
+    }
+  }
+
+  build(includedItems, mainItem, cat) {
+    // build instances from include defns
     this.includedItems = includedItems;
     this.mainItem = mainItem;
 
     switch(cat) {
       case 'M':
-        this.processM();
+        this.buildM();
         break;
     }
   }
 
-  async processM() {
+  async buildM() {
     //meals
-    let seq2 = 0;
-
     for (let incl of this.includedItems) {
       let obj = {};
       let day = parseInt(incl.day);
@@ -518,10 +527,10 @@ class IncludesManager extends ItemManager {
 
       obj.cat = 'M';
       obj.seq1 = incl.seq1;
-      obj.seq2 = ++seq2;
       obj.meal = incl.meal;
       obj.code = incl.meal;
       obj.rateno = incl.mealrate;
+      obj.fixed = true;
       obj.dur = parseInt(incl.dur);
       obj.ppl = this.mainItem.ppl;
       obj.date = datex.add(day - 1, 'days').format(DATEFMT);
@@ -641,11 +650,21 @@ class BookItem extends Verror {
     this.initItem();
   }
 
-  display(item) {
+  display(item, pc) {
     this.model.viewState = 'view';
-    this.model.parentState = 'parent';
+    this.model.parentState = pc || 'parent';
     this.model.item = item;
+    this.model.item.pdesc = this.model.item.snapshot.pdesc;
+    this.model.item.pqty = this.model.item.snapshot.pqty;
+    this.model.item.price = this.model.item.snapshot.price;
+    this.model.item.pextn = this.model.item.snapshot.pextn;    
     this.model.facade = item.snapshot.facade;
+
+    this.getProductInfo();
+
+    if ('includes' in item) {
+      this.includesInst.display(item.includes);
+    }
 
     delete this.model.item.snapshot;
   }
@@ -669,10 +688,10 @@ class BookItem extends Verror {
       units: [],
       dur: 1,
       rateno: '',
-      pdesc: ['','','','','','',''], 
-      prices: [0,0,0,0,0,0,0], 
-      pqty: [0,0,0,0,0,0,0], 
-      pextn: [0,0,0,0,0,0,0],
+      pdesc: ['','','','','','','',''], 
+      prices: [0,0,0,0,0,0,0,0], 
+      pqty: [0,0,0,0,0,0,0,0], 
+      pextn: [0,0,0,0,0,0,0,0],
     };
   }
 
@@ -690,9 +709,11 @@ class BookItem extends Verror {
   async save(ev) {
     let item = this.getItemBundle();
 
-    item.includes = this.includesInst.getIncludedItems();
+    item.includes = (this.includesInst) ? this.includesInst.getIncludedItems() : [];
 
+    // save
     let res = (item.seq1) ? await Module.tableStores.item.update([item.rsvno, item.seq1], item) : await Module.tableStores.item.insert(item);
+    
     if (res.status == 200) {
       this.model.item.seq1 = res.data.seq1;
       this.existingData = this.model.item.toJSON();
@@ -746,19 +767,23 @@ class BookItem extends Verror {
   }
 
   calcCharges() {
-    let charges = 0, qty = this.model.item.pqty.toJSON(), price = this.model.item.price.toJSON();
+    // 1-6, addl, free
+    let charges = 0, comped = 0;
+    let qty = this.model.item.pqty.toJSON(), price = this.model.item.price.toJSON();
     let extn = [0,0,0,0,0,0,0,0];
 
-    for (let i=0; i<8; i++) {   // 8 is comped
-      extn[i] = qty[i]*price[i];
+    for (let i=0; i<8; i++) {   // 8(7) is comped
+      extn[i] = qty[i] * price[i];
 
-      if (i<7) charges += extn[i];
+      if (i == 7) comped = extn[i];
+      if (i < 7) charges += extn[i];
 
       extn[i] = extn[i].toFixed(2);
     };
 
     this.model.item.pextn = extn;
     this.model.item.charges = charges.toFixed(2);
+    this.model.item.comped = comped.toFixed(2);
   }
 
 // Rates
@@ -779,9 +804,18 @@ class BookItem extends Verror {
   }
 
   async getPriceData() {
+    this.rateInfo = {};
+
     let pobj = this.model.item.toJSON();
 
     pobj.rateno = this.model.item.rateno;
+
+    for (let rate of this.model.rates) {
+      if (pobj.rateno == rate.rateno) {
+        this.rateInfo = rate;
+        break;
+      }
+    }
 
     if (pobj.rateno) {
       let res = await io.post({calc: pobj}, `/reservations/v1/calc/pricing`);
@@ -802,12 +836,15 @@ class BookItem extends Verror {
   }
 
   chooseRate() {
+    // code entered, select a rate
     let pastRate = this.existingData.rateno || '';
     let rateno = '';
+    this.rateInfo = {};
 
     for (let rate of this.model.rates) {
       if (pastRate && pastRate == rate.rateno) {
         rateno = rate.rateno;
+        this.rateInfo = rate;
         break;
       }
     }
@@ -854,9 +891,9 @@ class BookItem extends Verror {
 
     pobj.ppl = this.model.item.ppl;
     pobj.dur = this.model.item.dur;
+    pobj.charges = this.model.item.charges;
     pobj.disccode = this.model.item.disccode;
     pobj.discamt = this.model.item.discamt;
-    pobj.charges = this.model.item.charges;
 
     let res = await io.post({calc: pobj}, `/reservations/v1/calc/discount`);
 
@@ -953,7 +990,7 @@ class BookItem extends Verror {
       }
     }
 
-    return text + '  $' + this.model.item.charges;
+    return text + '  $' + (parseFloat(this.model.item.charges) - parseFloat(this.model.item.comped)).toFixed(2);
   }
 
   doIncluded() {
@@ -1010,7 +1047,6 @@ class Activity extends BookItem {
     await this.getRates();
     await this.processItemGroup();
     this.handleTimes();
-    await this.rePrice();
   }
 
   async buildIncluded(item) {
@@ -1068,13 +1104,14 @@ class Activity extends BookItem {
 
   async code(ev) {
     if (ev.state == 'close' && ev.accept) {
-      await this.getProductInfo();
-console.log(this.model.product.toJSON())
       this.model.item.activity = this.model.item.code;
-      this.model.item.dur = this.model.product.durdays;
-      this.model.item.desc = this.model.product.name;
       this.model.item.rateno = '';
 
+      await this.getProductInfo();
+      this.model.item.dur = this.model.product.durdays;
+      this.model.item.desc = this.model.product.name;
+            
+      this.calcEndDate();
       this.calcQty();
       this.handleTimes();
       await this.getRates();
@@ -1251,7 +1288,7 @@ console.log(this.model.product.toJSON())
 
   async getProductInfo() {
     this.model.product = {};
-    let code = this.model.item.code;
+    let code = this.model.item.activity;
 
     if (!code) return;
 
@@ -1275,7 +1312,7 @@ console.log(this.model.product.toJSON())
       return;
     }
 
-    this.includesInst.process(res.data, item, 'M');
+    this.includesInst.build(res.data, item, 'M');
   }
 
 // facade routines -----------------------------------------------
@@ -1342,9 +1379,10 @@ class Meal extends BookItem {
     this.calcPpl();
     this.processItemGroup();
 
+    this.model.item.meal = this.model.item.code;
+
     await this.getProductInfo();
     this.model.item.desc = this.model.product.name;
-    this.model.item.meal = this.model.item.code;
     this.model.item.group = this.model.product.meallocn;
 
     this.calcQty();
@@ -1356,6 +1394,11 @@ class Meal extends BookItem {
     this.model.facade.ppl = this.makeFacadePpl();
     this.model.facade.time = this.makeFacadeTime();
     this.model.facade.rate = this.makeFacadeRate();
+  }
+
+  async rePrice() {
+    await super.rePrice();
+    this.calcTip();
   }
 
 // dropper close routines -------------------------------------------------
@@ -1380,7 +1423,7 @@ class Meal extends BookItem {
       if (this.model.item.code) {
         this.calcQty();
         this.handleTimes();        // re-select times
-        await this.rePrice();         // get prices
+        await this.rePrice();         // get prices.  Reprice rather than processRate (which does includes)
   
         this.model.facade.time = this.makeFacadeTime();
         this.model.facade.rate = this.makeFacadeRate();        
@@ -1390,12 +1433,14 @@ class Meal extends BookItem {
 
   async code(ev) {
     if (ev.state == 'close' && ev.accept) {
-      await this.getProductInfo();
-
       this.model.item.meal = this.model.item.code;
-      this.model.item.desc = this.model.product.name;
       this.model.item.rateno = '';
+
+      await this.getProductInfo();
+      this.model.item.desc = this.model.product.name;
+      this.model.item.dur = 1;
   
+      this.calcEndDate();
       this.calcQty();
       this.handleTimes();
       await this.getRates();
@@ -1572,11 +1617,30 @@ class Meal extends BookItem {
 
   async getProductInfo() {
     this.model.product = {};
-    let code = this.model.item.code;
+    let code = this.model.item.meal;
 
     if (!code) return;
 
     this.model.product = await Module.tableStores.meals.getOne(code);
+  }
+
+  // Tip routines
+  calcTip() {
+    let tip = 0;
+
+    if (this.rateInfo.tipamt != 0) {
+      if (this.rateInfo.tipbasis) {
+        // % based
+        tip = this.model.item.charges * (this.rateInfo.tipamt / 100);
+      }
+      else {
+        // per person
+        tip = this.model.item.ppl * this.rateInfo.tipamt;
+      }
+    }
+
+    this.model.item.acc_tip = Math.round(tip * 100) / 100;  // included
+    this.model.item.tip = Math.round(tip * 100) / 100;      // main item
   }
 
 // facade routines -----------------------------------------------

@@ -33,7 +33,7 @@ const makeCSRF = async function(database, pgschema, user) {
 
 const getHighestItemSeq = async function(database, pgschema, user, rsvno) {
   let recs = await models.Item.select({database, pgschema, user, rec: {rsvno}});
-  if (!recs.status == 200) return -1;
+  if (recs.status != 200) return -1;
   
   let data = recs.data;
 
@@ -47,12 +47,580 @@ const rollback = async function(trans, tm) {
   return tm;
 }
 
+class ItemService extends ModelService {
+  // Main entry into getting/updating items.
+  async getOne({database = '', pgschema = '', user = {}, rec = {}} = {}) {
+    // Get specific row
+    let pks = [rec.rsvno, rec.seq1];
+    let process = new Process(database, pgschema, user);
+
+    return await process.gatherOne(pks);
+  }
+
+  async getMany({database='', pgschema = '', user = {}, rec={}, cols=['*'], where='', values=[], limit, offset, orderby} = {}) {
+    let process = new Process(database, pgschema, user);
+
+    return await process.gatherMany(rec);
+  }
+
+  async create({database = '', pgschema = '', user = {}, rec = {}} = {}) {
+    let process = new Process(database, pgschema, user);
+
+    return await process.create(rec);
+  }
+
+  async update({database = '', pgschema = '', user = {}, rec= {}} = {}) {
+    let process = new Process(database, pgschema, user);
+
+    return await process.update(rec);
+  }
+  
+  async delete({database = '', pgschema = '', user = {}, pks = {}} = {}) {
+    let process = new Process(database, pgschema, user);
+
+    return await process.delete(pks);
+  }  
+}
+
+// Model services
+services.main = new ModelService({model: models.Main});
+services.item = new ItemService({model: models.Item});
+
+services.discount = new ModelService({model: models.Discount});
+services.cancreas = new ModelService({model: models.Cancreas});
+
+// Any other needed services
+services.query = function({database = '', pgschema = '', query = '', values = []}) {
+  return jsonQueryExecify({database, pgschema, query, app, values});
+}
+
+services.output = {
+  main: async function(req) {
+    // main admin manage page.  Needs a user so won't get here without one
+    const tm = new TravelMessage();
+
+    try {
+      let ctx = {};
+      let tmpl = 'apps/reservations/modules/res/module.html';
+
+      ctx.CSRFToken = await makeCSRF(req.session.data.database, req.session.data.pgschema, req.session.user.code);
+      ctx.main = models.Main.getColumnDefns();
+
+      ctx.dateFormat = dateFormat;
+      ctx.timeFormat = timeFormat;
+      ctx.USER = JSON.stringify(req.session.user);
+
+      try {
+        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+        tm.type = 'html';
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+    }
+    catch(err) {
+      tm.status = 500;
+      tm.message = err.toString();
+    }
+
+    return tm;
+  },
+
+  setup: async function(req) {
+    // main setup manage page.  Needs a user so won't get here without one
+    const tm = new TravelMessage();
+
+    try {
+      let ctx = {};
+      let tmpl = 'apps/reservations/modules/setup/module.html';
+
+      ctx.CSRFToken = await makeCSRF(req.session.data.database, req.session.data.pgschema, req.session.user.code);
+      ctx.discount = models.Discount.getColumnDefns();
+      ctx.cancreas = models.Cancreas.getColumnDefns();
+
+      ctx.dateFormat = dateFormat;
+      ctx.timeFormat = timeFormat;
+      ctx.USER = JSON.stringify(req.session.user);
+
+      try {
+        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
+        tm.type = 'html';
+      }
+      catch(err) {
+        tm.status = 500;
+        tm.message = err.toString();
+      }
+    }
+    catch(err) {
+      tm.status = 500;
+      tm.message = err.toString();
+    }
+
+    return tm;
+  },
+};
+
+services.calc = {
+  pricing: async function({database = '', pgschema = '', user = {}, rec = {}} = {}) {
+    // to calc price
+    // cat, code, date, duration, qty, hours, times[], infants-seniors.
+    
+    let p = new Pricing(database, pgschema, user, rec);
+
+    return await p.calcIt();
+  },
+
+  discount: async function({database = '', pgschema = '', user = {}, rec = {}} = {}) {
+    let d = new Discount(database, pgschema, user, rec);
+
+    return await d.calcIt();
+  }
+}
+
 class Process {
+  /*
+    Save, Retrieves, Deletes, and Calculates rsv items
+    All DB IO within a transaction.
+    Any calcs for new/updated items are done after the item has been saved.
+    - this is to get the data saved asap, then worry about $
+  */  
   constructor(database, pgschema, user) {
     this.database = database;
     this.pgschema = pgschema;
     this.user = user;
+    this.cats = ['A', 'M'];
+  }
+
+  // Entry points
+  async gatherOne(pks) {
+    // get one main item record + includes
+    // pks will have [rsvno,seq1]
+    // No Transaction
+    let tm = await this.getItemRecord(pks);
+    if (tm.status != 200) return tm;
+
+    let item = tm.data;
+
+    return await this.gatherIncludeRecords(item);
+  }
+
+  async gatherMany(rec) {
+    // Gather include records into one big main item record
+    // rec will have {rsvno}
+    // No Transaction
+    let tmRet = new TravelMessage();
+    let data = [];
+
+    let tm = await models.Item.select({database: this.database, pgschema: this.pgschema, user: this.user, rec});
+    if (tm.status != 200) return tm;
+
+    for (let item of tm.data) {   // for each main item 
+      item.includes = [];
+      tm = await this.gatherIncludeRecords(item);
+
+      if (tm.status != 200) break;
+
+      data.push(tm.data);
+    }
+
+    if (tm.status != 200) return tm;
+
+    tmRet.data = data;
+    return tmRet;
+  }
+
+  // Transactions
+  async create(rec) {
+    let tm;
+
     this.trans = new Transaction(this.database);
+
+    let res = await this.trans.begin();
+    if (res.status != 200) return res;
+
+    let seq1 = await this.getSeq1(rec);
+
+    rec.seq1 = seq1;
+    rec.snapshot.seq1 = seq1;
+
+    tm = await this.createIt(rec);
+
+    if (tm.status == 200) {
+      tm = await this.calcIt(tm.data.rsvno, tm.data.seq1);
+    }
+
+    if (tm.status == 200) {
+      // Success
+      this.trans.commit();
+      this.trans.release();
+
+      return tm;
+    }
+
+    return rollback(this.trans, tm);
+  }
+
+  async update(rec) {
+    this.trans = new Transaction(this.database);
+        
+    let res = await this.trans.begin();
+    if (res.status != 200) return res;
+
+    let tm = await this.deleteIt(rec);
+
+    if (tm.status == 200) {
+      tm = await this.createIt(rec);
+    }
+
+    if (tm.status == 200) {
+      tm = await this.calcIt(tm.data.rsvno, tm.data.seq1);
+    }
+    
+    if (tm.status == 200) {
+      // Success
+      this.trans.commit();
+      this.trans.release();
+
+      return tm;
+    }
+
+    return rollback(this.trans, tm);
+  }
+
+  async delete(rec) {
+    this.trans = new Transaction(this.database);
+        
+    let res = await this.trans.begin();
+    if (res.status != 200) return res;
+
+    let tm = this.deleteIt(rec);
+
+    if (tm.status == 200) {
+      // Success
+      this.trans.commit();
+      this.trans.release();
+
+      return tm;
+    }
+
+    return rollback(this.trans, tm);    
+  }
+
+  async calcOne(rec) {
+    // recalc one item
+    this.trans = new Transaction(this.database);
+        
+    let res = await this.trans.begin();
+    if (res.status != 200) return res;
+
+    let tm = await this.calcIt(rec.rsvno, rec.seq1);
+    
+    if (tm.status == 200) {
+      // Success
+      this.trans.commit();
+      this.trans.release();
+
+      return tm;
+    }
+
+    return rollback(this.trans, tm);
+  }
+
+  async calcRsv(rec) {
+    // recalc all items
+    // how many items?
+    let tm = await models.Item.select({database: this.database, pgschema: this.pgschema, user: this.user, rec});
+    if (tm.status != 200) return tm;
+
+    this.trans = new Transaction(this.database);
+        
+    let res = await this.trans.begin();
+    if (res.status != 200) return res;    
+
+    for (let item of tm.data) {
+      tm = await this.calcIt(item.rsvno, item.seq1);
+      if (tm.status != 200) break;
+    }
+
+    if (tm.status == 200) {
+      // Success
+      this.trans.commit();
+      this.trans.release();
+
+      return tm;
+    }
+
+    return rollback(this.trans, tm);
+  }
+
+// lower level, must be already within a transaction
+  async getItemRecord(pks) {
+    // pks: [rsvno, seq1]
+    let tmRet = new TravelMessage();
+
+    let tm = await models.Item.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks}, this.trans);
+    if (tm.status != 200) return tm;
+
+    let item = tm.data;
+    item.includes = [];
+
+    tmRet.data = item;
+    return tmRet;
+  }
+
+  async gatherIncludeRecords(item) {
+    // get main item include
+    let tmRet = new TravelMessage();
+    let alrmostp = this.getItemInst(item.cat);
+    let pks = {rsvno: item.rsvno, seq1: item.seq1};
+
+    let tm = await alrmostp.gather(pks);
+    if (tm.status != 200) return tm;
+
+    Process.merge(tm.data[0], item);
+
+    // get included items
+    for (let cat of this.cats) {
+      if (cat != item.cat) {    // this precludes included items of the same type. Solution: go by seq2 != 1
+        let alrmostp = this.getItemInst(cat);
+
+        tm = await alrmostp.gather(pks);
+        if (tm.status != 200) break;
+
+        item.includes.push(...tm.data);
+      }
+    }
+
+    if (tm.status != 200) return tm;
+
+    tmRet.data = item;
+    
+    return tmRet;
+  }
+
+  async createIt(rec) {
+    let seq2;
+    let tm = new TravelMessage();
+    let tmKeep;
+
+    // save Item
+    try {
+      // Save Main Item
+      let tobj = new models.Item(rec);
+      tmKeep = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+      if (tmKeep.status != 200) return tmKeep;
+
+      // save Main Item details
+      seq2 = 1;
+      let alrmostp = this.getItemInst(rec.cat);
+      tm = await alrmostp.create(rec, seq2);
+
+      if (tm.status != 200) return tm;
+
+      // save include items
+      // don't delete as the original delete removed everything
+      for (let incl of rec.includes) {
+        incl.rsvno = rec.rsvno;
+        incl.seq1 = rec.seq1;
+        seq2++;
+        let incl_alrmostp = this.getItemInst(incl.cat);
+        tm = await incl_alrmostp.create(incl, seq2);
+
+        if (tm.status != 200) break;
+      }
+
+      if (tm.status != 200) return tm;
+    }      
+    catch(err) {
+      console.log(err)            
+      tm.status = 500;
+      tm.type = 'text';
+      tm.message = String(err);
+
+      return tm;
+    }
+
+    return tmKeep;
+  }
+    
+  async deleteIt(rec) {
+    // this deletes everything for seq1=x, ie all children for seq1.  Main item and includes
+    let tm = new TravelMessage();
+    let drec = {rsvno: rec.rsvno, seq1: rec.seq1};
+
+    try {
+      // delete Item specific
+      for (let cat of this.cats) {
+        let alrmostp = this.getItemInst(cat);
+        tm = await alrmostp.delete(drec);
+        if (tm.status != 200) break;
+      }
+
+      if (tm.status != 200) return tm;
+
+      // delete the main item
+      let irec = new models.Item(drec);
+      tm = await irec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);      
+    }      
+    catch(err) {
+      console.log(err)            
+      tm.status = 500;
+      tm.type = 'text';
+      tm.message = String(err);
+    }
+
+    return tm;
+  }
+
+  async calcIt(rsvno, seq1) {
+    // charges, comped, discount, comm, comm3 all get divvied from item
+    // tip get summed from includes
+    // taxes are calculated on charges - comped - discount
+    // sales = charges + tip - comped - discount - comm
+    // total = sales + taxes
+    /*
+      charges -   done
+      tip -       done
+      comped
+      discount -  done
+      comm
+      comm3
+      sales -     done
+      taxes
+      total -     done
+    */
+
+    const getRatingInfo = function(rec) {
+      let obj = {};
+    
+      ['cat', 'code', 'rateno', 'dur', 'times', 'ppl', 'infants', 'children', 'youth', 'adults', 'seniors'].forEach(function(fld) {
+        obj[fld] = rec[fld];
+      })
+
+      obj.date = datetimer(rec.date).format('YYYY-MM-DD');
+    
+      return obj;
+    }
+
+    const getInclTable = function(cat) {
+      let table;
+
+      switch (cat) {
+        case 'A':
+          table = 'Actinclude';
+          break;
+
+        case 'M':
+          table = 'Mealinclude';
+          break;
+
+        case 'L':
+          table = 'Lodginclude';
+          break;
+      }
+
+      return table
+    }
+
+    // calculate finances of one item
+    let tm = new TravelMessage();
+
+    // Get item
+    tm = await this.getItemRecord([rsvno, seq1]);
+    if (tm.status != 200) return tm;
+
+    let item = tm.data;
+
+    // get included
+    tm = await this.gatherIncludeRecords(item);
+    if (tm.status != 200) return tm;
+
+    // do it ------------
+    let data = tm.data;  // item + includes
+    let actualCharged = data.charges;
+    let actualComped = data.comped;
+    let actualDiscount = data.discount;
+    let tip = parseFloat(data.acc_tip);
+
+    let fixedTotal = 0;
+    let itemCharges = [];   // [v|f, charges, discount, comped]
+
+    // main item values
+    if (actualCharged != 0) {
+      let pobj = getRatingInfo(data);
+      let p1 = await services.calc.pricing({database: this.database, pgschema: this.pgschema, user: this.user, rec: pobj})
+      if (p1.status != 200) return p1;
+
+      itemCharges.push(['v', p1.data.charges, 0, 0]);
+    }
+    else {
+      itemCharges.push(['v', 0, 0, 0]);
+    }
+
+    // Included item values
+    for (let incl of data.includes) {
+      if (actualCharged != 0) {
+        let pobj = getRatingInfo(incl);
+        let p1 = await services.calc.pricing({database: this.database, pgschema: this.pgschema, user: this.user, rec: pobj})
+        if (p1.status != 200) return p1;
+
+        itemCharges.push(['f', p1.data.charges, 0, 0]);
+        fixedTotal += p1.data.charges;
+        tip += parseFloat(incl.acc_tip);
+      }
+      else {
+        itemCharges.push(['f', 0, 0, 0]);
+        fixedTotal += 0;
+      }
+    }
+
+    // fixed have their values, variables need calculating.
+    // toDivvy is actualCharged minus money given to fixeds
+    // calculated variable is: item charge/actualCharged * toDivvy
+    // discount & comped amount is divided up by included's value vs item value
+    let toDivvy = actualCharged - fixedTotal;
+
+    for (let item of itemCharges) {
+      if (item[0] == 'v') {
+        item[1] = (actualCharged != 0) ? Math.round(toDivvy * item[1]/actualCharged * 100, 2) / 100 : 0;
+      }
+
+      item[2] = (actualCharged != 0) ? Math.round(actualDiscount * item[1]/actualCharged * 100, 2) / 100 : 0;
+      item[3] = (actualCharged != 0) ? Math.round(actualComped * item[1]/actualCharged * 100, 2) / 100 : 0;
+    }
+
+    // save acc_charges, acc-comped, acc_discount in each include record, tip in item record
+    // main item include
+    let sales = itemCharges[0][1] - itemCharges[0][2];
+    let itable = getInclTable(data.cat);
+    let rec = {rsvno, seq1, seq2: data.seq2, acc_charges: itemCharges[0][1], acc_comped: itemCharges[0][3], acc_discount: itemCharges[0][2], acc_sales: sales};
+    let inst = new models[itable](rec);
+
+    tm = await inst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+    if (tm.status != 200) return tm;
+
+    // included items
+    let idx = 0;
+    for (let incl of data.includes) {
+      idx++;
+
+      let sales = itemCharges[idx][1] - itemCharges[idx][2];
+      let itable = getInclTable(incl.cat);
+      let rec = {rsvno, seq1, seq2: incl.seq2, acc_charges: itemCharges[idx][1], acc_comped: itemCharges[idx][3], acc_discount: itemCharges[idx][2], acc_sales: sales};
+      let inst = new models[itable](rec);
+
+      tm = await inst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+      if (tm.status != 200) break;
+    }
+
+    // set tip on item
+    let irec = {rsvno, seq1, tip};
+    let iinst = new models.Item(irec);
+    tm = await iinst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+    return tm;    
   }
 
   async getSeq1(rec) {
@@ -76,139 +644,14 @@ class Process {
 
     return inst;
   }
-
-  async create(rec) {
-    let res = await this.trans.begin();
-    if (res.status != 200) return res;
-
-    let seq1 = await this.getSeq1(rec);
-
-    rec.seq1 = seq1;
-    rec.snapshot.seq1 = seq1;
-
-    let tm = await this.createIt(rec);
-
-    if (tm.status == 200) {
-      // Success
-      this.trans.commit();
-      this.trans.release();
-
-      return tm;
-    }
-
-    return rollback(this.trans, tm);
-  }
-
-  async update(rec) {
-    let res = await this.trans.begin();
-    if (res.status != 200) return res;
-
-    let tm = await this.deleteIt(rec);
-
-    if (tm.status == 200) {
-      tm = await this.createIt(rec);
-    }
-
-    if (tm.status == 200) {
-      // Success
-      this.trans.commit();
-      this.trans.release();
-
-      return tm;
-    }
-
-    return rollback(this.trans, tm);
-  }
-
-  async delete(pks) {
-    let res = await this.trans.begin();
-    if (res.status != 200) return res;
-
-    let tm = this.deleteIt(pks);
-
-    if (tm.status == 200) {
-      // Success
-      this.trans.commit();
-      this.trans.release();
-
-      return tm;
-    }
-
-    return rollback(this.trans, tm);    
-  }
-
-  async createIt(rec) {
-    let seq2;
-    let tm = new TravelMessage();
-    let tmKeep;
-
-    // save Item
-    try {
-      // Save Main Item
-      let tobj = new models.Item(rec);
-      tmKeep = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
-      if (tmKeep.status != 200) return tmKeep;
-
-      // save Main Item details
-      seq2 = 1;
-      let alrmostp = this.getItemInst(rec.cat);
-      tm = await alrmostp.create(rec, seq2);
-
-      if (tm.status != 200) return tm;
-
-      // save include items
-      // don't delete as the original delete removed everything
-      /*
-      for (let incl in rec.includes) {
-        seq2++;
-        let incl_alrmostp = this.getItemInst(incl.cat);
-        tm = await incl_alrmostp.create(incl, seq2);
-
-        if (tm.status != 200) break;
+  
+  static merge(source, dest) {
+    // merge source into dest
+    for (let k in source) {
+      if (! (k in dest)) {
+        dest[k] = source[k];
       }
-      */
-
-      if (tm.status != 200) return tm;
-    }      
-    catch(err) {
-      console.log(err)            
-      tm.status = 500;
-      tm.type = 'text';
-      tm.message = String(err);
-
-      return tm;
     }
-
-    return tmKeep;
-  }
-    
-  async deleteIt(pks) {
-    // this deletes everything for seq1=x, ie all children for seq1.  Main item and includes
-    let tm = new TravelMessage();
-
-    try {
-      tm = await models.Item.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks}, this.trans);
-      if (tm.status != 200) return tm;
-      let cat = tm.data.cat;
-      let rec = {rsvno: pks[0], seq1: pks[1]};
-
-      // delete Item specific
-      let alrmostp = this.getItemInst(cat);
-      tm = await alrmostp.delete(rec);
-      if (tm.status != 200) return tm;
-
-      // delete the main item
-      let irec = new models.Item(rec);
-      tm = await irec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);      
-    }      
-    catch(err) {
-      console.log(err)            
-      tm.status = 500;
-      tm.type = 'text';
-      tm.message = String(err);
-    }
-
-    return tm;
   }
 }
 
@@ -234,13 +677,17 @@ class Booker {
 }
 
 class Activity extends Booker{
+  async gather(rec) {
+    // get all include records
+    return models.Actinclude.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
+  }
+
   async save(rec, seq2) {
     // Actinclude insert
     rec.seq2 = seq2;
 
     let tobj2 = new models.Actinclude(rec);
     let tm = await tobj2.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
-
     if (tm.status != 200) return tm;
 
     // Actdaily
@@ -391,6 +838,11 @@ class Activity extends Booker{
 }
 
 class Meal extends Booker {
+  async gather(rec) {
+    // get all include records
+    return models.Mealinclude.select({database: this.database, pgschema: this.pgschema, user: this.user, rec});
+  }
+
   async save(rec, seq2) {
     // Mealinclude insert
     rec.seq2 = seq2;
@@ -423,6 +875,7 @@ class Meal extends Booker {
       if (tm.status != 200) return tm;
 
       tm = await this.updateMealBooked(daily);
+
       if (tm.status != 200) return tm;
 
       date.add(1, 'day');
@@ -549,125 +1002,6 @@ class Meal extends Booker {
   }
 }
 
-class ItemService extends ModelService {
-  // Main entry into updating items.
-  async create({database = '', pgschema = '', user = {}, rec = {}} = {}) {
-    let process = new Process(database, pgschema, user);
-
-    return process.update(rec);
-  }
-
-  async update({database = '', pgschema = '', user = {}, rec= {}} = {}) {
-    let process = new Process(database, pgschema, user);
-
-    return process.create(rec);
-  }
-  
-  async delete({database = '', pgschema = '', user = {}, pks = {}} = {}) {
-    let drec = [pks.rsvno, pks.seq1];
-
-    let process = new Process(database, pgschema, user);
-
-    return process.delete(drec);
-  }  
-}
-
-// Model services
-services.main = new ModelService({model: models.Main});
-services.item = new ItemService({model: models.Item});
-
-services.discount = new ModelService({model: models.Discount});
-services.cancreas = new ModelService({model: models.Cancreas});
-
-// Any other needed services
-services.query = function({database = '', pgschema = '', query = '', values = []}) {
-  return jsonQueryExecify({database, pgschema, query, app, values});
-}
-
-services.output = {
-  main: async function(req) {
-    // main admin manage page.  Needs a user so won't get here without one
-    const tm = new TravelMessage();
-
-    try {
-      let ctx = {};
-      let tmpl = 'apps/reservations/modules/res/module.html';
-
-      ctx.CSRFToken = await makeCSRF(req.session.data.database, req.session.data.pgschema, req.session.user.code);
-      ctx.main = models.Main.getColumnDefns();
-
-      ctx.dateFormat = dateFormat;
-      ctx.timeFormat = timeFormat;
-      ctx.USER = JSON.stringify(req.session.user);
-
-      try {
-        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
-        tm.type = 'html';
-      }
-      catch(err) {
-        tm.status = 500;
-        tm.message = err.toString();
-      }
-    }
-    catch(err) {
-      tm.status = 500;
-      tm.message = err.toString();
-    }
-
-    return tm;
-  },
-
-  setup: async function(req) {
-    // main setup manage page.  Needs a user so won't get here without one
-    const tm = new TravelMessage();
-
-    try {
-      let ctx = {};
-      let tmpl = 'apps/reservations/modules/setup/module.html';
-
-      ctx.CSRFToken = await makeCSRF(req.session.data.database, req.session.data.pgschema, req.session.user.code);
-      ctx.discount = models.Discount.getColumnDefns();
-      ctx.cancreas = models.Cancreas.getColumnDefns();
-
-      ctx.dateFormat = dateFormat;
-      ctx.timeFormat = timeFormat;
-      ctx.USER = JSON.stringify(req.session.user);
-
-      try {
-        tm.data = await nunjucks.render({path: [root], opts: {autoescape: true}, filters: [], template: tmpl, context: ctx});
-        tm.type = 'html';
-      }
-      catch(err) {
-        tm.status = 500;
-        tm.message = err.toString();
-      }
-    }
-    catch(err) {
-      tm.status = 500;
-      tm.message = err.toString();
-    }
-
-    return tm;
-  },
-};
-
-services.calc = {
-  pricing: async function({database = '', pgschema = '', user = {}, rec = {}} = {}) {
-    // to calc price
-    // cat, code, date, duration, qty, hours, times[], infants-seniors.
-    
-    let p = new Pricing(database, pgschema, user, rec);
-
-    return await p.calcIt();
-  },
-
-  discount: async function({database = '', pgschema = '', user = {}, rec = {}} = {}) {
-    let d = new Discount(database, pgschema, user, rec);
-
-    return await d.calcIt();
-  }
-}
-
 class Discount {
   constructor(database, pgschema, user, pobj) {
     this.database = database;
@@ -748,7 +1082,6 @@ class Pricing {
     this.pobj = pobj;
 
     this.tm = new TravelMessage();
-    this.rate = '';
     this.plevel = '';
     this.errMsg = '';
     this.dateFormat = dateFormat;
@@ -781,12 +1114,17 @@ class Pricing {
   }
 
   async calcIt() {
-    await this.getBasicData();
+    let bd = await this.getBasicData();
+    if (bd.status != 200) return bd;
 
     this.setPriceDescs();
     this.setQtys();
-    await this.getPrices();
+
+    bd = await this.getPrices();
+    if (bd.status != 200) return bd;
+
     this.calcExtn();
+    this.calcCharges();
     this.formatPrices();
 
     this.tm.data = this.data;
@@ -798,12 +1136,14 @@ class Pricing {
     let rate = await itemModels[this.ratesModel].selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [this.pobj.code, this.pobj.rateno]});
     if (rate.status != 200) return rate;
 
-    this.rate = rate.data;
+    this.data.rate = rate.data;
 
-    let plevel = await itemModels.Pricelevel.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [this.rate.pricelevel]});
+    let plevel = await itemModels.Pricelevel.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [this.data.rate.pricelevel]});
     if (plevel.status != 200) return plevel;
 
     this.plevel = plevel.data;
+
+    return new TravelMessage();
   }
 
   async getPrices() {
@@ -815,7 +1155,7 @@ class Pricing {
     let prices = [0,0,0,0,0,0,0,0];
 
     let lod = startDate.listOfDays(endDate);
-    
+
     for (let [yr, mo, days] of lod) {
       for (let day of days) {
         timeno++;
@@ -844,20 +1184,35 @@ class Pricing {
             prices[i] += parseFloat(slot[i]) || 0;
           }
         }
+        else {
+          return price;
+        }
 
-        if (this.rate.ratebase2 != 'D') {
+        if (this.data.rate.ratebase2 != 'D') {
           break;
         }
       }
     }
 
     this.data.price = prices;
+
+    return new TravelMessage();
   }
 
   calcExtn() {
     for (let i=0; i<7; i++) {
       this.data.pextn[i] = Math.round(this.data.pqty[i] * this.data.price[i] * 1000)/1000;
     }
+  }
+
+  calcCharges() {
+    let charges = 0;
+
+    for (let i=0; i<7; i++) {   // 8 is comped
+      charges += this.data.pextn[i];
+    }
+
+    this.data.charges = charges;
   }
 
   formatPrices() {
@@ -876,7 +1231,7 @@ class Pricing {
   }
 
   setQtys() {
-    switch(this.rate.ratebase1) {
+    switch(this.data.rate.ratebase1) {
       case 'P':   // per person
         switch(this.plevel.type) {
           case 'R':
@@ -911,7 +1266,7 @@ class Pricing {
     // can be ppl or qty
     let ppl, msg;
 
-    if (this.rate.ratebase1 == 'P') {
+    if (this.data.rate.ratebase1 == 'P') {
       ppl = parseInt(this.pobj.ppl);
       msg = 'Group Size ';
     }
@@ -968,7 +1323,7 @@ class Pricing {
     }
 
     if (adults > maxa) {
-      this.errMsg = `Adult size of ${ppl} is more than the maximum of ${maxa}`;
+      this.errMsg = `Adult size of ${adults} is more than the maximum of ${maxa}`;
       return;
     }
 
@@ -1005,7 +1360,7 @@ class Pricing {
 
   doAddl() {
     // fgure out how many addl there are.
-    let addlppl = parseInt(this.rate.addlppl);  // starting level
+    let addlppl = parseInt(this.data.rate.addlppl);  // starting level
     let ppl = parseInt(this.pobj.ppl);
 
     this.data.pqty[6] = Math.max(ppl-addlppl+1, 0);
@@ -1034,7 +1389,7 @@ class Pricing {
           if (spot != -1) break;
         }
 
-        if (spot == -1) spot = (this.rate.ratebase1 == 'C') ? 1 : 0;
+        if (spot == -1) spot = (this.data.rate.ratebase1 == 'C') ? 1 : 0;
 
         this.data.pqty[spot] += qty;
       }
@@ -1057,7 +1412,7 @@ class Pricing {
           if (spot != -1) break;
         }
 
-        if (spot == -1) spot = (this.rate.ratebase1 == 'C') ? 1 : 0;
+        if (spot == -1) spot = (this.data.rate.ratebase1 == 'C') ? 1 : 0;
 
         this.data.pqty[spot] += qty;
       }

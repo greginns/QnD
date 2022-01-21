@@ -49,8 +49,16 @@
             </div>        
             
             <div class='row'>
-              <div class='col-8 col-md-2 mb-3 mb-2'>
+              <div class='col-8 col-md-2 mb-2'>
                 {{ fields.Integer(id=mealrates.addlppl.id, min=0, max=99, step=1, mvc_value='mealrates.addlppl', label=mealrates.addlppl.verbose) }}
+              </div>
+              <div class='col-4 mb-2'>
+              </div>
+              <div class='col-2 mb-2'>
+                {{ fields.Float(id=mealrates.tipamt.id, min=0, max=100, step=1, mvc_value='mealrates.tipamt', label=mealrates.tipamt.verbose) }}
+              </div>
+              <div class='col-4 mb-2'>
+                {{ fields.Switch(id=mealrates.tipbasis.id, mvc_checked='mealrates.tipbasis', label=mealrates.tipbasis.verbose) }}
               </div>
             </div>            
 
