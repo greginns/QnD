@@ -475,22 +475,27 @@ class Process {
   }
 
   async calcIt(rsvno, seq1) {
-    // charges, comped, discount, comm, comm3 all get divvied from item
-    // tip get summed from includes
-    // taxes are calculated on charges - comped - discount
+    // charges, comped, discount all get divvied from item
+    // tip, taxes get summed from includes
+    // comm is caclulated per include
+    // taxes are calculated on charges - comped - discount - comm
     // sales = charges + tip - comped - discount - comm
     // total = sales + taxes
     /*
       charges -   done
       tip -       done
-      comped
+      comped -    done
       discount -  done
       comm
       comm3
       sales -     done
-      taxes
+      taxes -     done
       total -     done
     */
+
+    const includeTaxes = {};
+    const includeCommGls = {};
+    const includeSaleGls = {};
 
     const getRatingInfo = function(rec) {
       let obj = {};
@@ -525,7 +530,11 @@ class Process {
     }
 
     // calculate finances of one item
-    let tm = new TravelMessage();
+    // get rsv info
+    let tm = await this.getRsvInfo([rsvno]);
+    if (tm.status != 200) return tm;
+
+    let rsvInfo = tm.data[0];
 
     // Get item
     tm = await this.getItemRecord([rsvno, seq1]);
@@ -542,7 +551,10 @@ class Process {
     let actualCharged = data.charges;
     let actualComped = data.comped;
     let actualDiscount = data.discount;
-    let tip = parseFloat(data.acc_tip);
+    let tip = parseFloat(data.acc_tip);  // accumulate for item record 'tip' is main item record, acc_tip is include records
+    let salesInst = new SalesGL(this.database, this.pgschema, this.user, this.trans);
+    let taxInst = new Taxes(this.database, this.pgschema, this.user, this.trans);
+    let commInst = new Commission(this.database, this.pgschema, this.user, this.trans);    
 
     let fixedTotal = 0;
     let itemCharges = [];   // [v|f, charges, discount, comped]
@@ -591,11 +603,29 @@ class Process {
       item[3] = (actualCharged != 0) ? Math.round(actualComped * item[1]/actualCharged * 100, 2) / 100 : 0;
     }
 
-    // save acc_charges, acc-comped, acc_discount in each include record, tip in item record
-    // main item include
-    let sales = itemCharges[0][1] - itemCharges[0][2];
+    // save acc_* in each include record, tip, taxes in item record
+    // main item include values
+    let [fv, acc_charges, acc_discount, acc_comped] = [...itemCharges[0]];
+    data.acc_charges = acc_charges;
+    data.acc_comped = acc_comped;
+    data.acc_discount = acc_discount;
+
+    let [acc_taxes, taxDtls] = await taxInst.calc(data, rsvInfo);
+    let [acc_comm, acc_comm3, commgl] = await commInst.calc(data, rsvInfo);
+
+    let acc_sales = acc_charges + parseFloat(data.acc_tip) - acc_discount - acc_comped - acc_comm;
+    let acc_total = acc_sales + acc_taxes;
+    let taxes = acc_taxes;  // accumulate taxes
+
+    let iid = data.seq2;
+
+    includeTaxes[iid] = taxDtls;
+    includeCommGls[iid] = [acc_comm, acc_comm3, commgl];
+    includeSaleGls[iid] = await salesInst.calc(data);
+    
+    // update include record
+    let rec = {rsvno, seq1, seq2: data.seq2, acc_charges, acc_comped, acc_discount, acc_comm, acc_comm3, acc_sales, acc_taxes, acc_total};    
     let itable = getInclTable(data.cat);
-    let rec = {rsvno, seq1, seq2: data.seq2, acc_charges: itemCharges[0][1], acc_comped: itemCharges[0][3], acc_discount: itemCharges[0][2], acc_sales: sales};
     let inst = new models[itable](rec);
 
     tm = await inst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
@@ -606,20 +636,117 @@ class Process {
     for (let incl of data.includes) {
       idx++;
 
-      let sales = itemCharges[idx][1] - itemCharges[idx][2];
+      let [fv, acc_charges, acc_discount, acc_comped] = [...itemCharges[idx]];
+      data.acc_charges = acc_charges;
+      data.acc_comped = acc_comped;
+      data.acc_discount = acc_discount;
+
+      let [acc_taxes, taxDtls] = await taxInst.calc(incl, rsvInfo);
+      let [acc_comm, acc_comm3, commgl] = await commInst.calc(incl, rsvInfo);
+      
+      let acc_sales = acc_charges + parseFloat(incl.acc_tip) - acc_discount - acc_comped - acc_comm;
+      let acc_total = acc_sales + acc_taxes;
+      taxes += acc_taxes;
+
+      let iid = incl.seq2;
+      includeTaxes[iid] = taxDtls;
+      includeCommGls[iid] = [acc_comm, acc_comm3, commgl];
+      includeSaleGls[iid] = await salesInst.calc(incl);
+
+      // update include record
+      let rec = {rsvno, seq1, seq2: incl.seq2, acc_charges, acc_comped, acc_discount, acc_comm, acc_comm3, acc_sales, acc_taxes, acc_total};
       let itable = getInclTable(incl.cat);
-      let rec = {rsvno, seq1, seq2: incl.seq2, acc_charges: itemCharges[idx][1], acc_comped: itemCharges[idx][3], acc_discount: itemCharges[idx][2], acc_sales: sales};
       let inst = new models[itable](rec);
 
       tm = await inst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
       if (tm.status != 200) break;
     }
+console.log(includeSaleGls);
+    if (tm.status != 200) return tm;
 
-    // set tip on item
-    let irec = {rsvno, seq1, tip};
+    // set tip, taxes, sales, total on item
+    let sales = parseFloat(data.charges) - parseFloat(data.comped) + tip - parseFloat(data.discount) - parseFloat(data.comm);
+    let total = sales + taxes;
+    let irec = {rsvno, seq1, tip, sales, taxes, total};
+
     let iinst = new models.Item(irec);
     tm = await iinst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+    if (tm.status != 200) return tm;
 
+    // save GLs and taxes
+    // for remove all taxes from item (seq1)
+    let drec = {rsvno, seq1};
+    tm = await models.Includetaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    tm = await models.Includegls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    // sumup by tax, gl
+    let sumupGL = {};
+    let sumupTax = {};
+
+    for (let seq2 in includeTaxes) {
+      sumupGL[seq2] = {};
+      sumupTax[seq2] = {};
+
+      if (includeTaxes[seq2].length > 0) {
+        for (let dtls of includeTaxes[seq2]) {
+          let [taxcode, amt, gl] = [...dtls];
+
+          if (gl && amt !=0) {
+            if (!(gl in sumupGL[seq2])) sumupGL[seq2][gl] = 0;
+            sumupGL[seq2][gl] += parseFloat(amt);
+          }
+
+          if (taxcode && amt != 0) {
+            if (!(taxcode in sumupTax[seq2])) sumupTax[seq2][taxcode] = 0;
+            sumupTax[seq2][taxcode] += parseFloat(amt);
+          }
+        }        
+      }
+    }
+
+    for (let seq2 in includeCommGls) {
+      if (!(seq2 in sumupGL)) sumupGL[seq2] = {};
+
+      let [comm, comm3, gl] = [...includeCommGls[seq2]];
+
+      if (gl && comm + comm3 != 0) {  // it's one or the other
+        if (!(gl in sumupGL[seq2])) sumupGL[seq2][gl] = 0;
+        sumupGL[seq2][gl] += parseFloat(comm) + parseFloat(comm3);
+      }
+    }
+
+    // save taxes
+    for (let seq2 in sumupTax) {
+      for (let taxcode in sumupTax[seq2]) {
+        let amount = sumupTax[seq2][taxcode];
+
+        let trec = {rsvno, seq1, seq2, taxcode, amount};
+        let iinst = new models.Includetaxes(trec);
+        tm = await iinst.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+        if (tm.status != 200) break;
+      }
+
+      if (tm.status != 200) break;
+    }
+
+    if (tm.status != 200) return tm;
+
+    // save GLs
+    for (let seq2 in sumupGL) {
+      for (let glcode in sumupGL[seq2]) {
+        let amount = sumupGL[seq2][glcode];
+
+        let trec = {rsvno, seq1, seq2, glcode, amount};
+        let iinst = new models.Includegls(trec);
+        tm = await iinst.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+        if (tm.status != 200) break;
+      }
+      if (tm.status != 200) break;
+    }
+    
     return tm;    
   }
 
@@ -643,6 +770,24 @@ class Process {
     }
 
     return inst;
+  }
+
+  async getRsvInfo(values) {
+    let query = {
+      reservations_Main: {
+        columns: ['*'],
+        leftJoin: [
+          {contacts_Contact: {
+            columns: ['*'],
+            fkname: 'contact'
+          }}
+        ],
+
+        where: `"reservations_Main"."rsvno" = $1`
+      }
+    };
+
+    return jsonQueryExecify({database: this.database, pgschema: this.pgschema, query, app: 'reservations', values});
   }
   
   static merge(source, dest) {
@@ -1002,67 +1147,6 @@ class Meal extends Booker {
   }
 }
 
-class Discount {
-  constructor(database, pgschema, user, pobj) {
-    this.database = database;
-    this.pgschema = pgschema;
-    this.user = user;
-    this.pobj = pobj;
-
-    this.tm = new TravelMessage();
-    this.discRecord = {};
-  }
-
-  async calcIt() {
-    // disccode, discamt (if allowed), ppl, dur, charges
-    //
-    // Flat, %, per person, per person day, 
-    await this.getDiscount();
-    let discount = this.calc();
-
-    if (this.discRecord.maxdisc != 0) discount = Math.min(discount, this.discRecord.maxdisc);
-
-    this.tm.data = (Math.round(discount*100)/100).toFixed(2);
-
-    return this.tm;
-  }
-
-  calc() {
-    let amt = parseFloat(this.discRecord.amount) || parseFloat(this.pobj.discamt);    // override 0 amount in setup with entered amount
-    let basis = this.discRecord.basis;
-    let ppl = parseInt(this.pobj.ppl);
-    let dur = parseInt(this.pobj.dur);
-
-    if (! ('basis' in this.discRecord)) return 0;
-    if (!this.discRecord.active) return 0;
-
-    switch (basis) {
-      case 'F':
-        return amt;
-
-      case '%':
-        return (amt/100) * parseFloat(this.pobj.charges);
-
-      case 'P':
-        return ppl*amt;
-
-      case 'D':
-        return ppl*amt*dur;
-
-      default:
-        return 0;
-    }
-  }
-
-  async getDiscount() {
-    let res = await models.Discount.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [this.pobj.disccode]});
-    if (res.status == 200) {
-      this.discRecord = res.data;
-    }
-  }
-
-}
-
 class Pricing {
   // Flat, Per Person, Combined.
   // PP is adult, youth, etc.
@@ -1417,6 +1501,296 @@ class Pricing {
         this.data.pqty[spot] += qty;
       }
     }
+  }
+}
+
+class SalesGL {
+  // calculate sales gl on one item.  Charges-comped-discount
+  constructor(database, pgschema, user, trans) {
+    this.database = database;
+    this.pgschema = pgschema;
+    this.user = user;
+    this.trans = trans;
+
+    this.breakdown = [];
+  }
+
+  async calc(data) {
+    let itable = this.getItemTable(data.cat);
+    let charges = parseFloat(data.acc_charges) - parseFloat(data.acc_comped) - parseFloat(data.acc_discount);
+    let sum = 0;
+
+    // get item
+    let tm = await itable.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [data.code]}, this.trans);
+    if (tm.status != 200) return this.breakdown;
+
+    let item = tm.data;
+
+    for (let i=1; i<5; i++) {
+      let gl = item['gl' + i];
+
+      if (!gl) continue;
+
+      let amt = item['gl' + i + 'amt'];
+      let perc = item['gl' + i + 'perc'];
+      let calced = (perc) ? Math.round(charges * (amt/100) * 100) / 100 : amt;
+
+      sum += calced;
+
+      this.breakdown.push([gl, calced]);
+    }
+
+    if (sum != charges) {
+      let diff = charges-sum;
+
+      this.breakdown[0][1] += diff;
+    }
+
+    return this.breakdown;
+  }
+
+  getItemTable(cat) {
+    if (cat == 'A') return itemModels.Activity;
+    if (cat == 'L') return itemModels.Lodging;
+    if (cat == 'M') return itemModels.Meals;
+  }
+}
+
+class Discount {
+  constructor(database, pgschema, user, pobj) {
+    this.database = database;
+    this.pgschema = pgschema;
+    this.user = user;
+    this.pobj = pobj;
+
+    this.tm = new TravelMessage();
+    this.discRecord = {};
+  }
+
+  async calcIt() {
+    // disccode, discamt (if allowed), ppl, dur, charges
+    //
+    // Flat, %, per person, per person day, 
+    await this.getDiscount();
+    let discount = this.calc();
+
+    if (this.discRecord.maxdisc != 0) discount = Math.min(discount, this.discRecord.maxdisc);
+
+    this.tm.data = (Math.round(discount*100)/100).toFixed(2);
+
+    return this.tm;
+  }
+
+  calc() {
+    let amt = parseFloat(this.discRecord.amount) || parseFloat(this.pobj.discamt);    // override 0 amount in setup with entered amount
+    let basis = this.discRecord.basis;
+    let ppl = parseInt(this.pobj.ppl);
+    let dur = parseInt(this.pobj.dur);
+
+    if (! ('basis' in this.discRecord)) return 0;
+    if (!this.discRecord.active) return 0;
+
+    switch (basis) {
+      case 'F':
+        return amt;
+
+      case '%':
+        return (amt/100) * (parseFloat(this.pobj.charges) - parseFloat(this.pobj.comped));
+
+      case 'P':
+        return ppl*amt;
+
+      case 'D':
+        return ppl*amt*dur;
+
+      default:
+        return 0;
+    }
+  }
+
+  async getDiscount() {
+    let res = await models.Discount.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [this.pobj.disccode]});
+    if (res.status == 200) {
+      this.discRecord = res.data;
+    }
+  }
+}
+
+class Commission {
+  // calculate commission on one item.  Charges-comped-discount
+  constructor(database, pgschema, user, trans) {
+    this.database = database;
+    this.pgschema = pgschema;
+    this.user = user;
+    this.trans = trans;
+  }
+
+  async calc(data, rsvData) {
+    let comm = 0, comm3 = 0, commgl = '';
+    let commrate = parseFloat(rsvData.commrate);
+
+    if (commrate == 0) return [comm, comm3, commgl];
+    commrate = commrate/100;
+
+    let itable = this.getItemTable(data.cat);
+
+    // get item
+    let tm = await itable.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [data.code]}, this.trans);
+    if (tm.status != 200) return [comm, comm3, commgl];
+
+    let item = tm.data;
+
+    commgl = item.commgl;
+
+    if (!commgl) return [comm, comm3, ''];
+    let commable = parseFloat(data.acc_charges) - parseFloat(data.acc_comped) - parseFloat(data.acc_discount);
+    let net = Math.round(commable * commrate * 100) / 100;
+
+    (rsvData.contact == rsvData.agent) ? comm3 = net : comm = net;
+
+    return [comm, comm3, commgl];
+  }
+
+  getItemTable(cat) {
+    if (cat == 'A') return itemModels.Activity;
+    if (cat == 'L') return itemModels.Lodging;
+    if (cat == 'M') return itemModels.Meals;
+  }
+}
+
+class Taxes {
+  // calculate taxes on one item
+  constructor(database, pgschema, user, trans) {
+    this.database = database;
+    this.pgschema = pgschema;
+    this.user = user;
+    this.trans = trans;
+  }
+
+  async calc(data, rsvData) {
+    let tax = 0, taxes = [];
+    let taxable = rsvData.taxable;
+    let bookdate = rsvData.cr8date || new Date();
+    let arrdate = rsvData.arrdate || new Date();
+
+    let itable = this.getItemTable(data.cat);
+
+    // get item
+    let tm = await itable.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [data.code]}, this.trans);
+    if (tm.status != 200) return [tax, taxes];
+
+    let item = tm.data;
+
+    for (let idx=1; idx<5; idx++) {
+      let taxcode = item['tax' + idx];
+      if (!taxcode) continue;
+
+      let tm = await itemModels.Tax.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [taxcode]}, this.trans);
+      if (tm.status != 200) continue;
+      let taxData = tm.data;
+      let rateDate = (taxData.effwhen == 'A') ? arrdate : bookdate;
+
+      if (taxable || !taxData.exemptable) {
+        let [amt, gl] = this.calcIt(data, taxData, rateDate);
+        tax += amt;
+        taxes.push([taxcode, amt, gl]);
+      }
+    }
+
+    return [tax, taxes];
+  }
+
+  calcIt(data, taxData, rateDate) {
+    let taxableAmt = parseFloat(data.acc_charges) - parseFloat(data.acc_comped) - parseFloat(data.acc_discount);
+    let amt = 0, gl = taxData.gl, basis = taxData.base;
+    let [rate, tierbase] = this.getTaxRate(taxData, rateDate, taxableAmt);
+
+    switch(basis) {
+      case '%':
+        amt = taxableAmt * rate/100;
+        break;
+
+      case 'P':
+        amt = parseFloat(data.ppl) * rate;
+        break;
+
+      case 'U':
+        amt = parseFloat(data.ppl) * parseFloat(data.dur) * rate;
+        break;
+
+      case 'Q':
+        amt = parseFloat(data.qty) * rate;
+        break;
+
+      case 'N':
+        amt = parseFloat(data.qty) * parseFloat(data.dur) * rate;
+        break;
+
+      case 'F':
+        amt = rate;
+        break;
+
+      case 'X':
+        amt = tierbase + (taxableAmt * (rate/1000))
+        break;
+
+      case 'Y':
+        amt = tierbase + rate;
+        break;
+
+      case 'Z':
+        amt = tierbase + (taxableAmt * rate/100)
+        break;
+    }
+
+    amt = Math.round(amt*100)/100;
+
+    return [amt, gl];
+  }
+
+  getTaxRate(taxData, rateDate, taxableAmt) {
+    // find proper rate based on date and possibly tier
+    let lowDate = new Date(1961, 4, 1).valueOf();
+    let rate = 0, tierbase = 0, basis = taxData.basis;
+
+    for (let history of taxData.history) {
+      let hdate = new Date(history.date).valueOf();
+
+      if (hdate > lowDate && hdate <= rateDate) {
+        if (basis == 'X' || basis == 'Y' || basis == 'Z') {
+          tierbase = history.tierbase;
+
+          if (taxableAmt < taxData.tier1min) {
+            rate = 0;
+          }
+          else if (taxableAmt <= taxData.tier1max) {
+            rate = history.tier1;
+          }
+          else if (taxableAmt <= taxData.tier2max) {
+            rate = history.tier2;
+          }
+          else if (taxableAmt <= taxData.tier3max) {
+            rate = history.tier3;
+          }
+          else {
+            rate = history.tier4;
+          }
+        }
+        else {
+          rate = history.rate;
+        }
+      }
+
+      lowDate = hdate;
+    }
+
+    return [rate, tierbase];
+  }
+
+  getItemTable(cat) {
+    if (cat == 'A') return itemModels.Activity;
+    if (cat == 'L') return itemModels.Lodging;
+    if (cat == 'M') return itemModels.Meals;
   }
 }
 

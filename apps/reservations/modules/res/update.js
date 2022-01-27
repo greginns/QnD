@@ -167,10 +167,10 @@ class Reserv extends Verror {
   }
 
   /* Modals */
-  getAModal(id) {
-    let el = document.getElementById(id);
-    return bootstrap.Modal.getInstance(el);
-  }
+  //getAModal(id) {
+  //  let el = document.getElementById(id);
+  //  return bootstrap.Modal.getInstance(el);
+  //}
 
   resetFromBailedOutModal() {
     // bailed out of modal, so set things back.
@@ -705,6 +705,12 @@ class BookItem extends Verror {
     return item;
   }
 
+  math() {
+    let item = this.model.item.toJSON();
+
+    itemFinances.setData(item);
+    itemFinances.show();
+  }
 // I/O
   async save(ev) {
     let item = this.getItemBundle();
@@ -773,7 +779,7 @@ class BookItem extends Verror {
     let extn = [0,0,0,0,0,0,0,0];
 
     for (let i=0; i<8; i++) {   // 8(7) is comped
-      extn[i] = qty[i] * price[i];
+      extn[i] = qty[i] || 0 * price[i] || 0;
 
       if (i == 7) comped = extn[i];
       if (i < 7) charges += extn[i];
@@ -892,6 +898,7 @@ class BookItem extends Verror {
     pobj.ppl = this.model.item.ppl;
     pobj.dur = this.model.item.dur;
     pobj.charges = this.model.item.charges;
+    pobj.comped = this.model.item.pextn[7];
     pobj.disccode = this.model.item.disccode;
     pobj.discamt = this.model.item.discamt;
 
@@ -1649,11 +1656,35 @@ class Meal extends BookItem {
   }
 };
 
+class ItemFinances extends Verror {
+  constructor(el) {
+    super(el)
+  }
+
+  createModel() {
+    this.financeModal = new bootstrap.Modal(document.getElementById('itemFinances'));
+    this.model.item = {};
+  }
+
+  setData(item) {
+    console.log(item)        
+    this.model.item = item;
+
+  }
+
+  show() {
+    // show finance details of an item
+    this.financeModal.show();
+  }
+}
+
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
 let el1 = document.getElementById('rsvs-rsv-update');   // page html
 
 let setup1 = new Reserv('rsvs-rsv-update-section');
 let section1 = new Section({mvc: setup1});
+
+const itemFinances = new ItemFinances('itemFinancesSection');
 
 let page1 = new Page({el: el1, path: ['/:rsvno'], title: 'Reservation', sections: [section1]});
 

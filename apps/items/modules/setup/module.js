@@ -384,7 +384,7 @@ let moduleStart = function() {
     itemData.addModel(model);                          
 
     Module.tableStores.tax = new TableStore({accessor: Module.data.tax, model, safemode});  // setup a table store in Module so all pages can access    
-    dataPromises.push(Module.tableStores.tax.getAll());
+    dataPromises.push(Module.tableStores.tax.getMany({filters: {active: true}}));
 
     // Waiver
     model = `/items/waiver`;

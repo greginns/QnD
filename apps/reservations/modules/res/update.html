@@ -612,6 +612,76 @@
       </div>
     </div>  
   </section>
+
+  <section id='itemFinancesSection'>
+    <!-- Item Finances Modal -->
+    <div class="modal fade" id="itemFinances" data-bs-keyboard="true" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"><span mvc-text='item.desc'></span> Finances</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" >
+            </button>
+          </div>
+
+          <div class='modal-body'>
+            <div class='row mb-3'>
+              <div class='table-responsive'>
+                <table class='table table-sm'>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th style='text-align: right'>Charge</th>
+                      <th style='text-align: right'>Tip</th>
+                      <th style='text-align: right'>Comped</th>
+                      <th style='text-align: right'>Discount</th>
+                      <th style='text-align: right'>Taxes</th>
+                      <th style='text-align: right'>Commission</th>
+                      <th style='text-align: right'>To Pay</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Guest Sees</td>
+                      <td mvc-text='item.charges' style='text-align: right'></td>
+                      <td mvc-text='item.tip' style='text-align: right'></td>
+                      <td mvc-text='item.comped' style='text-align: right'></td>
+                      <td mvc-text='item.discount' style='text-align: right'></td>
+                      <td mvc-text='item.taxes' style='text-align: right'></td>
+                      <td mvc-text='item.comm' style='text-align: right'></td>
+                      <td mvc-text='item.total' style='text-align: right'></td>
+                    </tr>
+                    <tr>
+                      <td mvc-text='item.desc'></td>
+                      <td mvc-text='item.acc_charges' style='text-align: right'></td>
+                      <td mvc-text='item.acc_tip' style='text-align: right'></td>
+                      <td mvc-text='item.acc_comped' style='text-align: right'></td>
+                      <td mvc-text='item.acc_discount' style='text-align: right'></td>
+                      <td mvc-text='item.acc_taxes' style='text-align: right'></td>
+                      <td mvc-text='item.acc_comm' style='text-align: right'></td>
+                      <td mvc-text='item.acc_total' style='text-align: right'></td>
+                    </tr>
+                  </tbody>
+                  <tbody mvc-each='item.includes'>
+                    <tr>
+                      <td mvc-text='item.includes[$index].desc'></td>
+                      <td mvc-text='item.includes[$index].acc_charges' style='text-align: right'></td>
+                      <td mvc-text='item.includes[$index].acc_tip' style='text-align: right'></td>
+                      <td mvc-text='item.includes[$index].acc_comped' style='text-align: right'></td>
+                      <td mvc-text='item.includes[$index].acc_discount' style='text-align: right'></td>
+                      <td mvc-text='item.includes[$index].acc_taxes' style='text-align: right'></td>
+                      <td mvc-text='item.includes[$index].acc_comm' style='text-align: right'></td>
+                      <td mvc-text='item.includes[$index].acc_total' style='text-align: right'></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </page>
 
 <div class='row'>
@@ -701,9 +771,12 @@
         <span mvc-text='facade.rate'></span>
       </div>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        <span class='pointer' mvc-click='edit()' style='font-size: 20px' mvc-show='parentState == "parent"'>
+        <span class='pointer me-2' mvc-click='edit()' style='font-size: 20px' mvc-show='parentState == "parent"'>
           <i class="fa-thin fa-pen"></i>
         </span>
+        <span class='pointer me-2' mvc-click='math()' style='font-size: 20px' mvc-show='parentState == "parent"'>
+          <i class="fa-thin fa-file-invoice-dollar"></i>
+        </span>        
       </div>
     </div> 
     
@@ -780,9 +853,12 @@
         <span mvc-text='facade.rate'></span>
       </div>
       <div class='col-6 col-md-3 col-lg-2 mt-1 mb-1'>
-        <span class='pointer' mvc-click='edit()' style='font-size: 20px' mvc-show='parentState == "parent"'>
+        <span class='pointer me-2' mvc-click='edit()' style='font-size: 20px' mvc-show='parentState == "parent"'>
           <i class="fa-thin fa-pen"></i>
         </span>
+        <span class='pointer me-2' mvc-click='math()' style='font-size: 20px' mvc-show='parentState == "parent"'>
+          <i class="fa-thin fa-file-invoice-dollar"></i>
+        </span>        
       </div>
     </div>
     

@@ -2,6 +2,8 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
+import {datetimer} from '/~static/lib/client/core/datetime.js';
+import {Edittable} from '/~static/lib/client/core/tables.js';
 import {Setup} from '/~static/apps/items/modules/setup/baseclasses.js';
 
 class Tax extends Setup {
@@ -32,6 +34,8 @@ class Tax extends Setup {
 
       this.defaults = await Module.tableStores.tax.getDefault();   
 
+      this.editTable = new Edittable('#tax-rates', this, this.saver, this.deleter)
+
       resolve();
     }.bind(this));
   }
@@ -44,6 +48,44 @@ class Tax extends Setup {
     return true;  
   }
 
+  newRate() {
+    let dt = datetimer();
+    let rate = {};
+    rate.date = dt.format('YYYY-MM-DD');
+    rate.rate = '0';
+
+    this.editTable.add(rate);
+  }
+
+  editTableEditCaller(obj) {
+    this.editTable.edit(obj);
+  }
+
+  async deleter(idx) {
+    if (! ('history' in this.model.tax)) {
+      this.model.tax.history = [];
+      return;
+    }
+
+    this.model.tax.history.splice(idx, 1);
+  }
+
+  async saver(idx) {
+    // called from editTable
+    let data = this.model.hist.toJSON();
+
+    if (! ('history' in this.model.tax) || !this.model.tax.history) this.model.tax.history = [];
+
+    if (idx) {
+      this.model.tax.history[idx] = data;
+    }
+    else {
+      this.model.tax.history.push(data)
+    }
+
+    return await this.save();
+  }
+
   async save(ev) {
     let data = this.model.tax.toJSON();
     let diffs;
@@ -52,10 +94,11 @@ class Tax extends Setup {
           
     if (this.model.existingEntry) {
       diffs = this.checkDiff(this.origData, data);
-      if (diffs === false) return;
-    }      
 
-    let spinner = this.startSpinner(ev);
+      if (diffs === false) {
+        diffs = {history: data.history};
+      }
+    }      
 
     // new (post) or old (put)?
     let res = (this.model.existingEntry) ? await Module.tableStores.tax.update(data.code, diffs) : await Module.tableStores.tax.insert(data);
@@ -67,9 +110,10 @@ class Tax extends Setup {
     }
     else {
       this.displayErrors(res);
+      return false;
     }
     
-    this.stopSpinner(ev, spinner);    
+    return true;
   }
 
   async canClear(ev) {

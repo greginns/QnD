@@ -151,7 +151,7 @@ const Includetaxes = class extends Model {
     super(obj, opts);
   }
   
-  static parent() {
+  static definition() {
     return {
       schema: {
         rsvno: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Rsvno'}),
@@ -189,7 +189,7 @@ const Includegls = class extends Model {
     super(obj, opts);
   }
   
-  static parent() {
+  static definition() {
     return {
       schema: {
         rsvno: new Fields.Char({notNull: true, maxLength: 8, verbose: 'Rsvno'}),
@@ -637,7 +637,7 @@ const Actinclude = class extends Include {
     return this.mergeSchemas(this.parent(), this.child());
   }
 }
-
+/*
 const Acttaxes = class extends Includetaxes {
   constructor(obj, opts) {
     super(obj, opts);
@@ -695,7 +695,7 @@ const Actgls = class extends Includegls {
     return this.mergeSchemas(this.parent(), this.child());
   }
 }
-
+*/
 const Actdaily = class extends Daily {
   constructor(obj, opts) {
     super(obj, opts);
@@ -761,7 +761,7 @@ const Lodginclude = class extends Include {
     return this.mergeSchemas(this.parent(), this.child());
   }
 }
-
+/*
 const Lodgtaxes = class extends Includetaxes {
   constructor(obj, opts) {
     super(obj, opts);
@@ -819,7 +819,7 @@ const Lodggls = class extends Includegls {
     return this.mergeSchemas(this.parent(), this.child());
   }
 }
-
+*/
 const Lodgdaily = class extends Daily {
   //
   //  # one per day per qty booked.
@@ -902,7 +902,7 @@ const Mealinclude = class extends Include {
     return this.mergeSchemas(this.parent(), this.child());
   }
 }
-
+/*
 const Mealtaxes = class extends Includetaxes {
   constructor(obj, opts) {
     super(obj, opts);
@@ -960,7 +960,7 @@ const Mealgls = class extends Includegls {
     return this.mergeSchemas(this.parent(), this.child());
   }
 }
-
+*/
 const Mealdaily = class extends Daily {
   constructor(obj, opts) {
     super(obj, opts);
@@ -1090,8 +1090,9 @@ const Sequence = class extends Model {
 module.exports = {
   Main, Maintaxes, Maingls,
   Item, Itemtaxes, Itemgls,
-  Actinclude, Actdaily, Acttaxes, Actgls,
-  Lodginclude, Lodgdaily, Lodgtaxes, Lodggls,
-  Mealinclude, Mealdaily, Mealtaxes, Mealgls,
+  Actinclude, Actdaily, 
+  Lodginclude, Lodgdaily, 
+  Mealinclude, Mealdaily, 
+  Includetaxes, Includegls,
   Cancreas, Discount, Sequence
 };

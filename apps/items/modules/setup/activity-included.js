@@ -85,6 +85,7 @@ class Inclmeal extends Verror {
     }
     else {
       this.displayErrors(res);
+      return false;
     }
     
     //this.stopSpinner(ev, spinner); 

@@ -109,6 +109,112 @@
                 </div>
               </div>            
             </div>
+
+            <div class='row pt-2'>
+              <div class='col-12 mb-3'>
+                <table class='table table-sm' id='tax-rates'>
+                  <thead>
+                    <tr>
+                      <th>From Date</th>
+                      <th>Rate</th>
+                      <th>Tier Base</th>
+                      <th>Tier 1</th>
+                      <th>Tier 2</th>
+                      <th>Tier 3</th>
+                      <th>Tier 4</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody mvc-each='tax.history' class='edittable-source'>
+                    <tr data-edittable-index='$index'>
+                      <td>
+                        <span mvc-text='tax.history[$index].date'></span>
+                      </td>
+                      <td>
+                        <span mvc-text='tax.history[$index].rate'></span>
+                      </td>
+                      <td>
+                        <span mvc-text='tax.history[$index].tierbase'></span>
+                      </td>
+                      <td>
+                        <span mvc-text='tax.history[$index].tier1'></span>
+                      </td>
+                      <td>
+                        <span mvc-text='tax.history[$index].tier2'></span>
+                      </td>
+                      <td>
+                        <span mvc-text='tax.history[$index].tier3'></span>
+                      </td>
+                      <td>
+                        <span mvc-text='tax.history[$index].tier4'></span>
+                      </td>
+                      <td>
+                        <span class='pointer me-3' mvc-click='editTableEditCaller()'>
+                          <i class="fa-thin fa-pen"></i>
+                        </span>                        
+                        <span class='pointer' mvc-click='editTable.delete()'>
+                          <i class="fa-thin fa-trash-can text-danger"></i> 
+                        </span>                                              
+                      </td>
+                    </tr>
+                  </tbody>
+
+                  <tbody style='display: none' class='edittable-editor' data-edittable-dest='hist'>
+                    <tr>
+                      <td>
+                        <span>
+                          {{ fields.Date(id='hist-date', maxlength='10', mvc_value='hist.date', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_role='time', mvc_filter='', mvc_role='', mvc_helptext='', placeholder='') }}
+                        </span>
+                      </td>
+                      <td>
+                        <span>
+                          {{ fields.Char(id='hist-rate', maxlength='10', mvc_value='hist.rate', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_role='time', mvc_filter='', mvc_role='float', mvc_helptext='', placeholder='') }}
+                        </span>
+                      </td>
+                      <td>
+                        <span>
+                          {{ fields.Char(id='hist-tierbase', maxlength='10', mvc_value='hist.tierbase', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_role='time', mvc_filter='', mvc_role='float', mvc_helptext='', placeholder='') }}
+                        </span>
+                      </td>
+                      <td>
+                        <span>
+                          {{ fields.Char(id='hist-tier1', maxlength='10', mvc_value='hist.tier1', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_role='time', mvc_filter='', mvc_role='float', mvc_helptext='', placeholder='') }}
+                        </span>
+                      </td>
+                      <td>
+                        <span>
+                          {{ fields.Char(id='hist-tier2', maxlength='10', mvc_value='hist.tier2', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_role='time', mvc_filter='', mvc_role='float', mvc_helptext='', placeholder='') }}
+                        </span>
+                      </td>
+                      <td>
+                        <span>
+                          {{ fields.Char(id='hist-tier3', maxlength='10', mvc_value='hist.tier3', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_role='time', mvc_filter='', mvc_role='float', mvc_helptext='', placeholder='') }}
+                        </span>
+                      </td>
+                      <td>
+                        <span>
+                          {{ fields.Char(id='hist-tier4', maxlength='10', mvc_value='hist.tier4', label='', mvc_enabled='', mvc_disabled='', mvc_event_type='change', mvc_on='{}', mvc_role='time', mvc_filter='', mvc_role='float', mvc_helptext='', placeholder='') }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class='pointer' mvc-click='editTable.save()'>
+                          <i class="fa-light fa-floppy-disk"></i>
+                        </span>
+                        <span class='pointer' mvc-click='editTable.cancel()'>
+                          <i class="fa-light fa-xmark"></i>  
+                        </span>                        
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-12'>
+                <button class='btn btn-sm btn-outline-primary' mvc-click='newRate()'>New Rate</button>
+              </div>
+            </div>
           </div>
 
           <div class='card-footer'>

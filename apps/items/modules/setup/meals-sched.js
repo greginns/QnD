@@ -45,6 +45,7 @@ class Mealsched extends Setup {
       dow: [true, true, true, true, true, true, true]
     };
 
+    this.model.hist = {};
     this.model.errors = {range: {}};
 
     this.model.existingEntry = false;

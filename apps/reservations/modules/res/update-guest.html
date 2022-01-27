@@ -1,10 +1,5 @@
 <div class='row'>
   <div class='col-12 col-sm-6'>
-    <button class='btn btn-sm btn-outline-secondary' mvc-click='gotoContact()'>
-      <span mvc-text='main.contact'></span>
-    </button>
-    <br>
-    
     <span mvc-text='contact.first'></span>
     <span mvc-text='contact.last'></span>
     <br>
@@ -27,6 +22,11 @@
   </div>
 
   <div class='col-12 col-sm-6'>
+    <button class='btn btn-sm btn-outline-secondary' mvc-click='gotoContact()'>
+      <span mvc-text='main.contact'></span>
+    </button>
+    <br>
+    
     <span mvc-show='contact.email'>
       <a mvc-href='mailto:${contact.email}?subject=Reservation ${main.rsvno} on ${main.arrdate}'>
         <span mvc-text='contact.email'></span>
