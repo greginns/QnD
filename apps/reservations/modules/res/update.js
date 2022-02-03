@@ -72,6 +72,7 @@ class Reserv extends Verror {
     };
 
     this.itemManager = new ItemManager(document.getElementById('rsvs-rsv-items-list'));
+    document.addEventListener('rsvUpdated', this.getTheRsv.bind(this));
 
     return new Promise(async function(resolve) {
       Module.tableStores.company.addView(new TableView({proxy: this.model.companies, filterFunc}));
@@ -100,7 +101,7 @@ class Reserv extends Verror {
     this.itemManager.setRsvno(this.rsvno);
     this.itemManager.displayItems(this.rsvno);
 
-    this.model.main = await Module.tableStores.main.getOne(this.rsvno); 
+    await this.getTheRsv();
     this.origData = this.$copy(this.model.main);
 
     await this.getContact();
@@ -117,6 +118,11 @@ class Reserv extends Verror {
 
   outView() {
     return true;  
+  }
+
+  async getTheRsv() {
+console.log(this.rsvno)    
+    this.model.main = await Module.tableStores.main.getOne(this.rsvno); 
   }
 
   async update(ev) {
@@ -614,6 +620,7 @@ class BookItem extends Verror {
     };    
 
     this.rsvno = '';
+    this.rsvEvent = new CustomEvent('rsvUpdated');
 
     this.bookRemoveCallback;
   }
@@ -724,6 +731,8 @@ class BookItem extends Verror {
       this.model.item.seq1 = res.data.seq1;
       this.existingData = this.model.item.toJSON();
       this.model.viewState = 'view';
+
+      document.dispatchEvent(this.rsvEvent);
     }
     else {
       alert(res.message);
@@ -735,6 +744,8 @@ class BookItem extends Verror {
       let res = await Module.data.item.delete([this.model.item.rsvno, this.model.item.seq1]);
       if (res.status == 200) {
         this.removeSelf();
+        
+        document.dispatchEvent(this.rsvEvent);
       }
       else {
         alert(res.message);
@@ -779,7 +790,7 @@ class BookItem extends Verror {
     let extn = [0,0,0,0,0,0,0,0];
 
     for (let i=0; i<8; i++) {   // 8(7) is comped
-      extn[i] = qty[i] || 0 * price[i] || 0;
+      extn[i] = parseInt(qty[i]) * parseFloat(price[i]);
 
       if (i == 7) comped = extn[i];
       if (i < 7) charges += extn[i];
@@ -795,6 +806,7 @@ class BookItem extends Verror {
 // Rates
   async rateChanged(obj) {
     // rate selected by user
+    this.includesInst.clear();
     await this.processRate();
   }
 
@@ -813,6 +825,7 @@ class BookItem extends Verror {
     this.rateInfo = {};
 
     let pobj = this.model.item.toJSON();
+    let ok = true;
 
     pobj.rateno = this.model.item.rateno;
 
@@ -825,19 +838,26 @@ class BookItem extends Verror {
 
     if (pobj.rateno) {
       let res = await io.post({calc: pobj}, `/reservations/v1/calc/pricing`);
-
       if (res.status == 200) {
         this.model.item.pdesc = res.data.pdesc;
         this.model.item.pqty = res.data.pqty;
         this.model.item.price = res.data.price;
         this.model.item.pextn = res.data.pextn;
       }
+      else {
+        alert('No Pricing Data');
+        ok = false;
+      }
     }
     else {
+      ok = false;
+    }
+
+    if (!ok) {
       this.model.item.pdesc = ['','','','','','','',''];
       this.model.item.pqty = [0,0,0,0,0,0,0,0];
       this.model.item.price = [0,0,0,0,0,0,0,0];
-      this.model.item.pextn = [0,0,0,0,0,0,0,0];
+      this.model.item.pextn = [0,0,0,0,0,0,0,0];      
     }
   }
 
@@ -996,8 +1016,8 @@ class BookItem extends Verror {
         }
       }
     }
-
-    return text + '  $' + (parseFloat(this.model.item.charges) - parseFloat(this.model.item.comped)).toFixed(2);
+    return text + '  $' + (parseFloat(this.model.item.charges)).toFixed(2);
+    //return text + '  $' + (parseFloat(this.model.item.charges) - parseFloat(this.model.item.comped) - parseFloat(this.model.item.discount)).toFixed(2);
   }
 
   doIncluded() {

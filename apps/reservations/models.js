@@ -298,6 +298,7 @@ const Main = class extends Model {
         firm: new Fields.Boolean({default: true, verbose: 'Deposit Paid'}),
         system: new Fields.Char({notNull: true, maxLength: 2, default: 'R', choices: SYSTEMS, verbose: 'System'}),
         notes: new Fields.Jsonb({verbose: 'Notes'}),
+        seq: new Fields.Integer({notNull: true, default: 0, verbose: 'Item Seq'}),
 
         cidate: new Fields.Date({null: true, verbose: 'Check-In Date'}),
         citime: new Fields.Time({null: true, verbose: 'Check-In Time'}),

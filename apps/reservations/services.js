@@ -8,7 +8,7 @@ const {getAppName} = require(root + '/lib/server/utils/utils.js');
 const {jsonQueryExecify} = require(root + '/lib/server/utils/sqlUtil.js');
 const {ModelService} = require(root + '/lib/server/utils/services.js');
 const {datetimer} = require(root + '/lib/server/utils/datetime.js');
-const {Transaction} = require(root + '/lib/server/utils/db.js');
+const {Transaction, exec} = require(root + '/lib/server/utils/db.js');
 const {CSRF} = require(root + '/apps/login/models.js');
 const app = getAppName(__dirname);
 const models = require(root + `/apps/${app}/models.js`);
@@ -232,14 +232,17 @@ class Process {
 
   // Transactions
   async create(rec) {
-    let tm;
+    // get seq1 before transaction so that it doesn't get rolled back
+    // seq are wasted if trans fails
+    let tm = await this.getSeq1(rec.rsvno);   
+    if (tm.status != 200) return tm;
+
+    let seq1 = tm.data[0].seq;
 
     this.trans = new Transaction(this.database);
 
-    let res = await this.trans.begin();
-    if (res.status != 200) return res;
-
-    let seq1 = await this.getSeq1(rec);
+    tm = await this.trans.begin();
+    if (tm.status != 200) return tm;
 
     rec.seq1 = seq1;
     rec.snapshot.seq1 = seq1;
@@ -247,7 +250,7 @@ class Process {
     tm = await this.createIt(rec);
 
     if (tm.status == 200) {
-      tm = await this.calcIt(tm.data.rsvno, tm.data.seq1);
+      tm = await this.calcIt(rec.rsvno, seq1);
     }
 
     if (tm.status == 200) {
@@ -274,7 +277,7 @@ class Process {
     }
 
     if (tm.status == 200) {
-      tm = await this.calcIt(tm.data.rsvno, tm.data.seq1);
+      tm = await this.calcIt(rec.rsvno, rec.seq1);
     }
     
     if (tm.status == 200) {
@@ -477,25 +480,27 @@ class Process {
   async calcIt(rsvno, seq1) {
     // charges, comped, discount all get divvied from item
     // tip, taxes get summed from includes
-    // comm is caclulated per include
-    // taxes are calculated on charges - comped - discount - comm
+    // comm is caclulated per include, summed up into item
+    // taxes are calculated on charges - comped - discount - comm, not on tip
     // sales = charges + tip - comped - discount - comm
     // total = sales + taxes
+    // DO NOT RELY ON THIS RETURNING A FULLY FORMED data ELEMENT.  Save, then re-select records.
+    // TO DO - Rounding divvied items.
+    //         Sumup GLs and Taxes for Rsv and Item
     /*
       charges -   done
       tip -       done
       comped -    done
       discount -  done
-      comm
-      comm3
+      comm -      done
+      comm3 -     done
       sales -     done
       taxes -     done
       total -     done
     */
 
     const includeTaxes = {};
-    const includeCommGls = {};
-    const includeSaleGls = {};
+    const listOfGls = [];
 
     const getRatingInfo = function(rec) {
       let obj = {};
@@ -551,10 +556,16 @@ class Process {
     let actualCharged = data.charges;
     let actualComped = data.comped;
     let actualDiscount = data.discount;
-    let tip = parseFloat(data.acc_tip);  // accumulate for item record 'tip' is main item record, acc_tip is include records
+    
     let salesInst = new SalesGL(this.database, this.pgschema, this.user, this.trans);
     let taxInst = new Taxes(this.database, this.pgschema, this.user, this.trans);
     let commInst = new Commission(this.database, this.pgschema, this.user, this.trans);    
+    let tipInst = new Tip(this.database, this.pgschema, this.user, this.trans);     
+
+    let [tipamt, tipgl] = await tipInst.calc(data);  // accumulate for item record 'tip' is main item record, acc_tip is include records
+    let tip = tipamt;
+
+    if (tipamt !=0 && tipgl) listOfGls.push(['1', tipamt, tipgl]);
 
     let fixedTotal = 0;
     let itemCharges = [];   // [v|f, charges, discount, comped]
@@ -580,7 +591,11 @@ class Process {
 
         itemCharges.push(['f', p1.data.charges, 0, 0]);
         fixedTotal += p1.data.charges;
-        tip += parseFloat(incl.acc_tip);
+
+        let [tipamt, tipgl] = await tipInst.calc(incl);
+        tip += tipamt;
+
+        if (tipamt !=0 && tipgl) listOfGls.push([incl.seq2, tipamt, tipgl]);
       }
       else {
         itemCharges.push(['f', 0, 0, 0]);
@@ -616,12 +631,23 @@ class Process {
     let acc_sales = acc_charges + parseFloat(data.acc_tip) - acc_discount - acc_comped - acc_comm;
     let acc_total = acc_sales + acc_taxes;
     let taxes = acc_taxes;  // accumulate taxes
+    let comm = acc_comm;
+    let comm3 = acc_comm3;
 
     let iid = data.seq2;
 
     includeTaxes[iid] = taxDtls;
-    includeCommGls[iid] = [acc_comm, acc_comm3, commgl];
-    includeSaleGls[iid] = await salesInst.calc(data);
+    if (commgl && acc_comm+acc_comm3 != 0) listOfGls.push([iid, acc_comm + acc_comm3, commgl]);
+
+    let sgls = await salesInst.calc(data);
+
+    for (let sgl of sgls) {
+      listOfGls.push([iid, sgl[0], sgl[1]]);
+    }
+
+    for (let td of taxDtls) {
+      listOfGls.push([iid, td[1], td[2]]);
+    }
     
     // update include record
     let rec = {rsvno, seq1, seq2: data.seq2, acc_charges, acc_comped, acc_discount, acc_comm, acc_comm3, acc_sales, acc_taxes, acc_total};    
@@ -647,11 +673,24 @@ class Process {
       let acc_sales = acc_charges + parseFloat(incl.acc_tip) - acc_discount - acc_comped - acc_comm;
       let acc_total = acc_sales + acc_taxes;
       taxes += acc_taxes;
+      comm += acc_comm;
+      comm3 += acc_comm3;
 
       let iid = incl.seq2;
+
       includeTaxes[iid] = taxDtls;
-      includeCommGls[iid] = [acc_comm, acc_comm3, commgl];
-      includeSaleGls[iid] = await salesInst.calc(incl);
+
+      if (commgl && acc_comm+acc_comm3 != 0) listOfGls.push([iid, acc_comm + acc_comm3, commgl]);
+      
+      let sgls = await salesInst.calc(incl);
+
+      for (let sgl of sgls) {
+        listOfGls.push([iid, sgl[0], sgl[1]]);
+      }
+
+      for (let td of taxDtls) {
+        listOfGls.push([iid, td[1], td[2]]);
+      }
 
       // update include record
       let rec = {rsvno, seq1, seq2: incl.seq2, acc_charges, acc_comped, acc_discount, acc_comm, acc_comm3, acc_sales, acc_taxes, acc_total};
@@ -661,20 +700,29 @@ class Process {
       tm = await inst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
       if (tm.status != 200) break;
     }
-console.log(includeSaleGls);
+
     if (tm.status != 200) return tm;
 
     // set tip, taxes, sales, total on item
-    let sales = parseFloat(data.charges) - parseFloat(data.comped) + tip - parseFloat(data.discount) - parseFloat(data.comm);
-    let total = sales + taxes;
-    let irec = {rsvno, seq1, tip, sales, taxes, total};
+    data.tip = tip;
+    data.comm = comm;
+    data.comm3 = comm3;
+    data.taxes = taxes;
 
+    let sales = parseFloat(data.charges) + parseFloat(tip) - parseFloat(data.comped) - parseFloat(data.discount) - parseFloat(comm);
+    let total = sales + parseFloat(taxes);
+    
+    data.sales = sales;
+    data.total = total;
+
+    let irec = {rsvno, seq1, tip, sales, comm, comm3, taxes, total};
     let iinst = new models.Item(irec);
+
     tm = await iinst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
     if (tm.status != 200) return tm;
 
     // save GLs and taxes
-    // for remove all taxes from item (seq1)
+    // first remove all taxes from item (seq1)
     let drec = {rsvno, seq1};
     tm = await models.Includetaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
     if (tm.status != 200) return tm;
@@ -686,18 +734,13 @@ console.log(includeSaleGls);
     let sumupGL = {};
     let sumupTax = {};
 
+    // sumup taxes
     for (let seq2 in includeTaxes) {
-      sumupGL[seq2] = {};
       sumupTax[seq2] = {};
 
       if (includeTaxes[seq2].length > 0) {
         for (let dtls of includeTaxes[seq2]) {
           let [taxcode, amt, gl] = [...dtls];
-
-          if (gl && amt !=0) {
-            if (!(gl in sumupGL[seq2])) sumupGL[seq2][gl] = 0;
-            sumupGL[seq2][gl] += parseFloat(amt);
-          }
 
           if (taxcode && amt != 0) {
             if (!(taxcode in sumupTax[seq2])) sumupTax[seq2][taxcode] = 0;
@@ -707,15 +750,12 @@ console.log(includeSaleGls);
       }
     }
 
-    for (let seq2 in includeCommGls) {
-      if (!(seq2 in sumupGL)) sumupGL[seq2] = {};
+    // sumup GLs
+    for (let [seq2, amt, gl] of listOfGls) {
+      if (! (seq2 in sumupGL)) sumupGL[seq2] = {};
+      if (! (gl in sumupGL[seq2])) sumupGL[seq2][gl] = 0;
 
-      let [comm, comm3, gl] = [...includeCommGls[seq2]];
-
-      if (gl && comm + comm3 != 0) {  // it's one or the other
-        if (!(gl in sumupGL[seq2])) sumupGL[seq2][gl] = 0;
-        sumupGL[seq2][gl] += parseFloat(comm) + parseFloat(comm3);
-      }
+      sumupGL[seq2][gl] += amt;
     }
 
     // save taxes
@@ -746,13 +786,43 @@ console.log(includeSaleGls);
       }
       if (tm.status != 200) break;
     }
-    
+
+    if (tm.status != 200) return tm;
+
+    // update reservation
+    rec = {rsvno};
+    tm = await models.Item.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    let rcharges = 0, rtip = 0, rcomped = 0, rdiscount = 0, rcomm = 0, rcomm3 = 0, rsales = 0, rtaxes = 0, rtotal = 0;
+
+    for (let item of tm.data) {
+      rcharges += parseFloat(item.charges);
+      rtip += parseFloat(item.tip);
+      rcomped += parseFloat(item.comped);
+      rdiscount += parseFloat(item.discount);
+      rcomm += parseFloat(item.comm);
+      rcomm3 += parseFloat(item.rcomm3);
+      rsales += parseFloat(item.sales);
+      rtaxes += parseFloat(item.taxes);
+      rtotal += parseFloat(item.total);
+    }
+
+    let rrec = {rsvno, charges: rcharges, tip: rtip, comped: rcomped, discount: rdiscount, comm: rcomm, comm3: rcomm3, sales: rsales, taxes: rtaxes, total: rtotal};
+    let rinst = new models.Main(rrec);
+
+    tm = await rinst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+    if (tm.status != 200) return tm;
+
+    tm.data = data;
     return tm;    
   }
 
-  async getSeq1(rec) {
-    // change this to using a lastrec table.
-    return await getHighestItemSeq(this.database, this.pgschema, this.user, rec.rsvno);
+  async getSeq1(rsvno) {
+    let text = `UPDATE "${this.pgschema}"."reservations_Main" SET seq = seq + 1 WHERE rsvno = $1 RETURNING seq`;
+    let values = [rsvno];
+
+    return await exec(this.database, {text, values});
   }
 
   getItemInst(cat) {
@@ -1519,6 +1589,7 @@ class SalesGL {
     let itable = this.getItemTable(data.cat);
     let charges = parseFloat(data.acc_charges) - parseFloat(data.acc_comped) - parseFloat(data.acc_discount);
     let sum = 0;
+    this.breakdown = [];
 
     // get item
     let tm = await itable.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [data.code]}, this.trans);
@@ -1537,13 +1608,13 @@ class SalesGL {
 
       sum += calced;
 
-      this.breakdown.push([gl, calced]);
+      this.breakdown.push([calced, gl]);
     }
 
     if (sum != charges) {
       let diff = charges-sum;
 
-      this.breakdown[0][1] += diff;
+      this.breakdown[0][0] += diff;
     }
 
     return this.breakdown;
@@ -1646,9 +1717,42 @@ class Commission {
     let commable = parseFloat(data.acc_charges) - parseFloat(data.acc_comped) - parseFloat(data.acc_discount);
     let net = Math.round(commable * commrate * 100) / 100;
 
-    (rsvData.contact == rsvData.agent) ? comm3 = net : comm = net;
+    (rsvData.contact.id == rsvData.agent) ? comm = net : comm3 = net;   // comm is guest=agent, comm3 is a 3rd party commission agent
 
     return [comm, comm3, commgl];
+  }
+
+  getItemTable(cat) {
+    if (cat == 'A') return itemModels.Activity;
+    if (cat == 'L') return itemModels.Lodging;
+    if (cat == 'M') return itemModels.Meals;
+  }
+}
+
+class Tip {
+  // gather tip and GL
+  constructor(database, pgschema, user, trans) {
+    this.database = database;
+    this.pgschema = pgschema;
+    this.user = user;
+    this.trans = trans;
+  }
+
+  async calc(data) {
+    if (data.cat != 'M') return [0, ''];
+
+    let tip = parseFloat(data.acc_tip);
+
+    let itable = this.getItemTable(data.cat);
+
+    // get item
+    let tm = await itable.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [data.code]}, this.trans);
+    if (tm.status != 200) return [tip, ''];
+
+    let item = tm.data;
+    let tipgl = item.tipgl;
+
+    return [tip, tipgl];
   }
 
   getItemTable(cat) {
