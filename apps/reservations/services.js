@@ -721,18 +721,25 @@ class Process {
     tm = await iinst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
     if (tm.status != 200) return tm;
 
-    // save GLs and taxes
-    // first remove all taxes from item (seq1)
+    // Save Include & Item GLs and Taxes --------------------------------------------------------------------------
+    // first remove all taxes/gls from includes and item (seq1)
     let drec = {rsvno, seq1};
+
     tm = await models.Includetaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
     if (tm.status != 200) return tm;
 
     tm = await models.Includegls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
     if (tm.status != 200) return tm;
+    
+    tm = await models.Itemtaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    tm = await models.Itemgls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
 
     // sumup by tax, gl
-    let sumupGL = {};
-    let sumupTax = {};
+    let sumupGL = {}, sumupGLi = {};
+    let sumupTax = {}, sumupTaxi = {};
 
     // sumup taxes
     for (let seq2 in includeTaxes) {
@@ -746,6 +753,9 @@ class Process {
             if (!(taxcode in sumupTax[seq2])) sumupTax[seq2][taxcode] = 0;
             sumupTax[seq2][taxcode] += parseFloat(amt);
           }
+
+          if (!(taxcode in sumupTaxi)) sumupTaxi[taxcode] = 0;
+          sumupTaxi[taxcode] += parseFloat(amt);
         }        
       }
     }
@@ -756,6 +766,9 @@ class Process {
       if (! (gl in sumupGL[seq2])) sumupGL[seq2][gl] = 0;
 
       sumupGL[seq2][gl] += amt;
+
+      if (! (gl in sumupGLi)) sumupGLi[gl] = 0;
+      sumupGLi[gl] += amt;
     }
 
     // save taxes
@@ -774,6 +787,17 @@ class Process {
 
     if (tm.status != 200) return tm;
 
+    for (let taxcode in sumupTaxi) {
+      let amount = sumupTaxo[taxcode];
+
+      let trec = {rsvno, seq1, taxcode, amount};
+      let iinst = new models.ITemtaxes(trec);
+      tm = await iinst.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+      if (tm.status != 200) break;
+    }
+
+    if (tm.status != 200) return;
+
     // save GLs
     for (let seq2 in sumupGL) {
       for (let glcode in sumupGL[seq2]) {
@@ -784,12 +808,84 @@ class Process {
         tm = await iinst.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
         if (tm.status != 200) break;
       }
+
       if (tm.status != 200) break;
     }
 
     if (tm.status != 200) return tm;
 
-    // update reservation
+    for (let glcode in sumupGLi) {
+      let amount = sumupGLi[glcode];
+
+      let trec = {rsvno, seq1, glcode, amount};
+      let iinst = new models.Itemgls(trec);
+      tm = await iinst.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+      if (tm.status != 200) break;
+    }
+    
+    if (tm.status != 200) return;    
+
+    // Save Rsv GLs and Taxes --------------------------------------------------------------------------
+    // first remove all taxes/gls from rsv
+    let rrec = {rsvno};
+    tm = await models.Maintaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    tm = await models.Maingls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    tm = await models.Itemtaxes.select({database: this.database, pgschema: this.pgschema, user: this.user, rrec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    let mtaxes = tm.data;
+
+    tm = await models.Itemgls.select({database: this.database, pgschema: this.pgschema, user: this.user, rrec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    let mgls = tm.data;
+
+    // sumup by tax, gl
+    let sumupGLm = {};
+    let sumupTaxm = {};
+
+    // sumup taxes
+    for (let mtax in mtaxes) {
+      if (! (mtax.taxcode in sumupTaxm)) sumupTaxm[mtax.taxcode] = 0;
+      sumupTaxm[mtax.taxcode] += mtax.amount;
+    }
+
+    // sumup GLs
+    for (let mgl in mgls) {
+      if (! (mgl.gl in sumupGLm)) sumupGLm[mgl.gl] = 0;
+      sumupGLm[mgl.gl] += mgl.amount;
+    }
+
+    // save taxes
+    for (let taxcode in sumupTaxm) {
+      let amount = sumupTaxm[taxcode];
+
+      let trec = {rsvno, taxcode, amount};
+      let iinst = new models.Maintaxes(trec);
+      tm = await iinst.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+      if (tm.status != 200) break;
+    }
+
+    if (tm.status != 200) return tm;
+
+    // save GLs
+    for (let glcode in sumupGLm) {
+      let amount = sumupGLm[glcode];
+
+      let trec = {rsvno, glcode, amount};
+      let iinst = new models.Maingls(trec);
+      tm = await iinst.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
+
+      if (tm.status != 200) break;
+    }
+
+    if (tm.status != 200) return tm;    
+
+    // update reservation ----------------------------------------------------------------------
     rec = {rsvno};
     tm = await models.Item.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
     if (tm.status != 200) return tm;
