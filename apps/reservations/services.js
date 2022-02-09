@@ -1,5 +1,4 @@
 const root = process.cwd();
-const { inOperator } = require('nunjucks/src/lib');
 const uuidv1 = require('uuid/v1');
 
 const nunjucks = require(root + '/lib/server/utils/nunjucks.js');
@@ -29,15 +28,6 @@ const makeCSRF = async function(database, pgschema, user) {
   await rec.insertOne({database, pgschema});
 
   return CSRFToken;
-}
-
-const getHighestItemSeq = async function(database, pgschema, user, rsvno) {
-  let recs = await models.Item.select({database, pgschema, user, rec: {rsvno}});
-  if (recs.status != 200) return -1;
-  
-  let data = recs.data;
-
-  return (data.length == 0) ? 1 : parseInt(data[data.length-1].seq1) + 1;
 }
 
 const rollback = async function(trans, tm) {
@@ -180,6 +170,8 @@ services.calc = {
 
 class Process {
   /*
+    TO DO:
+      Deletes need to delete all gl, taxes, etc before deleting item.
     Save, Retrieves, Deletes, and Calculates rsv items
     All DB IO within a transaction.
     Any calcs for new/updated items are done after the item has been saved.
@@ -234,7 +226,9 @@ class Process {
   async create(rec) {
     // get seq1 before transaction so that it doesn't get rolled back
     // seq are wasted if trans fails
-    let tm = await this.getSeq1(rec.rsvno);   
+    let tm, tmKeep;
+
+    tm = await this.getSeq1(rec.rsvno);   
     if (tm.status != 200) return tm;
 
     let seq1 = tm.data[0].seq;
@@ -248,6 +242,7 @@ class Process {
     rec.snapshot.seq1 = seq1;
 
     tm = await this.createIt(rec);
+    tmKeep = tm;
 
     if (tm.status == 200) {
       tm = await this.calcIt(rec.rsvno, seq1);
@@ -258,7 +253,7 @@ class Process {
       this.trans.commit();
       this.trans.release();
 
-      return tm;
+      return tmKeep;
     }
 
     return rollback(this.trans, tm);
@@ -293,11 +288,11 @@ class Process {
 
   async delete(rec) {
     this.trans = new Transaction(this.database);
-        
+
     let res = await this.trans.begin();
     if (res.status != 200) return res;
 
-    let tm = this.deleteIt(rec);
+    let tm = await this.deleteIt(rec);
 
     if (tm.status == 200) {
       // Success
@@ -357,7 +352,7 @@ class Process {
     return rollback(this.trans, tm);
   }
 
-// lower level, must be already within a transaction
+// lower level methods, must be already within a transaction
   async getItemRecord(pks) {
     // pks: [rsvno, seq1]
     let tmRet = new TravelMessage();
@@ -403,6 +398,7 @@ class Process {
   }
 
   async createIt(rec) {
+console.log('CREATEIT')    
     let seq2;
     let tm = new TravelMessage();
     let tmKeep;
@@ -414,7 +410,7 @@ class Process {
       tmKeep = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
 
       if (tmKeep.status != 200) return tmKeep;
-
+console.log('CREATEIT TMKEEP', tmKeep)
       // save Main Item details
       seq2 = 1;
       let alrmostp = this.getItemInst(rec.cat);
@@ -454,6 +450,10 @@ class Process {
     let drec = {rsvno: rec.rsvno, seq1: rec.seq1};
 
     try {
+      // delete children, gl, taxes, etc
+      tm = await this.deleteChildren(rec);
+      if (tm.status != 200) return tm;
+
       // delete Item specific
       for (let cat of this.cats) {
         let alrmostp = this.getItemInst(cat);
@@ -466,6 +466,10 @@ class Process {
       // delete the main item
       let irec = new models.Item(drec);
       tm = await irec.deleteOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);      
+
+      if (tm.status != 200) return tm;
+
+      tm = this.calcMain(rec.rsvno);
     }      
     catch(err) {
       console.log(err)            
@@ -473,6 +477,26 @@ class Process {
       tm.type = 'text';
       tm.message = String(err);
     }
+
+    return tm;
+  }
+
+  async deleteChildren(rec) {
+    // delete children of an item
+    let drec = {rsvno: rec.rsvno, seq1: parseInt(rec.seq1)};
+    let tm;
+
+    tm = await models.Includegls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    tm = await models.Includetaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
+    
+    tm = await models.Itemtaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
+
+    tm = await models.Itemgls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    if (tm.status != 200) return tm;
 
     return tm;
   }
@@ -499,7 +523,21 @@ class Process {
       total -     done
     */
 
-    const includeTaxes = {};
+    let tmKeep = await this.calcItDoFinances(rsvno, seq1);
+    if (tmKeep.status != 200) return tmKeep;
+
+    let tm = await this.calcItSaveGlsAndTaxes(rsvno, seq1, tmKeep.listOfTaxes, tmKeep.listOfGls);
+    if (tm.status != 200) return tm;
+    
+    tm = this.calcMain(rsvno);
+    if (tm.status != 200) return tm;
+
+    return tmKeep;
+  }
+
+  async calcItDoFinances(rsvno, seq1) {
+    // calculate finances of one item
+    const listOfTaxes = {};
     const listOfGls = [];
 
     const getRatingInfo = function(rec) {
@@ -534,9 +572,8 @@ class Process {
       return table
     }
 
-    // calculate finances of one item
     // get rsv info
-    let tm = await this.getRsvInfo([rsvno]);
+    let tm = await this.getRsvInfo(rsvno);
     if (tm.status != 200) return tm;
 
     let rsvInfo = tm.data[0];
@@ -551,8 +588,9 @@ class Process {
     tm = await this.gatherIncludeRecords(item);
     if (tm.status != 200) return tm;
 
-    // do it ------------
     let data = tm.data;  // item + includes
+
+    // do it ------------
     let actualCharged = data.charges;
     let actualComped = data.comped;
     let actualDiscount = data.discount;
@@ -636,7 +674,7 @@ class Process {
 
     let iid = data.seq2;
 
-    includeTaxes[iid] = taxDtls;
+    listOfTaxes[iid] = taxDtls;
     if (commgl && acc_comm+acc_comm3 != 0) listOfGls.push([iid, acc_comm + acc_comm3, commgl]);
 
     let sgls = await salesInst.calc(data);
@@ -678,7 +716,7 @@ class Process {
 
       let iid = incl.seq2;
 
-      includeTaxes[iid] = taxDtls;
+      listOfTaxes[iid] = taxDtls;
 
       if (commgl && acc_comm+acc_comm3 != 0) listOfGls.push([iid, acc_comm + acc_comm3, commgl]);
       
@@ -717,24 +755,20 @@ class Process {
 
     let irec = {rsvno, seq1, tip, sales, comm, comm3, taxes, total};
     let iinst = new models.Item(irec);
-
     tm = await iinst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
     if (tm.status != 200) return tm;
 
-    // Save Include & Item GLs and Taxes --------------------------------------------------------------------------
+    tm.data = data;
+    tm.listOfTaxes = listOfTaxes;
+    tm.listOfGls = listOfGls;
+
+    return tm;
+  }
+
+  async calcItSaveGlsAndTaxes(rsvno, seq1, listOfTaxes, listOfGls) {
+    // Save Include & Item GLs and Taxes
     // first remove all taxes/gls from includes and item (seq1)
-    let drec = {rsvno, seq1};
-
-    tm = await models.Includetaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
-    if (tm.status != 200) return tm;
-
-    tm = await models.Includegls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
-    if (tm.status != 200) return tm;
-    
-    tm = await models.Itemtaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
-    if (tm.status != 200) return tm;
-
-    tm = await models.Itemgls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    let tm = await this.deleteChildren({rsvno, seq1});
     if (tm.status != 200) return tm;
 
     // sumup by tax, gl
@@ -742,11 +776,11 @@ class Process {
     let sumupTax = {}, sumupTaxi = {};
 
     // sumup taxes
-    for (let seq2 in includeTaxes) {
+    for (let seq2 in listOfTaxes) {
       sumupTax[seq2] = {};
 
-      if (includeTaxes[seq2].length > 0) {
-        for (let dtls of includeTaxes[seq2]) {
+      if (listOfTaxes[seq2].length > 0) {
+        for (let dtls of listOfTaxes[seq2]) {
           let [taxcode, amt, gl] = [...dtls];
 
           if (taxcode && amt != 0) {
@@ -771,7 +805,7 @@ class Process {
       sumupGLi[gl] += amt;
     }
 
-    // save taxes
+    // save Taxes
     for (let seq2 in sumupTax) {
       for (let taxcode in sumupTax[seq2]) {
         let amount = sumupTax[seq2][taxcode];
@@ -788,10 +822,10 @@ class Process {
     if (tm.status != 200) return tm;
 
     for (let taxcode in sumupTaxi) {
-      let amount = sumupTaxo[taxcode];
+      let amount = sumupTaxi[taxcode];
 
       let trec = {rsvno, seq1, taxcode, amount};
-      let iinst = new models.ITemtaxes(trec);
+      let iinst = new models.Itemtaxes(trec);
       tm = await iinst.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
       if (tm.status != 200) break;
     }
@@ -823,15 +857,17 @@ class Process {
       if (tm.status != 200) break;
     }
     
-    if (tm.status != 200) return;    
+    return tm;
+  }
 
+  async calcMain(rsvno) {
     // Save Rsv GLs and Taxes --------------------------------------------------------------------------
     // first remove all taxes/gls from rsv
     let rrec = {rsvno};
-    tm = await models.Maintaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    let tm = await models.Maintaxes.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: rrec}, this.trans);
     if (tm.status != 200) return tm;
 
-    tm = await models.Maingls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: drec}, this.trans);
+    tm = await models.Maingls.delete({database: this.database, pgschema: this.pgschema, user: this.user, obj: rrec}, this.trans);
     if (tm.status != 200) return tm;
 
     tm = await models.Itemtaxes.select({database: this.database, pgschema: this.pgschema, user: this.user, rrec}, this.trans);
@@ -849,15 +885,15 @@ class Process {
     let sumupTaxm = {};
 
     // sumup taxes
-    for (let mtax in mtaxes) {
+    for (let mtax of mtaxes) {
       if (! (mtax.taxcode in sumupTaxm)) sumupTaxm[mtax.taxcode] = 0;
-      sumupTaxm[mtax.taxcode] += mtax.amount;
+      sumupTaxm[mtax.taxcode] += parseFloat(mtax.amount);
     }
 
     // sumup GLs
-    for (let mgl in mgls) {
-      if (! (mgl.gl in sumupGLm)) sumupGLm[mgl.gl] = 0;
-      sumupGLm[mgl.gl] += mgl.amount;
+    for (let mgl of mgls) {
+      if (! (mgl.glcode in sumupGLm)) sumupGLm[mgl.glcode] = 0;
+      sumupGLm[mgl.glcode] += parseFloat(mgl.amount);
     }
 
     // save taxes
@@ -886,7 +922,7 @@ class Process {
     if (tm.status != 200) return tm;    
 
     // update reservation ----------------------------------------------------------------------
-    rec = {rsvno};
+    let rec = {rsvno};
     tm = await models.Item.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
     if (tm.status != 200) return tm;
 
@@ -904,13 +940,12 @@ class Process {
       rtotal += parseFloat(item.total);
     }
 
-    let rrec = {rsvno, charges: rcharges, tip: rtip, comped: rcomped, discount: rdiscount, comm: rcomm, comm3: rcomm3, sales: rsales, taxes: rtaxes, total: rtotal};
-    let rinst = new models.Main(rrec);
+    let resrec = {rsvno, charges: rcharges, tip: rtip, comped: rcomped, discount: rdiscount, comm: rcomm, comm3: rcomm3, sales: rsales, taxes: rtaxes, total: rtotal};
+    let rinst = new models.Main(resrec);
 
     tm = await rinst.updateOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
     if (tm.status != 200) return tm;
 
-    tm.data = data;
     return tm;    
   }
 
@@ -938,7 +973,8 @@ class Process {
     return inst;
   }
 
-  async getRsvInfo(values) {
+  async getRsvInfo(rsvno) {
+    let values = [rsvno];
     let query = {
       reservations_Main: {
         columns: ['*'],

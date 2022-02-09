@@ -726,7 +726,7 @@ class BookItem extends Verror {
 
     // save
     let res = (item.seq1) ? await Module.tableStores.item.update([item.rsvno, item.seq1], item) : await Module.tableStores.item.insert(item);
-    
+console.log(res.data)    
     if (res.status == 200) {
       this.model.item.seq1 = res.data.seq1;
       this.existingData = this.model.item.toJSON();
@@ -744,7 +744,7 @@ class BookItem extends Verror {
       let res = await Module.data.item.delete([this.model.item.rsvno, this.model.item.seq1]);
       if (res.status == 200) {
         this.removeSelf();
-        
+
         document.dispatchEvent(this.rsvEvent);
       }
       else {
