@@ -454,13 +454,17 @@ console.log(tm1)
     let workspace = await getAWorkspace(database, pgschema, [app.data.workspace]);
     let res;
 
-    if (table.status == 200 && app.status == 200) {
-      rec.id = id;
-      res = await updateTable(database, pgschema, rec);
+    rec.id = id;
 
+    if (table.status == 200 && app.status == 200) {
       let sb = new SqlBuilder(workspace.data.name, 'postgres');
-      let sql = sb.createPK(app.data.name, table.data.name, rec.pk);
+      let sql = sb.createPK(app.data.name, table.data.name, rec.pks);
       let tm1 = await exec(database, sql[0]);
+
+      if (tm1.status != 200) return tm1;
+
+      res = await updateTable(database, pgschema, rec);
+      
 console.log(tm1)        
       res.data.sql = sql;      
     }

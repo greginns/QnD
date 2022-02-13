@@ -69,8 +69,8 @@ const database = class extends Model {
   static definition() {
     return {
       schema: {
-        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Workspace ID'}),
-        name: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Workspace Name'}),
+        id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Database ID'}),
+        name: new Fields.Char({notNull: true, maxLength: 40, verbose: 'Database Name'}),
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
         updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),
       },
@@ -167,7 +167,7 @@ const table = class extends Model {
         name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Table Name'}),
         desc: new Fields.Text({null: true, verbose: 'Table Description'}),
         columns: new Fields.Json({verbose: 'Columns'}),
-        pk: new Fields.Json({default: '[]', verbose: 'PK'}),
+        pks: new Fields.Json({default: '[]', verbose: 'PKs'}),
         fks: new Fields.Json({default: '[]', verbose: 'FKs'}),
         rfks: new Fields.Json({default: '[]', verbose: 'Reverse FKs'}),
         indexes: new Fields.Json({default: '[]', verbose: 'Indexes'}),
@@ -488,4 +488,18 @@ const zapstat = class extends Model {
   }
 };
 
-module.exports = {user, database, workspace, application, table, query, bizprocess, code, codebundle, zapsub, zaptable, zapq, zapstat};
+module.exports = {
+  user, 
+  database, 
+  workspace, 
+  application, 
+  table, 
+  query, 
+  bizprocess, 
+  code, 
+  codebundle, 
+  zapsub, 
+  zaptable, 
+  zapq, 
+  zapstat
+};

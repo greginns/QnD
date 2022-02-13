@@ -20,6 +20,8 @@ class Table_config_pk extends App.MVC {
       message: ''
     };
 
+    this.model.order = [];
+    this.model.orderList = [];
   }
 
   async ready() {
@@ -35,8 +37,10 @@ class Table_config_pk extends App.MVC {
     this.model.table = params.table;
 
     this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
-console.log(this.model.tableRec.pk)
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
+
+    this.buildOrderList();
+    this.setPks();
   }
 
   outView() {
@@ -44,12 +48,12 @@ console.log(this.model.tableRec.pk)
   }
 
   async save(ev) {
-    let current = await Module.tableStores.table.getOne(this.model.table);
     let diffs = {};
+    let pks = this.gatherPKs();
 
-    if (current.pk != this.model.tableRec.pk) diffs.pk = this.model.tableRec.pk;
-    
-    if (Object.keys(diffs).length == 0) {
+    let current = await Module.tableStores.table.getOne(this.model.table);
+
+    if (this.comparePKs(pks, current.pks)) {
       this.model.badMessage = 'No Changes to Update';
       
       setTimeout(function() {
@@ -58,7 +62,9 @@ console.log(this.model.tableRec.pk)
 
       return;
     }
-
+    
+    diffs.pks = pks;
+    
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
@@ -87,8 +93,95 @@ console.log(this.model.tableRec.pk)
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config`);
   }
 
-  pkChanged(ev) {
-    console.log(this.model.tableRec.pk.toJSON())
+  setPks() {
+    let pks = this.model.tableRec.pks.toJSON();
+    let cols = this.model.tableRec.columns.toJSON();
+    let order = new Array(cols.length).fill(0);
+    let idx = 0;
+
+    for (let pk of pks) {
+      idx++;
+
+      let colno = -1;
+      for (let col of cols) {
+        colno++;
+
+        if (col.name == pk) {
+          order[colno] = idx;
+        }
+      }
+    }
+console.log(order)
+    this.model.order = order;
+  }
+
+  gatherPKs() {
+    let cols = this.model.tableRec.columns.toJSON();
+    let order = this.model.order.toJSON();
+    let used = new Array(cols.length+1).fill(false);
+    let max = 0;
+    let pks = [];
+
+    // check for dupes
+    for (let o of order) {
+      if (used[o]) {
+        alert(o + ' already taken');
+        return false;
+      }
+
+      if (o != 0) used[o] = true;
+      max = Math.max(max, o);
+    }
+
+    // check for gaps
+    if (!used[1]) {
+      alert('Order #1 not used');
+      return false;
+    }
+
+    for (let i=2; i<cols.length; i++) {
+      if (used[i] && !used[i-1]) {
+        alert('Order #' + (i-1) + ' not used');
+        return false;
+      }
+    }
+
+    // build list
+    for (let m=1; m<max+1; m++) {
+      let idx = -1;
+
+      for (let o of order) {
+        idx++;
+
+        if (m == o) pks.push(cols[idx].name);
+      }
+    }
+
+    return pks;
+  }
+
+  comparePKs(now, old) {
+    if (now.length != old.length) return false;
+    
+    for (let idx=0; idx<now.length; idx++) {
+      if (now[idx] != old[idx]) return false;
+    }
+
+    return true;
+  }
+
+  buildOrderList() {
+    let list = [{text: '-', value: '0'}];
+    let order = [];
+    let max = this.model.tableRec.columns.length;
+
+    for (let i=1; i<=max; i++) {
+      list.push({text: String(i), value: String(i)});
+      order.push('0');
+    }
+
+    this.model.orderList = list;
+    this.model.order = order;
   }
 
   breadcrumbGo(ev) {

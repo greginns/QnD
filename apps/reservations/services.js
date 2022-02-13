@@ -260,15 +260,18 @@ class Process {
   }
 
   async update(rec) {
+    let tm, tmKeep;
+
     this.trans = new Transaction(this.database);
         
     let res = await this.trans.begin();
     if (res.status != 200) return res;
 
-    let tm = await this.deleteIt(rec);
+    tm = await this.deleteIt(rec);
 
     if (tm.status == 200) {
       tm = await this.createIt(rec);
+      tmKeep = tm;
     }
 
     if (tm.status == 200) {
@@ -280,7 +283,7 @@ class Process {
       this.trans.commit();
       this.trans.release();
 
-      return tm;
+      return tmKeep;
     }
 
     return rollback(this.trans, tm);
@@ -393,12 +396,10 @@ class Process {
     if (tm.status != 200) return tm;
 
     tmRet.data = item;
-    
     return tmRet;
   }
 
   async createIt(rec) {
-console.log('CREATEIT')    
     let seq2;
     let tm = new TravelMessage();
     let tmKeep;
@@ -410,7 +411,7 @@ console.log('CREATEIT')
       tmKeep = await tobj.insertOne({database: this.database, pgschema: this.pgschema, user: this.user}, this.trans);
 
       if (tmKeep.status != 200) return tmKeep;
-console.log('CREATEIT TMKEEP', tmKeep)
+
       // save Main Item details
       seq2 = 1;
       let alrmostp = this.getItemInst(rec.cat);
@@ -509,8 +510,8 @@ console.log('CREATEIT TMKEEP', tmKeep)
     // sales = charges + tip - comped - discount - comm
     // total = sales + taxes
     // DO NOT RELY ON THIS RETURNING A FULLY FORMED data ELEMENT.  Save, then re-select records.
-    // TO DO - Rounding divvied items.
-    //         Sumup GLs and Taxes for Rsv and Item
+    // TO DO - 
+    //         
     /*
       charges -   done
       tip -       done
@@ -603,7 +604,7 @@ console.log('CREATEIT TMKEEP', tmKeep)
     let [tipamt, tipgl] = await tipInst.calc(data);  // accumulate for item record 'tip' is main item record, acc_tip is include records
     let tip = tipamt;
 
-    if (tipamt !=0 && tipgl) listOfGls.push(['1', tipamt, tipgl]);
+    if (tipamt != 0 && tipgl) listOfGls.push(['1', tipamt, tipgl]);
 
     let fixedTotal = 0;
     let itemCharges = [];   // [v|f, charges, discount, comped]
@@ -646,6 +647,7 @@ console.log('CREATEIT TMKEEP', tmKeep)
     // calculated variable is: item charge/actualCharged * toDivvy
     // discount & comped amount is divided up by included's value vs item value
     let toDivvy = actualCharged - fixedTotal;
+    let divviedCharged = 0, divviedDiscount = 0, divviedComped = 0;
 
     for (let item of itemCharges) {
       if (item[0] == 'v') {
@@ -654,7 +656,24 @@ console.log('CREATEIT TMKEEP', tmKeep)
 
       item[2] = (actualCharged != 0) ? Math.round(actualDiscount * item[1]/actualCharged * 100, 2) / 100 : 0;
       item[3] = (actualCharged != 0) ? Math.round(actualComped * item[1]/actualCharged * 100, 2) / 100 : 0;
+
+      divviedCharged += item[1];
+      divviedDiscount += item[2];
+      divviedComped += item[3];      
     }
+
+    // allocate any over/uner after divvying (rounding errors) to main item
+    divviedCharged = Math.round(divviedCharged * 100) / 100;
+    divviedDiscount = Math.round(divviedDiscount * 100) / 100;
+    divviedComped = Math.round(divviedComped * 100) / 100;
+
+    let diffCharged = divviedCharged - actualCharged;
+    let diffDiscount = divviedDiscount - actualDiscount;
+    let diffComped = divviedComped - actualComped;
+
+    itemCharges[0][1] -= diffCharged;
+    itemCharges[0][2] -= diffDiscount;
+    itemCharges[0][3] -= diffComped;
 
     // save acc_* in each include record, tip, taxes in item record
     // main item include values
@@ -701,9 +720,9 @@ console.log('CREATEIT TMKEEP', tmKeep)
       idx++;
 
       let [fv, acc_charges, acc_discount, acc_comped] = [...itemCharges[idx]];
-      data.acc_charges = acc_charges;
-      data.acc_comped = acc_comped;
-      data.acc_discount = acc_discount;
+      incl.acc_charges = acc_charges;
+      incl.acc_comped = acc_comped;
+      incl.acc_discount = acc_discount;
 
       let [acc_taxes, taxDtls] = await taxInst.calc(incl, rsvInfo);
       let [acc_comm, acc_comm3, commgl] = await commInst.calc(incl, rsvInfo);
@@ -1026,7 +1045,7 @@ class Booker {
 class Activity extends Booker{
   async gather(rec) {
     // get all include records
-    return models.Actinclude.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
+    return await models.Actinclude.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
   }
 
   async save(rec, seq2) {
@@ -1187,7 +1206,7 @@ class Activity extends Booker{
 class Meal extends Booker {
   async gather(rec) {
     // get all include records
-    return models.Mealinclude.select({database: this.database, pgschema: this.pgschema, user: this.user, rec});
+    return await models.Mealinclude.select({database: this.database, pgschema: this.pgschema, user: this.user, rec}, this.trans);
   }
 
   async save(rec, seq2) {
@@ -1722,7 +1741,7 @@ class SalesGL {
     let charges = parseFloat(data.acc_charges) - parseFloat(data.acc_comped) - parseFloat(data.acc_discount);
     let sum = 0;
     this.breakdown = [];
-
+console.log(data.acc_charges, data.acc_comped, data.acc_discount)
     // get item
     let tm = await itable.selectOne({database: this.database, pgschema: this.pgschema, user: this.user, pks: [data.code]}, this.trans);
     if (tm.status != 200) return this.breakdown;
@@ -1740,7 +1759,9 @@ class SalesGL {
 
       sum += calced;
 
-      this.breakdown.push([calced, gl]);
+      if (gl && calced != 0) {
+        this.breakdown.push([calced, gl]);
+      }
     }
 
     if (sum != charges) {
@@ -1748,7 +1769,7 @@ class SalesGL {
 
       this.breakdown[0][0] += diff;
     }
-
+console.log(this.breakdown)
     return this.breakdown;
   }
 
@@ -1928,8 +1949,10 @@ class Taxes {
 
       if (taxable || !taxData.exemptable) {
         let [amt, gl] = this.calcIt(data, taxData, rateDate);
-        tax += amt;
-        taxes.push([taxcode, amt, gl]);
+        if (gl && amt != 0) {
+          tax += amt;
+          taxes.push([taxcode, amt, gl]);
+        }
       }
     }
 
