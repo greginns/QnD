@@ -9,19 +9,14 @@ class Table_config_index_update extends App.MVC {
   }
 
   createModel() {
+    super.createModel();
+
     this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
     this.model.name = '';
     this.model.index = {};
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
-
   }
 
   async ready() {
@@ -31,6 +26,8 @@ class Table_config_index_update extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -111,10 +108,6 @@ class Table_config_index_update extends App.MVC {
 
   gotoList() {
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config`);
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }  
 }
 

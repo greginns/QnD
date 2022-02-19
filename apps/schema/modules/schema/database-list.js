@@ -3,20 +3,15 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView} from '/~static/lib/client/core/data.js';
 
-class database_list extends App.MVC {
+class database_list extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.databases = [];
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      contact: {},
-      message: ''
-    };
-
   }
 
   async ready() {
@@ -29,6 +24,8 @@ class database_list extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
   }
 
   outView() {

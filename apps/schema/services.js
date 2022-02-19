@@ -464,8 +464,7 @@ console.log(tm1)
       if (tm1.status != 200) return tm1;
 
       res = await updateTable(database, pgschema, rec);
-      
-console.log(tm1)        
+
       res.data.sql = sql;      
     }
     else {
@@ -616,7 +615,7 @@ console.log(tm1)
     let res;
 
     if (table.status == 200 && app.status == 200) {
-      let indexes = table.indexes || [];
+      let indexes = table.data.indexes || [];
       let ok = true;
 
       for (let index of indexes) {
@@ -633,7 +632,7 @@ console.log(tm1)
         let sb = new SqlBuilder(workspace.data.name, 'postgres');
         let sql = sb.createIndex(app.data.name, table.data.name, rec.index);
         let tm1 = await exec(database, sql[0]);
-console.log(tm1)        
+
         res.data.sql = sql;
       }
       else {

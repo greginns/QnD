@@ -270,23 +270,19 @@ class queryAccordion {
   }
 }
 
-class Query_create extends App.MVC {
+class Query_create extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.query = {};
     this.model.database = '';
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      query: {},
-      message: ''
-    };
 
     this.crud = '';
   }
@@ -298,6 +294,8 @@ class Query_create extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -338,7 +336,6 @@ class Query_create extends App.MVC {
 
   async save(ev) {
     let query = this.model.query.toJSON();
-    let diffs = {};
 
     if (!query.name) {
       this.model.badMessage = 'Please Enter a Query Name';
@@ -396,10 +393,6 @@ class Query_create extends App.MVC {
   gotoList() {
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query`);
   }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
-  }  
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

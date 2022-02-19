@@ -3,23 +3,18 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableStore, TableView} from '/~static/lib/client/core/data.js';
 
-class Workspace_list extends App.MVC {
+class Workspace_list extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.workspaces = [];
 
     this.wsStore;
     this.wsView = new TableView({proxy: this.model.workspaces});
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      contact: {},
-      message: ''
-    };
-
   }
 
   async ready() {
@@ -30,6 +25,8 @@ class Workspace_list extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+    
     let database = params.db;
     let model = '/schema/workspace';
     let conditions = {};
@@ -81,10 +78,6 @@ class Workspace_list extends App.MVC {
     let uuid = this.model.workspaces[idx].id;
 
     Module.pager.go(`database/${this.model.database}/workspace/${uuid}/app`);
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }
 }
 

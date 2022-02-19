@@ -3,23 +3,18 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 
-class Table_config_pk extends App.MVC {
+class Table_config_pk extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
-
     this.model.order = [];
     this.model.orderList = [];
   }
@@ -31,6 +26,8 @@ class Table_config_pk extends App.MVC {
   }
   
   async inView(params) {
+    super.inView();
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -48,8 +45,12 @@ class Table_config_pk extends App.MVC {
   }
 
   async save(ev) {
+    this.clearErrors();
+
     let diffs = {};
     let pks = this.gatherPKs();
+
+    if (pks === false) return;
 
     let current = await Module.tableStores.table.getOne(this.model.table);
 
@@ -111,7 +112,7 @@ class Table_config_pk extends App.MVC {
         }
       }
     }
-console.log(order)
+
     this.model.order = order;
   }
 
@@ -183,10 +184,6 @@ console.log(order)
     this.model.orderList = list;
     this.model.order = order;
   }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
-  }  
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

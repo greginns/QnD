@@ -3,21 +3,17 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView, TableStore} from '/~static/lib/client/core/data.js';
 
-class Table_list extends App.MVC {
+class Table_list extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.tables = [];
     this.model.workspace = '';
     this.model.app = ''
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      message: ''
-    };
-
     this.tableStore;
     this.tableView = new TableView({proxy: this.model.tables});
   }
@@ -29,6 +25,8 @@ class Table_list extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     let workspace = params.workspace;
     let app = params.app;
@@ -98,10 +96,6 @@ class Table_list extends App.MVC {
 
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${uuid}/query`);
   }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
-  }  
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

@@ -3,12 +3,14 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 
-class Column_create extends App.MVC {
+class Column_create extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
@@ -16,12 +18,6 @@ class Column_create extends App.MVC {
 
     this.model.display = {}
     this.model.values = {};
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
   }
 
   async ready() {
@@ -31,6 +27,8 @@ class Column_create extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -225,10 +223,6 @@ class Column_create extends App.MVC {
 
   dzChanged() {
     this.model.display.defaultDZ2 = (this.model.column.defaultDZ == 'U');
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }
 }
 

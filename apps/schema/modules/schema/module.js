@@ -4,6 +4,7 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {WSDataComm, TableAccess, TableStore} from '/~static/lib/client/core/data.js';
 import {Pages} from '/~static/lib/client/core/paging.js';
 import {io} from '/~static/lib/client/core/io.js';
+import {Modal} from '/~static/lib/client/widgets/modal.js';
 
 // js for pages
 import '/~static/apps/schema/modules/schema/navbar.js';
@@ -35,6 +36,7 @@ import '/~static/apps/schema/modules/schema/query-list.js';
 import '/~static/apps/schema/modules/schema/query-create.js';
 //import '/~static/apps/schema/modules/schema/query-update.js';
 import '/~static/apps/schema/modules/schema/query-delete.js';
+
 
 Module.breadcrumb = async function({db='', ws='', app='', table='', query=''} = {}) {
   const hrefs = [];
@@ -220,5 +222,6 @@ let moduleStart = function() {
 }
 
 window.name = 'DB4_Schema'
+Module.modal = new Modal();
 
 moduleStart();

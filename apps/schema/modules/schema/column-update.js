@@ -9,6 +9,8 @@ class Column_update extends App.MVC {
   }
 
   createModel() {
+    super.createModel();
+
     this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
@@ -19,12 +21,6 @@ class Column_update extends App.MVC {
     this.model.values = {};
 
     this.model.FALSE = false;
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
   }
 
   async ready() {
@@ -34,6 +30,8 @@ class Column_update extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -249,10 +247,6 @@ class Column_update extends App.MVC {
 
   dzChanged() {
     this.model.display.defaultDZ2 = (this.model.column.defaultDZ == 'U');
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }
 }
 

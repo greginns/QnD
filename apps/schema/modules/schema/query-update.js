@@ -3,23 +3,18 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 
-class Query_update extends App.MVC {
+class Query_update extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.query = {};
     this.model.table = '';
     this.model.workspace = '';
     this.model.app = '';
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      query: {},
-      message: ''
-    };
-
   }
 
   async ready() {
@@ -29,6 +24,8 @@ class Query_update extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -105,10 +102,6 @@ class Query_update extends App.MVC {
 
   gotoList() {
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query`);
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }
 }
 

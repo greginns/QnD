@@ -9,15 +9,10 @@ class Workspace_delete extends App.MVC {
   }
 
   createModel() {
+    super.createModel();
+
     this.model.workspace = {};
     this.origWorkspace = {};
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      workspace: {},
-      message: ''
-    };
-
   }
 
   async ready() {
@@ -27,6 +22,8 @@ class Workspace_delete extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     let id = params.id || '';
     this.model.database = params.db;
 
@@ -84,10 +81,6 @@ class Workspace_delete extends App.MVC {
 
   gotoList() {
     Module.pager.go(`/database/${this.model.database}/workspace`);
-  }
-  
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }
 }
 

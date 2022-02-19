@@ -4,23 +4,18 @@ import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableStore, TableView} from '/~static/lib/client/core/data.js';
 
-class Table_update extends App.MVC {
+class Table_update extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.zaps = [];
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
-
     this.model.true = true;
 
     this.zapStore;
@@ -35,6 +30,8 @@ class Table_update extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params)
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -132,10 +129,6 @@ class Table_update extends App.MVC {
 
   gotoList() {
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table`);
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }
 }
 

@@ -9,17 +9,13 @@ class Column_delete extends App.MVC {
   }
 
   createModel() {
+    super.createModel();
+
     this.model.table = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
     this.model.column = {};
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
   }
 
   async ready() {
@@ -29,6 +25,8 @@ class Column_delete extends App.MVC {
   }
   
   async inView(params) {
+    super.inView();
+
     this.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -69,10 +67,6 @@ class Column_delete extends App.MVC {
 
   gotoList() {
     Module.pager.go(`/database/${this.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column`);
-  }
-  
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }
 }
 

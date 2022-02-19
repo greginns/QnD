@@ -3,21 +3,16 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 
-class App_create extends App.MVC {
+class App_create extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.application = {};
     this.model.workspace = '';
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      app: {},
-      message: ''
-    };
-
   }
 
   async ready() {
@@ -27,6 +22,8 @@ class App_create extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
 
@@ -80,10 +77,6 @@ class App_create extends App.MVC {
 
   gotoList() {
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app`);
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }
 }
 

@@ -3,24 +3,20 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView, TableStore} from '/~static/lib/client/core/data.js';
 
-class Column_config extends App.MVC {
+class Column_config extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
 
     this.model.tables = [];
     this.model.tableRec = {};
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
   }
 
   async ready() {
@@ -30,13 +26,15 @@ class Column_config extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
     this.model.table = params.table;
 
     let model = '/schema/table';
-    let filters = {'app': params.app};
+    let filters = {}; //{'app': params.app};
     let conditions = {};
 
     conditions[model] = function(rec) {
@@ -95,8 +93,8 @@ class Column_config extends App.MVC {
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/create`);
   }
 
-  indexDelete(ev) {
-    let idx = ev.target.closest('tr').getAttribute('data-index');
+  async indexDelete(ev) {
+    let idx = ev.target.closest('div.list-group-item').getAttribute('data-index');
     let index = this.model.tableRec.indexes[idx];
 
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/index/${index.name}/delete`);
@@ -107,15 +105,11 @@ class Column_config extends App.MVC {
   }
 
   fkDelete(ev) {
-    let idx = ev.target.closest('tr').getAttribute('data-index');
+    let idx = ev.target.closest('div.list-group-item').getAttribute('data-index');
     let fk = this.model.tableRec.fks[idx];
 
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config/fks/${fk.name}/delete`);
   }  
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
-  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)

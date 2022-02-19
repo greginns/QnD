@@ -3,22 +3,18 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableStore, TableView} from '/~static/lib/client/core/data.js';
 
-class Query_list extends App.MVC {
+class Query_list extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.queries = [];
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = ''
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      contact: {},
-      message: ''
-    };
   }
 
   async ready() {
@@ -32,6 +28,8 @@ class Query_list extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -71,10 +69,6 @@ class Query_list extends App.MVC {
     let uuid = this.model.queries[idx].id;
 
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/query/${uuid}/delete`);
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }  
 }
 

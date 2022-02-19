@@ -2,22 +2,18 @@ import {App} from '/~static/project/app.js';
 import {Module} from '/~static/lib/client/core/module.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 
-class Column_list extends App.MVC {
+class Column_list extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = ''
     this.model.columns = [];
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      message: ''
-    };
-
   }
 
   async ready() {
@@ -28,6 +24,8 @@ class Column_list extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -57,10 +55,6 @@ class Column_list extends App.MVC {
     let name = this.model.tableRec.columns[idx].name;
 
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/delete`);
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }
 }
 

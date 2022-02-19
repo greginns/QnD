@@ -3,24 +3,21 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 
-class Table_config_index_create extends App.MVC {
+class Table_config_index_create extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
     this.model.index = {};
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
-
+    this.model.order = [];
+    this.model.orderList = [];
   }
 
   async ready() {
@@ -30,6 +27,8 @@ class Table_config_index_create extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -38,6 +37,8 @@ class Table_config_index_create extends App.MVC {
     this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
 
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
+
+    this.buildOrderList();
   }
 
   outView() {
@@ -45,11 +46,15 @@ class Table_config_index_create extends App.MVC {
   }
 
   async save(ev) {
-    let current = await Module.tableStores.table.getOne(this.model.table);
-    let index = this.model.index.toJSON();
-    let indexes = current.indexes || [];
+    this.clearErrors();
 
-    if (!index.name || !index.columns) {
+    let columns = this.gatherIndex();
+
+    if (columns === false) return;
+
+    let index = this.model.index.toJSON();
+
+    if (!index.name || !columns) {
       this.model.badMessage = 'No Name or Columns';
       
       setTimeout(function() {
@@ -59,7 +64,7 @@ class Table_config_index_create extends App.MVC {
       return;
     }
 
-    indexes.push(index);
+    index.columns = columns;
 
     utils.modals.overlay(true);
 
@@ -85,12 +90,77 @@ class Table_config_index_create extends App.MVC {
     this.gotoList();
   }
 
-  gotoList() {
-    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config`);
+  gatherIndex() {
+    let cols = this.model.tableRec.columns.toJSON();
+    let order = this.model.order.toJSON();
+    let used = new Array(cols.length+1).fill(false);
+    let max = 0;
+    let pks = [];
+
+    // check for dupes
+    for (let o of order) {
+      if (used[o]) {
+        alert(o + ' already taken');
+        return false;
+      }
+
+      if (o != 0) used[o] = true;
+      max = Math.max(max, o);
+    }
+
+    // check for gaps
+    if (!used[1]) {
+      alert('Order #1 not used');
+      return false;
+    }
+
+    for (let i=2; i<cols.length; i++) {
+      if (used[i] && !used[i-1]) {
+        alert('Order #' + (i-1) + ' not used');
+        return false;
+      }
+    }
+
+    // build list
+    for (let m=1; m<max+1; m++) {
+      let idx = -1;
+
+      for (let o of order) {
+        idx++;
+
+        if (m == o) pks.push(cols[idx].name);
+      }
+    }
+
+    return pks;
   }
 
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
+  compareIndex(now, old) {
+    if (now.length != old.length) return false;
+    
+    for (let idx=0; idx<now.length; idx++) {
+      if (now[idx] != old[idx]) return false;
+    }
+
+    return true;
+  }
+
+  buildOrderList() {
+    let list = [{text: '-', value: '0'}];
+    let order = [];
+    let max = this.model.tableRec.columns.length;
+
+    for (let i=1; i<=max; i++) {
+      list.push({text: String(i), value: String(i)});
+      order.push('0');
+    }
+
+    this.model.orderList = list;
+    this.model.order = order;
+  }
+
+  gotoList() {
+    Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config`);
   }  
 }
 

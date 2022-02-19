@@ -4,12 +4,14 @@ import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 import {TableView, TableStore} from '/~static/lib/client/core/data.js';
 
-class Table_config_fks_create extends App.MVC {
+class Table_config_fks_create extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
@@ -21,12 +23,6 @@ class Table_config_fks_create extends App.MVC {
     this.model.sourceTable = {};
     this.model.foreignTable = {};
     this.model.link = {};
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
   }
 
   async ready() {
@@ -44,6 +40,8 @@ class Table_config_fks_create extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     let workspace = params.workspace;
     let model = '/schema/application';
@@ -177,10 +175,6 @@ class Table_config_fks_create extends App.MVC {
     let ft = this.model.fk.ftable;
 
     this.model.foreignTable = await Module.tableStores.table.getOne(ft);
-  }
-
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
   }  
 }
 

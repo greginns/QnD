@@ -1,5 +1,6 @@
 // App-wide variables
 import {MVC} from '/~static/lib/client/core/mvc.js';
+import {Module} from '/~static/lib/client/core/module.js';
 import addBindings from '/~static/lib/client/core/mvc-bindings.js';
 import addDtBindings from '/~static/lib/client/core/mvc-datetime.js';
 import addDropper from '/~static/lib/client/core/mvc-dropper.js';
@@ -111,16 +112,43 @@ App.MVC = class extends MVC {
   constructor(element) {
     super(element);
   }
+};
 
+App.DB4MVC = class extends MVC {
   createModel() {
     this.model._params = {};
-    this.model._badMessage = '';
-    this.model._errors = {};
+    this.model.badMessage = '';
+    this.model.errors = {
+      table: {},
+      message: ''
+    };
   }
 
   async inView(params) {
     this.model._params = params;
   }
-};
+  
+  displayErrors(res) {
+    this.model.badMessage = res.data.errors.message || '';
+
+    if ('errors' in res) {
+      for (let table in res.errors) {
+        this.model.errors.table[table] = res.data.errors[table];
+      }
+    }
+  }
+
+  clearErrors() {
+    this.model.badMessage = '';
+
+    for (let table in this.model.errors) {
+      this.model.errors[table] = '';
+    }
+  }
+
+  breadcrumbGo(ev) {
+    Module.pager.go(ev.args[0]);
+  }  
+}
 
 export {App};

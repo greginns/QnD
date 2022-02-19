@@ -21,16 +21,21 @@
           </div>
           
           <div class='card-body'>
-            <div class='row pt-2'>
-              <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.SelectMVC(id='table_config_orderby', size='10', mvc_value='tableRec.orderby', mvc_each='tableRec.columns', mvc_on='{"change": "orderbyChanged"}', valueField='name', textField='name', label='Columns', multiple='multiple')}}
-              </div>  
-            </div>
+            <div class='pt-2' mvc-each='tableRec.columns' mvc-index='$ondex'>
+              <div class='row mb-2'>
+                <div class='col-6 col-lg-3 col-xl-2'>
+                  <span mvc-text='tableRec.columns[$ondex].name'></span>
+                </div>
+                <div class='col-6 col-lg-3 col-xl-2'>
+                  {{ fields.SelectMVC(id='table_config_pk_order', size='1', mvc_value='order[$ondex]', mvc_each='orderList', label='Order')}}  
+                </div>
+              </div>
+            </div>            
             
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <span class='label-color'>Order By Fields</span>
-                <span mvc-text='table.orderby'></span>
+                <span mvc-text='tableRec.orderby'></span>
               </div>  
             </div>
           </div>

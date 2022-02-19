@@ -51,51 +51,55 @@
               </div>
             </div>
 
-            <div class='row pt-2'>
+            <div class='row'>
               <div class='col-6 col-md-4 col-lg-2 mb-2 label-color'>
                 Foreign Keys
               </div>
               <div class='col-6 col-md-4 col-lg-2 mb-2'>
-                <button type="button" class="btn btn-sm btn-success" mvc-click='fkCreate()' title='Add New Foreign Key'><i class="fas fa-plus"></i></button>
+                <span style='cursor: pointer' title='Add New Foreign Key' mvc-click='fkCreate()'><i class="fas fa-plus"></i></span>
               </div>
             </div>
 
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-2'>
-                <table class='table table-striped'>
-                  <tbody mvc-each='tableRec.fks'>
-                    <tr data-index='$index'>
-                      <td><span mvc-text='tableRec.fks[$index].name'></span></td>
-                      <td><span mvc-text='tableRec.fks[$index].ftableName'></span></td>
-                      <td><span mvc-text='tableRec.fks[$index].linksX'></span></td>
-                      <td style='cursor: pointer' title='Delete' mvc-click='fkDelete()'><i class="fal fa-trash-alt"></i></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>  
+                <div class='list-group' mvc-each='tableRec.fks'>
+                  <div class='list-group-item d-flex justify-content-between align-items-start' data-index='$index'>
+                    <div>
+                      <div class='fw-bold'>
+                        <span mvc-text='tableRec.fks[$index].name'></span>
+                      </div>
+                      <span mvc-text='tableRec.fks[$index].ftableName'></span>
+                      <span mvc-text='tableRec.fks[$index].linksX'></span>
+                    </div>
+                    <span class='style='cursor: pointer' title='Delete' mvc-click='fkDelete()'><i class="fal fa-trash-alt"></i></span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div class='row pt-2'>
-              <div class='col-6 col-md-4 col-lg-2 mb-2 label-color'>
+            <div class='row'>
+              <div class='col-6 col-md-4 col-lg-2 label-color'>
                 Indexes
               </div>
-              <div class='col-6 col-md-4 col-lg-2 mb-2'>
-                <button type="button" class="btn btn-sm btn-success" mvc-click='indexCreate()' title='Add New Index'><i class="fas fa-plus"></i></button>
+              <div class='col-6 col-md-4 col-lg-2'>
+                <span style='cursor: pointer' title='Add New Index' mvc-click='indexCreate()'><i class="fas fa-plus"></i></span>
               </div>
             </div>
 
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-2'>
-                <table class='table table-striped'>
-                  <tbody mvc-each='tableRec.indexes'>
-                    <tr data-index='$index'>
-                      <td><span mvc-text='tableRec.indexes[$index].name'></span></td>
-                      <td><span mvc-text='tableRec.indexes[$index].columns'></span></td>
-                      <td style='cursor: pointer' title='Delete' mvc-click='indexDelete()'><i class="fal fa-trash-alt"></i></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>  
+                <div class='list-group' mvc-each='tableRec.indexes'>
+                  <div class='list-group-item d-flex justify-content-between align-items-start' data-index='$index'>
+                    <div>
+                      <div class='fw-bold'>
+                        <span mvc-text='tableRec.indexes[$index].name'></span>
+                      </div>
+                      <span mvc-text='tableRec.indexes[$index].columns'></span>
+                    </div>
+                    <span class='style='cursor: pointer' title='Delete' mvc-click='indexDelete()'><i class="fal fa-trash-alt"></i></span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

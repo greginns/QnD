@@ -8,7 +8,7 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6'>
-                <h4>Foreign Key</h4>
+                <h4>Foreign Key Delete</h4>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -49,10 +49,10 @@
                   <tbody mvc-each='fk.links'>
                     <tr data-index='$index'>
                       <td>
-                        <span mvc-text='fk.links.$index.source'></span>
+                        <span mvc-text='fk.links[$index].source'></span>
                       </td>
                       <td>
-                        <span mvc-text='fk.links.$index.target'></span>
+                        <span mvc-text='fk.links[$index].target'></span>
                       </td>
                     </tr>
                   </tbody>

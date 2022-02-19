@@ -3,23 +3,20 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 
-class Table_config_orderby extends App.MVC {
+class Table_config_orderby extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
 
   createModel() {
+    super.createModel();
+
     this.model.tableRec = {};
     this.model.workspace = '';
     this.model.app = '';
     this.model.table = '';
-
-    this.model.badMessage = '';
-    this.model.errors = {
-      table: {},
-      message: ''
-    };
-
+    this.model.order = [];
+    this.model.orderList = [];
   }
 
   async ready() {
@@ -29,6 +26,8 @@ class Table_config_orderby extends App.MVC {
   }
   
   async inView(params) {
+    super.inView(params);
+
     this.model.database = params.db;
     this.model.workspace = params.workspace;
     this.model.app = params.app;
@@ -37,6 +36,9 @@ class Table_config_orderby extends App.MVC {
     this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
 
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
+
+    this.buildOrderList();
+    this.setOrder();
   }
 
   outView() {
@@ -44,12 +46,16 @@ class Table_config_orderby extends App.MVC {
   }
 
   async save(ev) {
-    let current = await Module.tableStores.table.getOne(this.model.table);
-    let diffs = {};
+    this.clearErrors();
 
-    if (current.orderby != this.model.tableRec.orderby) diffs.orderby = this.model.tableRec.orderby;
-    
-    if (Object.keys(diffs).length == 0) {
+    let diffs = {};
+    let orderby = this.gatherOrder();
+
+    if (orderby === false) return;
+
+    let current = await Module.tableStores.table.getOne(this.model.table);
+
+    if (this.compareOrder(orderby, current.orderby)) {
       this.model.badMessage = 'No Changes to Update';
       
       setTimeout(function() {
@@ -58,11 +64,13 @@ class Table_config_orderby extends App.MVC {
 
       return;
     }
+    
+    diffs.orderby = orderby;
 
     utils.modals.overlay(true);
 
     let spinner = utils.modals.buttonSpinner(ev.target, true);
-    let res = await Module.tableStores.table.update(this.model.table, diffs);
+    let res = await Module.data.table.updateOrderBy(this.model.table, diffs);
 
     if (res.status == 200) {
       utils.modals.toast('Table', 'Updated', 2000);
@@ -87,12 +95,96 @@ class Table_config_orderby extends App.MVC {
     Module.pager.go(`/database/${this.model.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/config`);
   }
 
-  orderbyChanged(ev) {
+  setOrder() {
+    let orderby = this.model.tableRec.orderby.toJSON();
+    let cols = this.model.tableRec.columns.toJSON();
+    let order = new Array(cols.length).fill(0);
+    let idx = 0;
+
+    for (let pk of orderby) {
+      idx++;
+
+      let colno = -1;
+      for (let col of cols) {
+        colno++;
+
+        if (col.name == pk) {
+          order[colno] = idx;
+        }
+      }
+    }
+
+    this.model.order = order;
   }
 
-  breadcrumbGo(ev) {
-    Module.pager.go(ev.args[0]);
-  }  
+  gatherOrder() {
+    let cols = this.model.tableRec.columns.toJSON();
+    let order = this.model.order.toJSON();
+    let used = new Array(cols.length+1).fill(false);
+    let max = 0;
+    let orderby = [];
+
+    // check for dupes
+    for (let o of order) {
+      if (used[o]) {
+        alert(o + ' already taken');
+        return false;
+      }
+
+      if (o != 0) used[o] = true;
+      max = Math.max(max, o);
+    }
+
+    // check for gaps
+    if (!used[1]) {
+      alert('Order #1 not used');
+      return false;
+    }
+
+    for (let i=2; i<cols.length; i++) {
+      if (used[i] && !used[i-1]) {
+        alert('Order #' + (i-1) + ' not used');
+        return false;
+      }
+    }
+
+    // build list
+    for (let m=1; m<max+1; m++) {
+      let idx = -1;
+
+      for (let o of order) {
+        idx++;
+
+        if (m == o) orderby.push(cols[idx].name);
+      }
+    }
+
+    return orderby;
+  }
+
+  compareOrder(now, old) {
+    if (now.length != old.length) return false;
+    
+    for (let idx=0; idx<now.length; idx++) {
+      if (now[idx] != old[idx]) return false;
+    }
+
+    return true;
+  }
+
+  buildOrderList() {
+    let list = [{text: '-', value: '0'}];
+    let order = [];
+    let max = this.model.tableRec.columns.length;
+
+    for (let i=1; i<=max; i++) {
+      list.push({text: String(i), value: String(i)});
+      order.push('0');
+    }
+
+    this.model.orderList = list;
+    this.model.order = order;
+  }
 }
 
 // instantiate MVCs and hook them up to sections that will eventually end up in a page (done in module)
