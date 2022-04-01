@@ -33,6 +33,8 @@ class Column_delete extends App.MVC {
     this.model.table = params.table;
     this.model.columnName = params.name;
 
+    this.model.badMessage = '';
+
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
   }
 

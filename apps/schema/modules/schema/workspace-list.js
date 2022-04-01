@@ -48,6 +48,8 @@ class Workspace_list extends App.DB4MVC {
 
     this.wsStore.getMany();    
 
+    this.model.dbInfo = await Module.tableStores.database.getOne(this.model.database);
+
     this.model.hrefs = await Module.breadcrumb({db: this.model.database});
   }
 

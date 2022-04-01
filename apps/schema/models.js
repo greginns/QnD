@@ -288,10 +288,11 @@ const code = class extends Model {
       schema: {
         id: new Fields.SUUID({notNull: true, onBeforeInsert: getSUUID, verbose: 'Code ID'}),
         name: new Fields.Char({notNull: true, maxLength: 20, verbose: 'Function Name'}),
-        tag: new Fields.Char({null: true, maxLength: 100, verbose: 'Tag'}),
+        parent: new Fields.SUUID({null: true, verbose: 'Parent ID'}),
         desc: new Fields.Text({null: true, verbose: 'Description'}),
         code: new Fields.Text({null: true, verbose: 'Code'}),
         type: new Fields.Char({notNull: true, maxLength: 2, verbose: 'Usage'}),
+        folder: new Fields.Boolean({default: false, verbose: 'Folder'}),
         created: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, verbose: 'Created on'}),
         updated: new Fields.DateTime({notNull: true, onBeforeInsert: getTimestamp, onBeforeUpdate: getTimestamp, verbose: 'Updated on'}),        
       },

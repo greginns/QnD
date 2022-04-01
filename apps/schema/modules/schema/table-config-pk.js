@@ -95,7 +95,7 @@ class Table_config_pk extends App.DB4MVC {
   }
 
   setPks() {
-    let pks = this.model.tableRec.pks.toJSON();
+    let pks = (this.model.tableRec.pks) ? this.model.tableRec.pks.toJSON() : [];
     let cols = this.model.tableRec.columns.toJSON();
     let order = new Array(cols.length).fill(0);
     let idx = 0;
@@ -162,6 +162,7 @@ class Table_config_pk extends App.DB4MVC {
   }
 
   comparePKs(now, old) {
+    if (now && !old) return false;
     if (now.length != old.length) return false;
     
     for (let idx=0; idx<now.length; idx++) {

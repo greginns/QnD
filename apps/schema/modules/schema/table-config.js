@@ -15,6 +15,7 @@ class Column_config extends App.DB4MVC {
     this.model.app = '';
     this.model.table = '';
 
+    this.model.apps = [];
     this.model.tables = [];
     this.model.tableRec = {};
   }
@@ -45,7 +46,13 @@ class Column_config extends App.DB4MVC {
     let tableView = new TableView({proxy: this.model.tables});
 
     tableStore.addView(tableView);
-    tableStore.getMany();
+    await tableStore.getMany();
+
+    let appStore = new TableStore({accessor: Module.data.application, filters, conditions, safeMode: true});
+    let appView = new TableView({proxy: this.model.apps});
+
+    appStore.addView(appView);
+    await appStore.getMany();
 
     this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
 
@@ -57,6 +64,13 @@ class Column_config extends App.DB4MVC {
       for (let tbl of this.model.tables) {
         if (fk.ftable == tbl.id) {
           fk.ftableName = tbl.name;
+          break;
+        }
+      }
+
+      for (let app of this.model.apps) {
+        if (fk.app == app.id) {
+          fk.fappName = app.name;
           break;
         }
       }

@@ -60,7 +60,9 @@ class Table_config_fks_create extends App.DB4MVC {
     };
 
     this.appStore.redo({filters, conditions});
-    this.appStore.getMany();
+    await this.appStore.getMany();
+
+    this.model.sappRec = await Module.tableStores.application.getOne(this.model.app);
 
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
   }
@@ -168,13 +170,22 @@ class Table_config_fks_create extends App.DB4MVC {
     this.foreignStore.redo({filters, conditions});
     this.foreignStore.addView(this.foreignView);
 
-    this.foreignStore.getMany();
+    await this.foreignStore.getMany();
+
+    this.model.fappRec = await Module.tableStores.application.getOne(app);
   }
 
   async getForeignColumns() {
     let ft = this.model.fk.ftable;
+    let names = [];
 
     this.model.foreignTable = await Module.tableStores.table.getOne(ft);
+
+    for (let fid of this.model.foreignTable.pks) {
+      names.push({name: fid});
+    }
+
+    this.model.foreignTable.pknames = names;
   }  
 }
 

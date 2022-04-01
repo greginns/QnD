@@ -8,7 +8,7 @@
           <div class='card-header'>
             <div class='row'>
               <div class='col-6'>
-                <h4>Update New Column</h4>
+                <h4>Update Column</h4>
               </div>
               <div class='col-2'>
                 <div class='d-block d-sm-none'>XS</div>
@@ -23,13 +23,13 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-2'>
-                {{ fields.Char(type='text', id='column_name', maxlength='40', mvc_value='column.name', label='Column Name') }}
+                {{ fields.Char(type='text', id='column_name', maxlength='40', mvc_value='column.name', label='Column Name', mvc_disabled='true') }}
               </div>  
             </div>
 
             <div class='row pt-2'>
               <div class='col-12 col-lg-2 col-xl-2 mb-2'>
-                {{ fields.SelectMVC(id='column_type', size='1', mvc_each='values.columnTypes', mvc_value='column.type', mvc_on='{"change": "typeChanged"}', valueField='value', textField='text', label='Column Type')}}
+                {{ fields.SelectMVC(id='column_type', size='1', mvc_each='values.columnTypes', mvc_value='column.type', mvc_on='{"change": "typeChanged()"}', valueField='value', textField='text', label='Column Type')}}
               </div>  
             </div>
 
@@ -47,7 +47,7 @@
 
             <div class='row pt-2' mvc-show='display.defaultDD'>
               <div class='col-12 col-lg-2 col-xl-2 mb-2'>
-                {{ fields.SelectMVC(id='column_defaultDD', size='1', mvc_each='values.date', mvc_value='column.defaultDD', mvc_on='{"change": "ddChanged"}', valueField='value', textField='text', label='Default Date Choices')}}
+                {{ fields.SelectMVC(id='column_defaultDD', size='1', mvc_each='values.date', mvc_value='column.defaultDD', mvc_on='{"change": "ddChanged()"}', valueField='value', textField='text', label='Default Date Choices')}}
               </div>  
             </div>
 
@@ -59,7 +59,7 @@
 
             <div class='row pt-2' mvc-show='display.defaultDT'>
               <div class='col-12 col-lg-2 col-xl-2 mb-2'>
-                {{ fields.SelectMVC(id='column_defaultDT', size='1', mvc_each='values.time', mvc_value='column.defaultDT', mvc_on='{"change": "dtChanged"}', valueField='value', textField='text', label='Default Time Choices')}}
+                {{ fields.SelectMVC(id='column_defaultDT', size='1', mvc_each='values.time', mvc_value='column.defaultDT', mvc_on='{"change": "dtChanged()"}', valueField='value', textField='text', label='Default Time Choices')}}
               </div>  
             </div>
 
@@ -71,7 +71,7 @@
             
             <div class='row pt-2' mvc-show='display.defaultDZ'>
               <div class='col-12 col-lg-2 col-xl-2 mb-2'>
-                {{ fields.SelectMVC(id='column_type', size='1', mvc_each='values.datetime', mvc_value='column.defaultDZ', mvc_on='{"change": "dzChanged"}', valueField='value', textField='text', label='Default DateTime Choices')}}
+                {{ fields.SelectMVC(id='column_type', size='1', mvc_each='values.datetime', mvc_value='column.defaultDZ', mvc_on='{"change": "dzChanged()"}', valueField='value', textField='text', label='Default DateTime Choices')}}
               </div>  
             </div>
 
@@ -126,7 +126,7 @@
                 {{ buttons.btn(class='success', mvc_click='save()', text='Update Column') }}
               </div>  
               <div class='col-6 col-md-2 mb-2'>
-                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Exit') }}
               </div>  
             </div>
 

@@ -23,7 +23,7 @@
           <div class='card-body'>
             <div class='row pt-2'>
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
-                {{ fields.Char(type='text', id=application.name.id, maxlength=application.name.maxLength, mvc_value='application.name', label=application.name.verbose) }}
+                {{ fields.Char(type='text', id=application.name.id, maxlength=application.name.maxLength, mvc_value='application.name', mvc_disabled='true', label=application.name.verbose) }}
               </div>  
             </div>
             <div class='row pt-2'>
@@ -47,7 +47,7 @@
                 {{ buttons.btn(class='success', mvc_click='save()', text='Update App') }}
               </div>  
               <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Exit') }}
               </div>  
             </div>
           </div>

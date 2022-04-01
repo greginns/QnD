@@ -25,7 +25,7 @@
               <div class='col-12 col-lg-6 col-xl-4 mb-4'>
                 <div class='row mb-2'>
                   <div class='col-12'>
-                    {{ fields.Char(type='text', id=query.name.id, maxlength=query.name.maxLength, mvc_value='query.name', label=query.name.verbose, mvc_disabled='true') }}
+                    {{ fields.Char(type='text', id=query.name.id, maxlength=query.name.maxLength, mvc_value='query.name', label=query.name.verbose) }}
                   </div>
                 </div>
                 <div class='row mb-2'>
@@ -109,7 +109,7 @@
                 {{ buttons.btn(class='success', mvc_click='save()', text='Create Query') }}
               </div>  
               <div class='col-6 col-md-2 mb-4'>
-                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Cancel') }}
+                {{ buttons.btn(class='warning', mvc_click='cancel()', text='Exit') }}
               </div>  
             </div>
 

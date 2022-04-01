@@ -51,6 +51,8 @@ class Table_list extends App.DB4MVC {
 
     this.tableStore.getMany();
 
+    this.model.appInfo = await Module.tableStores.application.getOne(this.model.app);
+
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app});
   }
 

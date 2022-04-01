@@ -46,6 +46,8 @@ class Query_list extends App.DB4MVC {
     this.queryStore.redo({filters, conditions});
     this.queryStore.getMany();
 
+    this.model.tableInfo = await Module.tableStores.table.getOne(this.model.table);
+
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
   }
 

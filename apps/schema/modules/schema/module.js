@@ -44,22 +44,22 @@ Module.breadcrumb = async function({db='', ws='', app='', table='', query=''} = 
   if (db) {
     let dbRec = await Module.tableStores.database.getOne(db);
 
-    hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database')">${dbRec.name}</span>`});
+    hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database')">DB: ${dbRec.name}</span>`});
 
     if (ws) {
       let wsRec = await Module.tableStores.workspace.getOne(ws);
 
-      hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace')">${wsRec.name}</span>`});
+      hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace')">WS: ${wsRec.name}</span>`});
 
       if (app) {
         let appRec = await Module.tableStores.application.getOne(app);
 
-        hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace/${ws}/app')">${appRec.name}</span>`});
+        hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace/${ws}/app')">App: ${appRec.name}</span>`});
 
         if (table) {
           let tableRec = await Module.tableStores.table.getOne(table);
   
-          hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace/${ws}/app/${app}/table')">${tableRec.name}</span>`});        
+          hrefs.push({'html': `<span mvc-click="breadcrumbGo('/database/${db}/workspace/${ws}/app/${app}/table')">Table: ${tableRec.name}</span>`});        
 
           if (query) {
             let queryRec = await Module.tableStores.query.getOne(query);

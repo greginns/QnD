@@ -30,13 +30,6 @@ const makeCSRF = async function(database, pgschema, user) {
   return CSRFToken;
 }
 
-const rollback = async function(trans, tm) {
-  await trans.rollback();
-  await trans.release();
-
-  return tm;
-}
-
 class ItemService extends ModelService {
   // Main entry into getting/updating items.
   async getOne({database = '', pgschema = '', user = {}, rec = {}} = {}) {
@@ -250,13 +243,18 @@ class Process {
 
     if (tm.status == 200) {
       // Success
-      this.trans.commit();
-      this.trans.release();
+      tm = await this.trans.commit();
 
-      return tmKeep;
+      if (tm.status == 200) {
+        return tmKeep;
+      }
+    }
+    else {
+      // Failure
+      tm = await this.trans.rollback();
     }
 
-    return rollback(this.trans, tm);
+    return tm;
   }
 
   async update(rec) {
@@ -278,15 +276,21 @@ class Process {
       tm = await this.calcIt(rec.rsvno, rec.seq1);
     }
     
+
     if (tm.status == 200) {
       // Success
-      this.trans.commit();
-      this.trans.release();
+      tm = await this.trans.commit();
 
-      return tmKeep;
+      if (tm.status == 200) {
+        return tmKeep;
+      }
+    }
+    else {
+      // Failure
+      tm = await this.trans.rollback();
     }
 
-    return rollback(this.trans, tm);
+    return tm;
   }
 
   async delete(rec) {
@@ -296,16 +300,22 @@ class Process {
     if (res.status != 200) return res;
 
     let tm = await this.deleteIt(rec);
+    let tmKeep = tm;
 
     if (tm.status == 200) {
       // Success
-      this.trans.commit();
-      this.trans.release();
+      tm = await this.trans.commit();
 
-      return tm;
+      if (tm.status == 200) {
+        return tmKeep;
+      }
+    }
+    else {
+      // Failure
+      tm = await this.trans.rollback();
     }
 
-    return rollback(this.trans, tm);    
+    return tm;
   }
 
   async calcOne(rec) {
@@ -316,21 +326,28 @@ class Process {
     if (res.status != 200) return res;
 
     let tm = await this.calcIt(rec.rsvno, rec.seq1);
-    
+    let tmKeep = tm;
+
     if (tm.status == 200) {
       // Success
-      this.trans.commit();
-      this.trans.release();
+      tm = await this.trans.commit();
 
-      return tm;
+      if (tm.status == 200) {
+        return tmKeep;
+      }
+    }
+    else {
+      // Failure
+      tm = await this.trans.rollback();
     }
 
-    return rollback(this.trans, tm);
+    return tm;
   }
 
   async calcRsv(rec) {
     // recalc all items
     // how many items?
+    let tmKeep = new TravelMessage();
     let tm = await models.Item.select({database: this.database, pgschema: this.pgschema, user: this.user, rec});
     if (tm.status != 200) return tm;
 
@@ -346,13 +363,18 @@ class Process {
 
     if (tm.status == 200) {
       // Success
-      this.trans.commit();
-      this.trans.release();
+      tm = await this.trans.commit();
 
-      return tm;
+      if (tm.status == 200) {
+        return tmKeep;
+      }
+    }
+    else {
+      // Failure
+      tm = await this.trans.rollback();
     }
 
-    return rollback(this.trans, tm);
+    return tm;
   }
 
 // lower level methods, must be already within a transaction

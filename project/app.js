@@ -129,11 +129,11 @@ App.DB4MVC = class extends MVC {
   }
   
   displayErrors(res) {
-    this.model.badMessage = res.data.errors.message || '';
+    if ('data' in res && 'errors' in res.data) {
+      this.model.badMessage = res.data.errors._message || '';
 
-    if ('errors' in res) {
-      for (let table in res.errors) {
-        this.model.errors.table[table] = res.data.errors[table];
+      for (let table in res.data.errors) {
+        if (table != '_message') this.model.errors.table[table] = res.data.errors[table] || '';
       }
     }
   }

@@ -114,7 +114,7 @@ class queryAccordion {
       `;
     }
 
-    const initialLoop= function(table) {
+    const initialLoop = function(table) {
       let body = '';
   
       // column names
@@ -350,7 +350,7 @@ class Query_create extends App.DB4MVC {
     query.table = this.model.table;
     query.columns = this.$copy(this.columnAccordion.getPaths());
     query.orderby = this.$copy(this.orderByAccordion.getPaths());
-
+console.log(query.columns)
 /*  IF WE WANT SYSTEM TO GENERATE SQL ON SAVE THEN WE NEED TO SEND ALL DATA, NOT JUST DIFFS
     if (this.queryId) {
       diffs = utils.object.diff(this.origQuery, query);

@@ -34,19 +34,25 @@ class Column_create extends App.DB4MVC {
     this.model.app = params.app;
     this.model.table = params.table;
 
+    this.model.badMessage = '';
     this.setDefaults();
     this.typeChanged();    
 
-    this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
+    this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
+    this.model.hrefs = await Module.breadcrumb({db: this.database, ws: this.model.workspace, app: this.model.app, table: this.model.table});
   }
 
   outView() {
     return true;  
   }
 
-  async save(ev) {
+  async save(ev, repeat) {
+    repeat = !!repeat;
+
+    this.model.badMessage = '';
     let column = this.model.column.toJSON();
 
+    // column name?
     if (!column.name) {
       this.model.badMessage = 'Please Enter a Column Name';
         
@@ -57,17 +63,18 @@ class Column_create extends App.DB4MVC {
       return;
     }
 
+    // dupe col name?
     let res = await Module.tableStores.table.getOne(this.model.table);
     let dupe = false;
 
-    for (let col in res.columns || []) {
+    for (let col of res.columns || []) {
       if (column.name == col.name) {
         dupe = true;
         break;
       }
     }
 
-    if (!column.name) {
+    if (dupe) {
       this.model.badMessage = 'Duplicate Column Name';
         
       setTimeout(function() {
@@ -87,7 +94,9 @@ class Column_create extends App.DB4MVC {
    
       this.model.column = {};
 
-      this.gotoList();
+      if (!repeat) this.gotoList();
+
+      this.repeat();
     }
     else {
       this.displayErrors(res);
@@ -95,6 +104,25 @@ class Column_create extends App.DB4MVC {
     
     utils.modals.overlay(false);
     utils.modals.buttonSpinner(ev.target, false, spinner);
+  }
+
+  async save2(ev) {
+    await this.save(ev, true);
+  }
+
+  async repeat() {
+    this.model.column = {};
+    this.model.tableRec = await Module.tableStores.table.getOne(this.model.table);
+
+    this.$focus('column.name');
+  }
+
+  editColumn(ev) {
+    let idx = ev.target.closest('button').getAttribute('data-index');
+    let cols = this.model.tableRec.columns;
+    let name = cols[idx].name;
+    
+    Module.pager.go(`/database/${this.database}/workspace/${this.model.workspace}/app/${this.model.app}/table/${this.model.table}/column/${name}/update`);
   }
 
   cancel() {
@@ -209,7 +237,10 @@ class Column_create extends App.DB4MVC {
         this.model.display.defaultDD = true;
         this.dzChanged();
         break;                 
-      
+
+      case 'MU':
+        this.model.column.maxlength = 32;
+        break;      
     }
   }
 

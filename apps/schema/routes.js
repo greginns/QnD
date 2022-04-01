@@ -941,7 +941,7 @@ Router.add(new RouterMessage({
 
       tm = await services.column.insert({database, pgschema, id, rec: req.body.table || {}});
 
-      if (tm.isBad() || tm.data.length == 0) tm = new TravelMessage({status: 404});
+      //if (tm.isBad() || tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();
@@ -979,7 +979,7 @@ Router.add(new RouterMessage({
 
       tm = await services.column.update({database, pgschema, id, name, rec: req.body.table || {}});
 
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+      //if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();
@@ -1017,7 +1017,7 @@ Router.add(new RouterMessage({
 
       tm = await services.column.delete({database, pgschema, id, name});
 
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+      //if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();
@@ -1054,7 +1054,7 @@ Router.add(new RouterMessage({
 
       tm = await services.table.updatePK({database, pgschema, id, rec: req.body.table || {}});
 
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+      //if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();
@@ -1091,7 +1091,7 @@ Router.add(new RouterMessage({
 
       tm = await services.table.insertFK({database, pgschema, id, rec: req.body.table || {}});
 
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+      //if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();
@@ -1129,7 +1129,7 @@ Router.add(new RouterMessage({
 
       tm = await services.table.deleteFK({database, pgschema, id, name});
 
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+      //if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();
@@ -1166,7 +1166,7 @@ Router.add(new RouterMessage({
 
       tm = await services.table.insertIndex({database, pgschema, id, rec: req.body.table || {}});
 
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+      //if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();
@@ -1204,7 +1204,7 @@ Router.add(new RouterMessage({
 
       tm = await services.table.deleteIndex({database, pgschema, id, name});
 
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+      //if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();
@@ -1241,7 +1241,7 @@ Router.add(new RouterMessage({
       
       tm = await services.table.updateOrderby({database, pgschema, id, rec: req.body.table || {}});
 
-      if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
+      //if (tm.isGood() && tm.data.length == 0) tm = new TravelMessage({status: 404});
     }
 
     return tm.toResponse();

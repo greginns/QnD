@@ -1,4 +1,167 @@
+<style>
+  /* Remove default bullets */
+  div ul {
+    list-style-type: none;
+    padding-left: 28px;
+  }
+  
+  div ul:first-child {
+    padding-left: 0px;
+  }
+
+  .tree-input {
+    border: 0;
+    outline: 0;
+    background: transparent;
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+  
+  .tree-input-folder {
+    padding-left: 24px;
+  }
+  
+  .vis-hover {
+    visibility: hidden;
+  }
+  
+  .ace-editor { 
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+</style>
+
 <page id='code-list' class='fade'>
+  <section id='code-list-section'>
+    <div class='row'>
+      <div class='col-12 mb-2'>
+        <a href='/' mvc-nohandle>Home</a> / <a href='/'>Menu</a>
+      </div>
+    </div>
+
+    <div class='row justify-content-center'>
+      <div class='row form-group tree-wrapper'>
+        <div class='col-4'>
+          <div class='row form-group'>
+            <div class='col-12'>
+              <div id='tags1'>
+              </div>
+            </div>
+          </div>
+          
+          <div class='row form-group'>
+            <div class='col-12'>
+              <div id='tags2'>
+              </div>
+            </div>
+          </div>
+          
+          <div class='row form-group'>
+            <div class='col-12'>
+              <div id='tags3'>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class='col-8'>
+          <div class='row'>
+            <div class='col-12 pb-1'>
+              <ul class="nav nav-tabs" id='editorTabs' role='tablist'>
+              </ul>
+              
+              <div class='tab-content' id='editorContent'>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</page>
+    
+<template id='editorTemplate'>
+  <div>
+    <div class='card'>
+      <div class='card-header'>
+        <div class='row'>
+          <div class='col-6'>
+            <input type='text' class='form-control editor-field-func' placeholder='Function Name'>
+          </div>
+          <div class='col-6'>
+            <textarea class='form-control editor-field-desc' placeholder='Function Description'></textarea>
+          </div>
+        </div>  
+      </div>
+      
+      <div class='card-body'>
+        <div class='row pt-2'>
+          <div class='col-12 col-lg-6 col-xl-8 mb-4'>
+            <div>
+              <span style='padding-left: 41px; background-color: #eeeeee'></span>
+              <span style='padding-left: 4px'></span>
+              <span class='editor-file-name'></span>
+              <span class='editor-file-params'></span>
+              {
+            </div>
+            <div style='width: 100%; height: 220px; position: relative'>
+              <div class='ace-editor'>
+              </div>
+            </div>
+            <div>
+              <span style='padding-left: 41px; background-color: #eeeeee'></span>
+              <span style='padding-left: 4px'></span>
+                }
+            </div>
+          </div> 
+          <div class='col-12 col-lg-6 col-xl-4 mb-4'>
+            <div class='row'>
+              <div class='col-12'>
+                <code class='functype functypeCE' style='display: none'>
+                  evObj.ev - Event<br>
+                  evObj.target - Event target<br>
+                  evObj.args - Function arguments<br>
+                  evObj.attrs - Element attributes
+                </code>                
+                <code class='functype functypeSR' style='display: none'>
+                  dataObj._initial = Request body<br>
+                  dataObj._req.body - Request body<br>
+                  dataObj._req.params - URL parameters, ie /:id<br>
+                  dataObj._req.query - URL query values, ie ?id=123
+                </code>             
+                <code class='functype functypeUT' style='display: none'>
+                  obj - pass/receive all arguments within one object.
+                </code>                   
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class='card-footer'>
+        <div class='row'>
+          <div class='col-12'>
+            <button class='btn btn-success'>
+              Save
+            </button>
+            <button class='btn btn-warning'>
+              Close
+            </button>
+            <button class='btn btn-danger'>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<!--page id='code-list' class='fade'>
   <section id='code-list-section'>
     <div class='row'>
       <div class='col-12 mb-2'>
@@ -47,15 +210,12 @@
     </div>
 
     <div class='d-block d-md-none' style='padding-top: 70px'>
-      <!-- Spacer XS SM-->
     </div>
 
     <div class='d-block d-lg-none' style='padding-top: 30px'>
-      <!-- Spacer XS SM MD -->
     </div>
 
     <div class='d-block' style='padding-top: 30px'>
-      <!-- Spacer XS DM MD LG XL -->
     </div>
   </section>
-</page>
+</page-->

@@ -3,7 +3,7 @@ import {Module} from '/~static/lib/client/core/module.js';
 import {utils} from '/~static/lib/client/core/utils.js';
 import {Page, Section} from '/~static/lib/client/core/paging.js';
 
-class Column_update extends App.MVC {
+class Column_update extends App.DB4MVC {
   constructor(element) {
     super(element);
   }
@@ -21,6 +21,37 @@ class Column_update extends App.MVC {
     this.model.values = {};
 
     this.model.FALSE = false;
+
+    this.columnTypes  = {
+      'CC': {value: 'CC', text: 'Text'},
+      'CT': {value: 'CT', text: 'Textarea'},
+      'CP': {value: 'CP', text: 'Password'},
+      'NI': {value: 'NI', text: 'Numeric - Integer'},
+      'NF' :{value: 'NF', text: 'Numeric - Float'},
+      'ND': {value: 'ND', text: 'Numeric - Currency'},
+      'NS': {value: 'NS', text: 'Auto-Increment'},
+      'DD': {value: 'DD', text: 'Date'},
+      'DT': {value: 'DT', text: 'Time'},
+      'DZ': {value: 'DZ', text: 'Date and Time'},
+      'MB': {value: 'MB', text: 'Yes/No'},
+      'MU': {value: 'MU', text: 'Unique ID'},
+    };
+
+    this.allowMatrix = {
+      'CC': ['CT', 'CP'],
+      'CT': ['CC', 'CP'],
+      'CP': ['CT', 'CC'],
+      'NI': ['NF', 'ND', 'NS'],
+      'NF': ['NI', 'ND', 'NS'],
+      'ND': ['NI', 'NF', 'NS'],
+      'NS': ['NI', 'NF', 'ND'],
+      'DD': ['CC', 'CT', 'CP', 'DZ'],
+      'DT': ['CC', 'CT', 'CP', 'DZ'],
+      'DZ': ['CC', 'CT', 'CP', 'DD', 'DT'],
+      'MB': ['CC', 'CT', 'CP', 'NI', 'NF', 'ND'],
+      'MU': ['CC', 'CT', 'CP']
+    }
+
   }
 
   async ready() {
@@ -38,6 +69,7 @@ class Column_update extends App.MVC {
     this.model.table = params.table;
     this.model.columnName = params.name;
 
+    this.model.badMessage = '';
     this.setDefaults();
     this.setExisting();
     this.typeChanged();    
@@ -74,7 +106,7 @@ class Column_update extends App.MVC {
     }
 
     if (this.model.columnName != column.name) {
-      // col name has changed, make sure it doesn't already exists
+      // col name has changed, make sure it doesn't already exist
       // not allowed yet (field is disabled).  Will break FK/Index defns.
       let dupe = false;
 
@@ -125,21 +157,6 @@ class Column_update extends App.MVC {
   }
 
   async setDefaults() {
-    this.model.values.columnTypes = [
-      {value: 'CC', text: 'Text'},
-      {value: 'CT', text: 'Textarea'},
-      {value: 'CP', text: 'Password'},
-      {value: 'NI', text: 'Numeric - Integer'},
-      {value: 'NF', text: 'Numeric - Float'},
-      {value: 'ND', text: 'Numeric - Currency'},
-      {value: 'NS', text: 'Auto-Increment'},
-      {value: 'DD', text: 'Date'},
-      {value: 'DT', text: 'Time'},
-      {value: 'DZ', text: 'Date and Time'},
-      {value: 'MB', text: 'Yes/No'},
-      {value: 'MU', text: 'Unique ID'},
-    ];
-
     this.model.values.date = [
       {value: 'D', text: 'Current Date'},
       {value: 'U', text: 'Specific Date'}
@@ -175,6 +192,18 @@ class Column_update extends App.MVC {
         this.model.column = col;
       }
     }
+
+    let type = this.model.column.type;
+    let allowed  = this.allowMatrix[type];
+    let types = [];
+
+    types.push(this.columnTypes[type]);
+
+    for (let t of allowed) {
+      types.push(this.columnTypes[t]);
+    }
+
+    this.model.values.columnTypes = types
   }
 
   typeChanged() {
@@ -233,7 +262,10 @@ class Column_update extends App.MVC {
         this.model.display.defaultDD = true;
         this.dzChanged();
         break;                 
-      
+
+      case 'MU':
+        this.model.column.maxlength = 32;
+        break;    
     }
   }
 

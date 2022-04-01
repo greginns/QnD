@@ -18,7 +18,7 @@ const pgschema = 'public';
 const cookie = 'db4_session';
 
 const models = require(root + `/apps/schema/models.js`);
-const schemaServices = require(root + `/apps/schema/services.js`);
+//const schemaServices = require(root + `/apps/schema/services.js`);  *** Circular dependency
 
 const invalidAPIACLStatus = function() {
   return new TravelMessage({status: 401});
@@ -896,7 +896,7 @@ class TableInfo {
       if (data[name] || dflts[name]) {
         val = data[name] || dflts[name];
 
-        if (type == 'MJ') val = JSON.stringify(val);
+        if (type == 'JA' || type == 'JB') val = JSON.stringify(val);
 
         idx++;
         cols.push(`"${name}"`);
@@ -1141,10 +1141,10 @@ class TableInfo {
     const makeJoin = async function(part) {
       // table<|>[r]fk
       let join = 'LEFT JOIN ';
-      let pos = part.indexOf('<') || part.indexOf('>');
-      let table = part.substr(0,pos);
-      let dir = part.substr(pos,1);
-      let relName = part.substr(pos+1);
+      let pos = (part.indexOf('<') > -1) ? part.indexOf('<') : part.indexOf('>');
+      let table = part.substring(0, pos);
+      let dir = part.substring(pos, 1);
+      let relName = part.substring(pos+1);
       let [t,a,w] = await getTAW(table);
       let sourcetName = self.makeTableName(a.name, t.name);
       let sourcetfqn = `"${w.name}"."${sourcetName}"`;
@@ -1182,24 +1182,26 @@ class TableInfo {
       parts.pop();  // field
       let rejoin = parts.join('.');
 
-      if (relsFull.indexOf(rejoin) == -1) relsFull.push(rejoin);
+      //if (relsFull.indexOf(rejoin) == -1) relsFull.push(rejoin);
 
       parts.pop();  // table
 
       for (let part of parts) {
         let join = await makeJoin(part);
 
-        relsPart[part] = join;
-        joinList.push(join);
+        //relsPart[part] = join;
+        if (joinList.indexOf(join) == -1) joinList.push(join);
       }
     }
-
+//console.log(relsPart, relsFull)
     return joinList;
   }
 
   makeQueryWhere(where) {
     // from this:  WHERE "frstname" = ${first} to this: WHERE "frstname" = '$1'
     // and return ['first']
+    if (!where) return ['', []];
+
     let posn, posn2;
     let valueobj = [];
     let index = 0;
@@ -1229,5 +1231,5 @@ class TableInfo {
     return [where, valueobj];
   }
 }
-
-module.exports = {services, makeQuerySQL};
+console.log('XXX')
+module.exports = {services, makeQuerySQL, TableInfo};

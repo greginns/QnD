@@ -49,6 +49,8 @@ class App_list extends App.DB4MVC {
 
     this.appStore.getMany();
 
+    this.model.wsInfo = await Module.tableStores.workspace.getOne(this.model.workspace);
+
     this.model.hrefs = await Module.breadcrumb({db: this.model.database, ws: this.model.workspace});
   }
 
